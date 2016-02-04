@@ -1,0 +1,56 @@
+<msf_localization>
+
+  <!-- List of sensors -->
+  <sensor>
+    <type>imu</type>
+    <ros_topic>phidgets_imu_1044/imu/data_raw</ros_topic>
+
+    <pose_in_robot>
+      <position description="position of the imu wrt drone (3D vector in m)">0 0 0</position>
+      <attitude description="attitude of the imu wrt drone (quaternion vector)">1 0 0 0</attitude>
+      <var_position></var_position>
+      <var_attitude></var_attitude>
+    </pose_in_robot>
+
+    <measurements>
+      <orientation>
+        <enabled>0</enabled>
+        <var></var>
+        
+      </orientation>
+
+      <angular_velocity>
+        <enabled>1</enabled>
+        <covar></covar>
+        <biases>
+          <init_estimation>0 0 0</init_estimation>
+          <var>0 0 0</var>
+        </biases>
+        
+      </angular_velocity>
+     
+      <linear_acceleration>
+        <enabled>1</enabled>
+        <covar></covar>
+        <biases>
+          <init_estimation>0 0 0</init_estimation>
+          <var>0 0 0</var>
+        </biases>
+        
+      </linear_acceleration> 
+
+    </measurements>
+
+
+  </sensor>
+
+
+  <sensor>
+    <type>magnetometer</type>
+    <ros_topic>phidgets_imu_1044/mag/data_raw</ros_topic>
+
+
+  </sensor>
+
+
+</msf_localization>

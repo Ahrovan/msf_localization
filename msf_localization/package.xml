@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>msf_localization</name>
+	<version>1.0.0</version>
+	<description>
+  		This package is msf_localization.
+	</description>
+	<author email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</author>
+	<maintainer email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</maintainer>
+  	<license>BSD</license>
+	<url>http://ros.org/wiki/msf_localization</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+ <export>
+   <metapackage />
+ </export>
+
+</package>
+
