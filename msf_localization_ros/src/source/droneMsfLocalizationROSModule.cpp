@@ -46,7 +46,7 @@ int MsfLocalizationROS::readConfigFile()
     if(!result)
     {
         std::cout<<"I cannot open xml file: "<<configFile<<std::endl;
-        return 1;
+        return 2;
     }
 
     //

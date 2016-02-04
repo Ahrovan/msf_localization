@@ -77,6 +77,10 @@
 #include "ros_sensor_imu_interface.h"
 
 
+// MSF Core
+#include "msfLocalization.h"
+
+
 
 class MsfLocalizationROS
 {
@@ -120,6 +124,10 @@ protected:
     std::thread* robotPoseThread;
     int robotPoseThreadFunction();
 
+
+    // Algorithm Core
+protected:
+    MsfLocalizationCore TheMsfLocalizationCore;
 
 
 };
