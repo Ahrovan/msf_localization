@@ -3,6 +3,32 @@
 
 
 
+
+
+StateEstimationCore::StateEstimationCore() :
+    flagHasRobotState(false),
+    flagHasSensorState(false),
+    flagHasMeasurement(false)
+{
+    return;
+}
+
+StateEstimationCore::~StateEstimationCore()
+{
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 MsfLocalizationCore::MsfLocalizationCore()
 {
 

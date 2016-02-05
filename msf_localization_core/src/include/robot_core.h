@@ -4,24 +4,17 @@
 
 
 
+
 class RobotCore
 {
-public:
-    RobotCore();
-    ~RobotCore();
-
-
-protected:
-    // TODO RobotState
-    // TODO RobotErrorState
-
-
-
-protected:
-    // TODO predictState()
 
 
 };
+
+
+
+
+
 
 
 

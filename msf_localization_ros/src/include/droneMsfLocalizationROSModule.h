@@ -107,6 +107,8 @@ protected:
     int setConfigFile(std::string configFile);
     int readConfigFile();
 
+
+    // Sensors Interfaces
 protected:
     std::list<RosSensorInterface*> listRosSensors;
 

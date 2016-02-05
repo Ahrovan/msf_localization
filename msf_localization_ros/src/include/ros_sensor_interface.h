@@ -16,11 +16,26 @@
 #include <std_msgs/Header.h>
 
 
+#include "msfLocalization.h"
 
 
 
 class RosSensorInterface
 {
+    //
+public:
+    RosSensorInterface();
+    ~RosSensorInterface();
+
+
+    // Sensor Core
+protected:
+    SensorCore* TheSensorCore;
+public:
+    SensorCore* getTheSensorCore() const;
+
+
+
     // Sensor Type
 protected:
 
@@ -32,6 +47,7 @@ public:
     // Close
 public:
     virtual int close();
+
 
 
 };

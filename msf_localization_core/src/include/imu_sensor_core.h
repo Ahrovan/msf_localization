@@ -10,6 +10,12 @@
 
 class ImuSensorCore : public SensorCore
 {
+public:
+    ImuSensorCore();
+    ~ImuSensorCore();
+
+public:
+    int setMeasurement();
 
 };
 

@@ -76,7 +76,10 @@ int MsfLocalizationROS::readConfigFile()
         if(sensorType=="imu")
         {
             // Create a class
-            RosSensorImuInterface* TheRosSensorImuInterface=new RosSensorImuInterface;
+            RosSensorImuInterface* TheRosSensorImuInterface=new RosSensorImuInterface();
+
+            // Link to the Core
+            TheMsfLocalizationCore.TheListOfSensorCore.push_back(TheRosSensorImuInterface->getTheSensorCore());
 
             // Sensor Topic
             std::string sensorTopic=sensor.child_value("ros_topic");

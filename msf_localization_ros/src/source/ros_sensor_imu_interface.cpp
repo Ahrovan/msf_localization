@@ -3,6 +3,21 @@
 
 
 
+
+
+RosSensorImuInterface::RosSensorImuInterface()
+{
+    // Create the variable in the MSF Localization Core
+    TheSensorCore = new ImuSensorCore;
+
+    //ImuSensorCore TheImuSensorCore;
+    //TheMsfLocalizationCore->TheListOfSensorCore.push_back(TheImuSensorCore);
+
+    return;
+}
+
+
+
 int RosSensorImuInterface::setImuTopicName(std::string ImuTopicName)
 {
     this->ImuTopicName=ImuTopicName;
@@ -13,6 +28,11 @@ int RosSensorImuInterface::setImuTopicName(std::string ImuTopicName)
 void RosSensorImuInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg)
 {
     //std::cout<<"Imu Measured"<<std::endl;
+
+    ImuSensorCore* TheSensorCore=dynamic_cast<ImuSensorCore*>(this->TheSensorCore);
+    TheSensorCore->setMeasurement();
+
+
 
     return;
 }

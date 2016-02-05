@@ -3,29 +3,47 @@
 #define _SENSOR_CORE_H
 
 
+//I/O stream
+//std::cout
+#include <iostream>
+
+
+
+
+enum SensorTypes
+{
+    undefined=0,
+    imu=1
+};
+
 
 
 class SensorCore
 {
 public:
     SensorCore();
-    ~SensorCore();
-
-
-protected:
-    // TODO SensorState
-    // TODO SensorErrorState
-    // TODO SensorMeasurements
-
-
+    virtual ~SensorCore();
 
 protected:
-    // TODO predictState()
-    // TODO measurementsPrediction()
+    SensorTypes sensorType;
+public:
+    int setSensorType(SensorTypes sensorType);
+    SensorTypes getSensorType() const;
+
+protected:
+    int sensorId;
+public:
+    int setSensorId(int sensorId);
+    int getSensorId() const;
+
 
 
 
 };
+
+
+
+
 
 
 

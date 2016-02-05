@@ -52,6 +52,58 @@
 
 
 
+#include "stamped_ring_buffer.h"
+
+
+
+#include "robot_state_core.h"
+#include "sensor_state_core.h"
+#include "sensor_measurement_core.h"
+
+
+
+// Class that stores the information for every time instant
+class StateEstimationCore
+{
+public:
+    StateEstimationCore();
+    ~StateEstimationCore();
+
+
+
+public:
+    // Robot State
+    bool flagHasRobotState;
+    RobotStateCore TheRobotStateCore;
+
+
+
+public:
+    // Sensors State
+    bool flagHasSensorState;
+    std::list<SensorStateCore*> TheListSensorStateCore;
+
+
+public:
+    // Covariances Matrixes
+
+
+
+
+public:
+    // Available Measurements
+    bool flagHasMeasurement;
+    std::list<SensorMeasurementCore*> TheListMeasurementCore;
+
+
+};
+
+
+
+
+
+
+
 class MsfLocalizationCore
 {
 
@@ -77,6 +129,7 @@ protected:
 
     // Sensors Components
 protected:
+public:
     std::list<SensorCore*> TheListOfSensorCore;
 
 

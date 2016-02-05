@@ -21,6 +21,9 @@
 
 class RosSensorImuInterface : public RosSensorInterface
 {
+public:
+    RosSensorImuInterface();
+
 
     // Subscriber
 protected:
