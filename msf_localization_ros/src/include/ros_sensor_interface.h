@@ -20,7 +20,7 @@
 
 
 
-class RosSensorInterface
+class RosSensorInterface : public virtual SensorCore
 {
     //
 public:
@@ -30,9 +30,9 @@ public:
 
     // Sensor Core
 protected:
-    SensorCore* TheSensorCore;
+    //SensorCore* TheSensorCore;
 public:
-    SensorCore* getTheSensorCore() const;
+    //SensorCore* getTheSensorCore() const;
 
 
 

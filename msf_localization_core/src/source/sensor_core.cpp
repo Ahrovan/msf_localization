@@ -2,8 +2,11 @@
 #include "sensor_core.h"
 
 
+
+
+
 SensorCore::SensorCore() :
-    sensorType(SensorTypes::undefined)
+    SensorBasics()
 {
     return;
 }
@@ -13,25 +16,14 @@ SensorCore::~SensorCore()
     return;
 }
 
-
-int SensorCore::setSensorType(SensorTypes sensorType)
+int SensorCore::setTheMsfStorageCore(std::shared_ptr<MsfStorageCore> TheMsfStorageCore)
 {
-    this->sensorType=sensorType;
-    return 0;
-}
-SensorTypes SensorCore::getSensorType() const
-{
-    return sensorType;
-}
-
-
-int SensorCore::setSensorId(int sensorId)
-{
-    this->sensorId=sensorId;
+    this->TheMsfStorageCore=TheMsfStorageCore;
     return 0;
 }
 
-int SensorCore::getSensorId() const
-{
-    return sensorId;
-}
+
+
+
+
+

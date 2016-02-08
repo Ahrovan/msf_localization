@@ -5,24 +5,6 @@
 
 
 
-StateEstimationCore::StateEstimationCore() :
-    flagHasRobotState(false),
-    flagHasSensorState(false),
-    flagHasMeasurement(false)
-{
-    return;
-}
-
-StateEstimationCore::~StateEstimationCore()
-{
-    return;
-}
-
-
-
-
-
-
 
 
 
@@ -37,6 +19,15 @@ MsfLocalizationCore::MsfLocalizationCore()
 
 MsfLocalizationCore::~MsfLocalizationCore()
 {
+    // Cleaning
+
+    // TheListOfSensorCore
+//    for(std::list<SensorCore*>::iterator it=TheListOfSensorCore.begin(); it!=TheListOfSensorCore.end(); ++it)
+//        delete *it;
+    TheListOfSensorCore.clear();
+
+
+
     return;
 }
 

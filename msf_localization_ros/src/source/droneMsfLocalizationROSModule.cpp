@@ -76,10 +76,11 @@ int MsfLocalizationROS::readConfigFile()
         if(sensorType=="imu")
         {
             // Create a class
-            RosSensorImuInterface* TheRosSensorImuInterface=new RosSensorImuInterface();
+            std::shared_ptr<RosSensorImuInterface> TheRosSensorImuInterface=std::make_shared<RosSensorImuInterface>();
 
-            // Link to the Core
-            TheMsfLocalizationCore.TheListOfSensorCore.push_back(TheRosSensorImuInterface->getTheSensorCore());
+            // Set the access to the Storage core
+            TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
+
 
             // Sensor Topic
             std::string sensorTopic=sensor.child_value("ros_topic");
@@ -119,7 +120,7 @@ int MsfLocalizationROS::readConfigFile()
             TheRosSensorImuInterface->open();
 
             // Push to the list of sensors
-            listRosSensors.push_back(TheRosSensorImuInterface);
+            this->TheListOfSensorCore.push_back(TheRosSensorImuInterface);
         }
 
 

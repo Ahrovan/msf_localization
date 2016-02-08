@@ -13,8 +13,11 @@ ImuSensorCore::~ImuSensorCore()
     return;
 }
 
-int ImuSensorCore::setMeasurement()
+int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
 {
-    std::cout<<"Measurement Set"<<std::endl;
+    std::cout<<"Imu Measurement Set"<<std::endl;
+
+    this->TheMsfStorageCore->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+
     return 0;
 }

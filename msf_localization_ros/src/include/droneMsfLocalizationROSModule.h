@@ -82,7 +82,7 @@
 
 
 
-class MsfLocalizationROS
+class MsfLocalizationROS : public MsfLocalizationCore
 {
 public:
     MsfLocalizationROS(int argc,char **argv);
@@ -110,7 +110,7 @@ protected:
 
     // Sensors Interfaces
 protected:
-    std::list<RosSensorInterface*> listRosSensors;
+    //std::list<RosSensorInterface*> listRosSensors;
 
 
     // Robot Pose Publisher
@@ -129,7 +129,7 @@ protected:
 
     // Algorithm Core
 protected:
-    MsfLocalizationCore TheMsfLocalizationCore;
+    //MsfLocalizationCore TheMsfLocalizationCore;
 
 
 };

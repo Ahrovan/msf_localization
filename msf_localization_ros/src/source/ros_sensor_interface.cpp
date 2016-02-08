@@ -3,8 +3,8 @@
 
 
 
-RosSensorInterface::RosSensorInterface() :
-    TheSensorCore(nullptr)
+RosSensorInterface::RosSensorInterface() //:
+    //TheSensorCore(nullptr)
 {
     return;
 }
@@ -21,8 +21,9 @@ int RosSensorInterface::close()
 }
 
 
+/*
 SensorCore* RosSensorInterface::getTheSensorCore() const
 {
     return TheSensorCore;
 }
-
+*/

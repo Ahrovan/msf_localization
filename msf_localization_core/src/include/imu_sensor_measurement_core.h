@@ -7,8 +7,23 @@
 #include "sensor_measurement_core.h"
 
 
-class ImuSensorMeasurementCore : SensorMeasurementCore
+class ImuSensorMeasurementCore : public SensorMeasurementCore
 {
+public:
+    ImuSensorMeasurementCore();
+    ~ImuSensorMeasurementCore();
+
+
+protected:
+    bool flagOrientationEnabled;
+
+
+protected:
+    bool flagAngularVelocityEnabled;
+
+
+protected:
+    bool flagLinearAccelerationEnabled;
 
 
 };

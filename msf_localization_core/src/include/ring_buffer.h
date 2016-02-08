@@ -11,6 +11,8 @@
 
 #include <mutex>
 
+//#include <memory>
+
 
 
 // TODO FIX RACE PROBLEMS
@@ -42,6 +44,19 @@ public:
 
     ~RingBuffer()
     {
+        // Be tidy
+
+        // TheElementsList
+//        for(typename std::list<BufferObjectType>::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
+//            delete *it;
+        this->TheElementsList.clear();
+
+        // TheEmptyElementsList
+//        for(typename std::list<BufferObjectType>::iterator it=this->TheEmptyElementsList.begin(); it!=this->TheEmptyElementsList.end(); ++it)
+//            delete *it;
+        this->TheEmptyElementsList.clear();
+
+
         return;
     }
 
@@ -152,12 +167,17 @@ public:
     // Purge Last Elements Starting from I
     int purgeLastElementsFromI(unsigned int iElement)
     {
+        std::cout<<"Cleaning buffer. Last "<<iElement<<" elements out of "<<this->getSize()<<std::endl;
+
+        if(this->getSize()>=iElement)
+        {
         typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
 
         std::advance(ListIterator, iElement);
 
 
         TheEmptyElementsList.splice(TheEmptyElementsList.end(), TheElementsList, ListIterator, TheElementsList.end());
+        }
 
 
         return 0;

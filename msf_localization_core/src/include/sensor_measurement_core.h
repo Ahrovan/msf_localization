@@ -5,7 +5,10 @@
 
 
 
-class SensorMeasurementCore
+#include "sensor_basics.h"
+
+
+class SensorMeasurementCore : public SensorBasics
 {
 
 

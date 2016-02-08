@@ -6,16 +6,18 @@
 
 #include "sensor_core.h"
 
+#include "imu_sensor_measurement_core.h"
 
 
-class ImuSensorCore : public SensorCore
+
+class ImuSensorCore : public virtual SensorCore
 {
 public:
     ImuSensorCore();
     ~ImuSensorCore();
 
 public:
-    int setMeasurement();
+    int setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
 
 };
 

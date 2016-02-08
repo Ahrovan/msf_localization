@@ -19,10 +19,15 @@
 
 
 
-class RosSensorImuInterface : public RosSensorInterface
+class RosSensorImuInterface : public RosSensorInterface, public ImuSensorCore
 {
 public:
     RosSensorImuInterface();
+
+
+
+public:
+    int setMeasurementRos(const sensor_msgs::ImuConstPtr& msg);
 
 
     // Subscriber

@@ -7,34 +7,34 @@
 //std::cout
 #include <iostream>
 
+#include <memory>
 
 
 
-enum SensorTypes
-{
-    undefined=0,
-    imu=1
-};
+#include "sensor_basics.h"
+
+
+#include "state_estimation_core.h"
 
 
 
-class SensorCore
+
+
+
+class SensorCore : public SensorBasics
 {
 public:
     SensorCore();
     virtual ~SensorCore();
 
-protected:
-    SensorTypes sensorType;
-public:
-    int setSensorType(SensorTypes sensorType);
-    SensorTypes getSensorType() const;
 
 protected:
-    int sensorId;
+    std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
 public:
-    int setSensorId(int sensorId);
-    int getSensorId() const;
+    int setTheMsfStorageCore(std::shared_ptr<MsfStorageCore> TheMsfStorageCore);
+
+
+
 
 
 

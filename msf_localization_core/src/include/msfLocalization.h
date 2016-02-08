@@ -28,6 +28,9 @@
 // List
 #include <list>
 
+//  shared_ptr
+#include <memory>
+
 
 //PUGIXML
 #include "pugixml.hpp"
@@ -52,7 +55,7 @@
 
 
 
-#include "stamped_ring_buffer.h"
+
 
 
 
@@ -61,44 +64,7 @@
 #include "sensor_measurement_core.h"
 
 
-
-// Class that stores the information for every time instant
-class StateEstimationCore
-{
-public:
-    StateEstimationCore();
-    ~StateEstimationCore();
-
-
-
-public:
-    // Robot State
-    bool flagHasRobotState;
-    RobotStateCore TheRobotStateCore;
-
-
-
-public:
-    // Sensors State
-    bool flagHasSensorState;
-    std::list<SensorStateCore*> TheListSensorStateCore;
-
-
-public:
-    // Covariances Matrixes
-
-
-
-
-public:
-    // Available Measurements
-    bool flagHasMeasurement;
-    std::list<SensorMeasurementCore*> TheListMeasurementCore;
-
-
-};
-
-
+#include "state_estimation_core.h"
 
 
 
@@ -121,6 +87,10 @@ public:
     int run();
 
 
+public:
+    MsfStorageCore TheStateEstimationCore;
+
+
     // Robot Component
 protected:
     RobotCore TheRobotCore;
@@ -130,7 +100,11 @@ protected:
     // Sensors Components
 protected:
 public:
-    std::list<SensorCore*> TheListOfSensorCore;
+    std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
+
+public:
+    // Sensor Measures
+    //std::list<SensorMeasurementCore*> TheListOfSensorMeasurementsCores;
 
 
 
