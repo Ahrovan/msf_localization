@@ -4,6 +4,9 @@
 
 
 
+#include <Eigen/Dense>
+
+
 
 class SensorStateCore
 {

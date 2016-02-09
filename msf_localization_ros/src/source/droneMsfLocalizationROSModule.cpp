@@ -78,8 +78,19 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class
             std::shared_ptr<RosSensorImuInterface> TheRosSensorImuInterface=std::make_shared<RosSensorImuInterface>();
 
+            // Set pointer to itself
+            TheRosSensorImuInterface->SensorCorePtr=TheRosSensorImuInterface;
+
+            // Set sensor type
+            TheRosSensorImuInterface->setSensorType(SensorTypes::imu);
+
+            // Set Id
+            TheRosSensorImuInterface->setSensorId(this->firstAvailableId);
+            firstAvailableId++;
+
             // Set the access to the Storage core
-            TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
+            //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
+            TheRosSensorImuInterface->setTheMsfStorageCore(this->TheStateEstimationCore);
 
 
             // Sensor Topic
@@ -100,6 +111,10 @@ int MsfLocalizationROS::readConfigFile()
             pugi::xml_node angular_velocity = measurements.child("angular_velocity");
 
             readingValue=angular_velocity.child_value("enabled");
+
+            TheRosSensorImuInterface->enableAngularVelocity();
+
+
             readingValue=angular_velocity.child_value("var");
 
             readingValue=angular_velocity.child("biases").child_value("init_estimation");

@@ -5,8 +5,17 @@
 
 
 
+#include "sensor_state_core.h"
 
 
+
+class ImuSensorStateCore : public SensorStateCore
+{
+
+
+
+
+};
 
 
 

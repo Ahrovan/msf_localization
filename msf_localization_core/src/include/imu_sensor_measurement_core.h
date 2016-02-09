@@ -14,16 +14,49 @@ public:
     ~ImuSensorMeasurementCore();
 
 
-protected:
-    bool flagOrientationEnabled;
-
-
-protected:
-    bool flagAngularVelocityEnabled;
-
+//protected:
+//    bool flagOrientationEnabled;
+//public:
 
 protected:
-    bool flagLinearAccelerationEnabled;
+    bool flagOrientationSet;
+public:
+    bool isOrientationSet() const;
+protected:
+    Eigen::Vector4d Orientation;
+public:
+    int setOrientation(const Eigen::Vector4d Orientation);
+    Eigen::Vector4d getOrientation() const;
+
+
+//protected:
+//    bool flagAngularVelocityEnabled;
+//public:
+
+protected:
+    bool flagAngularVelocitySet;
+public:
+    bool isAngularVelocitySet() const;
+protected:
+    Eigen::Vector3d AngularVelocity;
+public:
+    int setAngularVelocity(Eigen::Vector3d AngularVelocity);
+    Eigen::Vector3d getAngularVelocity() const;
+
+
+//protected:
+//    bool flagLinearAccelerationEnabled;
+//public:
+
+protected:
+    bool flagLinearAccelerationSet;
+public:
+    bool isLinearAccelerationSet() const;
+protected:
+    Eigen::Vector3d LinearAcceleration;
+public:
+    int setLinearAcceleration(Eigen::Vector3d LinearAcceleration);
+    Eigen::Vector3d getLinearAcceleration() const;
 
 
 };

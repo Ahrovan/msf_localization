@@ -12,13 +12,6 @@
 //std::string, std::getline()
 #include <string>
 
-//String stream
-//std::istringstream
-#include <sstream>
-
-//File Stream
-//std::ofstream, std::ifstream
-#include <fstream>
 
 
 //Vector
@@ -29,40 +22,18 @@
 #include <list>
 
 
-//PUGIXML
-#include "pugixml.hpp"
-
-
-// Boost
-#include <boost/filesystem.hpp>
-
-// Thread
-#include <thread>
 
 
 #include <memory>
 
 
-// Estimator Cores
-
-// Robot
-//#include "robot_core.h"
-
-// Sensor
-//#include "sensor_core.h"
-// IMU
-//#include "imu_sensor_core.h"
-
-
-
-
 
 #include "robot_state_core.h"
+
 #include "sensor_state_core.h"
+
 #include "sensor_measurement_core.h"
 
-
-#include "stamped_ring_buffer.h"
 
 
 
@@ -102,19 +73,6 @@ public:
 
 };
 
-
-
-class MsfStorageCore : public StampedRingBuffer<StateEstimationCore>
-{
-public:
-    MsfStorageCore();
-    ~MsfStorageCore();
-
-public:
-    int setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
-
-
-};
 
 
 

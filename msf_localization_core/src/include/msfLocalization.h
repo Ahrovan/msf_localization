@@ -67,7 +67,7 @@
 #include "state_estimation_core.h"
 
 
-
+#include "msf_storage_core.h"
 
 
 class MsfLocalizationCore
@@ -88,7 +88,7 @@ public:
 
 
 public:
-    MsfStorageCore TheStateEstimationCore;
+    std::shared_ptr<MsfStorageCore> TheStateEstimationCore;
 
 
     // Robot Component
@@ -99,8 +99,10 @@ protected:
 
     // Sensors Components
 protected:
-public:
+//public:
     std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
+protected:
+    unsigned int firstAvailableId;
 
 public:
     // Sensor Measures

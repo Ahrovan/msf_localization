@@ -91,7 +91,7 @@ public:
     }
 
     // Add element in the middle of the buffer, after element I
-    int addElementAfterI(const BufferObjectType TheElement, unsigned int iElement)
+    int addElementAfterI(const BufferObjectType TheElement, int iElement)
     {
         if(TheEmptyElementsList.size() == 0)
         {
@@ -120,7 +120,7 @@ public:
 public:
 
     // Get element in the middle of the buffer by position
-    int getElementI(BufferObjectType& TheElement, unsigned int iElement)
+    int getElementI(BufferObjectType& TheElement, int iElement)
     {
         typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
 
@@ -165,7 +165,7 @@ public:
     }
 
     // Purge Last Elements Starting from I
-    int purgeLastElementsFromI(unsigned int iElement)
+    int purgeLastElementsFromI(int iElement)
     {
         std::cout<<"Cleaning buffer. Last "<<iElement<<" elements out of "<<this->getSize()<<std::endl;
 

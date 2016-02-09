@@ -14,11 +14,14 @@
 #include "sensor_basics.h"
 
 
-#include "state_estimation_core.h"
+// For TimeStamp
+//#include "stamped_ring_buffer.h"
 
 
 
 
+
+class MsfStorageCore;
 
 
 class SensorCore : public SensorBasics
@@ -28,10 +31,17 @@ public:
     virtual ~SensorCore();
 
 
+    // Pointer to itself
 protected:
-    std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
 public:
-    int setTheMsfStorageCore(std::shared_ptr<MsfStorageCore> TheMsfStorageCore);
+    std::weak_ptr<const SensorCore> SensorCorePtr;
+
+
+    // Pointer to the MSF Storage Core
+protected:
+    std::weak_ptr<MsfStorageCore> TheMsfStorageCore;
+public:
+    int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
 
 
 

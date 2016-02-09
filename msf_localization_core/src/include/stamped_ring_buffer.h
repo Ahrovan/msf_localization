@@ -5,59 +5,10 @@
 
 #include "ring_buffer.h"
 
-#include <ctime>
-#include <cstdint>
+#include "time_stamp.h"
 
 
-class TimeStamp
-{
-public:
-    uint32_t sec;
-    uint32_t nsec;
 
-public:
-    TimeStamp()
-    {
-        return;
-    }
-
-    TimeStamp(uint32_t sec, uint32_t nsec) :
-        sec(sec),
-        nsec(nsec)
-    {
-        return;
-    }
-
-public:
-    bool operator==(const TimeStamp t2)
-    {
-        if(this->sec == t2.sec && this->nsec == t2.nsec)
-            return true;
-        else
-            return false;
-    }
-
-    bool operator>(const TimeStamp t2)
-    {
-        if(this->sec > t2.sec)
-            return true;
-        else if(this->sec == t2.sec && this->nsec > t2.nsec)
-            return true;
-        else
-            return false;
-    }
-
-    bool operator<(const TimeStamp t2)
-    {
-        if(this->sec < t2.sec)
-            return true;
-        else if(this->sec == t2.sec && this->nsec < t2.nsec)
-            return true;
-        else
-            return false;
-    }
-
-};
 
 
 template <class BufferObjectType>
@@ -107,10 +58,10 @@ public:
         return 1;
     }
 
-    int searchIElementByStamp(unsigned int& iElement, TimeStamp timeStamp)
+    int searchIElementByStamp(int& iElement, TimeStamp timeStamp)
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
-        unsigned int iElementAux=0;
+        int iElementAux=0;
 
         for(ListIterator; ListIterator!=this->TheElementsList.end(); ++ListIterator)
         {
@@ -126,23 +77,38 @@ public:
         return 1;
     }
 
-    int searchPreIElementByStamp(unsigned int& iElement, TimeStamp timeStamp)
+    int searchPreIElementByStamp(int& iElement, TimeStamp timeStamp)
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
+
+        iElement=-1;
+
+        // The List Doesn't have any elements
+        if(this->TheElementsList.begin()==this->TheElementsList.end())
+        {
+            std::cout<<"The List Has no elements"<<std::endl;
+            return -1;
+        }
+
+
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator AuxListIterator;
 
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIteratorEndSearch=this->TheElementsList.end();
         --ListIteratorEndSearch;
-        iElement=0;
+
 
         for(ListIterator; ListIterator!=ListIteratorEndSearch; ++ListIterator)
         {
             AuxListIterator=ListIterator;
             ++AuxListIterator;
+
+            // The Current Element has the timestamp
             if(ListIterator->timeStamp==timeStamp)
             {
                 return 1;
             }
+
+            // The element iElement is the previous element
             if(ListIterator->timeStamp>timeStamp && AuxListIterator->timeStamp<timeStamp)
             {
                 return 0;
@@ -155,7 +121,7 @@ public:
         return 2;
     }
 
-    int searchPostIElementByStamp(unsigned int& iElement, TimeStamp timeStamp)
+    int searchPostIElementByStamp(int& iElement, TimeStamp timeStamp)
     {
         int result=searchPreIElementByStamp(iElement, timeStamp);
         if(result==0)
@@ -175,7 +141,7 @@ public:
 public:
     int addElementAfterStamp(const StampedBufferObjectType<BufferObjectType> TheElement, TimeStamp timeStamp)
     {
-        unsigned int iElement=0;
+        int iElement=0;
         if(this->searchIElementByStamp(iElement, timeStamp))
         {
             // Element not found, we put in the begining
@@ -190,7 +156,7 @@ public:
 
     int addElementByStamp(const StampedBufferObjectType<BufferObjectType> TheElement)
     {
-        unsigned int iElement=0;
+        int iElement=0;
         int searchResult=this->searchPreIElementByStamp(iElement, TheElement.timeStamp);
         if(searchResult==0)
         {
@@ -205,16 +171,31 @@ public:
         else
         {
             // Element not found, we put in the begining
-            iElement=0;
+            iElement=-1;
         }
+
+
+
 
         std::cout<<"Element is going to be added after i="<<iElement<<std::endl;
 
-        if(this->addElementAfterI(TheElement,iElement))
-            return 1;
+        if(iElement==-1)
+        {
+            if(this->addElementTop(TheElement))
+                return 2;
+            return 0;
+        }
+        else
+        {
+            if(this->addElementAfterI(TheElement,iElement))
+                return 1;
+            return 0;
+        }
 
 
-        return 0;
+
+
+        return -1;
     }
 
 
@@ -231,7 +212,7 @@ public:
 public:
     int purgeOlderThanStamp(TimeStamp timeStamp)
     {
-        unsigned int iElement=0;
+        int iElement=0;
         int result=this->searchPostIElementByStamp(iElement,timeStamp);
 
         if(result==0)

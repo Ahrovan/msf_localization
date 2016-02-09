@@ -13,6 +13,10 @@
 
 MsfLocalizationCore::MsfLocalizationCore()
 {
+    // Create Storage Core
+    TheStateEstimationCore=std::make_shared<MsfStorageCore>();
+
+    firstAvailableId=0;
 
     return;
 }
