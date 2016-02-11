@@ -24,21 +24,10 @@ class RingBuffer
 protected:
     std::list<BufferObjectType> TheElementsList;
 
-protected:
-    std::list<BufferObjectType> TheEmptyElementsList;
-    //std::list<BufferObjectType>::iterator TheEmptyElementsListIterator;
-
-protected:
-    //BufferObjectType* TheInitElement;
-    //BufferObjectType* TheFinElement;
-
 
 public:
     RingBuffer()
     {
-        //TheInitElement=ptrnull;
-        //TheFinElement=ptrnull;
-
         return;
     }
 
@@ -47,15 +36,7 @@ public:
         // Be tidy
 
         // TheElementsList
-//        for(typename std::list<BufferObjectType>::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
-//            delete *it;
         this->TheElementsList.clear();
-
-        // TheEmptyElementsList
-//        for(typename std::list<BufferObjectType>::iterator it=this->TheEmptyElementsList.begin(); it!=this->TheEmptyElementsList.end(); ++it)
-//            delete *it;
-        this->TheEmptyElementsList.clear();
-
 
         return;
     }
@@ -64,77 +45,89 @@ public:
     // Add element in the top of the buffer
     int addElementTop(const BufferObjectType TheElement)
     {
-        if(TheEmptyElementsList.size() == 0)
-        {
-            // There are no available elements in the empty elements list. Create elements in the lists
-            TheElementsList.push_front(TheElement);
+        // There are no available elements in the empty elements list. Create elements in the lists
+        TheElementsList.push_front(TheElement);
 
-            //
-            return 0;
-        }
-        else
-        {
-            // Copy first element of TheEmptyElementsList to the begining of TheElementsList
-            TheElementsList.splice(TheElementsList.begin(), TheEmptyElementsList, TheEmptyElementsList.begin());
+        //
+        return 0;
 
-            // Write the value
-            typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
+    }
 
-            *ListIterator=TheElement;
+    // Add element in the end of the buffer
+    int addElementEnd(const BufferObjectType TheElement)
+    {
+        TheElementsList.push_back(TheElement);
+
+        //
+        return 0;
+    }
 
 
-            //
-            return 0;
-        }
-
-        return 1;
+    // Add element in the middle of the buffer, before element I
+    int addElementBeforeI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    {
+        TheElementsList.insert(itElement, TheElement);
+        return 0;
     }
 
     // Add element in the middle of the buffer, after element I
-    int addElementAfterI(const BufferObjectType TheElement, int iElement)
+    int addElementAfterI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
     {
-        if(TheEmptyElementsList.size() == 0)
+        if(itElement==TheElementsList.end())
         {
-            // There are no available elements in the empty elements list. Create elements in the lists
-            TheEmptyElementsList.push_front(TheElement);
+            // Do nothing
         }
         else
         {
-            typename std::list<BufferObjectType>::iterator ListIterator=TheEmptyElementsList.begin();
-            *ListIterator=TheElement;
+            std::advance(itElement, 1);
         }
 
-        typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
-        std::advance(ListIterator, iElement+1);
+        addElementBeforeI(TheElement, itElement);
 
+        return 0;
+    }
 
-        // Copy first element of TheEmptyElementsList to the begining of TheElementsList
-        TheElementsList.splice(ListIterator, TheEmptyElementsList, TheEmptyElementsList.begin());
-
-
-
+    int addElementInI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    {
+        (*itElement)=TheElement;
         return 0;
     }
 
 
 public:
 
-    // Get element in the middle of the buffer by position
-    int getElementI(BufferObjectType& TheElement, int iElement)
+
+    // Get the first element
+    int getFirstElement(BufferObjectType& TheElement)
     {
-        typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
 
-        std::advance(ListIterator, iElement);
-
-        if(ListIterator==TheElementsList.end())
-            return 1;
-
-        TheElement=*ListIterator;
-
-
+        TheElement=*TheElementsList.begin();
 
         return 0;
     }
+
+    int getElementI(BufferObjectType& TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    {
+        if(itElement==TheElementsList.end())
+            return 1;
+
+        TheElement=*itElement;
+
+        return 0;
+    }
+
+    // Get begining
+    typename std::list<BufferObjectType>::iterator getBegin()
+    {
+        return TheElementsList.begin();
+    }
+
+    // Get end
+    typename std::list<BufferObjectType>::iterator getEnd()
+    {
+        return TheElementsList.end();
+    }
+
 
 
 public:
@@ -143,21 +136,17 @@ public:
         return TheElementsList.size();
     }
 
-    typename std::list<BufferObjectType>::size_type getEmptySize() const
-    {
-        return TheEmptyElementsList.size();
-    }
 
 
 public:
     // Purge Last Elements in the buffer
     int purgeLast()
     {
-        // TODO fix
-        //TheElementsList.pop_back();
+
         typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.end();
-        --ListIterator;
-        TheEmptyElementsList.splice(TheEmptyElementsList.end(), TheElementsList, ListIterator);
+        std::advance(ListIterator, -1);
+
+        TheElementsList.erase(ListIterator);
 
 
         //
@@ -171,17 +160,30 @@ public:
 
         if(this->getSize()>=iElement)
         {
-        typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
+            typename std::list<BufferObjectType>::iterator ListIterator=TheElementsList.begin();
 
-        std::advance(ListIterator, iElement);
+            std::advance(ListIterator, iElement);
 
-
-        TheEmptyElementsList.splice(TheEmptyElementsList.end(), TheElementsList, ListIterator, TheElementsList.end());
+            TheElementsList.erase(ListIterator, TheElementsList.end());
         }
 
 
         return 0;
     }
+
+
+    int purgeLastElementsFromI(typename std::list<BufferObjectType>::iterator itElement)
+    {
+        std::cout<<"Cleaning buffer. It has "<<this->getSize()<<" elements"<<std::endl;
+
+
+        TheElementsList.erase(itElement, TheElementsList.end());
+
+
+
+        return 0;
+    }
+
 
 
 };

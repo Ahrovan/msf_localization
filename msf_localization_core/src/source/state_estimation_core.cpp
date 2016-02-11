@@ -5,10 +5,11 @@
 
 
 
-StateEstimationCore::StateEstimationCore() :
-    flagHasRobotState(false),
-    flagHasSensorState(false),
-    flagHasMeasurement(false)
+StateEstimationCore::StateEstimationCore() //:
+    //flagHasState(false),
+    //flagHasRobotState(false),
+    //flagHasSensorState(false),
+    //flagHasMeasurement(false)
 {
     return;
 }
@@ -31,6 +32,23 @@ StateEstimationCore::~StateEstimationCore()
     return;
 }
 
+
+bool StateEstimationCore::hasState() const
+{
+    // TODO check
+    if(TheListSensorStateCore.size()!=0 || TheRobotStateCore)
+        return true;
+    else
+        return false;
+}
+
+bool StateEstimationCore::hasMeasurement() const
+{
+    if(this->TheListMeasurementCore.size()!=0)
+        return true;
+    else
+        return false;
+}
 
 
 

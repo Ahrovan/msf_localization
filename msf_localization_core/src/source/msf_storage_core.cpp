@@ -27,16 +27,66 @@ int MsfStorageCore::setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<Senso
 
     // Measure
     TheMeasurementToTheBuffer.object.TheListMeasurementCore.push_back(TheSensorMeasurement);
-    TheMeasurementToTheBuffer.object.flagHasMeasurement=true;
+    //TheMeasurementToTheBuffer.object.flagHasMeasurement=true;
 
 
 
     // Add measurement to the MSF Storage Core
     // TODO, protect to avoid races!
     // TODO fix!
+    TheRingBufferMutex.lock();
     this->addElementByStamp(TheMeasurementToTheBuffer);
+    TheRingBufferMutex.unlock();
 
 
+
+    return 0;
+}
+
+
+int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, StateEstimationCore& PreviousState)
+{
+    StampedBufferObjectType<StateEstimationCore> BufferElement;
+
+    TheRingBufferMutex.lock();
+    for(std::list< StampedBufferObjectType<StateEstimationCore> >::iterator itElement=this->getBegin();
+        itElement!=this->getEnd();
+        ++itElement)
+    {
+        this->getElementI(BufferElement, itElement);
+        if(BufferElement.object.hasState())
+        {
+            TheTimeStamp=BufferElement.timeStamp;
+            PreviousState=BufferElement.object;
+            //std::cout<<"found!"<<std::endl;
+            break;
+        }
+    }
+    TheRingBufferMutex.unlock();
+
+
+    return 0;
+}
+
+
+int MsfStorageCore::addElement(TimeStamp TheTimeStamp, StateEstimationCore TheStateEstimationCore)
+{
+    StampedBufferObjectType<StateEstimationCore> BufferElement;
+
+    BufferElement.timeStamp=TheTimeStamp;
+    BufferElement.object=TheStateEstimationCore;
+
+    TheRingBufferMutex.lock();
+    this->addElementByStamp(BufferElement);
+    TheRingBufferMutex.unlock();
+
+    return 0;
+}
+
+
+int MsfStorageCore::displayRingBuffer()
+{
+    TheRingBufferMutex.lock();
 
     // Display Buffer
     std::cout<<" "<<std::endl;
@@ -44,14 +94,27 @@ int MsfStorageCore::setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<Senso
     for(std::list< StampedBufferObjectType<StateEstimationCore> >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
     {
         std::cout<<"-TS="<<it->timeStamp.sec<<" s; "<<it->timeStamp.nsec<<" ns"<<std::endl;
-        if(it->object.flagHasMeasurement)
+
+
+        // State
+        if(it->object.hasState())
+        {
+            std::cout<<"\t\t\t\t";
+            std::cout<<"+State:"<<std::endl;
+        }
+
+
+        // Measurements
+        if(it->object.hasMeasurement())
         {
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=it->object.TheListMeasurementCore.begin(); itMeas!=it->object.TheListMeasurementCore.end(); ++itMeas)
             {
-                std::cout<<" +Meas:";
+                std::cout<<"\t\t\t\t";
+                std::cout<<"+Meas:"<<std::endl;
 
                 std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itMeas)->getTheSensorCore().lock();
-                std::cout<<" Sensor id="<<SensorCorePtrAux->getSensorId();
+                std::cout<<"\t\t\t\t\t";
+                std::cout<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 
                 switch(SensorCorePtrAux->getSensorType())
                 {
@@ -82,22 +145,17 @@ int MsfStorageCore::setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<Senso
                 std::cout<<std::endl;
             }
         }
+
+        //std::cout<<" "<<std::endl;
     }
+
+    std::cout<<" "<<std::endl;
+
+    TheRingBufferMutex.unlock();
 
 
     // Buffer Info
-    std::cout<<"Number of elements in buffer (before purge): "<<this->getSize()<<std::endl;
-
-
-    // TODO
-    // Delete Lasts elements of the buffer, to avoid it growing a lot
-    this->purgeLastElementsFromI(10);
-
-    std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
-
-
-
-
+    //std::cout<<"Number of elements in buffer (before purge): "<<this->getSize()<<std::endl;
 
 
     return 0;
@@ -106,5 +164,13 @@ int MsfStorageCore::setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<Senso
 
 
 
+int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
+{
+    // TODO
+    // Delete Lasts elements of the buffer, to avoid it growing a lot
+    TheRingBufferMutex.lock();
+    this->purgeLastElementsFromI(numElementsFrom);
+    TheRingBufferMutex.unlock();
 
-
+    //std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
+}

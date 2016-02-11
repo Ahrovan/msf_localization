@@ -48,11 +48,11 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
     //TheImuSensorMeasurementCore->setTheSensorCore(std::dynamic_pointer_cast<ImuSensorCore>(this));
     //std::weak_ptr<const ImuSensorCore> TheImuSensorCorePtrAux=std::static_pointer_cast<const ImuSensorCore>((this));
     //TheImuSensorMeasurementCore->setTheSensorCore(TheImuSensorCorePtrAux);
-    TheImuSensorMeasurementCore->setTheSensorCore(this->SensorCorePtr);
+    TheImuSensorMeasurementCore->setTheSensorCore(this->TheSensorCorePtr);
 
 
     // Orientation if enabled
-    if(this)
+    if(this->isOrientationEnabled())
     {
         Eigen::Vector4d orientation(msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
 
@@ -64,19 +64,25 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
 
 
     // Angular velocity if enabled
-    Eigen::Vector3d angular_velocity(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
+    if(this->isAngularVelocityEnabled())
+    {
+        Eigen::Vector3d angular_velocity(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
 
-    if(TheImuSensorMeasurementCore->setAngularVelocity(angular_velocity))
-        std::cout<<"Error setting angular_velocity"<<std::endl;
+        if(TheImuSensorMeasurementCore->setAngularVelocity(angular_velocity))
+            std::cout<<"Error setting angular_velocity"<<std::endl;
+    }
 
     msg->angular_velocity_covariance;
 
 
     // Linear acceleration if enabled
-    Eigen::Vector3d linear_acceleration(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
+    if(this->isLinearAccelerationEnabled())
+    {
+        Eigen::Vector3d linear_acceleration(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
 
-    if(TheImuSensorMeasurementCore->setLinearAcceleration(linear_acceleration))
-        std::cout<<"Error setting linear_acceleration"<<std::endl;
+        if(TheImuSensorMeasurementCore->setLinearAcceleration(linear_acceleration))
+            std::cout<<"Error setting linear_acceleration"<<std::endl;
+    }
     msg->linear_acceleration_covariance;
 
 

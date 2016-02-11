@@ -18,6 +18,19 @@ SensorCore::~SensorCore()
     return;
 }
 
+
+int SensorCore::setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr)
+{
+    this->TheSensorCorePtr=TheSensorCorePtr;
+    return 0;
+}
+std::shared_ptr<const SensorCore> SensorCore::getTheSensorCore() const
+{
+    std::shared_ptr<const SensorCore> TheSensorCoreSharedPtr=this->TheSensorCorePtr.lock();
+    return TheSensorCoreSharedPtr;
+}
+
+
 int SensorCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore)
 {
     this->TheMsfStorageCore=TheMsfStorageCore;

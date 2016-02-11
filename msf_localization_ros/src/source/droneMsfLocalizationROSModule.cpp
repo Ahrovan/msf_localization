@@ -55,6 +55,24 @@ int MsfLocalizationROS::readConfigFile()
     // Aux vars
     std::string readingValue;
 
+
+    // Create Initial Element of the buffer with the initial state
+    StateEstimationCore InitialState;
+
+
+
+    // Reading Configs
+    // TODO
+    predictRateVale=100.0; // In Hz
+
+
+
+
+    // Reading Robot
+    // TODO
+
+
+
     // Reading sensors
     for(pugi::xml_node sensor = msf_localization.child("sensor"); sensor; sensor = sensor.next_sibling("sensor"))
     {
@@ -63,7 +81,7 @@ int MsfLocalizationROS::readConfigFile()
         // Sensor Type
         std::string sensorType=sensor.child_value("type");
 
-        // Pose in robot
+        // Pose of the sensor wrt robot
         pugi::xml_node pose_in_robot=sensor.child("pose_in_robot");
 
         readingValue=pose_in_robot.child_value("position");
@@ -75,11 +93,18 @@ int MsfLocalizationROS::readConfigFile()
         // IMU Sensor Type
         if(sensorType=="imu")
         {
-            // Create a class
+            // Create a class for the SensoreCore
             std::shared_ptr<RosSensorImuInterface> TheRosSensorImuInterface=std::make_shared<RosSensorImuInterface>();
+            // Set pointer to the SensorCore
+            TheRosSensorImuInterface->setTheSensorCore(TheRosSensorImuInterface);
 
-            // Set pointer to itself
-            TheRosSensorImuInterface->SensorCorePtr=TheRosSensorImuInterface;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<ImuSensorStateCore> SensorInitStateCore=std::make_shared<ImuSensorStateCore>();
+            // Set pointer to the SensorCore
+            SensorInitStateCore->setTheSensorCore(TheRosSensorImuInterface);
+
+
+
 
             // Set sensor type
             TheRosSensorImuInterface->setSensorType(SensorTypes::imu);
@@ -90,12 +115,15 @@ int MsfLocalizationROS::readConfigFile()
 
             // Set the access to the Storage core
             //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-            TheRosSensorImuInterface->setTheMsfStorageCore(this->TheStateEstimationCore);
+            TheRosSensorImuInterface->setTheMsfStorageCore(this->TheMsfStorageCore);
 
 
             // Sensor Topic
             std::string sensorTopic=sensor.child_value("ros_topic");
             TheRosSensorImuInterface->setImuTopicName(sensorTopic);
+
+            // Pose of the sensor wrt robot
+            // TODO. Antes?
 
             // Measurements
             pugi::xml_node measurements = sensor.child("measurements");
@@ -118,6 +146,8 @@ int MsfLocalizationROS::readConfigFile()
             readingValue=angular_velocity.child_value("var");
 
             readingValue=angular_velocity.child("biases").child_value("init_estimation");
+            // TODO fill
+
             readingValue=angular_velocity.child("biases").child_value("var");
 
 
@@ -136,12 +166,19 @@ int MsfLocalizationROS::readConfigFile()
 
             // Push to the list of sensors
             this->TheListOfSensorCore.push_back(TheRosSensorImuInterface);
+
+            // Push the init state of the sensor
+            InitialState.TheListSensorStateCore.push_back(SensorInitStateCore);
         }
 
 
 
 
     }
+
+
+    // Add init state to the buffer
+    TheMsfStorageCore->addElement(TimeStamp(0,0),InitialState);
 
 
     return 0;
@@ -210,6 +247,12 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     {
         // Get Robot Pose
         // TODO
+        TimeStamp TheTimeStamp;
+        StateEstimationCore PreviousState;
+        this->TheMsfStorageCore->getLastElementWithStateEstimate(TheTimeStamp, PreviousState);
+
+        // Fill msg
+        robotPoseMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
 
         // Publish Robot Pose
         robotPosePub.publish(robotPoseMsg);
@@ -222,11 +265,66 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     return 0;
 }
 
+int MsfLocalizationROS::predictThreadFunction()
+{
+    std::cout<<"MsfLocalizationROS::predictThreadFunction()"<<std::endl;
+
+    ros::Rate predictRate(predictRateVale);
+
+    while(ros::ok() && predictEnabled)
+    {
+        // Get Time Stamp
+        ros::Time RosTimeStamp=ros::Time::now();
+        TimeStamp TheTimeStamp(RosTimeStamp.sec, RosTimeStamp.nsec);
+        this->predict(TheTimeStamp);
+
+        // Sleep
+        predictRate.sleep();
+    }
+
+
+    return 0;
+
+}
+
+
+int MsfLocalizationROS::bufferManagerThreadFunction()
+{
+    std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction()"<<std::endl;
+
+    ros::Rate bufferManagerRate(50);
+
+    while(ros::ok())
+    {
+        // Purge the buffer
+        //this->TheMsfStorageCore->purgeRingBuffer(20);
+
+
+        // Display the buffer
+        this->TheMsfStorageCore->displayRingBuffer();
+
+
+        // Purge the buffer
+        this->TheMsfStorageCore->purgeRingBuffer(20);
+
+
+        // Sleep
+        bufferManagerRate.sleep();
+    }
+
+
+    return 0;
+
+}
+
 
 int MsfLocalizationROS::run()
 {
-    // Start threads
+    // Start ROS threads
     robotPoseThread=new std::thread(&MsfLocalizationROS::robotPoseThreadFunction, this);
+
+    // Core threads
+    startThreads();
 
     // Loop
     try

@@ -47,15 +47,20 @@ public:
 
 
 public:
+    bool hasState() const;
+
+
+
+public:
     // Robot State
-    bool flagHasRobotState;
-    RobotStateCore TheRobotStateCore;
+    //bool flagHasRobotState;
+    std::shared_ptr<RobotStateCore> TheRobotStateCore;
 
 
 
 public:
     // Sensors State
-    bool flagHasSensorState;
+    //bool flagHasSensorState;
     std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
 
 
@@ -67,8 +72,11 @@ public:
 
 public:
     // Available Measurements
-    bool flagHasMeasurement;
+    //bool flagHasMeasurement;
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
+
+public:
+    bool hasMeasurement() const;
 
 
 };

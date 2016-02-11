@@ -11,9 +11,9 @@ ImuSensorCore::ImuSensorCore()
     setSensorType(SensorTypes::imu);
 
     // Flags measurement
-    flagOrientationEnabled=false;
-    flagAngularVelocityEnabled=false;
-    flagLinearAccelerationEnabled=false;
+    flagMeasurementOrientation=false;
+    flagMeasurementAngularVelocity=false;
+    flagMeasurementLinearAcceleration=false;
 
     return;
 }
@@ -25,34 +25,34 @@ ImuSensorCore::~ImuSensorCore()
 
 bool ImuSensorCore::isOrientationEnabled() const
 {
-    return flagOrientationEnabled;
+    return flagMeasurementOrientation;
 }
 
 int ImuSensorCore::enableOrientation()
 {
-    this->flagOrientationEnabled=true;
+    this->flagMeasurementOrientation=true;
     return 0;
 }
 
 bool ImuSensorCore::isAngularVelocityEnabled() const
 {
-    return flagAngularVelocityEnabled;
+    return flagMeasurementAngularVelocity;
 }
 
 int ImuSensorCore::enableAngularVelocity()
 {
-    this->flagAngularVelocityEnabled=true;
+    this->flagMeasurementAngularVelocity=true;
     return 0;
 }
 
 bool ImuSensorCore::isLinearAccelerationEnabled() const
 {
-    return flagLinearAccelerationEnabled;
+    return flagMeasurementLinearAcceleration;
 }
 
 int ImuSensorCore::enableLinearAcceleration()
 {
-    this->flagLinearAccelerationEnabled=true;
+    this->flagMeasurementLinearAcceleration=true;
     return 0;
 }
 
@@ -65,6 +65,41 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
 //        std::cout<<"Unable to lock TheMsfStorageCore"<<std::endl;
 
     TheMsfStorageCoreAux->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+
+    return 0;
+}
+
+
+
+int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
+{
+    //std::cout<<"ImuSensorCore::predictState()"<<std::endl;
+
+    // Create the predicted state if it doen't exists
+    if(!predictedState)
+    {
+        predictedState=std::make_shared<ImuSensorStateCore>();
+    }
+
+    // Equations
+    *predictedState=*pastState;
+
+    // Set The core
+    predictedState->setTheSensorCore(pastState->getTheSensorCore());
+
+    //std::cout<<"ImuSensorCore::predictState() end"<<std::endl;
+
+    return 0;
+}
+
+int ImuSensorCore::predictStateJacobians(TimeStamp theTimeStamp, std::shared_ptr<ImuSensorStateCore> currentState)
+{
+
+    return 0;
+}
+
+int ImuSensorCore::predictMeasurement(TimeStamp theTimeStamp, std::shared_ptr<ImuSensorStateCore> currentState, std::shared_ptr<ImuSensorMeasurementCore> predictedMeasurement)
+{
 
     return 0;
 }

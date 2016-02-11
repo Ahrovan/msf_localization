@@ -33,7 +33,7 @@
 
 
 //PUGIXML
-#include "pugixml.hpp"
+//#include "pugixml.hpp"
 
 
 // Boost
@@ -41,6 +41,9 @@
 
 // Thread
 #include <thread>
+
+// Chrono
+#include <chrono>
 
 
 // Estimator Cores
@@ -88,12 +91,12 @@ public:
 
 
 public:
-    std::shared_ptr<MsfStorageCore> TheStateEstimationCore;
+    std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
 
 
     // Robot Component
 protected:
-    RobotCore TheRobotCore;
+    std::shared_ptr<RobotCore> TheRobotCore;
 
 
 
@@ -123,15 +126,32 @@ protected:
     bool predictEnabled;
     int setPredictEnabled(bool predictEnabled);
 protected:
-    double predictRate;
+    double predictRateVale;
     std::thread* predictThread;
 protected:
-    int predictThreadFunction();
+    // TODO Finish
+    virtual int predictThreadFunction();
+
+
+
+    // Buffer Manager Thread
+protected:
+    std::thread* bufferManagerThread;
+protected:
+    virtual int bufferManagerThreadFunction();
+
+
+
+    // Start threads
+public:
+    int startThreads();
 
 
     // Predict Functions
 protected:
-    int predict();
+    int predict(TimeStamp TheTimeStamp);
+
+
 
 
 

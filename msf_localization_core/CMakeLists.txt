@@ -26,11 +26,13 @@ set(MSF_LOCALIZATION_CORE_INCLUDE_DIR
 
 set(MSF_LOCALIZATION_CORE_SOURCE_FILES
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/robot_state_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/free_model_robot_state_core.cpp
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_state_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_sensor_state_core.cpp
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/robot_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/free_model_robot_core.cpp
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_basics.cpp
 
@@ -48,11 +50,13 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
  
 set(MSF_LOCALIZATION_CORE_HEADER_FILES
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/robot_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/free_model_robot_state_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/sensor_state_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/imu_sensor_state_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/robot_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/free_model_robot_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/sensor_basics.h
 

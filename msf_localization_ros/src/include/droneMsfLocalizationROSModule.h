@@ -127,9 +127,14 @@ protected:
     int robotPoseThreadFunction();
 
 
-    // Algorithm Core
+
+
+
+    // Algorithm Core threads with ROS time
 protected:
-    //MsfLocalizationCore TheMsfLocalizationCore;
+    int predictThreadFunction();
+
+    int bufferManagerThreadFunction();
 
 
 };

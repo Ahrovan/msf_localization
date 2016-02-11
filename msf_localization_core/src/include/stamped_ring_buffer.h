@@ -58,38 +58,52 @@ public:
         return 1;
     }
 
-    int searchIElementByStamp(int& iElement, TimeStamp timeStamp)
+    int searchIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, TimeStamp timeStamp)
     {
-        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
-        int iElementAux=0;
+        itElement=this->TheElementsList.begin();
 
-        for(ListIterator; ListIterator!=this->TheElementsList.end(); ++ListIterator)
+        for(itElement; itElement!=this->TheElementsList.end(); ++itElement)
         {
-            if(*ListIterator->timeStamp==timeStamp)
+            if(*itElement->timeStamp==timeStamp)
             {
-                iElement=iElementAux;
                 return 0;
             }
-            else
-                iElementAux++;
         }
         // Not found
         return 1;
     }
 
-    int searchPreIElementByStamp(int& iElement, TimeStamp timeStamp)
-    {
-        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
 
-        iElement=-1;
+    int searchPreIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, TimeStamp timeStamp)
+    {
 
         // The List Doesn't have any elements
-        if(this->TheElementsList.begin()==this->TheElementsList.end())
+        if(this->TheElementsList.size()==0)
         {
-            std::cout<<"The List Has no elements"<<std::endl;
+            //std::cout<<"The List Has no elements"<<std::endl;
+            itElement=this->TheElementsList.begin();
             return -1;
         }
 
+
+        // The First Element is older than the searched time stamp. The element goes at the beginig
+        if(timeStamp > this->TheElementsList.begin()->timeStamp)
+        {
+            //std::cout<<"The new Element goes at the begining"<<std::endl;
+            itElement=this->TheElementsList.begin();
+            return 10;
+        }
+
+        // The Last Element is newer than the searched time stamp. The element goes at the end
+        if(timeStamp < this->TheElementsList.back().timeStamp)
+        {
+            //std::cout<<"The new Element goes at the end"<<std::endl;
+            itElement=this->TheElementsList.end();
+            return 20;
+        }
+
+
+        //typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
 
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator AuxListIterator;
 
@@ -97,101 +111,108 @@ public:
         --ListIteratorEndSearch;
 
 
-        for(ListIterator; ListIterator!=ListIteratorEndSearch; ++ListIterator)
+        for(itElement=this->TheElementsList.begin(); itElement!=ListIteratorEndSearch; ++itElement)
         {
-            AuxListIterator=ListIterator;
+            AuxListIterator=itElement;
             ++AuxListIterator;
 
             // The Current Element has the timestamp
-            if(ListIterator->timeStamp==timeStamp)
+            if(itElement->timeStamp==timeStamp)
             {
+                //std::cout<<"The Current Element has the timestamp"<<std::endl;
                 return 1;
             }
 
             // The element iElement is the previous element
-            if(ListIterator->timeStamp>timeStamp && AuxListIterator->timeStamp<timeStamp)
+            if(itElement->timeStamp>timeStamp && AuxListIterator->timeStamp<timeStamp)
             {
+                //std::cout<<"The element iElement is the previous element"<<std::endl;
                 return 0;
             }
-            else
-                iElement++;
-        }
-        // Not found
 
-        return 2;
+        }
+
+        // Not found -> Should never happend
+        //itElement=nullptr;
+        //std::cout<<"Error Finding Element by Stamp"<<std::endl;
+
+        return -2;
     }
 
-    int searchPostIElementByStamp(int& iElement, TimeStamp timeStamp)
+    // TODO FIX!!!
+    int searchPostIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, TimeStamp timeStamp)
     {
-        int result=searchPreIElementByStamp(iElement, timeStamp);
+        int result=searchPreIElementByStamp(itElement, timeStamp);
         if(result==0)
         {
-            iElement++;
+            std::advance(itElement, 1);
             return result;
         }
         else if(result==1)
         {
-            iElement++;
+            std::advance(itElement, 1);
+            return result;
+        }
+        else if(result==10)
+        {
+            //iElement=0;
+            // TODO Check!
+            return result;
+        }
+        else if(result==20)
+        {
+            //iElement=this->getSize();
             return result;
         }
         else
+        {
             return result;
+        }
     }
 
 public:
-    int addElementAfterStamp(const StampedBufferObjectType<BufferObjectType> TheElement, TimeStamp timeStamp)
-    {
-        int iElement=0;
-        if(this->searchIElementByStamp(iElement, timeStamp))
-        {
-            // Element not found, we put in the begining
-            iElement=0;
-        }
-
-        if(this->addElementAfterI(TheElement,iElement))
-            return 1;
-
-        return 0;
-    }
 
     int addElementByStamp(const StampedBufferObjectType<BufferObjectType> TheElement)
     {
-        int iElement=0;
-        int searchResult=this->searchPreIElementByStamp(iElement, TheElement.timeStamp);
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
+        int searchResult=this->searchPreIElementByStamp(itElement, TheElement.timeStamp);
         if(searchResult==0)
         {
             // No problem
+            //std::cout<<"Element is going to be added after i="<<iElement<<std::endl;
+            //std::cout<<"Element is going to be added in the middle"<<std::endl;
+            if(this->addElementAfterI(TheElement,itElement))
+                return 1;
+            return 0;
 
         }
         else if(searchResult==1)
         {
             // Already added element. Need to be updated!
+            //std::cout<<"Element is going to be added after i="<<iElement<<std::endl;
+            //std::cout<<"Element is going to be added in the middle. Overwritting!"<<std::endl;
             // TODO
-        }
-        else
-        {
-            // Element not found, we put in the begining
-            iElement=-1;
-        }
-
-
-
-
-        std::cout<<"Element is going to be added after i="<<iElement<<std::endl;
-
-        if(iElement==-1)
-        {
-            if(this->addElementTop(TheElement))
-                return 2;
-            return 0;
-        }
-        else
-        {
-            if(this->addElementAfterI(TheElement,iElement))
+            if(this->addElementInI(TheElement,itElement))
                 return 1;
             return 0;
         }
+        else if(searchResult==10 || searchResult==-1)
+        {
+            // we put in the begining
+            //std::cout<<"Element is going to be added in the top of the buffer"<<std::endl;
+            if(this->addElementTop(TheElement))
+                return 2;
+            return 0;
 
+        }
+        else if(searchResult==20)
+        {
+            // We put in the end
+            //std::cout<<"Element is going to be added in the end of the buffer"<<std::endl;
+            if(this->addElementEnd(TheElement))
+                return 2;
+            return 0;
+        }
 
 
 
@@ -199,30 +220,33 @@ public:
     }
 
 
+
+
+
 public:
-    int getElementByStamp(TimeStamp timeStamp)
-    {
+//    int getElementByStamp(TimeStamp timeStamp)
+//    {
 
 
-        return 0;
-    }
+//        return 0;
+//    }
 
 
 
 public:
     int purgeOlderThanStamp(TimeStamp timeStamp)
     {
-        int iElement=0;
-        int result=this->searchPostIElementByStamp(iElement,timeStamp);
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
+        int result=this->searchPostIElementByStamp(itElement,timeStamp);
 
         if(result==0)
         {
-            this->purgeLastElementsFromI(iElement);
+            this->purgeLastElementsFromI(itElement);
             return 0;
         }
         else if(result==1)
         {
-            this->purgeLastElementsFromI(iElement);
+            this->purgeLastElementsFromI(itElement);
             return 0;
         }
         else

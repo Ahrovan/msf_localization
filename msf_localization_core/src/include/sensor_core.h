@@ -15,7 +15,7 @@
 
 
 // For TimeStamp
-//#include "stamped_ring_buffer.h"
+
 
 
 
@@ -33,8 +33,11 @@ public:
 
     // Pointer to itself
 protected:
+//public:
+    std::weak_ptr<const SensorCore> TheSensorCorePtr;
 public:
-    std::weak_ptr<const SensorCore> SensorCorePtr;
+    int setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
+    std::shared_ptr<const SensorCore> getTheSensorCore() const;
 
 
     // Pointer to the MSF Storage Core
@@ -42,6 +45,13 @@ protected:
     std::weak_ptr<MsfStorageCore> TheMsfStorageCore;
 public:
     int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+
+
+
+
+    // Pose of the sensor wrt the robot
+protected:
+
 
 
 
