@@ -67,12 +67,86 @@ int MsfLocalizationROS::readConfigFile()
 
 
 
-
+    ///// Robot
     // Reading Robot
-    // TODO
+    pugi::xml_node robot = msf_localization.child("robot");
 
 
 
+    // Create the RobotCore
+    TheRobotCore=std::make_shared<FreeModelRobotCore>();
+    // Set pointer to the RobotCore
+    TheRobotCore->setTheRobotCore(TheRobotCore);
+
+    // Set robot type
+    TheRobotCore->setRobotType(RobotTypes::free_model);
+
+    // Set the access to the Storage core
+    TheRobotCore->setTheMsfStorageCore(this->TheMsfStorageCore);
+
+    // Create a class for the RobotStateCore
+    std::shared_ptr<FreeModelRobotStateCore> RobotInitStateCore=std::make_shared<FreeModelRobotStateCore>();
+    // Set pointer to the SensorCore
+    RobotInitStateCore->setTheRobotCore(TheRobotCore);
+
+    // Init State
+
+    // Position
+    readingValue=robot.child("position").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d position;
+        stm>>position[0]>>position[1]>>position[2];
+        RobotInitStateCore->setPosition(position);
+    }
+
+    // Linear Speed
+    readingValue=robot.child("lin_speed").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d lin_speed;
+        stm>>lin_speed[0]>>lin_speed[1]>>lin_speed[2];
+        RobotInitStateCore->setLinearSpeed(lin_speed);
+    }
+
+    // Linear Acceleration
+    readingValue=robot.child("lin_accel").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d lin_accel;
+        stm>>lin_accel[0]>>lin_accel[1]>>lin_accel[2];
+        RobotInitStateCore->setLinearAcceleration(lin_accel);
+    }
+
+    // Attitude
+    readingValue=robot.child("attitude").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector4d attitude;
+        stm>>attitude[0]>>attitude[1]>>attitude[2]>>attitude[3];
+        RobotInitStateCore->setAttitude(attitude);
+    }
+
+    // Angular Velocity
+    readingValue=robot.child("ang_velocity").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d ang_velocity;
+        stm>>ang_velocity[0]>>ang_velocity[1]>>ang_velocity[2];
+        RobotInitStateCore->setAngularVelocity(ang_velocity);
+    }
+
+
+    // TODO Variances
+
+
+
+    // Push the init state of the robot
+    InitialState.TheRobotStateCore=RobotInitStateCore;
+
+
+
+    ///// Sensors
     // Reading sensors
     for(pugi::xml_node sensor = msf_localization.child("sensor"); sensor; sensor = sensor.next_sibling("sensor"))
     {
@@ -104,8 +178,6 @@ int MsfLocalizationROS::readConfigFile()
             SensorInitStateCore->setTheSensorCore(TheRosSensorImuInterface);
 
 
-
-
             // Set sensor type
             TheRosSensorImuInterface->setSensorType(SensorTypes::imu);
 
@@ -125,7 +197,7 @@ int MsfLocalizationROS::readConfigFile()
             // Pose of the sensor wrt robot
             // TODO. Antes?
 
-            // Measurements
+            //// Measurements
             pugi::xml_node measurements = sensor.child("measurements");
 
             // Orientation
@@ -136,29 +208,76 @@ int MsfLocalizationROS::readConfigFile()
 
 
             // Angular Velocity
-            pugi::xml_node angular_velocity = measurements.child("angular_velocity");
+            pugi::xml_node meas_angular_velocity = measurements.child("angular_velocity");
 
-            readingValue=angular_velocity.child_value("enabled");
+            readingValue=meas_angular_velocity.child_value("enabled");
+            if(std::stoi(readingValue))
+                TheRosSensorImuInterface->enableAngularVelocity();
 
-            TheRosSensorImuInterface->enableAngularVelocity();
+            readingValue=meas_angular_velocity.child_value("var");
 
 
-            readingValue=angular_velocity.child_value("var");
-
-            readingValue=angular_velocity.child("biases").child_value("init_estimation");
-            // TODO fill
-
-            readingValue=angular_velocity.child("biases").child_value("var");
 
 
             // Linear Acceleration
-            pugi::xml_node linear_acceleration = measurements.child("linear_acceleration");
+            pugi::xml_node meas_linear_acceleration = measurements.child("linear_acceleration");
 
-            readingValue=linear_acceleration.child_value("enabled");
-            readingValue=linear_acceleration.child_value("var");
+            readingValue=meas_linear_acceleration.child_value("enabled");
+            if(std::stoi(readingValue))
+                TheRosSensorImuInterface->enableLinearAcceleration();
 
-            readingValue=linear_acceleration.child("biases").child_value("init_estimation");
-            readingValue=linear_acceleration.child("biases").child_value("var");
+            readingValue=meas_linear_acceleration.child_value("var");
+
+
+
+
+            /// Parameters
+            pugi::xml_node parameters = sensor.child("parameters");
+
+
+            // Angular Velocity
+            pugi::xml_node param_angular_velocity = parameters.child("angular_velocity");
+
+            readingValue=param_angular_velocity.child("biases").child_value("enabled");
+            if(std::stoi(readingValue))
+            {
+                TheRosSensorImuInterface->enableEstimationBiasAngularVelocity();
+            }
+
+            readingValue=param_angular_velocity.child("biases").child_value("init_estimation");
+            {
+                std::istringstream stm(readingValue);
+
+                Eigen::Vector3d biasesAngularVelocity;
+
+                stm>>biasesAngularVelocity[0]>>biasesAngularVelocity[1]>>biasesAngularVelocity[2];
+
+                SensorInitStateCore->setBiasesAngularVelocity(biasesAngularVelocity);
+            }
+
+            readingValue=param_angular_velocity.child("biases").child_value("var");
+
+
+            // Linear Acceleration
+            pugi::xml_node param_linear_acceleration = parameters.child("linear_acceleration");
+
+            readingValue=param_linear_acceleration.child("biases").child_value("enabled");
+            if(std::stoi(readingValue))
+                TheRosSensorImuInterface->enableEstimationBiasLinearAcceleration();
+
+            readingValue=param_linear_acceleration.child("biases").child_value("init_estimation");
+            {
+                std::istringstream stm(readingValue);
+
+                Eigen::Vector3d biasesLinearAcceleration;
+
+                stm>>biasesLinearAcceleration[0]>>biasesLinearAcceleration[1]>>biasesLinearAcceleration[2];
+
+                SensorInitStateCore->setBiasesLinearAcceleration(biasesLinearAcceleration);
+            }
+
+            readingValue=param_linear_acceleration.child("biases").child_value("var");
+
 
 
             // Open
@@ -282,6 +401,7 @@ int MsfLocalizationROS::predictThreadFunction()
         predictRate.sleep();
     }
 
+    std::cout<<"MsfLocalizationROS::predictThreadFunction() ended"<<std::endl;
 
     return 0;
 
@@ -320,11 +440,15 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 int MsfLocalizationROS::run()
 {
-    // Start ROS threads
-    robotPoseThread=new std::thread(&MsfLocalizationROS::robotPoseThreadFunction, this);
+    // Enable prediction
+    setPredictEnabled(true);
 
     // Core threads
     startThreads();
+
+    // Start ROS threads
+    robotPoseThread=new std::thread(&MsfLocalizationROS::robotPoseThreadFunction, this);
+
 
     // Loop
     try

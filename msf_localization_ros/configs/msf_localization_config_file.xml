@@ -1,45 +1,81 @@
 <msf_localization>
 
-  <!-- List of sensors -->
+  <!-- ROBOT -->
+  <robot>
+    <position description="position of the robot wrt world (3D vector in m)">
+      <init_estimation>0 0 0</init_estimation>
+      <var>0 0 0</var>
+    </position>
+
+    <lin_speed>
+      <init_estimation>0 0 0</init_estimation>
+      <var>0 0 0</var>
+    </lin_speed>
+
+    <lin_accel>
+      <init_estimation>0 0 0</init_estimation>
+      <var>0 0 0</var>
+    </lin_accel>
+
+    <attitude description="attitude of the robot wrt world (quaternion vector)">
+      <init_estimation>1 0 0 0</init_estimation>
+      <var>0 0 0</var>
+    </attitude>
+
+    <ang_velocity>
+      <init_estimation>0 0 0</init_estimation>
+      <var>0 0 0</var>
+    </ang_velocity>
+
+  </robot>
+
+
+  <!-- LIST OF SENSORS -->
   <sensor>
     <type>imu</type>
     <ros_topic>phidgets_imu_1044/imu/data_raw</ros_topic>
 
-    <pose_in_robot>
-      <position description="position of the imu wrt drone (3D vector in m)">0 0 0</position>
-      <attitude description="attitude of the imu wrt drone (quaternion vector)">1 0 0 0</attitude>
+    <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
+      <position description="position of the sensor wrt robot (3D vector in m)">0 0 0</position>
+      <attitude description="attitude of the sensor wrt robot (quaternion vector)">1 0 0 0</attitude>
       <var_position></var_position>
       <var_attitude></var_attitude>
     </pose_in_robot>
 
-    <measurements>
+    <measurements description="info about the measurements given by this sensor">
       <orientation>
         <enabled>0</enabled>
-        <var></var>
-        
+        <covar></covar>
       </orientation>
 
       <angular_velocity>
         <enabled>1</enabled>
         <covar></covar>
-        <biases>
-          <init_estimation>0 0 0</init_estimation>
-          <var>0 0 0</var>
-        </biases>
-        
       </angular_velocity>
      
       <linear_acceleration>
         <enabled>1</enabled>
-        <covar></covar>
+        <covar></covar>       
+      </linear_acceleration> 
+    </measurements>
+
+    <parameters description="info about the calibration parameters given by this sensor">
+      <angular_velocity>
         <biases>
+          <enabled>1</enabled>
           <init_estimation>0 0 0</init_estimation>
           <var>0 0 0</var>
         </biases>
-        
-      </linear_acceleration> 
+      </angular_velocity>
 
-    </measurements>
+      <linear_acceleration>
+        <biases>
+          <enabled>1</enabled>
+          <init_estimation>0 0 0</init_estimation>
+          <var>0 0 0</var>
+        </biases>
+      </linear_acceleration> 
+    </parameters>
 
 
   </sensor>

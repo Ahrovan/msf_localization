@@ -13,6 +13,9 @@
 
 MsfLocalizationCore::MsfLocalizationCore()
 {
+    // Flags
+    predictEnabled=false;
+
     // Create Robot Core
     TheRobotCore=std::make_shared<RobotCore>();
 
@@ -130,12 +133,35 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
 
-    // Robot
-    // TODO
-    //TheRobotCore->
+    ///// Robot
+    if(TheRobotCore->getRobotType() == RobotTypes::free_model)
+    {
+        std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot;
+        std::shared_ptr<FreeModelRobotStateCore> pastStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PreviousState.TheRobotStateCore);
+
+        if(!pastStateRobot)
+        {
+            std::cout<<"!!previous state for robot not found!"<<std::endl;
+            return -2;
+        }
 
 
-    // Sensors
+        // Polymorphic
+        std::shared_ptr<FreeModelRobotCore> TheFreeModelRobotCore=std::dynamic_pointer_cast<FreeModelRobotCore>(TheRobotCore);
+
+        if(TheFreeModelRobotCore->predictState(PreviousTimeStamp, TheTimeStamp, pastStateRobot, predictedStateRobot))
+        {
+            std::cout<<"!!Error predicting state of the robot"<<std::endl;
+            return 1;
+        }
+
+        // Add
+        PredictedState.TheRobotStateCore=predictedStateRobot;
+
+    }
+
+
+    ///// Sensors
     for(std::list< std::shared_ptr<SensorCore> >::iterator itSens=TheListOfSensorCore.begin(); itSens!=TheListOfSensorCore.end(); ++itSens)
     {
 

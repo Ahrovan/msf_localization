@@ -10,7 +10,7 @@
 
 
 
-enum SensorTypes
+enum class SensorTypes
 {
     undefined=0,
     imu=1

@@ -4,12 +4,60 @@
 
 
 
+//I/O stream
+//std::cout
+#include <iostream>
+
+
+#include <memory>
+
+
+
+enum class RobotTypes
+{
+    undefined=0,
+    free_model=1
+};
+
+
+
+
+class MsfStorageCore;
 
 class RobotCore
 {
 
+public:
+    RobotCore();
+    virtual ~RobotCore();
+
+
+    // Robot Core
+protected:
+    RobotTypes robotType;
+public:
+    int setRobotType(RobotTypes robotType);
+    RobotTypes getRobotType() const;
+
+
+    // Pointer to itself
+protected:
+//public:
+    std::weak_ptr<const RobotCore> TheRobotCorePtr;
+public:
+    int setTheRobotCore(std::weak_ptr<const RobotCore> TheRobotCorePtr);
+    std::shared_ptr<const RobotCore> getTheRobotCore() const;
+
+
+    // Pointer to the MSF Storage Core
+protected:
+    std::weak_ptr<MsfStorageCore> TheMsfStorageCore;
+public:
+    int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+
 
 };
+
 
 
 

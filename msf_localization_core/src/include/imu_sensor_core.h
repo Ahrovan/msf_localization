@@ -91,6 +91,9 @@ protected:
     // Angular Velocity Biases: bwx, bwy, bwz
 protected:
     bool flagEstimationBiasAngularVelocity;
+public:
+    bool isEstimationBiasAngularVelocityEnabled() const;
+    int enableEstimationBiasAngularVelocity();
 
     // Angular Velocity Covariance
 protected:
@@ -100,9 +103,13 @@ protected:
     // Linear Acceleration Biases: bax, bay, baz
 protected:
     bool flagEstimationBiasLinearAcceleration;
+public:
+    bool isEstimationBiasLinearAccelerationEnabled() const;
+    int enableEstimationBiasLinearAcceleration();
 
     // Linear Acceleration covariance
 protected:
+
 
 
 

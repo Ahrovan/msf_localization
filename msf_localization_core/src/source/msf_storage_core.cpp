@@ -96,15 +96,92 @@ int MsfStorageCore::displayRingBuffer()
         std::cout<<"-TS="<<it->timeStamp.sec<<" s; "<<it->timeStamp.nsec<<" ns"<<std::endl;
 
 
-        // State
+        /////// State
         if(it->object.hasState())
         {
             std::cout<<"\t\t\t\t";
             std::cout<<"+State:"<<std::endl;
+
+
+            //// Robot
+            // TODO
+            std::cout<<"\t\t\t\t\t";
+            std::cout<<"Robot ";
+
+            switch(it->object.TheRobotStateCore->getTheRobotCore()->getRobotType())
+            {
+                case RobotTypes::undefined:
+                {
+                    break;
+                }
+
+                case RobotTypes::free_model:
+                {
+                    std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(it->object.TheRobotStateCore->getTheRobotCore());
+                    std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(it->object.TheRobotStateCore);
+
+                    std::cout<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
+                    std::cout<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
+                    std::cout<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
+                    std::cout<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
+                    std::cout<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
+
+                    break;
+                }
+
+            }
+
+            std::cout<<std::endl;
+
+
+
+
+            //// Sensors
+            for(std::list<std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=it->object.TheListSensorStateCore.begin();
+                itSensorStateCore!=it->object.TheListSensorStateCore.end();
+                ++itSensorStateCore)
+            {
+                std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itSensorStateCore)->getTheSensorCore();
+                std::cout<<"\t\t\t\t\t";
+                std::cout<<"Sensor id="<<SensorCorePtrAux->getSensorId();
+
+                switch(SensorCorePtrAux->getSensorType())
+                {
+                    case SensorTypes::undefined:
+                    {
+                        break;
+                    }
+                    case SensorTypes::imu:
+                    {
+                        std::cout<<" (IMU)";
+                        std::shared_ptr<const ImuSensorCore> ImuSensorCorePtrAux=std::dynamic_pointer_cast< const ImuSensorCore >(SensorCorePtrAux);
+
+
+                        std::shared_ptr<ImuSensorStateCore> sensorStatePtr=std::static_pointer_cast< ImuSensorStateCore >(*itSensorStateCore);
+
+                        if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
+                            std::cout<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
+
+                        if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
+                            std::cout<<" est_bis_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
+
+
+                        break;
+                    }
+
+                }
+
+                std::cout<<std::endl;
+            }
+
+
+            //// Map
+            // TODO
+
         }
 
 
-        // Measurements
+        /////// Measurements
         if(it->object.hasMeasurement())
         {
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=it->object.TheListMeasurementCore.begin(); itMeas!=it->object.TheListMeasurementCore.end(); ++itMeas)

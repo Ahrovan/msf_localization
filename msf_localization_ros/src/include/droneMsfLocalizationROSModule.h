@@ -69,6 +69,10 @@
 #include <tf/transform_broadcaster.h>
 
 
+// Robot
+#include "free_model_robot_core.h"
+
+
 // ROS Sensor Interface
 #include "ros_sensor_interface.h"
 

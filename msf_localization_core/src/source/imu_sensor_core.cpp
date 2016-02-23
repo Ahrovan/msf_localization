@@ -15,6 +15,13 @@ ImuSensorCore::ImuSensorCore()
     flagMeasurementAngularVelocity=false;
     flagMeasurementLinearAcceleration=false;
 
+    // Flags estimation
+    flagEstimationAttitudeSensorWrtRobot=false;
+    flagEstimationPositionSensorWrtRobot=false;
+    flagEstimationBiasAngularVelocity=false;
+    flagEstimationBiasLinearAcceleration=false;
+
+
     return;
 }
 
@@ -71,9 +78,35 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
 
 
 
+
+bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const
+{
+    return this->flagEstimationBiasAngularVelocity;
+}
+
+int ImuSensorCore::enableEstimationBiasAngularVelocity()
+{
+    this->flagEstimationBiasAngularVelocity=true;
+    return 0;
+}
+
+
+bool ImuSensorCore::isEstimationBiasLinearAccelerationEnabled() const
+{
+    return this->flagEstimationBiasLinearAcceleration;
+}
+
+int ImuSensorCore::enableEstimationBiasLinearAcceleration()
+{
+    this->flagEstimationBiasLinearAcceleration=true;
+    return 0;
+}
+
+
+
 int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
-    //std::cout<<"ImuSensorCore::predictState()"<<std::endl;
+    std::cout<<"ImuSensorCore::predictState()"<<std::endl;
 
     // Create the predicted state if it doen't exists
     if(!predictedState)
@@ -81,11 +114,26 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
         predictedState=std::make_shared<ImuSensorStateCore>();
     }
 
-    // Equations
-    *predictedState=*pastState;
-
     // Set The core
     predictedState->setTheSensorCore(pastState->getTheSensorCore());
+
+
+
+    // Equations
+    //*predictedState=*pastState;
+
+    // Bias Angular Velocity
+    if(flagEstimationBiasAngularVelocity)
+    {
+        predictedState->biasesAngularVelocity=pastState->biasesAngularVelocity;
+    }
+
+    // Bias Linear Acceleration
+    if(flagEstimationBiasLinearAcceleration)
+        predictedState->biasesLinearAcceleration=pastState->biasesLinearAcceleration;
+
+
+
 
     //std::cout<<"ImuSensorCore::predictState() end"<<std::endl;
 

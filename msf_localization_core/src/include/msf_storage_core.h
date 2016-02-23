@@ -38,11 +38,20 @@
 
 // Estimator Cores
 
+// Robot
 #include "robot_state_core.h"
-#include "sensor_state_core.h"
+#include "free_model_robot_core.h"
+#include "free_model_robot_state_core.h"
 
+
+// Sensor
+#include "sensor_state_core.h"
 #include "sensor_measurement_core.h"
+
+// Imu
+#include "imu_sensor_core.h"
 #include "imu_sensor_measurement_core.h"
+#include "imu_sensor_state_core.h"
 
 
 #include "stamped_ring_buffer.h"
