@@ -101,7 +101,7 @@ int MsfLocalizationCore::bufferManagerThreadFunction()
 
 int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 {
-    std::cout<<"MsfLocalizationCore::predict()"<<std::endl;
+    //std::cout<<"MsfLocalizationCore::predict()"<<std::endl;
 
     // New element that is going to be added to the buffer
     StateEstimationCore PredictedState;
@@ -133,6 +133,8 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
 
+    /////// State
+
     ///// Robot
     if(TheRobotCore->getRobotType() == RobotTypes::free_model)
     {
@@ -149,11 +151,20 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         // Polymorphic
         std::shared_ptr<FreeModelRobotCore> TheFreeModelRobotCore=std::dynamic_pointer_cast<FreeModelRobotCore>(TheRobotCore);
 
+        // State
         if(TheFreeModelRobotCore->predictState(PreviousTimeStamp, TheTimeStamp, pastStateRobot, predictedStateRobot))
         {
             std::cout<<"!!Error predicting state of the robot"<<std::endl;
             return 1;
         }
+
+        // Jacobians
+        if(TheFreeModelRobotCore->predictStateErrorStateJacobians(PreviousTimeStamp, TheTimeStamp, pastStateRobot, predictedStateRobot))
+        {
+            std::cout<<"!!Error predicting error state jacobians of the robot"<<std::endl;
+            return 1;
+        }
+
 
         // Add
         PredictedState.TheRobotStateCore=predictedStateRobot;
@@ -222,9 +233,17 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
             // Polymorphic
             std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(*itSens);
 
+            // State
             if(TheImuSensorCore->predictState(PreviousTimeStamp, TheTimeStamp, pastStateSensor, predictedStateSensor))
             {
                 std::cout<<"!!Error predicting state of sensor"<<std::endl;
+                return 1;
+            }
+
+            // Jacobians
+            if(TheImuSensorCore->predictStateErrorStateJacobians(PreviousTimeStamp, TheTimeStamp, pastStateSensor, predictedStateSensor))
+            {
+                std::cout<<"!!Error predicting error state jacobians of the sensor"<<std::endl;
                 return 1;
             }
 
@@ -239,7 +258,17 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
     }
 
-    // Add element to the buffer
+
+    ///// Map
+    // TODO
+
+
+
+    /////// Covariances
+    // TODO
+
+
+    /////// Add element to the buffer
     TheMsfStorageCore->addElement(TheTimeStamp, PredictedState);
 
 

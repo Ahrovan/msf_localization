@@ -49,8 +49,23 @@ public:
 
 
 
-    // Pose of the sensor wrt the robot
+    // Pose of the sensor wrt robot
 protected:
+    bool flagEstimationAttitudeSensorWrtRobot;
+public:
+    bool isEstimationAttitudeSensorWrtRobotEnabled() const;
+    int enableEstimationAttitudeSensorWrtRobot();
+
+    // Covariance
+
+
+protected:
+    bool flagEstimationPositionSensorWrtRobot;
+public:
+    bool isEstimationPositionSensorWrtRobotEnabled() const;
+    int enableEstimationPositionSensorWrtRobot();
+
+    // Covariance
 
 
 

@@ -76,9 +76,6 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
     return 0;
 }
 
-
-
-
 bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const
 {
     return this->flagEstimationBiasAngularVelocity;
@@ -106,32 +103,40 @@ int ImuSensorCore::enableEstimationBiasLinearAcceleration()
 
 int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
-    std::cout<<"ImuSensorCore::predictState()"<<std::endl;
+    //std::cout<<"ImuSensorCore::predictState()"<<std::endl;
 
-    // Create the predicted state if it doen't exists
+    // Create the predicted state if it doesn't exists
     if(!predictedState)
     {
         predictedState=std::make_shared<ImuSensorStateCore>();
     }
 
-    // Set The core
-    predictedState->setTheSensorCore(pastState->getTheSensorCore());
+    // Set The sensor core if it doesn't exist
+    if(!predictedState->getTheSensorCore())
+    {
+        predictedState->setTheSensorCore(pastState->getTheSensorCore());
+    }
 
 
 
     // Equations
     //*predictedState=*pastState;
 
+
+    // Pose of the sensor wrt Robot
+
+    // Position of sensor wrt Robot
+    predictedState->positionSensorWrtRobot=pastState->positionSensorWrtRobot;
+
+    // Attitude of sensor wrt Robot
+    predictedState->attitudeSensorWrtRobot=pastState->attitudeSensorWrtRobot;
+
+
     // Bias Angular Velocity
-    if(flagEstimationBiasAngularVelocity)
-    {
-        predictedState->biasesAngularVelocity=pastState->biasesAngularVelocity;
-    }
+    predictedState->biasesAngularVelocity=pastState->biasesAngularVelocity;
 
     // Bias Linear Acceleration
-    if(flagEstimationBiasLinearAcceleration)
-        predictedState->biasesLinearAcceleration=pastState->biasesLinearAcceleration;
-
+    predictedState->biasesLinearAcceleration=pastState->biasesLinearAcceleration;
 
 
 
@@ -140,8 +145,37 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     return 0;
 }
 
-int ImuSensorCore::predictStateJacobians(TimeStamp theTimeStamp, std::shared_ptr<ImuSensorStateCore> currentState)
+int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
+    std::cout<<"ImuSensorCore::predictStateErrorStateJacobians"<<std::endl;
+
+    // Create the predicted state if it doesn't exist
+    if(!predictedState)
+    {
+        return 1;
+    }
+
+
+    // Jacobians
+    // posi / posi
+    if(flagEstimationPositionSensorWrtRobot)
+        predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
+
+    // att / att
+    if(flagEstimationAttitudeSensorWrtRobot)
+        predictedState->errorStateJacobian.attitudeSensorWrtRobot=Eigen::Matrix3d::Identity();
+
+    // ba / ba
+    if(flagEstimationBiasLinearAcceleration)
+        predictedState->errorStateJacobian.biasesLinearAcceleration=Eigen::Matrix3d::Identity();
+
+    // bw / bw
+    if(flagEstimationBiasAngularVelocity)
+        predictedState->errorStateJacobian.biasesAngularVelocity=Eigen::Matrix3d::Identity();
+
+
+
+
 
     return 0;
 }

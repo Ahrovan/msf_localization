@@ -44,12 +44,22 @@ public:
     // Common State
 
     // Pose of the sensor wrt robot
+    // position
 protected:
-    // Reference
-    Eigen::Vector3d tranPoseSensorWrtRobot_ref;
-    Eigen::Vector4d quatPoseSensorWrtRobot_ref;
-    // Error
-    // Not needed!
+public:
+    Eigen::Vector3d positionSensorWrtRobot;
+public:
+    Eigen::Vector3d getPositionSensorWrtRobot() const;
+    int setPositionSensorWrtRobot(Eigen::Vector3d positionSensorWrtRobot);
+
+
+    // attitude
+protected:
+public:
+    Eigen::Vector4d attitudeSensorWrtRobot;
+public:
+    Eigen::Vector4d getAttitudeSensorWrtRobot() const;
+    int setAttitudeSensorWrtRobot(Eigen::Vector4d attitudeSensorWrtRobot);
 
 
 

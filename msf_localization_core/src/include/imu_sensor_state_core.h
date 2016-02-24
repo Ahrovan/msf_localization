@@ -21,7 +21,6 @@ public:
     ///// Imu State (Parameters)
 
     // Angular Velocity Biases
-    // Estimated
 protected:
 public:
     Eigen::Vector3d biasesAngularVelocity;
@@ -30,20 +29,8 @@ public:
     int setBiasesAngularVelocity(Eigen::Vector3d biasesAngularVelocity);
 
 
-    // Reference
-protected:
-    Eigen::Vector3d biasesAngularVelocity_ref;
-
-
-    // Error
-protected:
-public:
-    //Eigen::Vector3d biasesAngularVelocity_error;
-
-
 
     // Linear Acceleration Biases   
-    // Estimated
 protected:
 public:
     Eigen::Vector3d biasesLinearAcceleration;
@@ -51,15 +38,19 @@ public:
     Eigen::Vector3d getBiasesLinearAcceleration() const;
     int setBiasesLinearAcceleration(Eigen::Vector3d biasesLinearAcceleration);
 
-    // Reference
-protected:
-public:
-    Eigen::Vector3d biasesLinearAcceleration_ref;
 
-    // Error
-protected:
+
+
+
+    // Error State Jacobians
 public:
-    //Eigen::Vector3d biasesLinearAcceleration_error;
+    struct
+    {
+        Eigen::Matrix3d positionSensorWrtRobot;
+        Eigen::Matrix3d attitudeSensorWrtRobot;
+        Eigen::Matrix3d biasesLinearAcceleration;
+        Eigen::Matrix3d biasesAngularVelocity;
+    } errorStateJacobian;
 
 
 };

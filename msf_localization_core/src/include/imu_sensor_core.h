@@ -74,20 +74,6 @@ public:
     ///// State estimation
 
 
-    // Pose of the sensor wrt robot
-protected:
-    bool flagEstimationAttitudeSensorWrtRobot;
-
-    // Covariance
-
-
-protected:
-    bool flagEstimationPositionSensorWrtRobot;
-
-    // Covariance
-
-
-
     // Angular Velocity Biases: bwx, bwy, bwz
 protected:
     bool flagEstimationBiasAngularVelocity;
@@ -115,7 +101,7 @@ protected:
 
     ///// Predict functions
 
-    // State
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, bias_ang_veloc]'
 
     // Prediction state function
 public:
@@ -123,7 +109,7 @@ public:
 
     // Jacobian
 public:
-    int predictStateJacobians(TimeStamp theTimeStamp, std::shared_ptr<ImuSensorStateCore> currentState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState);
 
 
 

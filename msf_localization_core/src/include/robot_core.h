@@ -32,6 +32,21 @@ public:
     virtual ~RobotCore();
 
 
+    // Dimension state
+protected:
+    unsigned int dimensionState;
+public:
+    unsigned int getDimensionState() const;
+    int setDimensionState(unsigned int dimensionState);
+
+    // Dimension error
+protected:
+    unsigned int dimensionErrorState;
+public:
+    unsigned int getDimensionErrorState() const;
+    int setDimensionErrorState(unsigned int dimensionErrorState);
+
+
     // Robot Core
 protected:
     RobotTypes robotType;

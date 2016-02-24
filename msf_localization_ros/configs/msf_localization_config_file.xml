@@ -4,27 +4,27 @@
   <robot>
     <position description="position of the robot wrt world (3D vector in m)">
       <init_estimation>0 0 0</init_estimation>
-      <var>0 0 0</var>
+      <init_var>0 0 0</init_var>
     </position>
 
     <lin_speed>
       <init_estimation>0 0 0</init_estimation>
-      <var>0 0 0</var>
+      <init_var>0 0 0</init_var>
     </lin_speed>
 
     <lin_accel>
-      <init_estimation>0 0 0</init_estimation>
-      <var>0 0 0</var>
+      <init_estimation>0.1 0.02 0</init_estimation>
+      <init_var>0 0 0</init_var>
     </lin_accel>
 
     <attitude description="attitude of the robot wrt world (quaternion vector)">
       <init_estimation>1 0 0 0</init_estimation>
-      <var>0 0 0</var>
+      <init_var>0 0 0</init_var>
     </attitude>
 
     <ang_velocity>
-      <init_estimation>0 0 0</init_estimation>
-      <var>0 0 0</var>
+      <init_estimation>0 0 0.02</init_estimation>
+      <init_var>0 0 0</init_var>
     </ang_velocity>
 
   </robot>
@@ -36,10 +36,16 @@
     <ros_topic>phidgets_imu_1044/imu/data_raw</ros_topic>
 
     <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
-      <position description="position of the sensor wrt robot (3D vector in m)">0 0 0</position>
-      <attitude description="attitude of the sensor wrt robot (quaternion vector)">1 0 0 0</attitude>
-      <var_position></var_position>
-      <var_attitude></var_attitude>
+      <position description="position of the sensor wrt robot (3D vector in m)">
+        <enabled>1</enabled>
+        <init_estimation>0 0 0</init_estimation>
+        <init_var>0 0 0</init_var>
+      </position>
+      <attitude description="attitude of the sensor wrt robot (quaternion vector)">
+        <enabled>1</enabled>
+        <init_estimation>1 0 0 0</init_estimation>
+        <init_var>0 0 0</init_var>
+      </attitude>
     </pose_in_robot>
 
     <measurements description="info about the measurements given by this sensor">
@@ -64,7 +70,7 @@
         <biases>
           <enabled>1</enabled>
           <init_estimation>0 0 0</init_estimation>
-          <var>0 0 0</var>
+          <init_var>0 0 0</init_var>
         </biases>
       </angular_velocity>
 
@@ -72,7 +78,7 @@
         <biases>
           <enabled>1</enabled>
           <init_estimation>0 0 0</init_estimation>
-          <var>0 0 0</var>
+          <init_var>0 0 0</init_var>
         </biases>
       </linear_acceleration> 
     </parameters>

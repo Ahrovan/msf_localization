@@ -122,6 +122,11 @@ protected:
     // TODO K+1|k+1
 
 
+
+    // Predict Functions
+protected:
+    int predict(TimeStamp TheTimeStamp);
+
     // Predict Thread
 protected:
     bool predictEnabled;
@@ -146,13 +151,6 @@ protected:
     // Start threads
 public:
     int startThreads();
-
-
-    // Predict Functions
-protected:
-    int predict(TimeStamp TheTimeStamp);
-
-
 
 
 

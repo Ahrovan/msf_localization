@@ -120,11 +120,20 @@ int MsfStorageCore::displayRingBuffer()
                     std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(it->object.TheRobotStateCore->getTheRobotCore());
                     std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(it->object.TheRobotStateCore);
 
+                    // State
                     std::cout<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
                     std::cout<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
                     std::cout<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
                     std::cout<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
                     std::cout<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
+
+
+                    // Jacobian
+                    std::cout<<std::endl;
+                    std::cout<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
+
+                    std::cout<<std::endl;
+                    std::cout<<"Jacobian Robot Angular=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.angular<<"]";
 
                     break;
                 }
@@ -159,11 +168,36 @@ int MsfStorageCore::displayRingBuffer()
 
                         std::shared_ptr<ImuSensorStateCore> sensorStatePtr=std::static_pointer_cast< ImuSensorStateCore >(*itSensorStateCore);
 
-                        if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
+                        // State (Parameters)
+                        //if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
+                            std::cout<<" posi_wrt_robot=["<<sensorStatePtr->getPositionSensorWrtRobot().transpose()<<"]'";
+
+                        //if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
+                            std::cout<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
+
+                        //if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
+                            std::cout<<" est_bis_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
+
+                        //if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
                             std::cout<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
 
+
+                        // Jacobian
+                        std::cout<<std::endl;
+                        if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
+                            std::cout<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
+
+                        std::cout<<std::endl;
+                        if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
+                            std::cout<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
+
+                        std::cout<<std::endl;
                         if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                            std::cout<<" est_bis_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
+                            std::cout<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
+
+                        std::cout<<std::endl;
+                        if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
+                            std::cout<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
 
 
                         break;

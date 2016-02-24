@@ -6,6 +6,9 @@
 // Time Stamp
 #include "time_stamp.h"
 
+// Quaternion algebra
+#include "quaternion_algebra.h"
+
 // Robot Core
 #include "robot_core.h"
 
@@ -25,7 +28,7 @@ public:
 
     ///// Predict functions
 
-    // State
+    // State: xR=[pos, lin_speed, lin_accel, attit, ang_vel]'
 
     // Prediction state function
 public:
@@ -33,7 +36,7 @@ public:
 
     // Jacobian
 public:
-    int predictStateJacobians(TimeStamp theTimeStamp, std::shared_ptr<FreeModelRobotStateCore> currentState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState);
 
 
 

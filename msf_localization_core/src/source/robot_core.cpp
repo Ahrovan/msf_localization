@@ -6,7 +6,9 @@
 
 
 
-RobotCore::RobotCore()
+RobotCore::RobotCore() :
+    dimensionState(0),
+    dimensionErrorState(0)
 {
     // Robot Type
     robotType=RobotTypes::undefined;
@@ -18,6 +20,29 @@ RobotCore::~RobotCore()
 {
     return;
 }
+
+unsigned int RobotCore::getDimensionState() const
+{
+    return this->dimensionState;
+}
+
+int RobotCore::setDimensionState(unsigned int dimensionState)
+{
+    this->dimensionState=dimensionState;
+    return 0;
+}
+
+unsigned int RobotCore::getDimensionErrorState() const
+{
+    return this->dimensionErrorState;
+}
+
+int RobotCore::setDimensionErrorState(unsigned int dimensionErrorState)
+{
+    this->dimensionErrorState=dimensionErrorState;
+    return 0;
+}
+
 
 
 int RobotCore::setRobotType(RobotTypes robotType)

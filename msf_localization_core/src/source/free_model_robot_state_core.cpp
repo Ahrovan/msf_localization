@@ -4,6 +4,8 @@
 
 FreeModelRobotStateCore::FreeModelRobotStateCore()
 {
+    //this->errorStateJacobian.resize();
+
     return;
 }
 
