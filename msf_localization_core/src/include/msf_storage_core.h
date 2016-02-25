@@ -8,11 +8,14 @@
 //std::cout
 #include <iostream>
 
+#include <fstream>
+
 //String
 //std::string, std::getline()
 #include <string>
 
-
+// Environment variable
+#include <cstdlib>
 
 
 //Vector
@@ -93,6 +96,13 @@ public:
     // Display Elements in the ring buffer
 public:
     int displayRingBuffer();
+
+
+
+    // Debug log
+protected:
+    std::string logPath;
+    std::ofstream logFile;
 
 
 };

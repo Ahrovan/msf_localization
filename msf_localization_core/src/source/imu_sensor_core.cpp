@@ -65,7 +65,10 @@ int ImuSensorCore::enableLinearAcceleration()
 
 int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
 {
-    std::cout<<"Imu Measurement Set"<<std::endl;
+    //std::cout<<"Imu Measurement Set"<<std::endl;
+
+    if(!isSensorEnabled())
+        return 0;
 
     std::shared_ptr<MsfStorageCore> TheMsfStorageCoreAux=this->TheMsfStorageCore.lock();
 //    if(!TheMsfStorageCoreAux)
@@ -83,7 +86,15 @@ bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const
 
 int ImuSensorCore::enableEstimationBiasAngularVelocity()
 {
-    this->flagEstimationBiasAngularVelocity=true;
+    if(!this->flagEstimationBiasAngularVelocity)
+    {
+        // Enable
+        this->flagEstimationBiasAngularVelocity=true;
+        // Update State Dimension
+        this->dimensionState+=3;
+        // Update Error State Dimension
+        this->dimensionErrorState+=3;
+    }
     return 0;
 }
 
@@ -95,7 +106,15 @@ bool ImuSensorCore::isEstimationBiasLinearAccelerationEnabled() const
 
 int ImuSensorCore::enableEstimationBiasLinearAcceleration()
 {
-    this->flagEstimationBiasLinearAcceleration=true;
+    if(!this->flagEstimationBiasLinearAcceleration)
+    {
+        // Enable
+        this->flagEstimationBiasLinearAcceleration=true;
+        // Update State Dimension
+        this->dimensionState+=3;
+        // Update Error State Dimension
+        this->dimensionErrorState+=3;
+    }
     return 0;
 }
 
@@ -147,7 +166,7 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
 
 int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
-    std::cout<<"ImuSensorCore::predictStateErrorStateJacobians"<<std::endl;
+    //std::cout<<"ImuSensorCore::predictStateErrorStateJacobians"<<std::endl;
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)

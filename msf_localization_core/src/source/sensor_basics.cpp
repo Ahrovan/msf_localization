@@ -3,7 +3,8 @@
 
 
 SensorBasics::SensorBasics() :
-    sensorType(SensorTypes::undefined)
+    sensorType(SensorTypes::undefined),
+    flagSensorEnabled(false)
 {
     return;
 }
@@ -37,6 +38,16 @@ int SensorBasics::getSensorId() const
 }
 
 
+bool SensorBasics::isSensorEnabled() const
+{
+    return this->flagSensorEnabled;
+}
+
+int SensorBasics::setSensorEnabled(bool flagSensorEnabled)
+{
+    this->flagSensorEnabled=flagSensorEnabled;
+    return 0;
+}
 
 
 

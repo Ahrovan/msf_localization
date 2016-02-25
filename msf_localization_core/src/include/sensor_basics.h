@@ -38,6 +38,14 @@ public:
     int getSensorId() const;
 
 
+
+protected:
+    bool flagSensorEnabled;
+public:
+    bool isSensorEnabled() const;
+    int setSensorEnabled(bool flagSensorEnabled);
+
+
 };
 
 

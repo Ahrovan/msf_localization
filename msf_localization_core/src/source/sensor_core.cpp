@@ -8,7 +8,9 @@
 
 
 SensorCore::SensorCore() :
-    SensorBasics()
+    SensorBasics(),
+    dimensionState(0),
+    dimensionErrorState(0)
 {
     return;
 }
@@ -39,6 +41,30 @@ int SensorCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorage
 
 
 
+unsigned int SensorCore::getDimensionState() const
+{
+    return this->dimensionState;
+}
+
+int SensorCore::setDimensionState(unsigned int dimensionState)
+{
+    this->dimensionState=dimensionState;
+    return 0;
+}
+
+unsigned int SensorCore::getDimensionErrorState() const
+{
+    return this->dimensionErrorState;
+}
+
+int SensorCore::setDimensionErrorState(unsigned int dimensionErrorState)
+{
+    this->dimensionErrorState=dimensionErrorState;
+    return 0;
+}
+
+
+
 bool SensorCore::isEstimationAttitudeSensorWrtRobotEnabled() const
 {
     return this->flagEstimationAttitudeSensorWrtRobot;
@@ -46,7 +72,15 @@ bool SensorCore::isEstimationAttitudeSensorWrtRobotEnabled() const
 
 int SensorCore::enableEstimationAttitudeSensorWrtRobot()
 {
-    this->flagEstimationAttitudeSensorWrtRobot=true;
+    if(!this->flagEstimationAttitudeSensorWrtRobot)
+    {
+        // Enable
+        this->flagEstimationAttitudeSensorWrtRobot=true;
+        // Update State Dimension
+        this->dimensionState+=4;
+        // Update Error State Dimension
+        this->dimensionErrorState+=3;
+    }
     return 0;
 }
 
@@ -57,7 +91,15 @@ bool SensorCore::isEstimationPositionSensorWrtRobotEnabled() const
 
 int SensorCore::enableEstimationPositionSensorWrtRobot()
 {
-    this->flagEstimationPositionSensorWrtRobot=true;
+    if(!this->flagEstimationPositionSensorWrtRobot)
+    {
+        // Enable
+        this->flagEstimationPositionSensorWrtRobot=true;
+        // Update State Dimension
+        this->dimensionState+=3;
+        // Update Error State Dimension
+        this->dimensionErrorState+=3;
+    }
     return 0;
 }
 

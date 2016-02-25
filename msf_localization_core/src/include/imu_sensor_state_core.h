@@ -20,6 +20,10 @@ public:
 
     ///// Imu State (Parameters)
 
+    // if enabled
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, bias_ang_veloc]'
+
+
     // Angular Velocity Biases
 protected:
 public:

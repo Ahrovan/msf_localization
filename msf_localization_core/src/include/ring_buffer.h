@@ -156,7 +156,7 @@ public:
     // Purge Last Elements Starting from I
     int purgeLastElementsFromI(int iElement)
     {
-        std::cout<<"Cleaning buffer. Last "<<iElement<<" elements out of "<<this->getSize()<<std::endl;
+        //std::cout<<"Cleaning buffer. Last "<<iElement<<" elements out of "<<this->getSize()<<std::endl;
 
         if(this->getSize()>=iElement)
         {
@@ -174,12 +174,20 @@ public:
 
     int purgeLastElementsFromI(typename std::list<BufferObjectType>::iterator itElement)
     {
-        std::cout<<"Cleaning buffer. It has "<<this->getSize()<<" elements"<<std::endl;
+        //std::cout<<"Cleaning buffer. It has "<<this->getSize()<<" elements"<<std::endl;
 
 
         TheElementsList.erase(itElement, TheElementsList.end());
 
 
+
+        return 0;
+    }
+
+    // Purge complete buffer
+    int purgeFull()
+    {
+        TheElementsList.clear();
 
         return 0;
     }

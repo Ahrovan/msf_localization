@@ -108,18 +108,20 @@ protected:
 protected:
     unsigned int firstAvailableId;
 
+
+
+
+    // Time Stamps. Pure virtual function
 public:
-    // Sensor Measures
-    //std::list<SensorMeasurementCore*> TheListOfSensorMeasurementsCores;
+    virtual TimeStamp getTimeStamp();
 
 
-
-    // Covariances Matrixes
+    // State Estimation
 protected:
-    // TODO Use Ring-Buffers
-    // TODO k|k
-    // TODO k+1|k
-    // TODO K+1|k+1
+    bool stateEstimationEnabled;
+public:
+    int setStateEstimationEnabled(bool predictEnabled);
+    bool isStateEstimationEnabled() const;
 
 
 
@@ -128,9 +130,6 @@ protected:
     int predict(TimeStamp TheTimeStamp);
 
     // Predict Thread
-protected:
-    bool predictEnabled;
-    int setPredictEnabled(bool predictEnabled);
 protected:
     double predictRateVale;
     std::thread* predictThread;
@@ -144,6 +143,7 @@ protected:
 protected:
     std::thread* bufferManagerThread;
 protected:
+    // TODO finish
     virtual int bufferManagerThreadFunction();
 
 
@@ -153,6 +153,17 @@ public:
     int startThreads();
 
 
+
+    // Helper functions
+protected:
+    int findSensorStateCoreFromList(std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore, std::shared_ptr<SensorCore> TheSensorCore, std::shared_ptr<SensorStateCore>& TheSensorStateCore);
+
+
+
+    // Debug log
+protected:
+    std::string logPath;
+    std::ofstream logFile;
 
 };
 

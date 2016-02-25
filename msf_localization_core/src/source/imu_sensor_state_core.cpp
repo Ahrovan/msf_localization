@@ -4,6 +4,12 @@
 
 ImuSensorStateCore::ImuSensorStateCore()
 {
+    // Init to zero
+    errorStateJacobian.positionSensorWrtRobot.setZero();
+    errorStateJacobian.attitudeSensorWrtRobot.setZero();
+    errorStateJacobian.biasesLinearAcceleration.setZero();
+    errorStateJacobian.biasesAngularVelocity.setZero();
+
     return;
 }
 

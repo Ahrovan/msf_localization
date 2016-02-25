@@ -2,10 +2,23 @@
 #include "msf_storage_core.h"
 
 
+//#define _DEBUG_DISPLAY
 
 
 MsfStorageCore::MsfStorageCore()
 {
+    const char* env_p = std::getenv("FUSEON_STACK");
+
+    logPath=std::string(env_p)+"/logs/"+"logMsfStorageCoreFile.txt";
+
+    //std::cout<<"log file path="<<logPath<<std::endl;
+
+    logFile.open(logPath);
+
+    if(!logFile.is_open())
+    {
+        std::cout<<"unable to open log file"<<std::endl;
+    }
 
     return;
 }
@@ -13,6 +26,7 @@ MsfStorageCore::MsfStorageCore()
 
 MsfStorageCore::~MsfStorageCore()
 {
+    logFile.close();
     return;
 }
 
@@ -89,24 +103,24 @@ int MsfStorageCore::displayRingBuffer()
     TheRingBufferMutex.lock();
 
     // Display Buffer
-    std::cout<<" "<<std::endl;
-    std::cout<<"Displaying buffer of "<<this->getSize()<<" elements:"<<std::endl;
+    logFile<<" "<<std::endl;
+    logFile<<"Displaying buffer of "<<this->getSize()<<" elements:"<<std::endl;
     for(std::list< StampedBufferObjectType<StateEstimationCore> >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
     {
-        std::cout<<"-TS="<<it->timeStamp.sec<<" s; "<<it->timeStamp.nsec<<" ns"<<std::endl;
+        logFile<<"-TS="<<it->timeStamp.sec<<" s; "<<it->timeStamp.nsec<<" ns"<<std::endl;
 
 
         /////// State
         if(it->object.hasState())
         {
-            std::cout<<"\t\t\t\t";
-            std::cout<<"+State:"<<std::endl;
+            logFile<<"\t";
+            logFile<<"+State:"<<std::endl;
 
 
             //// Robot
             // TODO
-            std::cout<<"\t\t\t\t\t";
-            std::cout<<"Robot ";
+            logFile<<"\t\t";
+            logFile<<"Robot ";
 
             switch(it->object.TheRobotStateCore->getTheRobotCore()->getRobotType())
             {
@@ -121,26 +135,28 @@ int MsfStorageCore::displayRingBuffer()
                     std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(it->object.TheRobotStateCore);
 
                     // State
-                    std::cout<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
-                    std::cout<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
-                    std::cout<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
-                    std::cout<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
-                    std::cout<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
+                    logFile<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
+                    logFile<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
+                    logFile<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
+                    logFile<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
+                    logFile<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
 
 
                     // Jacobian
-                    std::cout<<std::endl;
-                    std::cout<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
+#ifdef _DEBUG_DISPLAY
+                    logFile<<std::endl;
+                    logFile<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
 
-                    std::cout<<std::endl;
-                    std::cout<<"Jacobian Robot Angular=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.angular<<"]";
+                    logFile<<std::endl;
+                    logFile<<"Jacobian Robot Angular=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.angular<<"]";
+#endif
 
                     break;
                 }
 
             }
 
-            std::cout<<std::endl;
+            logFile<<std::endl;
 
 
 
@@ -151,8 +167,8 @@ int MsfStorageCore::displayRingBuffer()
                 ++itSensorStateCore)
             {
                 std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itSensorStateCore)->getTheSensorCore();
-                std::cout<<"\t\t\t\t\t";
-                std::cout<<"Sensor id="<<SensorCorePtrAux->getSensorId();
+                logFile<<"\t\t";
+                logFile<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 
                 switch(SensorCorePtrAux->getSensorType())
                 {
@@ -162,7 +178,7 @@ int MsfStorageCore::displayRingBuffer()
                     }
                     case SensorTypes::imu:
                     {
-                        std::cout<<" (IMU)";
+                        logFile<<" (IMU)";
                         std::shared_ptr<const ImuSensorCore> ImuSensorCorePtrAux=std::dynamic_pointer_cast< const ImuSensorCore >(SensorCorePtrAux);
 
 
@@ -170,34 +186,36 @@ int MsfStorageCore::displayRingBuffer()
 
                         // State (Parameters)
                         //if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                            std::cout<<" posi_wrt_robot=["<<sensorStatePtr->getPositionSensorWrtRobot().transpose()<<"]'";
+                            logFile<<" posi_wrt_robot=["<<sensorStatePtr->getPositionSensorWrtRobot().transpose()<<"]'";
 
                         //if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                            std::cout<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
+                            logFile<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
 
                         //if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                            std::cout<<" est_bis_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
+                            logFile<<" est_bis_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
 
                         //if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                            std::cout<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
+                            logFile<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
 
 
                         // Jacobian
-                        std::cout<<std::endl;
+#ifdef _DEBUG_DISPLAY
+                        logFile<<std::endl;
                         if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                            std::cout<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
+                            logFile<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
 
-                        std::cout<<std::endl;
+                        logFile<<std::endl;
                         if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                            std::cout<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
+                            logFile<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
 
-                        std::cout<<std::endl;
+                        logFile<<std::endl;
                         if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                            std::cout<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
+                            logFile<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
 
-                        std::cout<<std::endl;
+                        logFile<<std::endl;
                         if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                            std::cout<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
+                            logFile<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
+#endif
 
 
                         break;
@@ -205,7 +223,7 @@ int MsfStorageCore::displayRingBuffer()
 
                 }
 
-                std::cout<<std::endl;
+                logFile<<std::endl;
             }
 
 
@@ -220,12 +238,12 @@ int MsfStorageCore::displayRingBuffer()
         {
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=it->object.TheListMeasurementCore.begin(); itMeas!=it->object.TheListMeasurementCore.end(); ++itMeas)
             {
-                std::cout<<"\t\t\t\t";
-                std::cout<<"+Meas:"<<std::endl;
+                logFile<<"\t";
+                logFile<<"+Meas:"<<std::endl;
 
                 std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itMeas)->getTheSensorCore().lock();
-                std::cout<<"\t\t\t\t\t";
-                std::cout<<"Sensor id="<<SensorCorePtrAux->getSensorId();
+                logFile<<"\t\t";
+                logFile<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 
                 switch(SensorCorePtrAux->getSensorType())
                 {
@@ -235,17 +253,17 @@ int MsfStorageCore::displayRingBuffer()
                     }
                     case SensorTypes::imu:
                     {
-                        std::cout<<" (IMU)";
+                        logFile<<" (IMU)";
                         //std::shared_ptr<SensorMeasurementCore> measurePtrAux=(*itMeas);
                         //std::shared_ptr<ImuSensorMeasurementCore> measurePtr=dynamic_cast< std::shared_ptr<ImuSensorMeasurementCore> >(measurePtrAux);
                         std::shared_ptr<ImuSensorMeasurementCore> measurePtr=std::static_pointer_cast< ImuSensorMeasurementCore >(*itMeas);
                         //std::shared_ptr<ImuSensorMeasurementCore> measurePtr=std::dynamic_pointer_cast< ImuSensorMeasurementCore >(*itMeas);
                         if(measurePtr->isOrientationSet())
-                            std::cout<<" orientation=["<<measurePtr->getOrientation().transpose()<<"]'";
+                            logFile<<" orientation=["<<measurePtr->getOrientation().transpose()<<"]'";
                         if(measurePtr->isAngularVelocitySet())
-                            std::cout<<" angularVel=["<<measurePtr->getAngularVelocity().transpose()<<"]'";
+                            logFile<<" angularVel=["<<measurePtr->getAngularVelocity().transpose()<<"]'";
                         if(measurePtr->isLinearAccelerationSet())
-                            std::cout<<" linearAcc=["<<measurePtr->getLinearAcceleration().transpose()<<"]'";
+                            logFile<<" linearAcc=["<<measurePtr->getLinearAcceleration().transpose()<<"]'";
                         break;
                     }
 
@@ -253,20 +271,20 @@ int MsfStorageCore::displayRingBuffer()
 
 
 
-                std::cout<<std::endl;
+                logFile<<std::endl;
             }
         }
 
-        //std::cout<<" "<<std::endl;
+        //logFile<<" "<<std::endl;
     }
 
-    std::cout<<" "<<std::endl;
+    logFile<<" "<<std::endl;
 
     TheRingBufferMutex.unlock();
 
 
     // Buffer Info
-    //std::cout<<"Number of elements in buffer (before purge): "<<this->getSize()<<std::endl;
+    //logFile<<"Number of elements in buffer (before purge): "<<this->getSize()<<std::endl;
 
 
     return 0;
@@ -279,9 +297,18 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 {
     // TODO
     // Delete Lasts elements of the buffer, to avoid it growing a lot
-    TheRingBufferMutex.lock();
-    this->purgeLastElementsFromI(numElementsFrom);
-    TheRingBufferMutex.unlock();
+    if(numElementsFrom>=0)
+    {
+        TheRingBufferMutex.lock();
+        this->purgeLastElementsFromI(numElementsFrom);
+        TheRingBufferMutex.unlock();
+    }
+    else
+    {
+        TheRingBufferMutex.lock();
+        this->purgeFull();
+        TheRingBufferMutex.unlock();
+    }
 
     //std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
 }

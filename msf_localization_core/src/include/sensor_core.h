@@ -47,6 +47,20 @@ public:
     int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
 
 
+    // Dimension state
+protected:
+    unsigned int dimensionState;
+public:
+    unsigned int getDimensionState() const;
+    int setDimensionState(unsigned int dimensionState);
+
+    // Dimension error state
+protected:
+    unsigned int dimensionErrorState;
+public:
+    unsigned int getDimensionErrorState() const;
+    int setDimensionErrorState(unsigned int dimensionErrorState);
+
 
 
     // Pose of the sensor wrt robot

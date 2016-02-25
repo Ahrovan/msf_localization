@@ -39,7 +39,7 @@ public:
     unsigned int getDimensionState() const;
     int setDimensionState(unsigned int dimensionState);
 
-    // Dimension error
+    // Dimension error state
 protected:
     unsigned int dimensionErrorState;
 public:

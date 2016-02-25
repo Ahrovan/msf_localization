@@ -68,6 +68,9 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 
+// Ros service
+#include <msf_localization_ros_srvs/SetBool.h>
+
 
 // Robot
 #include "free_model_robot_core.h"
@@ -105,16 +108,13 @@ public:
     int run();
 
 
+    // Config File
 protected:
     std::string configFile;
 protected:
     int setConfigFile(std::string configFile);
     int readConfigFile();
 
-
-    // Sensors Interfaces
-protected:
-    //std::list<RosSensorInterface*> listRosSensors;
 
 
     // Robot Pose Publisher
@@ -131,7 +131,16 @@ protected:
     int robotPoseThreadFunction();
 
 
+    // Service to start state estimation
+protected:
+    std::string setStateEstimationEnabledServiceName;
+    ros::ServiceServer setStateEstimationEnabledSrv;
+    bool setStateEstimationEnabledCallback(msf_localization_ros_srvs::SetBool::Request  &req, msf_localization_ros_srvs::SetBool::Response &res);
 
+
+    // Time Stamp
+public:
+    TimeStamp getTimeStamp();
 
 
     // Algorithm Core threads with ROS time

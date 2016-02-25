@@ -1,26 +1,22 @@
 <?xml version="1.0"?>
 <package format="2">
-	<name>msf_localization_ros</name>
+	<name>msf_localization_ros_srvs</name>
 	<version>1.0.0</version>
 	<description>
-  		This package is msf_localization_ros.
+  		This package is msf_localization_ros_srvs.
 	</description>
 	<author email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</author>
 	<maintainer email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</maintainer>
   	<license>BSD</license>
-	<url>http://ros.org/wiki/msf_localization_ros</url>
+	<url>http://ros.org/wiki/msf_localization_ros_srvs</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>roscpp</depend>
   <depend>std_srvs</depend>
   <depend>std_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>tf</depend>
-  <depend>lib_pugixml</depend>
-	<depend>msf_localization_core</depend>
-	<depend>msf_localization_ros_srvs</depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
 
 </package>
 
