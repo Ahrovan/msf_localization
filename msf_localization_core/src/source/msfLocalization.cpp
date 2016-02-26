@@ -304,11 +304,22 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /////// Covariances
-    // TODO
 
     // Auxiliar variables
-    unsigned int previousDimensionErrorState_col;
-    unsigned int previousDimensionErrorState_row;
+//    unsigned int previousDimensionErrorState_col;
+//    unsigned int previousDimensionErrorState_row;
+
+    // Dimension
+    MatrixPoint WorkingInitPoint;
+
+
+    // Delta Time Stamp
+    TimeStamp DeltaTime=TheTimeStamp-PreviousTimeStamp;
+
+
+//    std::cout<<"Delta TS: sec="<<DeltaTime.sec<<" s; nsec="<<DeltaTime.nsec<<" ns"<<std::endl;
+//    std::cout<<" ->dt="<<DeltaTime.get_double()<<std::endl;
+
 
     // Resize the covariance Matrix
     PredictedState.covarianceMatrix.resize(dimensionOfErrorState,dimensionOfErrorState);
@@ -320,28 +331,9 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     {
         case RobotTypes::free_model:
         {
-            // Aux variable
-            //std::shared_ptr<FreeModelRobotStateCore> previousStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PreviousState.TheRobotStateCore);
-            std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState.TheRobotStateCore);
-
-            //check
-            if(!predictedStateRobot)
-            {
+            // Covariance
+            if(predictedFreeModelRobotCovariance(DeltaTime, std::static_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState.TheRobotStateCore), &PreviousState.covarianceMatrix, &PredictedState.covarianceMatrix))
                 return -2;
-            }
-
-            // Covariances update
-            // Linear part
-            PredictedState.covarianceMatrix.block<9,9>(0,0)=predictedStateRobot->errorStateJacobian.linear*PreviousState.covarianceMatrix.block<9,9>(0,0)*predictedStateRobot->errorStateJacobian.linear.transpose();
-
-            // Angular part
-            PredictedState.covarianceMatrix.block<6,6>(9,9)=predictedStateRobot->errorStateJacobian.angular*PreviousState.covarianceMatrix.block<6,6>(9,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
-
-            // Linear - angular
-            PredictedState.covarianceMatrix.block<9,6>(0,9)=predictedStateRobot->errorStateJacobian.linear*PreviousState.covarianceMatrix.block<9,6>(0,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
-
-            // Angular - linear
-            PredictedState.covarianceMatrix.block<6,9>(9,0)=PredictedState.covarianceMatrix.block<9,6>(0,9).transpose();
 
             // End
             break;
@@ -350,21 +342,27 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /// Robot-Sensors
-    // TODO Today
+
+    // Dimensions
+    MatrixPoint RobotSensorsInitPoint;
+    MatrixPoint RobotSensorsEndPoint;
+
+    // Init Point
+    RobotSensorsInitPoint.col=TheRobotCore->getDimensionErrorState();
+    RobotSensorsInitPoint.row=0;
+
+    // Working Point
+    WorkingInitPoint=RobotSensorsInitPoint;
+
 
     switch(TheRobotCore->getRobotType())
     {
         case RobotTypes::free_model:
         {
-            // Aux variable
-            //std::shared_ptr<FreeModelRobotStateCore> previousStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PreviousState.TheRobotStateCore);
-            std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState.TheRobotStateCore);
 
-            //check
-            if(!predictedStateRobot)
-            {
-                return -2;
-            }
+            // Dimension
+            //previousDimensionErrorState_row=0;
+            //previousDimensionErrorState_col=TheRobotCore->getDimensionErrorState();
 
 
             // Iterate on the sensors
@@ -372,7 +370,6 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 it1Sens!=TheListOfSensorCore.end();
                 ++it1Sens)
             {
-
 
                 // Auxiliar
                 std::shared_ptr<SensorStateCore> predictedStateSensor1;
@@ -388,82 +385,19 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                     /// Imu
                     case SensorTypes::imu:
                     {
-
-                        // Polymorphic
-                        std::shared_ptr<ImuSensorCore> TheImuSensor1Core=std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens);
-                        std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1=std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1);
-
-
-
-
                         // Covariances update
-
-
-                        // R-Si
-                        // Robot linear
-                        // TODO
-                        /*
-                        // Position sensor wrt robot
-                        if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
-                        {
-                            // Update variances
-                            PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
-
-                            // Update dimension for next
-                            previousDimensionErrorState_col+=3;
-                        }
-
-                        // Attitude sensor wrt robot
-                        if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
-                        {
-                            // Update variances
-                            PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
-
-                            // Update dimension for next
-                            previousDimensionErrorState_col+=3;
-                        }
-
-                        // bias linear acceleration
-                        if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
-                        {
-                            // Update variances
-                            PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
-
-                            // Update dimension for next
-                            previousDimensionErrorState_col+=3;
-                        }
-
-                        // bias angular velocity
-                        if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
-                        {
-                            // Update variances
-                            PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
-
-                            // Update dimension for next
-                            previousDimensionErrorState_col+=3;
-                        }
-                        */
-
-                        // Robot angular
-                        // TODO
-
-
-
-
-                        // Si-R
-                        // Update the symmetric part
-                        // TODO
-
-
+                        predictedFreeModelRobotImuCovariance(DeltaTime, std::dynamic_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens),
+                                                  std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState.TheRobotStateCore), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1),
+                                                  &PreviousState.covarianceMatrix, WorkingInitPoint, &PredictedState.covarianceMatrix, RobotSensorsEndPoint);
 
                         // End
                         break;
                     }
                 }
 
+                // Update Point
+                WorkingInitPoint.col=RobotSensorsEndPoint.col;
             }
-
-
 
             // End
             break;
@@ -475,7 +409,16 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     /// Sensors
 
     // Dimension
-    previousDimensionErrorState_col=TheRobotCore->getDimensionErrorState();
+    MatrixPoint SensorsInitPoint;
+    MatrixPoint SensorsEndPoint;
+
+
+    // Init Point
+    SensorsInitPoint.col=TheRobotCore->getDimensionErrorState();
+    SensorsInitPoint.row=SensorsInitPoint.col;
+
+    // Working Point
+    WorkingInitPoint=SensorsInitPoint;
 
 
     // Iterate
@@ -483,21 +426,24 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         it1Sens!=TheListOfSensorCore.end();
         ++it1Sens)
     {
-        // Dimension
-        previousDimensionErrorState_row=previousDimensionErrorState_col;
+        // it1Sens Auxiliar
+        std::shared_ptr<SensorStateCore> predictedStateSensor1;
+
+        // Find
+        if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
+            return -2;
+
 
         // Iterate again
         for(std::list< std::shared_ptr<SensorCore> >::iterator it2Sens=it1Sens;
             it2Sens!=TheListOfSensorCore.end();
             ++it2Sens)
         {
-            // it1Sens
-
-            // Auxiliar
-            std::shared_ptr<SensorStateCore> predictedStateSensor1;
+            // it2Sens Auxiliar
+            std::shared_ptr<SensorStateCore> predictedStateSensor2;
 
             // Find
-            if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
+            if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it2Sens), predictedStateSensor2))
                 return -2;
 
 
@@ -507,273 +453,34 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 /// Imu
                 case SensorTypes::imu:
                 {
-
-                    // Polymorphic
-                    std::shared_ptr<ImuSensorCore> TheImuSensor1Core=std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens);
-                    std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1=std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1);
-
-
-                    // it2Sens
-
-                    // Auxiliar
-                    std::shared_ptr<SensorStateCore> predictedStateSensor2;
-
-                    // Find
-                    if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it2Sens), predictedStateSensor2))
-                        return -2;
-
-
                     // Switch type of sensor it2Sens
                     switch((*it2Sens)->getSensorType())
                     {
                         /// Imu
                         case SensorTypes::imu:
                         {
-
-                            // Polymorphic
-                            std::shared_ptr<ImuSensorCore> TheImuSensor2Core=std::dynamic_pointer_cast<ImuSensorCore>(*it2Sens);
-                            std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor2=std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor2);
-
-
-
-
-                            // Covariances update
-
-                            // Save the initDimension
-                            unsigned int initDimension_row=previousDimensionErrorState_row;
-                            unsigned int initDimension_col=previousDimensionErrorState_col;
-
-                            // Position sensor wrt robot
-                            if(TheImuSensor1Core->isEstimationPositionSensorWrtRobotEnabled())
-                            {
-                                // Reset col
-                                previousDimensionErrorState_col=initDimension_col;
-
-                                // Position sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Attitude sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias linear acceleration
-                                if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias angular velocity
-                                if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Update dimension for next
-                                // Update row
-                                previousDimensionErrorState_row+=3;
-                            }
-
-                            // Attitude sensor wrt robot
-                            if(TheImuSensor1Core->isEstimationAttitudeSensorWrtRobotEnabled())
-                            {
-                                // Reset col
-                                previousDimensionErrorState_col=initDimension_col;
-
-                                // Position sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Attitude sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias linear acceleration
-                                if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias angular velocity
-                                if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Update dimension for next
-                                // Update row
-                                previousDimensionErrorState_row+=3;
-                            }
-
-                            // bias linear acceleration
-                            if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
-                            {
-                                // Reset col
-                                previousDimensionErrorState_col=initDimension_col;
-
-                                // Position sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Attitude sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias linear acceleration
-                                if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias angular velocity
-                                if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Update dimension for next
-                                // Update row
-                                previousDimensionErrorState_row+=3;
-                            }
-
-                            // bias angular velocity
-                            if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
-                            {
-                                // Reset col
-                                previousDimensionErrorState_col=initDimension_col;
-
-                                // Position sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Attitude sensor wrt robot
-                                if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias linear acceleration
-                                if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // bias angular velocity
-                                if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
-                                {
-                                    // Update variances
-                                    PredictedState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*PreviousState.covarianceMatrix.block<3,3>(previousDimensionErrorState_row,previousDimensionErrorState_col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
-
-                                    // Update dimension for next
-                                    previousDimensionErrorState_col+=3;
-                                }
-
-                                // Update dimension for next
-                                // Update row
-                                previousDimensionErrorState_row+=3;
-                            }
-
-
-                            // Symmetric value of the covariance matrix
-                            if(TheImuSensor1Core!=TheImuSensor1Core)
-                            {
-                                // Poner symmetric value
-                                PredictedState.covarianceMatrix.block(previousDimensionErrorState_col,previousDimensionErrorState_row,previousDimensionErrorState_col-initDimension_row, previousDimensionErrorState_row-initDimension_row)=PredictedState.covarianceMatrix.block(initDimension_row,initDimension_row,previousDimensionErrorState_row-initDimension_row,previousDimensionErrorState_col-initDimension_row);
-                            }
-
+                            // Do the covariance update
+                            predictedImuImuCovariance(DeltaTime, std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens), std::dynamic_pointer_cast<ImuSensorCore>(*it2Sens),
+                                                      std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor2),
+                                                      &PreviousState.covarianceMatrix, WorkingInitPoint, &PredictedState.covarianceMatrix, SensorsEndPoint);
 
                             // End
                             break;
                         }
                     }
-
-
                     // End
                     break;
                 }
             }
 
-
-
-        // Update the dimension for the next sensor -> Not needed!
-        //previousDimensionErrorState+=(*it1Sens)->getDimensionErrorState();
-
+            // Update Working Point
+            WorkingInitPoint.col=SensorsEndPoint.col;
 
         }
+
+        // Update the dimension for the next sensor
+        WorkingInitPoint.row=SensorsEndPoint.row;
+        WorkingInitPoint.col=WorkingInitPoint.row;
 
     }
 
@@ -790,29 +497,19 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /// Display
-    //logFile<<"Covariances Matrix of the predicted state="<<std::endl;
-    //logFile<<PredictedState.covarianceMatrix<<std::endl;
-
-
-//    //
-//    TimeStamp newTimeStamp1=getTimeStamp();
-//    TimeStamp duration1=newTimeStamp1-TheTimeStamp;
-//    std::cout<<" before buffer duration: sec="<<duration1.sec<<" s; nsec="<<duration1.nsec<<" ns"<<std::endl;
+    logFile<<"Covariances Matrix of the predicted state="<<std::endl;
+    logFile<<PredictedState.covarianceMatrix<<std::endl;
 
 
 
     /////// Add element to the buffer
     TheMsfStorageCore->addElement(TheTimeStamp, PredictedState);
 
-
-//    //
-//    TimeStamp newTimeStamp2=getTimeStamp();
-//    TimeStamp duration2=newTimeStamp2-newTimeStamp1;
-//    std::cout<<" before buffer duration: sec="<<duration2.sec<<" s; nsec="<<duration2.nsec<<" ns"<<std::endl;
-
-
+    // End
     return 0;
 }
+
+
 
 
 
@@ -859,6 +556,455 @@ int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<S
 
 
 
+    return 0;
+}
+
+
+
+int MsfLocalizationCore::predictedFreeModelRobotCovariance(TimeStamp DeltaTime, std::shared_ptr<FreeModelRobotCore> robotCore, std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot, Eigen::MatrixXd* previousStateCovarianceMatrix, Eigen::MatrixXd* predictedStateCovarianceMatrix)
+{
+    //check
+    if(!predictedStateRobot)
+    {
+        return -2;
+    }
+
+    // Covariances update
+    // Linear part
+    predictedStateCovarianceMatrix->block<9,9>(0,0)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,9>(0,0)*predictedStateRobot->errorStateJacobian.linear.transpose();
+
+    // Angular part
+    predictedStateCovarianceMatrix->block<6,6>(9,9)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,6>(9,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
+
+    // Linear - angular
+    predictedStateCovarianceMatrix->block<9,6>(0,9)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,6>(0,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
+
+    // Angular - linear
+    predictedStateCovarianceMatrix->block<6,9>(9,0)=predictedStateCovarianceMatrix->block<9,6>(0,9).transpose();
+
+
+
+    // Adding noise
+
+    // Noise in the linear acceleration * Dt
+    predictedStateCovarianceMatrix->block<3,3>(6,6)+=robotCore->getNoiseLinearAcceleration()*DeltaTime.get_double();
+
+    // Noise in the angular velocity * Dt
+    predictedStateCovarianceMatrix->block<3,3>(12,12)+=robotCore->getNoiseAngularVelocity()*DeltaTime.get_double();
+
+
+    // end
+    return 0;
+
+}
+
+
+int MsfLocalizationCore::predictedImuImuCovariance(TimeStamp DeltaTime, std::shared_ptr<ImuSensorCore> TheImuSensor1Core, std::shared_ptr<ImuSensorCore> TheImuSensor2Core, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor2, Eigen::MatrixXd* previousStateCovarianceMatrix, MatrixPoint InitPoint, Eigen::MatrixXd* predictedStateCovarianceMatrix, MatrixPoint& EndPoint)
+{
+    // Check
+    if(!predictedImuStateSensor1)
+        return -2;
+    if(!predictedImuStateSensor2)
+        return -2;
+
+
+
+    // Points
+    MatrixPoint WorkingPoint=InitPoint;
+
+    // Covariances update
+
+    // Position sensor wrt robot
+    if(TheImuSensor1Core->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        // Reset col
+        //previousDimensionErrorState_col=initDimension_col;
+        WorkingPoint.col=InitPoint.col;
+
+        // Position sensor wrt robot
+        if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Attitude sensor wrt robot
+        if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias linear acceleration
+        if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias angular velocity
+        if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Update dimension for next
+        // Update row
+        WorkingPoint.row+=3;
+    }
+
+    // Attitude sensor wrt robot
+    if(TheImuSensor1Core->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        // Reset col
+        WorkingPoint.col=InitPoint.col;
+
+        // Position sensor wrt robot
+        if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Attitude sensor wrt robot
+        if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias linear acceleration
+        if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias angular velocity
+        if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Update dimension for next
+        // Update row
+        WorkingPoint.row+=3;
+    }
+
+    // bias linear acceleration
+    if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
+    {
+        // Reset col
+        WorkingPoint.col=InitPoint.col;
+
+        // Position sensor wrt robot
+        if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Attitude sensor wrt robot
+        if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias linear acceleration
+        if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias angular velocity
+        if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Update dimension for next
+        // Update row
+        WorkingPoint.row+=3;
+    }
+
+    // bias angular velocity
+    if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
+    {
+        // Reset col
+        WorkingPoint.col=InitPoint.col;
+
+        // Position sensor wrt robot
+        if(TheImuSensor2Core->isEstimationPositionSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.positionSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Attitude sensor wrt robot
+        if(TheImuSensor2Core->isEstimationAttitudeSensorWrtRobotEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias linear acceleration
+        if(TheImuSensor2Core->isEstimationBiasLinearAccelerationEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesLinearAcceleration.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // bias angular velocity
+        if(TheImuSensor2Core->isEstimationBiasAngularVelocityEnabled())
+        {
+            // Update variances
+            predictedStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)=predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity*previousStateCovarianceMatrix->block<3,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor2->errorStateJacobian.biasesAngularVelocity.transpose();
+
+            // Update dimension for next
+            WorkingPoint.col+=3;
+        }
+
+        // Update dimension for next
+        // Update row
+        WorkingPoint.row+=3;
+    }
+
+    // Update End Point
+    EndPoint=WorkingPoint;
+
+
+    // Symmetric value of the covariance matrix
+    if(TheImuSensor1Core!=TheImuSensor2Core)
+    {
+        // Poner symmetric value
+        predictedStateCovarianceMatrix->block(InitPoint.col,
+                                              InitPoint.row,
+                                              EndPoint.col-InitPoint.col,
+                                              EndPoint.row-InitPoint.row) = predictedStateCovarianceMatrix->block(InitPoint.row,
+                                                                                                                     InitPoint.col,
+                                                                                                                     EndPoint.row-InitPoint.row,
+                                                                                                                     EndPoint.col-InitPoint.col).transpose();
+
+    }
+
+
+    // Add noise
+    if(TheImuSensor1Core==TheImuSensor2Core)
+    {
+        // Previous dimensions
+        unsigned int previousErrorStateDimension=0;
+
+        if(TheImuSensor1Core->isEstimationPositionSensorWrtRobotEnabled())
+        {
+            previousErrorStateDimension+=3;
+        }
+
+        if(TheImuSensor1Core->isEstimationAttitudeSensorWrtRobotEnabled())
+        {
+            previousErrorStateDimension+=3;
+        }
+
+        if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
+        {
+            predictedStateCovarianceMatrix->block<3,3>(InitPoint.col+previousErrorStateDimension,InitPoint.row+previousErrorStateDimension)+=TheImuSensor1Core->getNoiseBiasLinearAcceleration()*DeltaTime.get_double();
+            previousErrorStateDimension+=3;
+        }
+
+        if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
+        {
+            predictedStateCovarianceMatrix->block<3,3>(InitPoint.col+previousErrorStateDimension,InitPoint.row+previousErrorStateDimension)+=TheImuSensor1Core->getNoiseBiasAngularVelocity()*DeltaTime.get_double();
+        }
+
+
+    }
+
+
+
+
+    return 0;
+}
+
+
+
+int MsfLocalizationCore::predictedFreeModelRobotImuCovariance(TimeStamp DeltaTime, std::shared_ptr<FreeModelRobotCore> robotCore, std::shared_ptr<ImuSensorCore> TheImuSensor1Core, std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1, Eigen::MatrixXd* previousStateCovarianceMatrix, MatrixPoint InitPoint, Eigen::MatrixXd* predictedStateCovarianceMatrix, MatrixPoint& EndPoint)
+{
+    //check
+    if(!predictedStateRobot)
+    {
+        return -2;
+    }
+    if(!predictedImuStateSensor1)
+        return -2;
+
+
+
+    // Dimension
+    MatrixPoint WorkingPoint=InitPoint;
+
+    // R-Si
+    // Robot linear
+
+    // Position sensor wrt robot
+    if(TheImuSensor1Core->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // Attitude sensor wrt robot
+    if(TheImuSensor1Core->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // bias linear acceleration
+    if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // bias angular velocity
+    if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // Dimension
+    WorkingPoint.row+=9;
+
+
+    // Robot angular
+
+    // Reset col
+    WorkingPoint.col=InitPoint.col;
+
+
+    // Position sensor wrt robot
+    if(TheImuSensor1Core->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // Attitude sensor wrt robot
+    if(TheImuSensor1Core->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // bias linear acceleration
+    if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // bias angular velocity
+    if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
+    {
+        // Update variances
+        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity.transpose();
+
+        // Update dimension for next
+        WorkingPoint.col+=3;
+    }
+
+    // Dimension
+    WorkingPoint.row+=6;
+
+
+    // Final dimension
+    EndPoint=WorkingPoint;
+
+
+
+    // Si-R
+    // Update the symmetric part
+    predictedStateCovarianceMatrix->block(InitPoint.col,
+                                          InitPoint.row,
+                                          EndPoint.col-InitPoint.col,
+                                          EndPoint.row-InitPoint.row) = predictedStateCovarianceMatrix->block(InitPoint.row,
+                                                                                                             InitPoint.col,
+                                                                                                             EndPoint.row-InitPoint.row,
+                                                                                                             EndPoint.col-InitPoint.col).transpose();
+
+
+    // End
     return 0;
 }
 

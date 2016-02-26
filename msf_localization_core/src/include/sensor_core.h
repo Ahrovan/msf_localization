@@ -33,7 +33,6 @@ public:
 
     // Pointer to itself
 protected:
-//public:
     std::weak_ptr<const SensorCore> TheSensorCorePtr;
 public:
     int setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
@@ -52,35 +51,34 @@ protected:
     unsigned int dimensionState;
 public:
     unsigned int getDimensionState() const;
-    int setDimensionState(unsigned int dimensionState);
+    //int setDimensionState(unsigned int dimensionState);
+
 
     // Dimension error state
 protected:
     unsigned int dimensionErrorState;
 public:
     unsigned int getDimensionErrorState() const;
-    int setDimensionErrorState(unsigned int dimensionErrorState);
+    //int setDimensionErrorState(unsigned int dimensionErrorState);
 
 
 
     // Pose of the sensor wrt robot
+
+    // Attitude
 protected:
     bool flagEstimationAttitudeSensorWrtRobot;
 public:
     bool isEstimationAttitudeSensorWrtRobotEnabled() const;
     int enableEstimationAttitudeSensorWrtRobot();
 
-    // Covariance
 
-
+    // Position
 protected:
     bool flagEstimationPositionSensorWrtRobot;
 public:
     bool isEstimationPositionSensorWrtRobotEnabled() const;
     int enableEstimationPositionSensorWrtRobot();
-
-    // Covariance
-
 
 
 

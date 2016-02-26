@@ -4,27 +4,29 @@
   <robot>
     <position description="position of the robot wrt world (3D vector in m)">
       <init_estimation>0 0 0</init_estimation>
-      <init_var>0 0 0</init_var>
+      <init_var>0.1 0.1 0.1</init_var>
     </position>
 
     <lin_speed>
       <init_estimation>0 0 0</init_estimation>
-      <init_var>0 0 0</init_var>
+      <init_var>0.11 0.11 0.11</init_var>
     </lin_speed>
 
     <lin_accel>
       <init_estimation>0.1 0.02 0</init_estimation>
-      <init_var>0 0 0</init_var>
+      <init_var>0.12 0.12 0.12</init_var>
+      <noise>0.05 0.05 0.05</noise>
     </lin_accel>
 
     <attitude description="attitude of the robot wrt world (quaternion vector)">
       <init_estimation>1 0 0 0</init_estimation>
-      <init_var>0 0 0</init_var>
+      <init_var>0.2 0.2 0.2</init_var>
     </attitude>
 
     <ang_velocity>
       <init_estimation>0 0 0.02</init_estimation>
-      <init_var>0 0 0</init_var>
+      <init_var>0.21 0.21 0.21</init_var>
+      <noise>0.05 0.05 0.05</noise>
     </ang_velocity>
 
   </robot>
@@ -37,14 +39,14 @@
 
     <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
       <position description="position of the sensor wrt robot (3D vector in m)">
-        <enabled>1</enabled>
+        <enabled description="disabling is equivalent to put zero variance and zero noise, but it is better in the filter">1</enabled>
         <init_estimation>0 0 0</init_estimation>
-        <init_var>0 0 0</init_var>
+        <init_var>0.3 0.3 0.3</init_var>
       </position>
       <attitude description="attitude of the sensor wrt robot (quaternion vector)">
-        <enabled>1</enabled>
+        <enabled description="disabling is equivalent to put zero variance and zero noise, but it is better in the filter">1</enabled>
         <init_estimation>1 0 0 0</init_estimation>
-        <init_var>0 0 0</init_var>
+        <init_var>0.31 0.31 0.31</init_var>
       </attitude>
     </pose_in_robot>
 
@@ -66,23 +68,23 @@
     </measurements>
 
     <parameters description="info about the calibration parameters given by this sensor">
-      <angular_velocity>
-        <biases>
-          <enabled>1</enabled>
-          <init_estimation>0 0 0</init_estimation>
-          <init_var>0 0 0</init_var>
-        </biases>
-      </angular_velocity>
-
       <linear_acceleration>
         <biases>
-          <enabled>1</enabled>
+          <enabled description="disabling is equivalent to put zero variance and zero noise, but it is better in the filter">1</enabled>
           <init_estimation>0 0 0</init_estimation>
-          <init_var>0 0 0</init_var>
+          <init_var>0.4 0.4 0.4</init_var>
+          <noise>0.05 0.05 0.05</noise>
         </biases>
       </linear_acceleration> 
+      <angular_velocity>
+        <biases>
+          <enabled description="disabling is equivalent to put zero variance and zero noise, but it is better in the filter">1</enabled>
+          <init_estimation>0 0 0</init_estimation>
+          <init_var>0.41 0.41 0.41</init_var>
+          <noise>0.05 0.05 0.05</noise>
+        </biases>
+      </angular_velocity>
     </parameters>
-
 
   </sensor>
 

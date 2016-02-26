@@ -25,6 +25,24 @@ public:
 
 
 
+    ///// Prediction Noises
+protected:
+public:
+    Eigen::Matrix3d noiseLinearAcceleration;
+public:
+    Eigen::Matrix3d getNoiseLinearAcceleration() const;
+    int setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration);
+
+
+protected:
+public:
+    Eigen::Matrix3d noiseAngularVelocity;
+public:
+    Eigen::Matrix3d getNoiseAngularVelocity() const;
+    int setNoiseAngularVelocity(Eigen::Matrix3d noiseAngularVelocity);
+
+
+
 
     ///// Predict functions
 

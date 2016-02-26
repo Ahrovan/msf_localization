@@ -74,6 +74,13 @@ public:
     ///// State estimation
 
 
+//public:
+//    unsigned int getDimensionState() const;
+
+//public:
+//    unsigned int getDimensionErrorState() const;
+
+
     // Angular Velocity Biases: bwx, bwy, bwz
 protected:
     bool flagEstimationBiasAngularVelocity;
@@ -83,6 +90,10 @@ public:
 
     // Angular Velocity Covariance
 protected:
+    Eigen::Matrix3d noiseBiasAngularVelocity;
+public:
+    Eigen::Matrix3d getNoiseBiasAngularVelocity() const;
+    int setNoiseBiasAngularVelocity(Eigen::Matrix3d noiseBiasAngularVelocity);
 
 
 
@@ -95,6 +106,10 @@ public:
 
     // Linear Acceleration covariance
 protected:
+    Eigen::Matrix3d noiseBiasLinearAcceleration;
+public:
+    Eigen::Matrix3d getNoiseBiasLinearAcceleration() const;
+    int setNoiseBiasLinearAcceleration(Eigen::Matrix3d noiseBiasLinearAcceleration);
 
 
 

@@ -6,12 +6,39 @@ FreeModelRobotCore::FreeModelRobotCore()
 {
     dimensionState=9+7;
     dimensionErrorState=9+6;
+
+    noiseLinearAcceleration.setZero();
+    noiseAngularVelocity.setZero();
+
     return;
 }
 
 FreeModelRobotCore::~FreeModelRobotCore()
 {
     return;
+}
+
+
+Eigen::Matrix3d FreeModelRobotCore::getNoiseLinearAcceleration() const
+{
+    return this->noiseLinearAcceleration;
+}
+
+int FreeModelRobotCore::setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration)
+{
+    this->noiseLinearAcceleration=noiseLinearAcceleration;
+    return 0;
+}
+
+Eigen::Matrix3d FreeModelRobotCore::getNoiseAngularVelocity() const
+{
+    return this->noiseAngularVelocity;
+}
+
+int FreeModelRobotCore::setNoiseAngularVelocity(Eigen::Matrix3d noiseAngularVelocity)
+{
+    this->noiseAngularVelocity=noiseAngularVelocity;
+    return 0;
 }
 
 

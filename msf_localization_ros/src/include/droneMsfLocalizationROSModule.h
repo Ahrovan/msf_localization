@@ -116,6 +116,13 @@ protected:
     int readConfigFile();
 
 
+    // Particular config readings
+protected:
+    int readFreeModelRobotConfig(pugi::xml_node robot, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<FreeModelRobotCore>& TheRobotCoreAux, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore, Eigen::MatrixXd& InitStateCovarianceMatrix);
+    int readImuConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosSensorImuInterface>& TheRosSensorImuInterface, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore, Eigen::MatrixXd& InitStateCovarianceMatrix);
+
+
+
 
     // Robot Pose Publisher
 protected:

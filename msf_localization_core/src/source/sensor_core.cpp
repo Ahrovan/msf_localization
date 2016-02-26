@@ -46,22 +46,22 @@ unsigned int SensorCore::getDimensionState() const
     return this->dimensionState;
 }
 
-int SensorCore::setDimensionState(unsigned int dimensionState)
-{
-    this->dimensionState=dimensionState;
-    return 0;
-}
+//int SensorCore::setDimensionState(unsigned int dimensionState)
+//{
+//    this->dimensionState=dimensionState;
+//    return 0;
+//}
 
 unsigned int SensorCore::getDimensionErrorState() const
 {
     return this->dimensionErrorState;
 }
 
-int SensorCore::setDimensionErrorState(unsigned int dimensionErrorState)
-{
-    this->dimensionErrorState=dimensionErrorState;
-    return 0;
-}
+//int SensorCore::setDimensionErrorState(unsigned int dimensionErrorState)
+//{
+//    this->dimensionErrorState=dimensionErrorState;
+//    return 0;
+//}
 
 
 

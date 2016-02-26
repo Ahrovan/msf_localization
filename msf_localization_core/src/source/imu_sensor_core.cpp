@@ -79,6 +79,47 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
     return 0;
 }
 
+
+
+//unsigned int ImuSensorCore::getDimensionState() const
+//{
+//    unsigned int dimensionState=0;
+
+//    if(isEstimationAttitudeSensorWrtRobotEnabled())
+//        dimensionState+=4;
+
+//    if(isEstimationPositionSensorWrtRobotEnabled())
+//        dimensionState+=3;
+
+//    if(isEstimationBiasAngularVelocityEnabled())
+//        dimensionState+=3;
+
+//    if(isEstimationBiasLinearAccelerationEnabled())
+//        dimensionState+=3;
+
+//    return dimensionState;
+//}
+
+//unsigned int ImuSensorCore::getDimensionErrorState() const
+//{
+//    unsigned int dimensionErrorState=0;
+
+//    if(isEstimationAttitudeSensorWrtRobotEnabled())
+//        dimensionState+=3;
+
+//    if(isEstimationPositionSensorWrtRobotEnabled())
+//        dimensionState+=3;
+
+//    if(isEstimationBiasAngularVelocityEnabled())
+//        dimensionState+=3;
+
+//    if(isEstimationBiasLinearAccelerationEnabled())
+//        dimensionState+=3;
+
+//    return dimensionErrorState;
+//}
+
+
 bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const
 {
     return this->flagEstimationBiasAngularVelocity;
@@ -95,6 +136,17 @@ int ImuSensorCore::enableEstimationBiasAngularVelocity()
         // Update Error State Dimension
         this->dimensionErrorState+=3;
     }
+    return 0;
+}
+
+Eigen::Matrix3d ImuSensorCore::getNoiseBiasAngularVelocity() const
+{
+    return this->noiseBiasAngularVelocity;
+}
+
+int ImuSensorCore::setNoiseBiasAngularVelocity(Eigen::Matrix3d noiseBiasAngularVelocity)
+{
+    this->noiseBiasAngularVelocity=noiseBiasAngularVelocity;
     return 0;
 }
 
@@ -115,6 +167,17 @@ int ImuSensorCore::enableEstimationBiasLinearAcceleration()
         // Update Error State Dimension
         this->dimensionErrorState+=3;
     }
+    return 0;
+}
+
+Eigen::Matrix3d ImuSensorCore::getNoiseBiasLinearAcceleration() const
+{
+    return this->noiseBiasLinearAcceleration;
+}
+
+int ImuSensorCore::setNoiseBiasLinearAcceleration(Eigen::Matrix3d noiseBiasLinearAcceleration)
+{
+    this->noiseBiasLinearAcceleration=noiseBiasLinearAcceleration;
     return 0;
 }
 
