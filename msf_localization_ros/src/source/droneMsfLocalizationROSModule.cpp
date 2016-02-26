@@ -60,7 +60,7 @@ int MsfLocalizationROS::readConfigFile()
 
 
     // Create Initial Element of the buffer with the initial state
-    StateEstimationCore InitialState;
+    std::shared_ptr<StateEstimationCore> InitialState=std::make_shared<StateEstimationCore>();
 
 
 
@@ -90,11 +90,11 @@ int MsfLocalizationROS::readConfigFile()
 
 
         // Update covariance
-        unsigned int previousNumCols=InitialState.covarianceMatrix.cols();
-        unsigned int previousNumRows=InitialState.covarianceMatrix.rows();
+        unsigned int previousNumCols=InitialState->covarianceMatrix.cols();
+        unsigned int previousNumRows=InitialState->covarianceMatrix.rows();
 
-        InitialState.covarianceMatrix.conservativeResize(previousNumRows+InitStateCovatrianceMatrix.rows(), previousNumCols+InitStateCovatrianceMatrix.cols());
-        InitialState.covarianceMatrix.block(previousNumRows, previousNumCols, InitStateCovatrianceMatrix.rows(), InitStateCovatrianceMatrix.cols())=InitStateCovatrianceMatrix;
+        InitialState->covarianceMatrix.conservativeResize(previousNumRows+InitStateCovatrianceMatrix.rows(), previousNumCols+InitStateCovatrianceMatrix.cols());
+        InitialState->covarianceMatrix.block(previousNumRows, previousNumCols, InitStateCovatrianceMatrix.rows(), InitStateCovatrianceMatrix.cols())=InitStateCovatrianceMatrix;
 
 
         // Finish
@@ -103,7 +103,7 @@ int MsfLocalizationROS::readConfigFile()
         TheRobotCore=TheRobotCoreAux;
 
         // Push the init state of the robot
-        InitialState.TheRobotStateCore=RobotInitStateCore;
+        InitialState->TheRobotStateCore=RobotInitStateCore;
 
     }
 
@@ -138,11 +138,11 @@ int MsfLocalizationROS::readConfigFile()
             firstAvailableId++;
 
             // Update covariance
-            unsigned int previousNumCols=InitialState.covarianceMatrix.cols();
-            unsigned int previousNumRows=InitialState.covarianceMatrix.rows();
+            unsigned int previousNumCols=InitialState->covarianceMatrix.cols();
+            unsigned int previousNumRows=InitialState->covarianceMatrix.rows();
 
-            InitialState.covarianceMatrix.conservativeResize(previousNumRows+InitStateCovatrianceMatrix.rows(), previousNumCols+InitStateCovatrianceMatrix.cols());
-            InitialState.covarianceMatrix.block(previousNumRows, previousNumCols, InitStateCovatrianceMatrix.rows(), InitStateCovatrianceMatrix.cols())=InitStateCovatrianceMatrix;
+            InitialState->covarianceMatrix.conservativeResize(previousNumRows+InitStateCovatrianceMatrix.rows(), previousNumCols+InitStateCovatrianceMatrix.cols());
+            InitialState->covarianceMatrix.block(previousNumRows, previousNumCols, InitStateCovatrianceMatrix.rows(), InitStateCovatrianceMatrix.cols())=InitStateCovatrianceMatrix;
 
 
             // Finish
@@ -151,7 +151,7 @@ int MsfLocalizationROS::readConfigFile()
             this->TheListOfSensorCore.push_back(TheRosSensorImuInterface);
 
             // Push the init state of the sensor
-            InitialState.TheListSensorStateCore.push_back(SensorInitStateCore);
+            InitialState->TheListSensorStateCore.push_back(SensorInitStateCore);
         }
 
 
@@ -161,7 +161,7 @@ int MsfLocalizationROS::readConfigFile()
 
     // Display
     logFile<<"Covariance Matrix"<<std::endl;
-    logFile<<InitialState.covarianceMatrix<<std::endl;
+    logFile<<InitialState->covarianceMatrix<<std::endl;
 
 
 
@@ -686,12 +686,50 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     {
         // Get Robot Pose
         // TODO
-        TimeStamp TheTimeStamp;
-        StateEstimationCore PreviousState;
-        this->TheMsfStorageCore->getLastElementWithStateEstimate(TheTimeStamp, PreviousState);
+        TimeStamp TheTimeStamp=getTimeStamp();
+        std::shared_ptr<StateEstimationCore> PredictedState;
+        while(this->TheMsfStorageCore->getLastElementWithStateEstimate(TheTimeStamp, PredictedState))
+        {
+            this->predict(TheTimeStamp, PredictedState);
+        }
+
+        if(!PredictedState)
+        {
+            std::cout<<"error getting robot pose"<<std::endl;
+        }
 
         // Fill msg
+        // Header
         robotPoseMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
+
+        // Robot Pose
+        std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore);
+        Eigen::Vector3d robotPosition=TheRobotStateCore->getPosition();
+        Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitude();
+
+        // Position
+        robotPoseMsg.pose.pose.position.x=robotPosition[0];
+        robotPoseMsg.pose.pose.position.y=robotPosition[1];
+        robotPoseMsg.pose.pose.position.z=robotPosition[2];
+
+        // Attitude
+        robotPoseMsg.pose.pose.orientation.w=robotAttitude[0];
+        robotPoseMsg.pose.pose.orientation.x=robotAttitude[1];
+        robotPoseMsg.pose.pose.orientation.y=robotAttitude[2];
+        robotPoseMsg.pose.pose.orientation.z=robotAttitude[3];
+
+        // Covariance
+        Eigen::MatrixXd robotPoseCovariance(6,6);
+        robotPoseCovariance.setZero();
+        robotPoseCovariance.block<3,3>(0,0)=PredictedState->covarianceMatrix.block<3,3>(0,0);
+        robotPoseCovariance.block<3,3>(3,3)=PredictedState->covarianceMatrix.block<3,3>(9,9);
+        double robotPoseCovarianceArray[36];
+        Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
+        for(unsigned int i=0; i<36; i++)
+        {
+            robotPoseMsg.pose.covariance[i]=robotPoseCovarianceArray[i];
+        }
+
 
         // Publish Robot Pose
         robotPosePub.publish(robotPoseMsg);
@@ -716,11 +754,26 @@ int MsfLocalizationROS::predictThreadFunction()
     //std::cout<<"MsfLocalizationROS::predictThreadFunction()"<<std::endl;
 
     ros::Rate predictRate(predictRateVale);
+    //ros::Rate predictRate(100);
 
     while(ros::ok())
     {
+        // Search if element already exists
+        // TODO
+        TimeStamp TheTimeStamp=getTimeStamp();
+        std::shared_ptr<StateEstimationCore> ThePredictedState;
+
         // Predict
-        this->predict(getTimeStamp());
+        //std::cout<<"Calling predict TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        this->predict(TheTimeStamp, ThePredictedState);
+
+
+        // Purge the buffer
+        //this->TheMsfStorageCore->purgeRingBuffer(20);
+
+
+        // Display the buffer
+        this->TheMsfStorageCore->displayRingBuffer();
 
         // Sleep
         predictRate.sleep();
@@ -737,16 +790,59 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 {
     //std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction()"<<std::endl;
 
-    ros::Rate bufferManagerRate(50);
+    ros::Rate bufferManagerRate(10000);
 
     while(ros::ok())
     {
+        // Get oldest element
+//std::cout<<"aqui!"<<std::endl;
+        TimeStamp OldestTimeStamp;
+        if(this->TheMsfStorageCore->getOldestOutdatedElement(OldestTimeStamp))
+        {
+            //std::cout<<"error!"<<std::endl;
+            // Sleep
+            bufferManagerRate.sleep();
+            continue;
+        }
+//std::cout<<"aqui!"<<std::endl;
+        std::cout<<"Updating TS: sec="<<OldestTimeStamp.sec<<" s; nsec="<<OldestTimeStamp.nsec<<" ns"<<std::endl;
+
+        // Get state estimation core associated to the oldest element on the buffer
+        std::shared_ptr<StateEstimationCore> TheOutdatedElement;
+        if(this->TheMsfStorageCore->getElement(OldestTimeStamp, TheOutdatedElement))
+        {
+            std::cout<<"error!"<<std::endl;
+            continue;
+        }
+//std::cout<<"aqui!"<<std::endl;
+        //std::shared_ptr<StateEstimationCore> TheOutdatedElementPtr=std::make_shared<StateEstimationCore>(TheOutdatedElement);
+
+        if(!TheOutdatedElement)
+        {
+            std::cout<<"error 2!"<<std::endl;
+            continue;
+        }
+//std::cout<<"aqui!"<<std::endl;
+        // Run predict and store updated predicted element
+        this->predict(OldestTimeStamp, TheOutdatedElement);
+
+        // Run update if there are measurements
+        // TODO
+
+        // Find the next element in the buffer and mark it as outdated
+        TimeStamp TheNewOutdatedTimeStamp;
+        // TODO
+
+        // Set the following element of the buffer as outdated
+        //this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
+
+
         // Purge the buffer
         this->TheMsfStorageCore->purgeRingBuffer(20);
 
 
         // Display the buffer
-        this->TheMsfStorageCore->displayRingBuffer();
+        //this->TheMsfStorageCore->displayRingBuffer();
 
 
         // Purge the buffer
@@ -754,7 +850,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 
         // Sleep
-        bufferManagerRate.sleep();
+        //bufferManagerRate.sleep();
     }
 
 

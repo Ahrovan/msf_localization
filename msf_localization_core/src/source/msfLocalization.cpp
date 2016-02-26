@@ -91,15 +91,21 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
 
     // Clear the buffer except the last state estimation that will be used as init state
     TimeStamp InitTimeStamp;
-    StateEstimationCore InitState;
-    TheMsfStorageCore->getLastElementWithStateEstimate(InitTimeStamp, InitState);
+    std::shared_ptr<StateEstimationCore> InitState;
+    if(TheMsfStorageCore->getLastElementWithStateEstimate(InitTimeStamp, InitState))
+    {
+        std::cout<<"Error setting init state"<<std::endl;
+        return 2;
+    }
 
-    TheMsfStorageCore->purgeRingBuffer(-1);
+    if(TheMsfStorageCore->purgeRingBuffer(-1))
+        return -2;
 
 
     // Set the init time stamp and init state
     InitTimeStamp=getTimeStamp();
-    TheMsfStorageCore->addElement(InitTimeStamp, InitState);
+    if(TheMsfStorageCore->addElement(InitTimeStamp, InitState))
+        return -3;
 
 
     // Change Flag in the core
@@ -150,27 +156,39 @@ int MsfLocalizationCore::bufferManagerThreadFunction()
 }
 
 
-int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
+int MsfLocalizationCore::predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& PredictedState)
 {
-    //std::cout<<"MsfLocalizationCore::predict() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-
-
     if(!isStateEstimationEnabled())
         return 0;
 
 
+    std::cout<<"MsfLocalizationCore::predict() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+
+
+
     // New element that is going to be added to the buffer
-    StateEstimationCore PredictedState;
+    if(!PredictedState)
+        PredictedState=std::make_shared<StateEstimationCore>();
 
 
     // Get the last state from the buffer
     TimeStamp PreviousTimeStamp;
-    StateEstimationCore PreviousState;
-    TheMsfStorageCore->getLastElementWithStateEstimate(PreviousTimeStamp, PreviousState);
+    std::shared_ptr<StateEstimationCore> PreviousState;
+    if(TheMsfStorageCore->getLastElementWithStateEstimate(PreviousTimeStamp, PreviousState))
+    {
+        std::cout<<"!!error"<<std::endl;
+        return 2;
+    }
+
+    if(!PreviousState)
+    {
+        std::cout<<"!!error"<<std::endl;
+        return 2;
+    }
 
 
     // Check
-    if(!PreviousState.hasState())
+    if(!PreviousState->hasState())
     {
         std::cout<<"!!error finding previous state"<<std::endl;
         return -1;
@@ -199,7 +217,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         case RobotTypes::free_model:
         {
             std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot;
-            std::shared_ptr<FreeModelRobotStateCore> pastStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PreviousState.TheRobotStateCore);
+            std::shared_ptr<FreeModelRobotStateCore> pastStateRobot=std::static_pointer_cast<FreeModelRobotStateCore>(PreviousState->TheRobotStateCore);
 
             if(!pastStateRobot)
             {
@@ -227,7 +245,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
             // Add
-            PredictedState.TheRobotStateCore=predictedStateRobot;
+            PredictedState->TheRobotStateCore=predictedStateRobot;
 
             // End
             break;
@@ -251,7 +269,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         std::shared_ptr<SensorStateCore> pastStateSensor;
 
         // Find
-        if(findSensorStateCoreFromList(PreviousState.TheListSensorStateCore, (*itSens), pastStateSensor))
+        if(findSensorStateCoreFromList(PreviousState->TheListSensorStateCore, (*itSens), pastStateSensor))
             return -2;
 
 
@@ -283,7 +301,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 }
 
                 // Add
-                PredictedState.TheListSensorStateCore.push_back(predictedImuStateSensor);
+                PredictedState->TheListSensorStateCore.push_back(predictedImuStateSensor);
 
                 // End
                 break;
@@ -322,8 +340,8 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     // Resize the covariance Matrix
-    PredictedState.covarianceMatrix.resize(dimensionOfErrorState,dimensionOfErrorState);
-    PredictedState.covarianceMatrix.setZero();
+    PredictedState->covarianceMatrix.resize(dimensionOfErrorState,dimensionOfErrorState);
+    PredictedState->covarianceMatrix.setZero();
 
 
     /// Robot
@@ -332,8 +350,11 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         case RobotTypes::free_model:
         {
             // Covariance
-            if(predictedFreeModelRobotCovariance(DeltaTime, std::static_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState.TheRobotStateCore), &PreviousState.covarianceMatrix, &PredictedState.covarianceMatrix))
+            if(predictedFreeModelRobotCovariance(DeltaTime, std::static_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore), &PreviousState->covarianceMatrix, &PredictedState->covarianceMatrix))
+            {
+                std::cout<<"!!Error predicting covariances"<<std::endl;
                 return -2;
+            }
 
             // End
             break;
@@ -375,7 +396,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 std::shared_ptr<SensorStateCore> predictedStateSensor1;
 
                 // Find
-                if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
+                if(findSensorStateCoreFromList(PredictedState->TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
                     return -2;
 
 
@@ -386,9 +407,13 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                     case SensorTypes::imu:
                     {
                         // Covariances update
-                        predictedFreeModelRobotImuCovariance(DeltaTime, std::dynamic_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens),
-                                                  std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState.TheRobotStateCore), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1),
-                                                  &PreviousState.covarianceMatrix, WorkingInitPoint, &PredictedState.covarianceMatrix, RobotSensorsEndPoint);
+                        if(predictedFreeModelRobotImuCovariance(DeltaTime, std::dynamic_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens),
+                                                  std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1),
+                                                  &PreviousState->covarianceMatrix, WorkingInitPoint, &PredictedState->covarianceMatrix, RobotSensorsEndPoint))
+                        {
+                            std::cout<<"!!Error predicting covariances"<<std::endl;
+                            return 2;
+                        }
 
                         // End
                         break;
@@ -430,7 +455,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         std::shared_ptr<SensorStateCore> predictedStateSensor1;
 
         // Find
-        if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
+        if(findSensorStateCoreFromList(PredictedState->TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
             return -2;
 
 
@@ -443,7 +468,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
             std::shared_ptr<SensorStateCore> predictedStateSensor2;
 
             // Find
-            if(findSensorStateCoreFromList(PredictedState.TheListSensorStateCore, (*it2Sens), predictedStateSensor2))
+            if(findSensorStateCoreFromList(PredictedState->TheListSensorStateCore, (*it2Sens), predictedStateSensor2))
                 return -2;
 
 
@@ -460,9 +485,13 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                         case SensorTypes::imu:
                         {
                             // Do the covariance update
-                            predictedImuImuCovariance(DeltaTime, std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens), std::dynamic_pointer_cast<ImuSensorCore>(*it2Sens),
+                            if(predictedImuImuCovariance(DeltaTime, std::dynamic_pointer_cast<ImuSensorCore>(*it1Sens), std::dynamic_pointer_cast<ImuSensorCore>(*it2Sens),
                                                       std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor2),
-                                                      &PreviousState.covarianceMatrix, WorkingInitPoint, &PredictedState.covarianceMatrix, SensorsEndPoint);
+                                                      &PreviousState->covarianceMatrix, WorkingInitPoint, &PredictedState->covarianceMatrix, SensorsEndPoint))
+                            {
+                                std::cout<<"!!Error predicting covariances"<<std::endl;
+                                return 2;
+                            }
 
                             // End
                             break;
@@ -495,10 +524,9 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     // TODO
 
 
-
     /// Display
     logFile<<"Covariances Matrix of the predicted state="<<std::endl;
-    logFile<<PredictedState.covarianceMatrix<<std::endl;
+    logFile<<PredictedState->covarianceMatrix<<std::endl;
 
 
 

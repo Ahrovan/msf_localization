@@ -64,7 +64,7 @@ public:
 
         for(itElement; itElement!=this->TheElementsList.end(); ++itElement)
         {
-            if(*itElement->timeStamp==timeStamp)
+            if((itElement)->timeStamp==timeStamp)
             {
                 return 0;
             }
@@ -191,9 +191,12 @@ public:
             // Already added element. Need to be updated!
             //std::cout<<"Element is going to be added after i="<<iElement<<std::endl;
             //std::cout<<"Element is going to be added in the middle. Overwritting!"<<std::endl;
-            // TODO
+
             if(this->addElementInI(TheElement,itElement))
                 return 1;
+
+            //std::cout<<"Element is going to be added in the middle. Overwritting done!"<<std::endl;
+
             return 0;
         }
         else if(searchResult==10 || searchResult==-1)
@@ -224,12 +227,20 @@ public:
 
 
 public:
-//    int getElementByStamp(TimeStamp timeStamp)
-//    {
+    int getElementByStamp(TimeStamp timeStamp, BufferObjectType& TheElement)
+    {
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
+        if(this->searchIElementByStamp(itElement, timeStamp))
+            return 1;
 
+        StampedBufferObjectType<BufferObjectType> TheBufferElement;
+        if(this->getElementI(TheBufferElement, itElement))
+            return 2;
 
-//        return 0;
-//    }
+        TheElement=TheBufferElement.object;
+
+        return 0;
+    }
 
 
 

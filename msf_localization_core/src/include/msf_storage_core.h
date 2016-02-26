@@ -64,7 +64,7 @@
 
 
 
-class MsfStorageCore : protected StampedRingBuffer<StateEstimationCore>
+class MsfStorageCore : protected StampedRingBuffer< std::shared_ptr<StateEstimationCore> >
 {
 public:
     MsfStorageCore();
@@ -75,31 +75,45 @@ protected:
     std::mutex TheRingBufferMutex;
 
 
-    // Set a measurement in the ring buffer with given time stamp
+    // Set a measurement in the ring buffer with given time stamp (safe)
 public:
-    int setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
+    int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
 
-    // Get the last element in the ring buffer which has a state estimate
+    // Get the last element in the ring buffer which has a state estimate (safe)
 public:
-    int getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, StateEstimationCore& PreviousState);
+    int getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
+
+    // Get element in the ring buffer (safe)
+public:
+    int getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore>& TheElement);
+
 
     // Add element in the ring buffer by stamp (safe)
 public:
-    int addElement(TimeStamp TheTimeStamp, StateEstimationCore TheStateEstimationCore);
+    int addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore);
 
-    // Purge Ring Buffer
+    // Purge Ring Buffer (safe)
 public:
     int purgeRingBuffer(int numElementsFrom);
 
 
 
-    // Display Elements in the ring buffer
+    // Display Elements in the ring buffer (safe)
 public:
     int displayRingBuffer();
 
 
 
-    // Debug log
+    // List with the timestamp of the outdated elements of the buffer
+protected:
+    std::list<TimeStamp> outdatedBufferElements;
+public:
+    int addOutdatedElement(TimeStamp TheTimeStamp);
+    int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp);
+
+
+
+    //// Debug log
 protected:
     std::string logPath;
     std::ofstream logFile;

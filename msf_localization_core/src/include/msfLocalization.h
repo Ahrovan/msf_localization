@@ -116,6 +116,7 @@ public:
     virtual TimeStamp getTimeStamp();
 
 
+
     // State Estimation
 protected:
     bool stateEstimationEnabled;
@@ -127,7 +128,7 @@ public:
 
     // Predict Functions
 protected:
-    int predict(TimeStamp TheTimeStamp);
+    int predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& PredictedState);
 
     // Predict Thread
 protected:
@@ -148,11 +149,15 @@ protected:
 
 
 
+
+
     // Start threads
 public:
     int startThreads();
 
 
+
+    //// Helper functions
 
     // Helper functions
 protected:
@@ -177,7 +182,7 @@ protected:
     int predictedImuImuCovariance(TimeStamp DeltaTime, std::shared_ptr<ImuSensorCore> TheImuSensor1Core, std::shared_ptr<ImuSensorCore> TheImuSensor2Core, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor2, Eigen::MatrixXd* previousStateCovarianceMatrix, MatrixPoint InitPoint, Eigen::MatrixXd* predictedStateCovarianceMatrix, MatrixPoint& EndPoint);
 
 
-    // Debug log
+    //// Debug log
 protected:
     std::string logPath;
     std::ofstream logFile;

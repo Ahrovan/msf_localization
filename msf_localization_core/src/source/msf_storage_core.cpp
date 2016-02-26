@@ -30,17 +30,19 @@ MsfStorageCore::~MsfStorageCore()
     return;
 }
 
-int MsfStorageCore::setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement)
+int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement)
 {
+    std::cout<<"MsfStorageCore::setMeasurement TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
 
     // Add measurement to the MSF Storage Core
-    StampedBufferObjectType<StateEstimationCore> TheMeasurementToTheBuffer;
+    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > TheMeasurementToTheBuffer;
 
     // Stamp
     TheMeasurementToTheBuffer.timeStamp=TheTimeStamp;
 
     // Measure
-    TheMeasurementToTheBuffer.object.TheListMeasurementCore.push_back(TheSensorMeasurement);
+    TheMeasurementToTheBuffer.object=std::make_shared<StateEstimationCore>();
+    TheMeasurementToTheBuffer.object->TheListMeasurementCore.push_back(TheSensorMeasurement);
     //TheMeasurementToTheBuffer.object.flagHasMeasurement=true;
 
 
@@ -53,22 +55,25 @@ int MsfStorageCore::setMeasurement(TimeStamp TheTimeStamp, std::shared_ptr<Senso
     TheRingBufferMutex.unlock();
 
 
+    // Add TimeStamp to the outdated elements list
+    addOutdatedElement(TheTimeStamp);
+
 
     return 0;
 }
 
 
-int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, StateEstimationCore& PreviousState)
+int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
-    StampedBufferObjectType<StateEstimationCore> BufferElement;
+    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
     TheRingBufferMutex.lock();
-    for(std::list< StampedBufferObjectType<StateEstimationCore> >::iterator itElement=this->getBegin();
+    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
         itElement!=this->getEnd();
         ++itElement)
     {
         this->getElementI(BufferElement, itElement);
-        if(BufferElement.object.hasState())
+        if(BufferElement.object->hasState())
         {
             TheTimeStamp=BufferElement.timeStamp;
             PreviousState=BufferElement.object;
@@ -83,9 +88,25 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, Sta
 }
 
 
-int MsfStorageCore::addElement(TimeStamp TheTimeStamp, StateEstimationCore TheStateEstimationCore)
+
+int MsfStorageCore::getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore> &TheElement)
 {
-    StampedBufferObjectType<StateEstimationCore> BufferElement;
+    //StateEstimationCore BufferElement;
+
+    TheRingBufferMutex.lock();
+    this->getElementByStamp(timeStamp, TheElement);
+    TheRingBufferMutex.unlock();
+
+    //TheElement=BufferElement.object;
+
+    return 0;
+}
+
+
+
+int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
+{
+    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
     BufferElement.timeStamp=TheTimeStamp;
     BufferElement.object=TheStateEstimationCore;
@@ -105,13 +126,13 @@ int MsfStorageCore::displayRingBuffer()
     // Display Buffer
     logFile<<" "<<std::endl;
     logFile<<"Displaying buffer of "<<this->getSize()<<" elements:"<<std::endl;
-    for(std::list< StampedBufferObjectType<StateEstimationCore> >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
+    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
     {
         logFile<<"-TS="<<it->timeStamp.sec<<" s; "<<it->timeStamp.nsec<<" ns"<<std::endl;
 
 
         /////// State
-        if(it->object.hasState())
+        if(it->object->hasState())
         {
             logFile<<"\t";
             logFile<<"+State:"<<std::endl;
@@ -122,7 +143,7 @@ int MsfStorageCore::displayRingBuffer()
             logFile<<"\t\t";
             logFile<<"Robot ";
 
-            switch(it->object.TheRobotStateCore->getTheRobotCore()->getRobotType())
+            switch(it->object->TheRobotStateCore->getTheRobotCore()->getRobotType())
             {
                 case RobotTypes::undefined:
                 {
@@ -131,8 +152,8 @@ int MsfStorageCore::displayRingBuffer()
 
                 case RobotTypes::free_model:
                 {
-                    std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(it->object.TheRobotStateCore->getTheRobotCore());
-                    std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(it->object.TheRobotStateCore);
+                    std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(it->object->TheRobotStateCore->getTheRobotCore());
+                    std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(it->object->TheRobotStateCore);
 
                     // State
                     logFile<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
@@ -162,8 +183,8 @@ int MsfStorageCore::displayRingBuffer()
 
 
             //// Sensors
-            for(std::list<std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=it->object.TheListSensorStateCore.begin();
-                itSensorStateCore!=it->object.TheListSensorStateCore.end();
+            for(std::list<std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=it->object->TheListSensorStateCore.begin();
+                itSensorStateCore!=it->object->TheListSensorStateCore.end();
                 ++itSensorStateCore)
             {
                 std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itSensorStateCore)->getTheSensorCore();
@@ -192,7 +213,7 @@ int MsfStorageCore::displayRingBuffer()
                             logFile<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
 
                         //if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                            logFile<<" est_bis_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
+                            logFile<<" est_bias_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
 
                         //if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
                             logFile<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
@@ -234,9 +255,9 @@ int MsfStorageCore::displayRingBuffer()
 
 
         /////// Measurements
-        if(it->object.hasMeasurement())
+        if(it->object->hasMeasurement())
         {
-            for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=it->object.TheListMeasurementCore.begin(); itMeas!=it->object.TheListMeasurementCore.end(); ++itMeas)
+            for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=it->object->TheListMeasurementCore.begin(); itMeas!=it->object->TheListMeasurementCore.end(); ++itMeas)
             {
                 logFile<<"\t";
                 logFile<<"+Meas:"<<std::endl;
@@ -311,4 +332,38 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
     }
 
     //std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
+}
+
+
+
+
+int MsfStorageCore::addOutdatedElement(TimeStamp TheTimeStamp)
+{
+    // Search for duplicates
+    // TODO
+
+    // Add element to the list
+    outdatedBufferElements.push_back(TheTimeStamp);
+    // End
+    return 0;
+}
+
+int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
+{
+    // Check the list size
+    if(outdatedBufferElements.size()==0)
+        return -1;
+
+    // Find the oldest element
+    std::list<TimeStamp>::iterator minElement=min_element(outdatedBufferElements.begin(),outdatedBufferElements.end());
+
+    if(minElement==outdatedBufferElements.end())
+        return 1;
+
+    // Save the TimeStamp to return it
+    TheOutdatedTimeStamp=(*minElement);
+    // Remove element of the list
+    outdatedBufferElements.erase(minElement);
+    // End
+    return 0;
 }

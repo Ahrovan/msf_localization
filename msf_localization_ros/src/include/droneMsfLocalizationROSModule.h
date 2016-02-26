@@ -154,6 +154,9 @@ public:
 protected:
     int predictThreadFunction();
 
+
+    // Buffer thread manager
+protected:
     int bufferManagerThreadFunction();
 
 
