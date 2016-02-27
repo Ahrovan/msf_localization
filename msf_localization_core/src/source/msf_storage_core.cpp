@@ -7,6 +7,11 @@
 
 MsfStorageCore::MsfStorageCore()
 {
+    // Mutex
+    outdatedBufferElementsLock=new std::unique_lock<std::mutex>(outdatedBufferElementsMutex);
+
+
+    // Log
     const char* env_p = std::getenv("FUSEON_STACK");
 
     logPath=std::string(env_p)+"/logs/"+"logMsfStorageCoreFile.txt";
@@ -100,6 +105,15 @@ int MsfStorageCore::getElement(const TimeStamp timeStamp, std::shared_ptr<StateE
     //TheElement=BufferElement.object;
 
     return 0;
+}
+
+int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp)
+{
+    TheRingBufferMutex.lock();
+    int result=this->searchPreIStampByStamp(previousTimeStamp, nextTimeStamp);
+    TheRingBufferMutex.unlock();
+
+    return result;
 }
 
 
@@ -340,10 +354,18 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 int MsfStorageCore::addOutdatedElement(TimeStamp TheTimeStamp)
 {
     // Search for duplicates
-    // TODO
+    std::list<TimeStamp>::iterator duplicate=std::find(outdatedBufferElements.begin(), outdatedBufferElements.end(), TheTimeStamp);
+
+    // It is duplicated, no need to add it
+    if(duplicate!=outdatedBufferElements.end())
+        return 0;
 
     // Add element to the list
     outdatedBufferElements.push_back(TheTimeStamp);
+
+    // Notify to wake up
+    outdatedBufferElementsConditionVariable.notify_all();
+
     // End
     return 0;
 }
@@ -351,8 +373,11 @@ int MsfStorageCore::addOutdatedElement(TimeStamp TheTimeStamp)
 int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
 {
     // Check the list size
-    if(outdatedBufferElements.size()==0)
-        return -1;
+    while(outdatedBufferElements.size()==0)
+    {
+        //cv.wait(lck);
+        outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
+    }
 
     // Find the oldest element
     std::list<TimeStamp>::iterator minElement=min_element(outdatedBufferElements.begin(),outdatedBufferElements.end());

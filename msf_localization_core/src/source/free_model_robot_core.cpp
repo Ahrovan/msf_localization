@@ -77,7 +77,6 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
 
     // Attitude
-    // TODO
     Eigen::Vector4d deltaQw;
     if(pastState->angular_velocity.norm() < 1e-3)
     {
@@ -91,12 +90,15 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
     {
         // Fill
         deltaQw[0]=cos(pastState->angular_velocity.norm()*DeltaTime.get_double()/2);
-        deltaQw.block<3,1>(1,0)=pastState->angular_velocity/pastState->angular_velocity.norm()*sin(pastState->angular_velocity.norm()*DeltaTime.get_double()/2);;
+        deltaQw.block<3,1>(1,0)=pastState->angular_velocity/pastState->angular_velocity.norm()*sin(pastState->angular_velocity.norm()*DeltaTime.get_double()/2);
+        // Unit quaternion -> Not needed!
+        deltaQw=deltaQw/deltaQw.norm();
     }
 
     predictedState->attitude=Quaternion::cross(pastState->attitude,deltaQw);
 
-
+    // Unit quaternion -> Not needed, Just in case
+    predictedState->attitude=predictedState->attitude/predictedState->attitude.norm();
 
 
     // Angular Velocity

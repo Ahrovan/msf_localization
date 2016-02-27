@@ -37,6 +37,9 @@
 // Mutex
 #include <mutex>
 
+// Condition variable
+#include <condition_variable>
+
 
 
 // Estimator Cores
@@ -87,6 +90,10 @@ public:
 public:
     int getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore>& TheElement);
 
+    // Get next timestap (safe)
+public:
+    int getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp);
+
 
     // Add element in the ring buffer by stamp (safe)
 public:
@@ -110,6 +117,10 @@ protected:
 public:
     int addOutdatedElement(TimeStamp TheTimeStamp);
     int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp);
+protected:
+    std::mutex outdatedBufferElementsMutex;             // mutex for critical section
+    std::condition_variable outdatedBufferElementsConditionVariable; // condition variable for critical section
+    std::unique_lock<std::mutex>* outdatedBufferElementsLock;
 
 
 

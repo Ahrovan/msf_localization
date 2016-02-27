@@ -95,6 +95,7 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
 
 void RosSensorImuInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg)
 {
+    //std::cout<<"RosSensorImuInterface::imuTopicCallback()"<<std::endl;
 
     this->setMeasurementRos(msg);
 
@@ -105,6 +106,8 @@ void RosSensorImuInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg
 
 int RosSensorImuInterface::open()
 {
+     std::cout<<"RosSensorImuInterface::open()"<<std::endl;
+
     // Node handler
     ros::NodeHandle nh;
 

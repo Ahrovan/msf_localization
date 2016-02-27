@@ -170,6 +170,24 @@ public:
         }
     }
 
+
+public:
+    int searchPreIStampByStamp(TimeStamp oldTimeStamp, TimeStamp& newTimeStamp)
+    {
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
+
+        int result=searchPreIElementByStamp(itElement, oldTimeStamp);
+
+        if(itElement!=this->TheElementsList.begin() && itElement!=this->TheElementsList.end())
+        {
+            newTimeStamp=(itElement)->timeStamp;
+            return 0;
+        }
+
+        return -1;
+    }
+
+
 public:
 
     int addElementByStamp(const StampedBufferObjectType<BufferObjectType> TheElement)

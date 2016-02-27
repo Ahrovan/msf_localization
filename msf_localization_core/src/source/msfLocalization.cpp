@@ -525,8 +525,8 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEs
 
 
     /// Display
-    logFile<<"Covariances Matrix of the predicted state="<<std::endl;
-    logFile<<PredictedState->covarianceMatrix<<std::endl;
+    //logFile<<"Covariances Matrix of the predicted state="<<std::endl;
+    //logFile<<PredictedState->covarianceMatrix<<std::endl;
 
 
 

@@ -680,6 +680,8 @@ bool MsfLocalizationROS::setStateEstimationEnabledCallback(msf_localization_ros_
 
 int MsfLocalizationROS::robotPoseThreadFunction()
 {
+    std::cout<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+
     robotPoseRate=new ros::Rate(robotPoseRateVal);
 
     while(ros::ok())
@@ -702,6 +704,10 @@ int MsfLocalizationROS::robotPoseThreadFunction()
         // Header
         robotPoseMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
 
+        // Frame id
+        // TODO put as a ros param
+        robotPoseMsg.header.frame_id="robot";
+
         // Robot Pose
         std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore);
         Eigen::Vector3d robotPosition=TheRobotStateCore->getPosition();
@@ -719,6 +725,7 @@ int MsfLocalizationROS::robotPoseThreadFunction()
         robotPoseMsg.pose.pose.orientation.z=robotAttitude[3];
 
         // Covariance
+        // TODO fix! Covariance of the attitude is not ok!
         Eigen::MatrixXd robotPoseCovariance(6,6);
         robotPoseCovariance.setZero();
         robotPoseCovariance.block<3,3>(0,0)=PredictedState->covarianceMatrix.block<3,3>(0,0);
@@ -739,6 +746,8 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     }
 
 
+    std::cout<<"MsfLocalizationROS::robotPoseThreadFunction() ended"<<std::endl;
+
     return 0;
 }
 
@@ -751,7 +760,7 @@ TimeStamp MsfLocalizationROS::getTimeStamp()
 
 int MsfLocalizationROS::predictThreadFunction()
 {
-    //std::cout<<"MsfLocalizationROS::predictThreadFunction()"<<std::endl;
+    std::cout<<"MsfLocalizationROS::predictThreadFunction()"<<std::endl;
 
     ros::Rate predictRate(predictRateVale);
     //ros::Rate predictRate(100);
@@ -773,13 +782,13 @@ int MsfLocalizationROS::predictThreadFunction()
 
 
         // Display the buffer
-        this->TheMsfStorageCore->displayRingBuffer();
+        //this->TheMsfStorageCore->displayRingBuffer();
 
         // Sleep
         predictRate.sleep();
     }
 
-    //std::cout<<"MsfLocalizationROS::predictThreadFunction() ended"<<std::endl;
+    std::cout<<"MsfLocalizationROS::predictThreadFunction() ended"<<std::endl;
 
     return 0;
 
@@ -788,23 +797,20 @@ int MsfLocalizationROS::predictThreadFunction()
 
 int MsfLocalizationROS::bufferManagerThreadFunction()
 {
-    //std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction()"<<std::endl;
+    std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction()"<<std::endl;
 
-    ros::Rate bufferManagerRate(10000);
+    //ros::Rate bufferManagerRate(10000);
 
     while(ros::ok())
     {
         // Get oldest element
-//std::cout<<"aqui!"<<std::endl;
         TimeStamp OldestTimeStamp;
         if(this->TheMsfStorageCore->getOldestOutdatedElement(OldestTimeStamp))
         {
-            //std::cout<<"error!"<<std::endl;
-            // Sleep
-            bufferManagerRate.sleep();
+            std::cout<<"error!"<<std::endl;
             continue;
         }
-//std::cout<<"aqui!"<<std::endl;
+
         std::cout<<"Updating TS: sec="<<OldestTimeStamp.sec<<" s; nsec="<<OldestTimeStamp.nsec<<" ns"<<std::endl;
 
         // Get state estimation core associated to the oldest element on the buffer
@@ -814,31 +820,38 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
             std::cout<<"error!"<<std::endl;
             continue;
         }
-//std::cout<<"aqui!"<<std::endl;
-        //std::shared_ptr<StateEstimationCore> TheOutdatedElementPtr=std::make_shared<StateEstimationCore>(TheOutdatedElement);
 
+        // TODO Check?
         if(!TheOutdatedElement)
         {
             std::cout<<"error 2!"<<std::endl;
             continue;
         }
-//std::cout<<"aqui!"<<std::endl;
+
+
         // Run predict and store updated predicted element
         this->predict(OldestTimeStamp, TheOutdatedElement);
+
 
         // Run update if there are measurements
         // TODO
 
+
         // Find the next element in the buffer and mark it as outdated
         TimeStamp TheNewOutdatedTimeStamp;
         // TODO
+//        if(!this->TheMsfStorageCore->getNextTimeStamp(OldestTimeStamp, TheNewOutdatedTimeStamp))
+//        {
+//            // Set the following element of the buffer as outdated
+//            //this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
 
-        // Set the following element of the buffer as outdated
-        //this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
+//            std::cout<<"Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
+//        }
+
 
 
         // Purge the buffer
-        this->TheMsfStorageCore->purgeRingBuffer(20);
+        this->TheMsfStorageCore->purgeRingBuffer(50);
 
 
         // Display the buffer
@@ -853,6 +866,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         //bufferManagerRate.sleep();
     }
 
+    std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction() ended"<<std::endl;
 
     return 0;
 
