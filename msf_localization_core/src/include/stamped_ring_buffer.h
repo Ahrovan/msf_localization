@@ -178,10 +178,18 @@ public:
 
         int result=searchPreIElementByStamp(itElement, oldTimeStamp);
 
-        if(itElement!=this->TheElementsList.begin() && itElement!=this->TheElementsList.end())
+        if(result==1)
         {
-            newTimeStamp=(itElement)->timeStamp;
-            return 0;
+            return 1;
+        }
+        else
+        {
+
+            if(itElement!=this->TheElementsList.begin() && itElement!=this->TheElementsList.end())
+            {
+                newTimeStamp=(itElement)->timeStamp;
+                return 0;
+            }
         }
 
         return -1;
@@ -211,7 +219,7 @@ public:
             //std::cout<<"Element is going to be added in the middle. Overwritting!"<<std::endl;
 
             if(this->addElementInI(TheElement,itElement))
-                return 1;
+                return 2;
 
             //std::cout<<"Element is going to be added in the middle. Overwritting done!"<<std::endl;
 
@@ -222,7 +230,7 @@ public:
             // we put in the begining
             //std::cout<<"Element is going to be added in the top of the buffer"<<std::endl;
             if(this->addElementTop(TheElement))
-                return 2;
+                return 3;
             return 0;
 
         }
@@ -231,7 +239,7 @@ public:
             // We put in the end
             //std::cout<<"Element is going to be added in the end of the buffer"<<std::endl;
             if(this->addElementEnd(TheElement))
-                return 2;
+                return 4;
             return 0;
         }
 

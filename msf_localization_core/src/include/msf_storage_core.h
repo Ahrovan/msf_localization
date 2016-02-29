@@ -83,8 +83,14 @@ public:
     int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
 
     // Get the last element in the ring buffer which has a state estimate (safe)
+    // Unuseful for the predict -> We need the previous to a defined timestamp!
 public:
     int getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
+
+    // Get the previous element of a timestamp in the ring buffer which has a state estimate (safe)
+public:
+    int getPreviousElementWithStateEstimateByStamp(TimeStamp ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
+
 
     // Get element in the ring buffer (safe)
 public:
@@ -108,6 +114,7 @@ public:
     // Display Elements in the ring buffer (safe)
 public:
     int displayRingBuffer();
+    int displayStateEstimationElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore>  TheStateEstimationCore);
 
 
 

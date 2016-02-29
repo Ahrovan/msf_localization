@@ -12,11 +12,32 @@ SensorCore::SensorCore() :
     dimensionState(0),
     dimensionErrorState(0)
 {
+
+
+    // LOG
+    const char* env_p = std::getenv("FUSEON_STACK");
+
+    logPath=std::string(env_p)+"/logs/"+"SensorCoreLogFile.txt";
+
+    logFile.open(logPath);
+
+    if(!logFile.is_open())
+    {
+        std::cout<<"unable to open log file"<<std::endl;
+    }
+
+
     return;
 }
 
 SensorCore::~SensorCore()
 {
+    // Log
+    if(logFile.is_open())
+    {
+        logFile.close();
+    }
+
     return;
 }
 

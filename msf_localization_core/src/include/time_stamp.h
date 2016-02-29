@@ -60,6 +60,14 @@ public:
             return false;
     }
 
+    bool operator>=(const TimeStamp t2) const
+    {
+        if(this->operator>(t2) || this->operator==(t2))
+            return true;
+        else
+            return false;
+    }
+
     bool operator<(const TimeStamp t2) const
     {
         if(this->sec < t2.sec)

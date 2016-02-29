@@ -10,6 +10,14 @@
 #include <memory>
 
 
+//File Stream
+//std::ofstream, std::ifstream
+#include <fstream>
+
+
+#include <string>
+
+
 
 #include "sensor_basics.h"
 
@@ -83,7 +91,10 @@ public:
 
 
 
-
+    //// Debug log
+protected:
+    std::string logPath;
+    std::ofstream logFile;
 
 
 };

@@ -27,6 +27,9 @@ int RosSensorImuInterface::setImuTopicName(std::string ImuTopicName)
 
 int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg)
 {
+    if(!isSensorEnabled())
+        return 0;
+
 
     //std::cout<<"ROS Imu Measured"<<std::endl;
 
@@ -95,11 +98,12 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
 
 void RosSensorImuInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg)
 {
-    //std::cout<<"RosSensorImuInterface::imuTopicCallback()"<<std::endl;
+    //logFile<<"RosSensorImuInterface::imuTopicCallback()"<<std::endl;
 
     this->setMeasurementRos(msg);
 
 
+    //logFile<<"RosSensorImuInterface::imuTopicCallback() ended"<<std::endl;
     return;
 }
 
