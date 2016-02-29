@@ -187,6 +187,14 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
 {
     //std::cout<<"ImuSensorCore::predictState()"<<std::endl;
 
+    // Checks in the past state
+    if(!pastState->getTheSensorCore())
+    {
+        return -5;
+        std::cout<<"ImuSensorCore::predictState() error !pastState->getTheSensorCore()"<<std::endl;
+    }
+
+
     // Create the predicted state if it doesn't exists
     if(!predictedState)
     {
@@ -262,8 +270,139 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
     return 0;
 }
 
-int ImuSensorCore::predictMeasurement(TimeStamp theTimeStamp, std::shared_ptr<ImuSensorStateCore> currentState, std::shared_ptr<ImuSensorMeasurementCore> predictedMeasurement)
+int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
+    logFile<<"ImuSensorCore::predictMeasurement()"<<std::endl;
 
+    // Check
+    if(!this->getTheSensorCore())
+    {
+        std::cout<<"ImuSensorCore::predictMeasurement() error 50"<<std::endl;
+        return 50;
+    }
+
+    // Check imu
+    if(!currentImuState)
+    {
+        std::cout<<"ImuSensorCore::predictMeasurement() error 1"<<std::endl;
+        return 1;
+    }
+
+    // Robot check
+    if(!currentRobotState)
+    {
+        std::cout<<"ImuSensorCore::predictMeasurement() error 2"<<std::endl;
+        return 2;
+    }
+
+    // Robot core check
+    if(!currentRobotState->getTheRobotCore())
+    {
+        std::cout<<"ImuSensorCore::predictMeasurement() error 3"<<std::endl;
+        return 3;
+    }
+
+
+    // Create pointer
+    // TODO check if it must be done here
+    if(!predictedMeasurement)
+    {
+        predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>();
+        logFile<<"ImuSensorCore::predictMeasurement() pointer created"<<std::endl;
+    }
+
+
+    // Set the sensor core -> Needed
+    if(predictedMeasurement)
+    {
+        predictedMeasurement->setTheSensorCore(this->getTheSensorCore());
+    }
+
+
+    // Prediction
+    // Orientation
+    if(this->isOrientationEnabled())
+    {
+        logFile<<"ImuSensorCore::predictMeasurement() orientation"<<std::endl;
+
+        // TODO
+
+    }
+
+    // Angular velocity
+    if(isAngularVelocityEnabled())
+    {
+        logFile<<"ImuSensorCore::predictMeasurement() angular velocity"<<std::endl;
+
+
+        Eigen::Vector3d ThePredictedAngularVelocity;
+
+
+        // Switch depending on robot used
+        switch(currentRobotState->getTheRobotCore()->getRobotType())
+        {
+            case RobotTypes::free_model:
+            {
+                // Cast
+                std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
+
+                // Model
+                // TODO improve!!!
+                ThePredictedAngularVelocity=currentFreeModelRobotState->getAngularVelocity()+currentImuState->getBiasesAngularVelocity();
+
+                logFile<<"ImuSensorCore::predictMeasurement() predicted w="<<ThePredictedAngularVelocity.transpose()<<std::endl;
+
+                // End
+                break;
+            }
+
+        }
+
+
+        // Set
+        predictedMeasurement->setAngularVelocity(ThePredictedAngularVelocity);
+    }
+
+    // Linear acceleration
+    if(isLinearAccelerationEnabled())
+    {
+        logFile<<"ImuSensorCore::predictMeasurement() linear acceleration"<<std::endl;
+
+
+        Eigen::Vector3d ThePredictedLinearAcceleration;
+
+
+        // Switch depending on robot used
+        switch(currentRobotState->getTheRobotCore()->getRobotType())
+        {
+            case RobotTypes::free_model:
+            {
+                // Cast
+                std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
+
+                // Model
+                // TODO improve!!!
+                ThePredictedLinearAcceleration=currentFreeModelRobotState->getLinearAcceleration()+currentImuState->getBiasesLinearAcceleration();
+
+                logFile<<"ImuSensorCore::predictMeasurement() predicted a="<<ThePredictedLinearAcceleration.transpose()<<std::endl;
+
+                // End
+                break;
+            }
+
+        }
+
+
+        // Set
+        predictedMeasurement->setLinearAcceleration(ThePredictedLinearAcceleration);
+    }
+
+
+
+
+
+    logFile<<"ImuSensorCore::predictMeasurement()"<<std::endl;
+
+    // End
     return 0;
 }

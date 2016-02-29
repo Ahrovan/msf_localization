@@ -592,6 +592,114 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEs
 
 
 
+int MsfLocalizationCore::update(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& UpdatedState)
+{
+    logFile<<"MsfLocalizationCore::update()"<<std::endl;
+
+    // Checks
+    // TODO
+
+    // Updated State
+    if(!UpdatedState)
+    {
+        std::cout<<"MsfLocalizationCore::update() error 1"<<std::endl;
+        return 1;
+    }
+
+    if(!UpdatedState->TheRobotStateCore)
+    {
+        std::cout<<"MsfLocalizationCore::update() error 11"<<std::endl;
+        return 11;
+    }
+
+    // TODO No!
+    if(UpdatedState->TheListMeasurementCore.size()==0)
+    {
+        std::cout<<"MsfLocalizationCore::update() error 12"<<std::endl;
+        return 12;
+    }
+
+    // TODO No!
+    if(UpdatedState->TheListSensorStateCore.size()==0)
+    {
+        std::cout<<"MsfLocalizationCore::update() error 13"<<std::endl;
+        return 13;
+    }
+
+
+    // Measurement prediction
+    std::list<std::shared_ptr<SensorMeasurementCore> > TheListPredictedMeasurements;
+
+    for(std::list<std::shared_ptr<SensorMeasurementCore> >::iterator itListMeas=UpdatedState->TheListMeasurementCore.begin();
+        itListMeas!=UpdatedState->TheListMeasurementCore.end();
+        ++itListMeas)
+    {
+        // Check
+        if(!(*itListMeas)->getTheSensorCore())
+        {
+            std::cout<<"MsfLocalizationCore::update() error 2"<<std::endl;
+            return 2;
+        }
+
+        // Find the type
+        switch((*itListMeas)->getTheSensorCore()->getSensorType())
+        {
+            case SensorTypes::imu:
+            {
+                // Cast the imu sensor core
+                std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>((*itListMeas)->getTheSensorCore());
+
+
+                // Find the sensor state
+                std::shared_ptr<SensorStateCore> TheSensorStateCore;
+                if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
+                {
+                    std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
+                    return 4;
+                }
+                if(!TheSensorStateCore)
+                {
+                    std::cout<<"MsfLocalizationCore::update() error 5"<<std::endl;
+                    return 5;
+                }
+
+                // Cast the imu sensor state
+                std::shared_ptr<ImuSensorStateCore> TheImuSensorStateCore=std::static_pointer_cast<ImuSensorStateCore>(TheSensorStateCore);;
+
+
+                // Create a pointer
+                std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorPredictedMeasurement;
+
+                // Call measurement prediction
+                if(TheImuSensorCore->predictMeasurement(TheTimeStamp, UpdatedState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
+                {
+                    std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
+                    return 3;
+                }
+
+                // Push
+                TheListPredictedMeasurements.push_back(TheImuSensorPredictedMeasurement);
+
+                // End
+                break;
+            }
+
+        }
+
+
+    }
+
+
+    //std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
+
+
+    logFile<<"MsfLocalizationCore::update() ended"<<std::endl;
+
+    // End
+    return 0;
+}
+
+
 
 
 int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore, std::shared_ptr<SensorCore> TheSensorCore, std::shared_ptr<SensorStateCore>& TheSensorStateCore)

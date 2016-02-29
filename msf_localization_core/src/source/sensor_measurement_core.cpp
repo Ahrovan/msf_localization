@@ -14,12 +14,13 @@ SensorMeasurementCore::~SensorMeasurementCore()
 }
 
 
-int SensorMeasurementCore::setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr)
+int SensorMeasurementCore::setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr)
 {
     this->TheSensorCorePtr=TheSensorCorePtr;
     return 0;
 }
-std::weak_ptr<const SensorCore> SensorMeasurementCore::getTheSensorCore() const
+std::shared_ptr<SensorCore> SensorMeasurementCore::getTheSensorCore() const
 {
-    return this->TheSensorCorePtr;
+    std::shared_ptr<SensorCore> TheSensorCore=this->TheSensorCorePtr.lock();
+    return TheSensorCore;
 }

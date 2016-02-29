@@ -41,10 +41,10 @@ public:
 
     // Pointer to itself
 protected:
-    std::weak_ptr<const SensorCore> TheSensorCorePtr;
+    std::weak_ptr<SensorCore> TheSensorCorePtr;
 public:
-    int setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
-    std::shared_ptr<const SensorCore> getTheSensorCore() const;
+    int setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
+    std::shared_ptr<SensorCore> getTheSensorCore() const;
 
 
     // Pointer to the MSF Storage Core

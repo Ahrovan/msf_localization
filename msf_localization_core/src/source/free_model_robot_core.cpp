@@ -46,6 +46,14 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 {
     //std::cout<<"FreeModelRobotCore::predictState"<<std::endl;
 
+    // Checks in the past state
+    if(!pastState->getTheRobotCore())
+    {
+        return -5;
+        std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+    }
+
+
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {

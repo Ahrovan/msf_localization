@@ -4,20 +4,26 @@
 
 
 
-#include "sensor_core.h"
+
 
 
 // Time Stamp
 #include "time_stamp.h"
 
 
-// Measurement
+// Sensor core
+#include "sensor_core.h"
+
+// IMU Measurement
 #include "imu_sensor_measurement_core.h"
 
-// State
+// IMU State
 #include "imu_sensor_state_core.h"
 
 
+// Robot state
+#include "robot_state_core.h"
+#include "free_model_robot_state_core.h"
 
 
 
@@ -130,8 +136,11 @@ public:
 
     // Prediction measurements
 public:
-    int predictMeasurement(TimeStamp theTimeStamp, const std::shared_ptr<ImuSensorStateCore> currentState, std::shared_ptr<ImuSensorMeasurementCore> predictedMeasurement);
+    int predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
 
+
+    // Jacobian of the measurements
+public:
 
 
 

@@ -23,10 +23,10 @@ public:
 
 protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer
-    std::weak_ptr<const SensorCore> TheSensorCorePtr;
+    std::weak_ptr<SensorCore> TheSensorCorePtr;
 public:
-    int setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
-    std::weak_ptr<const SensorCore> getTheSensorCore() const;
+    int setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
+    std::shared_ptr<SensorCore> getTheSensorCore() const;
 
 
 };

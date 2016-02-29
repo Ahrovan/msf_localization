@@ -425,7 +425,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
             logFile<<"\t";
             logFile<<"+Meas:"<<std::endl;
 
-            std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itMeas)->getTheSensorCore().lock();
+            std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itMeas)->getTheSensorCore();
             logFile<<"\t\t";
             logFile<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 

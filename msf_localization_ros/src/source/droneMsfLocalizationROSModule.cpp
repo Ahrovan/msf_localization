@@ -857,14 +857,23 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 
         // Run predict and store updated predicted element
-        while(!TheOutdatedElement)
+        if(this->predict(OldestTimeStamp, TheOutdatedElement))
         {
-            this->predict(OldestTimeStamp, TheOutdatedElement);
+            std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction() error 5!"<<std::endl;
+            continue;
+        }
+
+        // Not needed
+        if(!TheOutdatedElement)
+        {
+            std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction() error4!"<<std::endl;
+            continue;
         }
 
 
         // Run update if there are measurements
         // TODO
+        this->update(OldestTimeStamp, TheOutdatedElement);
 
 
         // Find the next element in the buffer and mark it as outdated

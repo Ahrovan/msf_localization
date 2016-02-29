@@ -130,6 +130,17 @@ public:
 protected:
     int predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& PredictedState);
 
+
+
+    // Update functions
+protected:
+    int update(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& UpdatedState);
+
+
+
+
+
+
     // Predict Thread
 protected:
     double predictRateVale;
