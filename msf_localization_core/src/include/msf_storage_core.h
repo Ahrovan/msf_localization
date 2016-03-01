@@ -78,9 +78,10 @@ protected:
     std::mutex TheRingBufferMutex;
 
 
-    // Set a measurement in the ring buffer with given time stamp (safe)
+
+    // Get element in the ring buffer (safe)
 public:
-    int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
+    int getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore>& TheElement);
 
     // Get the last element in the ring buffer which has a state estimate (safe)
     // Unuseful for the predict -> We need the previous to a defined timestamp!
@@ -91,19 +92,22 @@ public:
 public:
     int getPreviousElementWithStateEstimateByStamp(TimeStamp ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
 
-
-    // Get element in the ring buffer (safe)
-public:
-    int getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore>& TheElement);
-
     // Get next timestap (safe)
 public:
     int getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp);
 
 
+
+
     // Add element in the ring buffer by stamp (safe)
 public:
     int addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore);
+
+    // Set a measurement in the ring buffer with given time stamp (safe)
+public:
+    int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
+
+
 
     // Purge Ring Buffer (safe)
 public:
@@ -118,12 +122,16 @@ public:
 
 
 
+
     // List with the timestamp of the outdated elements of the buffer
 protected:
     std::list<TimeStamp> outdatedBufferElements;
 public:
     int addOutdatedElement(TimeStamp TheTimeStamp);
     int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp);
+public:
+    int displayOutdatedBufferElements();
+    std::string getDisplayOutdatedElements();
 protected:
     std::mutex outdatedBufferElementsMutex;             // mutex for critical section
     std::condition_variable outdatedBufferElementsConditionVariable; // condition variable for critical section
@@ -135,7 +143,11 @@ protected:
 protected:
     std::string logPath;
     std::ofstream logFile;
-
+    // mutex to protect the log file
+protected:
+    std::mutex TheLogFileMutex;
+public:
+    int log(std::string logString);
 
 };
 

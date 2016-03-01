@@ -680,7 +680,13 @@ bool MsfLocalizationROS::setStateEstimationEnabledCallback(msf_localization_ros_
 
 int MsfLocalizationROS::robotPoseThreadFunction()
 {
-    logFile<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+        this->log(logString.str());
+    }
+
 //return 0;
     robotPoseRate=new ros::Rate(robotPoseRateVal);
 
@@ -703,7 +709,9 @@ int MsfLocalizationROS::robotPoseThreadFunction()
 
         while(!PredictedState)
         {
+//            this->robotPoseThreadState.setProcessing(TheTimeStamp);
             this->predict(TheTimeStamp, PredictedState);
+//            this->robotPoseThreadState.setNotProcessing();
         }
 
 //        if()
@@ -758,7 +766,11 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     }
 
 
-    logFile<<"MsfLocalizationROS::robotPoseThreadFunction() ended"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::robotPoseThreadFunction() ended"<<std::endl;
+        this->log(logString.str());
+    }
 
     return 0;
 }
@@ -771,8 +783,13 @@ TimeStamp MsfLocalizationROS::getTimeStamp()
 }
 
 int MsfLocalizationROS::predictThreadFunction()
-{
-    logFile<<"MsfLocalizationROS::predictThreadFunction()"<<std::endl;
+{   
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::predictThreadFunction()"<<std::endl;
+        this->log(logString.str());
+    }
+
 //return 0;
     ros::Rate predictRate(predictRateVale);
     //ros::Rate predictRate(100);
@@ -800,7 +817,9 @@ int MsfLocalizationROS::predictThreadFunction()
 
         while(!ThePredictedState)
         {
+//            predictThreadState.setProcessing(TheTimeStamp);
             this->predict(TheTimeStamp, ThePredictedState);
+//            predictThreadState.setNotProcessing();
         }
 
 
@@ -815,7 +834,12 @@ int MsfLocalizationROS::predictThreadFunction()
         predictRate.sleep();
     }
 
-    logFile<<"MsfLocalizationROS::predictThreadFunction() ended"<<std::endl;
+
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::predictThreadFunction() ended"<<std::endl;
+        this->log(logString.str());
+    }
 
     return 0;
 
@@ -824,12 +848,20 @@ int MsfLocalizationROS::predictThreadFunction()
 
 int MsfLocalizationROS::bufferManagerThreadFunction()
 {
-    logFile<<"MsfLocalizationROS::bufferManagerThreadFunction()"<<std::endl;
+
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::bufferManagerThreadFunction()"<<std::endl;
+        this->log(logString.str());
+    }
 
     //ros::Rate bufferManagerRate(10000);
 
     while(ros::ok())
     {
+
+
+
         // Get oldest element
         TimeStamp OldestTimeStamp;
         if(this->TheMsfStorageCore->getOldestOutdatedElement(OldestTimeStamp))
@@ -838,7 +870,15 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
             continue;
         }
 
-        logFile<<"MsfLocalizationROS::bufferManagerThreadFunction() updating TS: sec="<<OldestTimeStamp.sec<<" s; nsec="<<OldestTimeStamp.nsec<<" ns"<<std::endl;
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::bufferManagerThreadFunction() updating TS: sec="<<OldestTimeStamp.sec<<" s; nsec="<<OldestTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+
+        {
+            this->log(this->TheMsfStorageCore->getDisplayOutdatedElements());
+        }
 
         // Get state estimation core associated to the oldest element on the buffer
         std::shared_ptr<StateEstimationCore> TheOutdatedElement;
@@ -876,20 +916,54 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         this->update(OldestTimeStamp, TheOutdatedElement);
 
 
+        // If some thread is predicting something, better to put this element in the outdated element, just in case
+        // Not working! I will need to wait until they finish of processing them before working again
+        // Thread robot pose
+//        if(robotPoseThreadState.isWorking())
+//        {
+//            TimeStamp TheProcesingTimeStamp;
+//            TheProcesingTimeStamp=robotPoseThreadState.getProcessingTimeStamp();
+//            this->TheMsfStorageCore->addOutdatedElement(TheProcesingTimeStamp);
+//        }
+//        // Thread predict
+//        if(predictThreadState.isWorking())
+//        {
+//            TimeStamp TheProcesingTimeStamp;
+//            TheProcesingTimeStamp=predictThreadState.getProcessingTimeStamp();
+//            this->TheMsfStorageCore->addOutdatedElement(TheProcesingTimeStamp);
+//        }
+
+
         // Find the next element in the buffer and mark it as outdated
         TimeStamp TheNewOutdatedTimeStamp;
         // TODO
         //std::cout<<"MsfLocalizationROS::bufferManagerThreadFunction() updating TS: sec="<<OldestTimeStamp.sec<<" s; nsec="<<OldestTimeStamp.nsec<<" ns"<<std::endl;
 
+
+
+
         if(!this->TheMsfStorageCore->getNextTimeStamp(OldestTimeStamp, TheNewOutdatedTimeStamp))
         {
             // Set the following element of the buffer as outdated
-            //this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
+            this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
 
-            logFile<<"MsfLocalizationROS::bufferManagerThreadFunction() Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
+                this->log(logString.str());
+            }
         }
         else
-            logFile<<"MsfLocalizationROS::bufferManagerThreadFunction() Nothing new to be added"<<std::endl;
+        {
+
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() Nothing new to be added"<<std::endl;
+                this->log(logString.str());
+            }
+
+        }
+
 
 
 
@@ -909,7 +983,11 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         //bufferManagerRate.sleep();
     }
 
-    logFile<<"MsfLocalizationROS::bufferManagerThreadFunction() ended"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::bufferManagerThreadFunction() ended"<<std::endl;
+        this->log(logString.str());
+    }
 
     return 0;
 

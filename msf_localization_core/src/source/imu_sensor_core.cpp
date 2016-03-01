@@ -272,7 +272,7 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
 
 int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
-    logFile<<"ImuSensorCore::predictMeasurement()"<<std::endl;
+    logFile<<"ImuSensorCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 
     // Check
     if(!this->getTheSensorCore())
@@ -401,8 +401,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::s
 
 
 
-    logFile<<"ImuSensorCore::predictMeasurement()"<<std::endl;
-
+    logFile<<"ImuSensorCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
     // End
     return 0;
 }

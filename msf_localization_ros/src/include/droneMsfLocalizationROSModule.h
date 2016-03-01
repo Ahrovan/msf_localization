@@ -131,10 +131,14 @@ protected:
 
     geometry_msgs::PoseWithCovarianceStamped robotPoseMsg;
 
+
+protected:
     double robotPoseRateVal;
     ros::Rate* robotPoseRate;
-
+protected:
     std::thread* robotPoseThread;
+    SyncThreadState robotPoseThreadState;
+protected:
     int robotPoseThreadFunction();
 
 

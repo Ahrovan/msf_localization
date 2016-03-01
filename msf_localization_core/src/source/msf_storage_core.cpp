@@ -42,8 +42,11 @@ MsfStorageCore::~MsfStorageCore()
 
 int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement)
 {
-    logFile<<"MsfStorageCore::setMeasurement() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setMeasurement() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
 
     std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
 
@@ -78,8 +81,11 @@ int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shar
     this->addOutdatedElement(TheTimeStamp);
 
 
-    logFile<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
 
 
     return 0;
@@ -113,7 +119,11 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
 
 int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
-    logFile<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp()"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp()"<<std::endl;
+        this->log(logString.str());
+    }
 
     // Reset time stamp
     PreviousState=nullptr;
@@ -145,7 +155,11 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
                 PreviousState=BufferElement.object;
                 //logFile<<"found with state!"<<std::endl;
 
-                logFile<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    this->log(logString.str());
+                }
 
                 break;
             }
@@ -153,7 +167,12 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
     }
     TheRingBufferMutex.unlock();
 
-    logFile<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() ended"<<std::endl;
+
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() ended"<<std::endl;
+        this->log(logString.str());
+    }
 
     if(!PreviousState)
         return 1;
@@ -169,12 +188,12 @@ int MsfStorageCore::getElement(const TimeStamp timeStamp, std::shared_ptr<StateE
     //StateEstimationCore BufferElement;
 
     TheRingBufferMutex.lock();
-    this->getElementByStamp(timeStamp, TheElement);
+    int error=this->getElementByStamp(timeStamp, TheElement);
     TheRingBufferMutex.unlock();
 
     //TheElement=BufferElement.object;
 
-    return 0;
+    return error;
 }
 
 int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp)
@@ -234,9 +253,14 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStam
 
 int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
 {
-    logFile<<"MsfStorageCore::addElement()"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::addElement()"<<std::endl;
+        logString<<"Adding element to the buffer:"<<std::endl;
+        this->log(logString.str());
+    }
 
-    logFile<<"Adding element to the buffer:"<<std::endl;
+
     this->displayStateEstimationElement(TheTimeStamp, TheStateEstimationCore);
 
 
@@ -263,7 +287,11 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     }
 
 
-    logFile<<"MsfStorageCore::addElement() ended"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::addElement() ended"<<std::endl;
+        this->log(logString.str());
+    }
 
     return 0;
 }
@@ -271,13 +299,16 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
 
 int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
 {
-    logFile<<"-TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+
+    std::ostringstream logString;
+    logString<<"-TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+
 
 
     // Check
     if(!TheStateEstimationCore)
     {
-        std::cout<<"error in MsfStorageCore::displayStateEstimationElement()"<<std::endl;
+        logString<<"error in MsfStorageCore::displayStateEstimationElement()"<<std::endl;
         return -1;
     }
 
@@ -285,14 +316,14 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
     /////// State
     if(TheStateEstimationCore->hasState())
     {
-        logFile<<"\t";
-        logFile<<"+State:"<<std::endl;
+        logString<<"\t";
+        logString<<"+State:"<<std::endl;
 
 
         //// Robot
         // TODO
-        logFile<<"\t\t";
-        logFile<<"Robot ";
+        logString<<"\t\t";
+        logString<<"Robot ";
 
         switch(TheStateEstimationCore->TheRobotStateCore->getTheRobotCore()->getRobotType())
         {
@@ -307,20 +338,20 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                 std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(TheStateEstimationCore->TheRobotStateCore);
 
                 // State
-                logFile<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
-                logFile<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
-                logFile<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
-                logFile<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
-                logFile<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
+                logString<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
+                logString<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
+                logString<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
+                logString<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
+                logString<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
 
 
                 // Jacobian
 #ifdef _DEBUG_DISPLAY
-                logFile<<std::endl;
-                logFile<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
+                logString<<std::endl;
+                logString<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
 
-                logFile<<std::endl;
-                logFile<<"Jacobian Robot Angular=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.angular<<"]";
+                logString<<std::endl;
+                logString<<"Jacobian Robot Angular=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.angular<<"]";
 #endif
 
                 break;
@@ -328,7 +359,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
         }
 
-        logFile<<std::endl;
+        logString<<std::endl;
 
 
 
@@ -339,8 +370,8 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
             ++itSensorStateCore)
         {
             std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itSensorStateCore)->getTheSensorCore();
-            logFile<<"\t\t";
-            logFile<<"Sensor id="<<SensorCorePtrAux->getSensorId();
+            logString<<"\t\t";
+            logString<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 
             switch(SensorCorePtrAux->getSensorType())
             {
@@ -350,7 +381,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                 }
                 case SensorTypes::imu:
                 {
-                    logFile<<" (IMU)";
+                    logString<<" (IMU)";
                     std::shared_ptr<const ImuSensorCore> ImuSensorCorePtrAux=std::dynamic_pointer_cast< const ImuSensorCore >(SensorCorePtrAux);
 
 
@@ -358,35 +389,35 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
                     // State (Parameters)
                     //if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                        logFile<<" posi_wrt_robot=["<<sensorStatePtr->getPositionSensorWrtRobot().transpose()<<"]'";
+                        logString<<" posi_wrt_robot=["<<sensorStatePtr->getPositionSensorWrtRobot().transpose()<<"]'";
 
                     //if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                        logFile<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
+                        logString<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
 
                     //if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                        logFile<<" est_bias_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
+                        logString<<" est_bias_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
 
                     //if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                        logFile<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
+                        logString<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
 
 
                     // Jacobian
 #ifdef _DEBUG_DISPLAY
-                    logFile<<std::endl;
+                    logString<<std::endl;
                     if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                        logFile<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
+                        logString<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
 
-                    logFile<<std::endl;
+                    logString<<std::endl;
                     if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                        logFile<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
+                        logString<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
 
-                    logFile<<std::endl;
+                    logString<<std::endl;
                     if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                        logFile<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
+                        logString<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
 
-                    logFile<<std::endl;
+                    logString<<std::endl;
                     if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                        logFile<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
+                        logString<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
 #endif
 
 
@@ -395,20 +426,26 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
             }
 
-            logFile<<std::endl;
+            logString<<std::endl;
         }
 
 
         //// Map
         // TODO
 
+//        // Has state?
+//        logString<<"\t";
+//        logString<<"+Has state: "<<TheStateEstimationCore->hasState()<<std::endl;
 
 
         /////// Covariance of the state
-        logFile<<"\t";
-        logFile<<"+Covariance of the state:"<<std::endl;
-        logFile<<"\t\t";
-        logFile<<"size: "<<TheStateEstimationCore->covarianceMatrix.rows()<<" x "<<TheStateEstimationCore->covarianceMatrix.cols()<<std::endl;
+        logString<<"\t";
+        logString<<"+Covariance of the state:"<<std::endl;
+        logString<<"\t\t";
+        logString<<"size: "<<TheStateEstimationCore->covarianceMatrix.rows()<<" x "<<TheStateEstimationCore->covarianceMatrix.cols()<<std::endl;
+
+
+
 
     }
 
@@ -422,12 +459,12 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
             itMeas!=TheStateEstimationCore->TheListMeasurementCore.end();
             ++itMeas)
         {
-            logFile<<"\t";
-            logFile<<"+Meas:"<<std::endl;
+            logString<<"\t";
+            logString<<"+Meas:"<<std::endl;
 
             std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itMeas)->getTheSensorCore();
-            logFile<<"\t\t";
-            logFile<<"Sensor id="<<SensorCorePtrAux->getSensorId();
+            logString<<"\t\t";
+            logString<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 
             switch(SensorCorePtrAux->getSensorType())
             {
@@ -437,17 +474,17 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                 }
                 case SensorTypes::imu:
                 {
-                    logFile<<" (IMU)";
+                    logString<<" (IMU)";
                     //std::shared_ptr<SensorMeasurementCore> measurePtrAux=(*itMeas);
                     //std::shared_ptr<ImuSensorMeasurementCore> measurePtr=dynamic_cast< std::shared_ptr<ImuSensorMeasurementCore> >(measurePtrAux);
                     std::shared_ptr<ImuSensorMeasurementCore> measurePtr=std::static_pointer_cast< ImuSensorMeasurementCore >(*itMeas);
                     //std::shared_ptr<ImuSensorMeasurementCore> measurePtr=std::dynamic_pointer_cast< ImuSensorMeasurementCore >(*itMeas);
                     if(measurePtr->isOrientationSet())
-                        logFile<<" orientation=["<<measurePtr->getOrientation().transpose()<<"]'";
+                        logString<<" orientation=["<<measurePtr->getOrientation().transpose()<<"]'";
                     if(measurePtr->isAngularVelocitySet())
-                        logFile<<" angularVel=["<<measurePtr->getAngularVelocity().transpose()<<"]'";
+                        logString<<" angularVel=["<<measurePtr->getAngularVelocity().transpose()<<"]'";
                     if(measurePtr->isLinearAccelerationSet())
-                        logFile<<" linearAcc=["<<measurePtr->getLinearAcceleration().transpose()<<"]'";
+                        logString<<" linearAcc=["<<measurePtr->getLinearAcceleration().transpose()<<"]'";
                     break;
                 }
 
@@ -455,11 +492,20 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
 
-            logFile<<std::endl;
+            logString<<std::endl;
         }
     }
 
+
+//    // Has measurements?
+//    logString<<"\t";
+//    logString<<"+Has measurements: "<<TheStateEstimationCore->hasMeasurement()<<std::endl;
+
     //logFile<<" "<<std::endl;
+
+
+    // Log it
+    this->log(logString.str());
 
 
     return 0;
@@ -470,14 +516,22 @@ int MsfStorageCore::displayRingBuffer()
     TheRingBufferMutex.lock();
 
     // Display Buffer
-    logFile<<" "<<std::endl;
-    logFile<<"Displaying buffer of "<<this->getSize()<<" elements:"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<" "<<std::endl;
+        logString<<"Displaying buffer of "<<this->getSize()<<" elements:"<<std::endl;
+
+        this->log(logString.str());
+    }
+
+
+
     for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
     {
         this->displayStateEstimationElement(it->timeStamp, it->object);
     }
 
-    logFile<<" "<<std::endl;
+    //logFile<<" "<<std::endl;
 
     TheRingBufferMutex.unlock();
 
@@ -494,7 +548,12 @@ int MsfStorageCore::displayRingBuffer()
 
 int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 {
-    logFile<<"MsfStorageCore::purgeRingBuffer()"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::purgeRingBuffer()"<<std::endl;
+        this->log(logString.str());
+    }
+
 
     // TODO
     // Delete Lasts elements of the buffer, to avoid it growing a lot
@@ -513,7 +572,13 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 
     //std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
 
-    logFile<<"MsfStorageCore::purgeRingBuffer() ended"<<std::endl;
+
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::purgeRingBuffer() ended"<<std::endl;
+        this->log(logString.str());
+    }
+
 
     // End
     return 0;
@@ -550,6 +615,9 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
         outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
     }
 
+    // Display
+    this->log(this->getDisplayOutdatedElements());
+
     // Find the oldest element
     std::list<TimeStamp>::iterator minElement=min_element(outdatedBufferElements.begin(),outdatedBufferElements.end());
 
@@ -561,5 +629,47 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
     // Remove element of the list
     outdatedBufferElements.erase(minElement);
     // End
+    return 0;
+}
+
+
+int MsfStorageCore::displayOutdatedBufferElements()
+{
+    this->log(getDisplayOutdatedElements());
+
+    return 0;
+}
+
+std::string MsfStorageCore::getDisplayOutdatedElements()
+{
+    std::ostringstream logString;
+
+    logString<<"List of outdated elements: ";
+    for(std::list<TimeStamp>::iterator itElement=outdatedBufferElements.begin();
+        itElement!=outdatedBufferElements.end();
+        ++itElement)
+    {
+        logString<<"TS: sec="<<itElement->sec<<" s; nsec="<<itElement->nsec<<" ns. ";
+
+    }
+
+    logString<<std::endl;
+
+
+    return logString.str();
+}
+
+
+int MsfStorageCore::log(std::string logString)
+{
+    // Lock mutex
+    TheLogFileMutex.lock();
+
+    // Write in file
+    logFile<<logString;
+
+    // Unlock mutex
+    TheLogFileMutex.unlock();
+
     return 0;
 }

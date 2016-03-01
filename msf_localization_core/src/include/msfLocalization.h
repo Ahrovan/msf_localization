@@ -74,6 +74,31 @@
 #include "msf_storage_core.h"
 
 
+
+
+class SyncThreadState
+{
+protected:
+    std::mutex protectionMutex;
+
+protected:
+    bool flagIsWorking;
+    TimeStamp procesingTimeStamp;
+public:
+    SyncThreadState();
+
+public:
+    bool isWorking();
+    TimeStamp getProcessingTimeStamp();
+
+public:
+    int setProcessing(TimeStamp procesingTimeStamp);
+    int setNotProcessing();
+};
+
+
+
+
 class MsfLocalizationCore
 {
 
@@ -126,6 +151,11 @@ public:
 
 
 
+    // Get previous state
+protected:
+    int getPreviousState(TimeStamp TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState);
+
+
     // Predict Functions
 protected:
     int predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& PredictedState);
@@ -145,9 +175,12 @@ protected:
 protected:
     double predictRateVale;
     std::thread* predictThread;
+    SyncThreadState predictThreadState;
 protected:
     // TODO Finish
     virtual int predictThreadFunction();
+
+
 
 
 
@@ -197,6 +230,11 @@ protected:
 protected:
     std::string logPath;
     std::ofstream logFile;
+    // mutex to protect the log file
+protected:
+    std::mutex TheLogFileMutex;
+public:
+    int log(std::string logString);
 
 };
 
