@@ -31,6 +31,9 @@
 //  shared_ptr
 #include <memory>
 
+// Thread
+#include <thread>
+
 
 //PUGIXML
 //#include "pugixml.hpp"

@@ -42,9 +42,9 @@ template <class BufferObjectType>
 class StampedRingBuffer : public RingBuffer< StampedBufferObjectType<BufferObjectType> >
 {
 public:
-    int searchElementByStamp(StampedBufferObjectType<BufferObjectType>& TheElement, TimeStamp timeStamp)
+    int searchElementByStamp(StampedBufferObjectType<BufferObjectType>& TheElement, TimeStamp timeStamp) const
     {
-        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator ListIterator=this->TheElementsList.begin();
 
         for(ListIterator; ListIterator!=this->TheElementsList.end(); ++ListIterator)
         {
@@ -172,9 +172,9 @@ public:
 
 
 public:
-    int searchPreIStampByStamp(TimeStamp oldTimeStamp, TimeStamp& newTimeStamp)
+    int searchPreIStampByStamp(TimeStamp oldTimeStamp, TimeStamp& newTimeStamp) const
     {
-        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator itElement;
 
         int result=searchPreIElementByStamp(itElement, oldTimeStamp);
 

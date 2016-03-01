@@ -714,6 +714,7 @@ int MsfLocalizationROS::robotPoseThreadFunction()
 //            this->robotPoseThreadState.setNotProcessing();
         }
 
+
 //        if()
 //        {
 //            std::cout<<"error getting robot pose"<<std::endl;
@@ -756,6 +757,10 @@ int MsfLocalizationROS::robotPoseThreadFunction()
         {
             robotPoseMsg.pose.covariance[i]=robotPoseCovarianceArray[i];
         }
+
+
+        // Free the ownership
+        PredictedState.reset();
 
 
         // Publish Robot Pose
@@ -821,6 +826,8 @@ int MsfLocalizationROS::predictThreadFunction()
             this->predict(TheTimeStamp, ThePredictedState);
 //            predictThreadState.setNotProcessing();
         }
+
+        ThePredictedState.reset();
 
 
         // Purge the buffer

@@ -98,7 +98,7 @@ public:
 
 
     // Get the first element
-    int getFirstElement(BufferObjectType& TheElement)
+    int getFirstElement(BufferObjectType& TheElement) const
     {
 
         TheElement=*TheElementsList.begin();
@@ -106,7 +106,7 @@ public:
         return 0;
     }
 
-    int getElementI(BufferObjectType& TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    int getElementI(BufferObjectType& TheElement, typename std::list<BufferObjectType>::const_iterator itElement) const
     {
         if(itElement==TheElementsList.end())
             return 1;
@@ -117,6 +117,11 @@ public:
     }
 
     // Get begining
+    typename std::list<BufferObjectType>::const_iterator getBegin() const
+    {
+        return TheElementsList.begin();
+    }
+
     typename std::list<BufferObjectType>::iterator getBegin()
     {
         return TheElementsList.begin();
@@ -124,6 +129,11 @@ public:
 
     // Get end
     typename std::list<BufferObjectType>::iterator getEnd()
+    {
+        return TheElementsList.end();
+    }
+
+    typename std::list<BufferObjectType>::const_iterator getEnd() const
     {
         return TheElementsList.end();
     }

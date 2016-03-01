@@ -264,6 +264,26 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEs
         PredictedState=std::make_shared<StateEstimationCore>();
 
 
+    {
+        std::ostringstream logString;
+        logString<<"predict: number of users of predicted state="<<PredictedState.use_count()<<std::endl;
+        this->log(logString.str());
+    }
+
+    while(PredictedState.use_count()>2)
+    {
+        // Do nothig. Sleep a little
+        // TODO optimize this!
+        std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
+    }
+
+    {
+        std::ostringstream logString;
+        logString<<"predict: number of users of predicted state="<<PredictedState.use_count()<<std::endl;
+        this->log(logString.str());
+    }
+
+
     // Get the last state from the buffer
     TimeStamp PreviousTimeStamp;
     std::shared_ptr<StateEstimationCore> PreviousState;
@@ -701,6 +721,23 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp, std::shared_ptr<StateEst
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+
+        logString<<"number of users of updated state="<<UpdatedState.use_count()<<std::endl;
+
+        this->log(logString.str());
+    }
+
+    while(UpdatedState.use_count()>2)
+    {
+        // Do nothig. Sleep a little
+        // TODO optimize this!
+        std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
+    }
+
+
+    {
+        std::ostringstream logString;
+        logString<<"number of users of updated state="<<UpdatedState.use_count()<<std::endl;
         this->log(logString.str());
     }
 
