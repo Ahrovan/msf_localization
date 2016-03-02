@@ -60,9 +60,7 @@ public:
 
     int searchIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, TimeStamp timeStamp)
     {
-        itElement=this->TheElementsList.begin();
-
-        for(itElement; itElement!=this->TheElementsList.end(); ++itElement)
+        for(itElement=this->TheElementsList.begin(); itElement!=this->TheElementsList.end(); ++itElement)
         {
             if((itElement)->timeStamp==timeStamp)
             {

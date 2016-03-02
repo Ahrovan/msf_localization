@@ -19,11 +19,15 @@
 
 
 
+
 class RosSensorImuInterface : public RosSensorInterface, public ImuSensorCore
 {
 public:
-    RosSensorImuInterface();
+    RosSensorImuInterface(ros::NodeHandle* nh);
 
+
+protected:
+    ros::NodeHandle* nh;
 
 
 public:

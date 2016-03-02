@@ -15,6 +15,10 @@ add_definitions(-std=c++11)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 
  
+#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+
 
 
 #MSF_LOCALIZATION

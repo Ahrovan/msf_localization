@@ -5,8 +5,11 @@
 
 
 
-RosSensorImuInterface::RosSensorImuInterface()
+RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh)
 {
+    // Node Handle
+    this->nh=nh;
+
     // Create the variable in the MSF Localization Core
     //TheSensorCore = new ImuSensorCore;
 
@@ -110,13 +113,14 @@ void RosSensorImuInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg
 
 int RosSensorImuInterface::open()
 {
-     std::cout<<"RosSensorImuInterface::open()"<<std::endl;
+
+    //std::cout<<"RosSensorImuInterface::open()"<<std::endl;
 
     // Node handler
-    ros::NodeHandle nh;
+    //ros::NodeHandle nh;
 
     // Subscriber
-    ImuTopicSub=nh.subscribe(ImuTopicName, 10, &RosSensorImuInterface::imuTopicCallback, this);
+    ImuTopicSub=nh->subscribe(ImuTopicName, 10, &RosSensorImuInterface::imuTopicCallback, this);
 
 
     return 0;

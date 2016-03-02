@@ -89,7 +89,16 @@ public:
 
     int addElementInI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
     {
+        // Previous
+        //typename std::list<BufferObjectType>::iterator previousIt=itElement;
+
+        // Change
         (*itElement)=TheElement;
+
+        // Delete old
+        //TheElementsList.erase(previousIt);
+
+        // end
         return 0;
     }
 

@@ -78,7 +78,7 @@
 
 
 
-
+/*
 class SyncThreadState
 {
 protected:
@@ -98,8 +98,11 @@ public:
     int setProcessing(TimeStamp procesingTimeStamp);
     int setNotProcessing();
 };
+*/
 
 
+//#define _DEBUG_MSF_LOCALIZATION_CORE
+#define _DEBUG_ERROR_MSF_LOCALIZATION_CORE
 
 
 class MsfLocalizationCore
@@ -161,13 +164,13 @@ protected:
 
     // Predict Functions
 protected:
-    int predict(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& PredictedState);
+    int predict(TimeStamp TheTimeStamp);
 
 
 
     // Update functions
 protected:
-    int update(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& UpdatedState);
+    int update(TimeStamp TheTimeStamp);
 
 
 
@@ -178,7 +181,7 @@ protected:
 protected:
     double predictRateVale;
     std::thread* predictThread;
-    SyncThreadState predictThreadState;
+    //SyncThreadState predictThreadState;
 protected:
     // TODO Finish
     virtual int predictThreadFunction();

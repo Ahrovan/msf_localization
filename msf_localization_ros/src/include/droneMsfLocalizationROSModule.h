@@ -51,6 +51,9 @@
 // Thread
 #include <thread>
 
+// Exceptions
+#include <exception>
+
 
 //ROS
 #include "ros/ros.h"
@@ -95,6 +98,9 @@ public:
     MsfLocalizationROS(int argc,char **argv);
     ~MsfLocalizationROS();
 
+private:
+    ros::NodeHandle* nh;
+
 
 protected:
     int readParameters();
@@ -137,7 +143,7 @@ protected:
     ros::Rate* robotPoseRate;
 protected:
     std::thread* robotPoseThread;
-    SyncThreadState robotPoseThreadState;
+//    SyncThreadState robotPoseThreadState;
 protected:
     int robotPoseThreadFunction();
 

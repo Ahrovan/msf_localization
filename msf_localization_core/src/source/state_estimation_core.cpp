@@ -18,6 +18,10 @@ StateEstimationCore::~StateEstimationCore()
 {
     // Be tidy
 
+//    // Remove the intelliguent pointers
+//    TheRobotStateCore.reset();
+
+
     // TheListSensorStateCore
 //    for(std::list<SensorStateCore*>::iterator it=TheListSensorStateCore.begin(); it!=TheListSensorStateCore.end(); ++it)
 //        delete *it;
