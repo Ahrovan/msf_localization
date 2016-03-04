@@ -1,17 +1,32 @@
 
-#include "sensor_core.h"
+#include "msf_localization_core/sensor_core.h"
 
 //#include "state_estimation_core.h"
 
-#include "msf_storage_core.h"
+#include "msf_localization_core/msf_storage_core.h"
 
 
 
 SensorCore::SensorCore() :
     SensorBasics(),
     dimensionState(0),
-    dimensionErrorState(0)
+    dimensionErrorState(0),
+    dimensionParameters(4+3),
+    dimensionErrorParameters(3+3),
+    dimensionMeasurement(0),
+    dimensionNoise(0)
 {
+
+
+    // Flags
+    flagEstimationAttitudeSensorWrtRobot=false;
+    flagEstimationPositionSensorWrtRobot=false;
+
+
+    // Noise
+    noiseAttitudeSensorWrtRobot.setZero();
+    noisePositionSensorWrtRobot.setZero();
+
 
 
     // LOG
@@ -60,6 +75,12 @@ int SensorCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorage
     return 0;
 }
 
+std::shared_ptr<MsfStorageCore> SensorCore::getTheMsfStorageCore() const
+{
+    std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
+    return TheMsfStorageCoreSharedPtr;
+}
+
 
 
 unsigned int SensorCore::getDimensionState() const
@@ -85,6 +106,27 @@ unsigned int SensorCore::getDimensionErrorState() const
 //}
 
 
+unsigned int SensorCore::getDimensionParameters() const
+{
+    return this->dimensionParameters;
+}
+
+unsigned int SensorCore::getDimensionErrorParameters() const
+{
+    return this->dimensionErrorParameters;
+}
+
+unsigned int SensorCore::getDimensionMeasurement() const
+{
+    return this->dimensionMeasurement;
+}
+
+unsigned int SensorCore::getDimensionNoise() const
+{
+    return this->dimensionNoise;
+}
+
+
 
 bool SensorCore::isEstimationAttitudeSensorWrtRobotEnabled() const
 {
@@ -101,9 +143,45 @@ int SensorCore::enableEstimationAttitudeSensorWrtRobot()
         this->dimensionState+=4;
         // Update Error State Dimension
         this->dimensionErrorState+=3;
+        // Update param
+        this->dimensionParameters-=4;
+        // Update error param
+        this->dimensionErrorParameters-=3;
     }
     return 0;
 }
+
+int SensorCore::enableParameterAttitudeSensorWrtRobot()
+{
+    if(this->flagEstimationAttitudeSensorWrtRobot)
+    {
+        // Enable
+        this->flagEstimationAttitudeSensorWrtRobot=false;
+        // Update State Dimension
+        this->dimensionState-=4;
+        // Update Error State Dimension
+        this->dimensionErrorState-=3;
+        // Update param
+        this->dimensionParameters+=4;
+        // Update error param
+        this->dimensionErrorParameters+=3;
+
+    }
+    return 0;
+}
+
+Eigen::Matrix3d SensorCore::getNoiseAttitudeSensorWrtRobot() const
+{
+    return this->noiseAttitudeSensorWrtRobot;
+}
+
+int SensorCore::setNoiseAttitudeSensorWrtRobot(Eigen::Matrix3d noiseAttitudeSensorWrtRobot)
+{
+    this->noiseAttitudeSensorWrtRobot=noiseAttitudeSensorWrtRobot;
+    return 0;
+}
+
+
 
 bool SensorCore::isEstimationPositionSensorWrtRobotEnabled() const
 {
@@ -120,9 +198,52 @@ int SensorCore::enableEstimationPositionSensorWrtRobot()
         this->dimensionState+=3;
         // Update Error State Dimension
         this->dimensionErrorState+=3;
+        //
+        this->dimensionParameters-=3;
+        //
+        this->dimensionErrorParameters-=3;
     }
     return 0;
 }
 
+int SensorCore::enableParameterPositionSensorWrtRobot()
+{
+    if(this->flagEstimationPositionSensorWrtRobot)
+    {
+        // Enable
+        this->flagEstimationPositionSensorWrtRobot=false;
+        // Update State Dimension
+        this->dimensionState-=3;
+        // Update Error State Dimension
+        this->dimensionErrorState-=3;
+        //
+        this->dimensionParameters+=3;
+        //
+        this->dimensionErrorParameters+=3;
+    }
+    return 0;
+}
+
+Eigen::Matrix3d SensorCore::getNoisePositionSensorWrtRobot() const
+{
+    return this->noisePositionSensorWrtRobot;
+}
+
+int SensorCore::setNoisePositionSensorWrtRobot(Eigen::Matrix3d noisePositionSensorWrtRobot)
+{
+    this->noisePositionSensorWrtRobot=noisePositionSensorWrtRobot;
+    return 0;
+}
 
 
+Eigen::MatrixXd SensorCore::getInitErrorStateVariance() const
+{
+    return this->InitErrorStateVariance;
+}
+
+int SensorCore::prepareInitErrorStateVariance()
+{
+    this->InitErrorStateVariance.resize(dimensionErrorState, dimensionErrorState);
+    this->InitErrorStateVariance.setZero();
+    return 0;
+}

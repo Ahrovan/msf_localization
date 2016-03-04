@@ -1,11 +1,12 @@
 
-#include "imu_sensor_core.h"
+#include "msf_localization_core/imu_sensor_core.h"
 
 // Circular Dependency
-#include "msf_storage_core.h"
+#include "msf_localization_core/msf_storage_core.h"
 
 
-ImuSensorCore::ImuSensorCore()
+ImuSensorCore::ImuSensorCore() :
+    SensorCore()
 {
     // Sensor Type
     setSensorType(SensorTypes::imu);
@@ -15,12 +16,33 @@ ImuSensorCore::ImuSensorCore()
     flagMeasurementAngularVelocity=false;
     flagMeasurementLinearAcceleration=false;
 
-    // Flags estimation
-    flagEstimationAttitudeSensorWrtRobot=false;
-    flagEstimationPositionSensorWrtRobot=false;
+    // Flags estimation -> By default are considered parameters
     flagEstimationBiasAngularVelocity=false;
+    flagEstimationScaleAngularVelocity=false;
     flagEstimationBiasLinearAcceleration=false;
+    flagEstimationScaleLinearAcceleration=false;
 
+    // State -> Again just in case
+    dimensionErrorState=0;
+    dimensionState=0;
+
+    // Parameters
+    dimensionParameters+=12;
+    dimensionErrorParameters+=12;
+
+    // Noises measurements
+    noiseMeasurementAngularVelocity.setZero();
+    noiseMeasurementLinearAcceleration.setZero();
+
+    // Noises parameters
+    noiseBiasAngularVelocity.setZero();
+    noiseScaleAngularVelocity.setZero();
+    noiseBiasLinearAcceleration.setZero();
+    noiseScaleLinearAcceleration.setZero();
+
+    // Noises estimation
+    noiseEstimationBiasAngularVelocity.setZero();
+    noiseEstimationBiasLinearAcceleration.setZero();
 
     return;
 }
@@ -30,38 +52,74 @@ ImuSensorCore::~ImuSensorCore()
     return;
 }
 
-bool ImuSensorCore::isOrientationEnabled() const
+bool ImuSensorCore::isMeasurementOrientationEnabled() const
 {
     return flagMeasurementOrientation;
 }
 
-int ImuSensorCore::enableOrientation()
+int ImuSensorCore::enableMeasurementOrientation()
 {
-    this->flagMeasurementOrientation=true;
+    if(!this->flagMeasurementOrientation)
+    {
+        this->flagMeasurementOrientation=true;
+        this->dimensionMeasurement+=3;
+    }
     return 0;
 }
 
-bool ImuSensorCore::isAngularVelocityEnabled() const
+bool ImuSensorCore::isMeasurementAngularVelocityEnabled() const
 {
     return flagMeasurementAngularVelocity;
 }
 
-int ImuSensorCore::enableAngularVelocity()
+int ImuSensorCore::enableMeasurementAngularVelocity()
 {
-    this->flagMeasurementAngularVelocity=true;
+    if(!this->flagMeasurementAngularVelocity)
+    {
+        this->flagMeasurementAngularVelocity=true;
+        this->dimensionMeasurement+=3;
+    }
     return 0;
 }
 
-bool ImuSensorCore::isLinearAccelerationEnabled() const
+Eigen::Matrix3d ImuSensorCore::getNoiseMeasurementAngularVelocity() const
+{
+    return this->noiseMeasurementAngularVelocity;
+}
+
+int ImuSensorCore::setNoiseMeasurementAngularVelocity(Eigen::Matrix3d noiseMeasurementAngularVelocity)
+{
+    this->noiseMeasurementAngularVelocity=noiseMeasurementAngularVelocity;
+    return 0;
+}
+
+
+bool ImuSensorCore::isMeasurementLinearAccelerationEnabled() const
 {
     return flagMeasurementLinearAcceleration;
 }
 
-int ImuSensorCore::enableLinearAcceleration()
+int ImuSensorCore::enableMeasurementLinearAcceleration()
 {
-    this->flagMeasurementLinearAcceleration=true;
+    if(!this->flagMeasurementLinearAcceleration)
+    {
+        this->flagMeasurementLinearAcceleration=true;
+        this->dimensionMeasurement+=3;
+    }
     return 0;
 }
+
+Eigen::Matrix3d ImuSensorCore::getNoiseMeasurementLinearAcceleration() const
+{
+    return this->noiseMeasurementLinearAcceleration;
+}
+
+int ImuSensorCore::setNoiseMeasurementLinearAcceleration(Eigen::Matrix3d noiseMeasurementLinearAcceleration)
+{
+    this->noiseMeasurementLinearAcceleration=noiseMeasurementLinearAcceleration;
+    return 0;
+}
+
 
 int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
 {
@@ -70,11 +128,11 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
     if(!isSensorEnabled())
         return 0;
 
-    std::shared_ptr<MsfStorageCore> TheMsfStorageCoreAux=this->TheMsfStorageCore.lock();
+    //std::shared_ptr<MsfStorageCore> TheMsfStorageCoreAux=this->TheMsfStorageCore.lock();
 //    if(!TheMsfStorageCoreAux)
 //        std::cout<<"Unable to lock TheMsfStorageCore"<<std::endl;
 
-    TheMsfStorageCoreAux->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+    this->getTheMsfStorageCore()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
 
     return 0;
 }
@@ -135,6 +193,28 @@ int ImuSensorCore::enableEstimationBiasAngularVelocity()
         this->dimensionState+=3;
         // Update Error State Dimension
         this->dimensionErrorState+=3;
+        //
+        this->dimensionParameters-=3;
+        //
+        this->dimensionErrorParameters-=3;
+    }
+    return 0;
+}
+
+int ImuSensorCore::enableParameterBiasAngularVelocity()
+{
+    if(this->flagEstimationBiasAngularVelocity)
+    {
+        // Enable
+        this->flagEstimationBiasAngularVelocity=false;
+        // Update State Dimension
+        this->dimensionState-=3;
+        // Update Error State Dimension
+        this->dimensionErrorState-=3;
+        //
+        this->dimensionParameters+=3;
+        //
+        this->dimensionErrorParameters+=3;
     }
     return 0;
 }
@@ -149,6 +229,74 @@ int ImuSensorCore::setNoiseBiasAngularVelocity(Eigen::Matrix3d noiseBiasAngularV
     this->noiseBiasAngularVelocity=noiseBiasAngularVelocity;
     return 0;
 }
+
+
+// Angular Velocity biases: Estimation Covariance (if enabled estimation)
+Eigen::Matrix3d ImuSensorCore::getNoiseEstimationBiasAngularVelocity() const
+{
+    return this->noiseEstimationBiasAngularVelocity;
+}
+
+int ImuSensorCore::setNoiseEstimationBiasAngularVelocity(Eigen::Matrix3d noiseEstimationBiasAngularVelocity)
+{
+    this->noiseEstimationBiasAngularVelocity=noiseEstimationBiasAngularVelocity;
+    return 0;
+}
+
+
+bool ImuSensorCore::isEstimationScaleAngularVelocityEnabled() const
+{
+    return this->flagEstimationScaleAngularVelocity;
+}
+
+int ImuSensorCore::enableEstimationScaleAngularVelocity()
+{
+    if(!this->flagEstimationScaleAngularVelocity)
+    {
+        // Enable
+        this->flagEstimationScaleAngularVelocity=true;
+        // Update State Dimension
+        this->dimensionState+=3;
+        // Update Error State Dimension
+        this->dimensionErrorState+=3;
+        //
+        this->dimensionParameters-=3;
+        //
+        this->dimensionErrorParameters-=3;
+    }
+    return 0;
+}
+
+int ImuSensorCore::enableParameterScaleAngularVelocity()
+{
+    if(this->flagEstimationScaleAngularVelocity)
+    {
+        // Enable
+        this->flagEstimationScaleAngularVelocity=false;
+        // Update State Dimension
+        this->dimensionState-=3;
+        // Update Error State Dimension
+        this->dimensionErrorState-=3;
+        //
+        this->dimensionParameters+=3;
+        //
+        this->dimensionErrorParameters+=3;
+    }
+    return 0;
+}
+
+Eigen::Matrix3d ImuSensorCore::getNoiseScaleAngularVelocity() const
+{
+    return this->noiseScaleAngularVelocity;
+}
+
+int ImuSensorCore::setNoiseScaleAngularVelocity(Eigen::Matrix3d noiseScaleAngularVelocity)
+{
+    this->noiseScaleAngularVelocity=noiseScaleAngularVelocity;
+    return 0;
+}
+
+
 
 
 bool ImuSensorCore::isEstimationBiasLinearAccelerationEnabled() const
@@ -166,6 +314,28 @@ int ImuSensorCore::enableEstimationBiasLinearAcceleration()
         this->dimensionState+=3;
         // Update Error State Dimension
         this->dimensionErrorState+=3;
+        //
+        this->dimensionParameters-=3;
+        //
+        this->dimensionErrorParameters-=3;
+    }
+    return 0;
+}
+
+int ImuSensorCore::enableParameterBiasLinearAcceleration()
+{
+    if(this->flagEstimationBiasLinearAcceleration)
+    {
+        // Enable
+        this->flagEstimationBiasLinearAcceleration=false;
+        // Update State Dimension
+        this->dimensionState-=3;
+        // Update Error State Dimension
+        this->dimensionErrorState-=3;
+        //
+        this->dimensionParameters+=3;
+        //
+        this->dimensionErrorParameters+=3;
     }
     return 0;
 }
@@ -180,6 +350,171 @@ int ImuSensorCore::setNoiseBiasLinearAcceleration(Eigen::Matrix3d noiseBiasLinea
     this->noiseBiasLinearAcceleration=noiseBiasLinearAcceleration;
     return 0;
 }
+
+Eigen::Matrix3d ImuSensorCore::getNoiseEstimationBiasLinearAcceleration() const
+{
+    return this->noiseEstimationBiasLinearAcceleration;
+}
+
+int ImuSensorCore::setNoiseEstimationBiasLinearAcceleration(Eigen::Matrix3d noiseEstimationBiasLinearAcceleration)
+{
+    this->noiseEstimationBiasLinearAcceleration=noiseEstimationBiasLinearAcceleration;
+    return 0;
+}
+
+
+bool ImuSensorCore::isEstimationScaleLinearAccelerationEnabled() const
+{
+    return this->flagEstimationScaleLinearAcceleration;
+}
+
+int ImuSensorCore::enableEstimationScaleLinearAcceleration()
+{
+    if(!this->flagEstimationScaleLinearAcceleration)
+    {
+        // Enable
+        this->flagEstimationScaleLinearAcceleration=true;
+        // Update State Dimension
+        this->dimensionState+=3;
+        // Update Error State Dimension
+        this->dimensionErrorState+=3;
+        //
+        this->dimensionParameters-=3;
+        //
+        this->dimensionErrorParameters-=3;
+    }
+    return 0;
+}
+
+int ImuSensorCore::enableParameterScaleLinearAcceleration()
+{
+    if(this->flagEstimationScaleLinearAcceleration)
+    {
+        // Enable
+        this->flagEstimationScaleLinearAcceleration=false;
+        // Update State Dimension
+        this->dimensionState-=3;
+        // Update Error State Dimension
+        this->dimensionErrorState-=3;
+        //
+        this->dimensionParameters+=3;
+        //
+        this->dimensionErrorParameters+=3;
+    }
+    return 0;
+}
+
+Eigen::Matrix3d ImuSensorCore::getNoiseScaleLinearAcceleration() const
+{
+    return this->noiseScaleLinearAcceleration;
+}
+
+int ImuSensorCore::setNoiseScaleLinearAcceleration(Eigen::Matrix3d noiseScaleLinearAcceleration)
+{
+    this->noiseScaleLinearAcceleration=noiseScaleLinearAcceleration;
+    return 0;
+}
+
+
+/*
+int ImuSensorCore::setInitErrorStateVariancePositionSensorWrtRobot(Eigen::Vector3d initVariance)
+{
+    int point=0;
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
+        return 0;
+    }
+    return -1;
+}
+
+int ImuSensorCore::setInitErrorStateVarianceAttitudeSensorWrtRobot(Eigen::Vector3d initVariance)
+{
+    int point=0;
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+        point+=3;
+    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
+        return 0;
+    }
+    return -1;
+}
+
+int ImuSensorCore::setInitErrorStateVarianceBiasLinearAcceleration(Eigen::Vector3d initVariance)
+{
+    int point=0;
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+        point+=3;
+    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        point+=3;
+    }
+    if(this->isEstimationBiasLinearAccelerationEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
+        return 0;
+    }
+    return -1;
+}
+
+int ImuSensorCore::setInitErrorStateVarianceBiasAngularVelocity(Eigen::Vector3d initVariance)
+{
+    int point=0;
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+        point+=3;
+    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        point+=3;
+    }
+    if(this->isEstimationBiasLinearAccelerationEnabled())
+    {
+        point+=3;
+    }
+    if(this->isEstimationBiasAngularVelocityEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
+        return 0;
+    }
+    return -1;
+}
+*/
+
+
+int ImuSensorCore::prepareInitErrorStateVariance()
+{
+    int error=SensorCore::prepareInitErrorStateVariance();
+
+    if(error)
+        return error;
+
+
+    int point=0;
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=noisePositionSensorWrtRobot;
+        point+=3;
+    }
+    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=noiseAttitudeSensorWrtRobot;
+        point+=3;
+    }
+    if(this->isEstimationBiasLinearAccelerationEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=noiseBiasLinearAcceleration;
+        point+=3;
+    }
+    if(this->isEstimationBiasAngularVelocityEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=noiseBiasAngularVelocity;
+    }
+
+
+
+    return 0;
+}
+
 
 
 
@@ -225,9 +560,16 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     // Bias Angular Velocity
     predictedState->biasesAngularVelocity=pastState->biasesAngularVelocity;
 
+
+    // Scale Angular Velocity
+    predictedState->scaleAngularVelocity=pastState->scaleAngularVelocity;
+
+
     // Bias Linear Acceleration
     predictedState->biasesLinearAcceleration=pastState->biasesLinearAcceleration;
 
+    // Scale Linear Velocity
+    predictedState->scaleLinearAcceleration=pastState->scaleLinearAcceleration;
 
 
     //std::cout<<"ImuSensorCore::predictState() end"<<std::endl;
@@ -259,10 +601,17 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
     if(flagEstimationBiasLinearAcceleration)
         predictedState->errorStateJacobian.biasesLinearAcceleration=Eigen::Matrix3d::Identity();
 
+    // ka / ka
+    if(flagEstimationScaleLinearAcceleration)
+        predictedState->errorStateJacobian.scaleLinearAcceleration=Eigen::Matrix3d::Identity();
+
     // bw / bw
     if(flagEstimationBiasAngularVelocity)
         predictedState->errorStateJacobian.biasesAngularVelocity=Eigen::Matrix3d::Identity();
 
+    // kw / kw
+    if(flagEstimationScaleAngularVelocity)
+        predictedState->errorStateJacobian.scaleAngularVelocity=Eigen::Matrix3d::Identity();
 
 
 
@@ -270,7 +619,7 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
     return 0;
 }
 
-int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
+int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
 #ifdef _DEBUG_SENSOR_CORE
     logFile<<"ImuSensorCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
@@ -305,6 +654,10 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::s
     }
 
 
+    // Checks
+    // TODO
+
+
     // Create pointer
     // TODO check if it must be done here
     if(!predictedMeasurement)
@@ -325,7 +678,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::s
 
     // Prediction
     // Orientation
-    if(this->isOrientationEnabled())
+    if(this->isMeasurementOrientationEnabled())
     {
 #ifdef _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() orientation"<<std::endl;
@@ -336,7 +689,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::s
     }
 
     // Angular velocity
-    if(isAngularVelocityEnabled())
+    if(isMeasurementAngularVelocityEnabled())
     {
 #ifdef _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() angular velocity"<<std::endl;
@@ -378,7 +731,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::s
     }
 
     // Linear acceleration
-    if(isLinearAccelerationEnabled())
+    if(isMeasurementLinearAccelerationEnabled())
     {
 #ifdef _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() linear acceleration"<<std::endl;
@@ -425,6 +778,114 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, const std::s
 #ifdef _DEBUG_SENSOR_CORE
     logFile<<"ImuSensorCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
+
+    // End
+    return 0;
+}
+
+
+
+
+int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore>& TheImuStateCore)
+{
+
+    // Checks
+    // TODO
+
+
+
+    /// Common Variables
+
+    // dimension of the measurement
+    int dimensionMeasurement=TheImuStateCore->getTheSensorCore()->getDimensionMeasurement();
+
+
+
+
+    /// Jacobians measurement - state
+
+    // Jacobian measurement - robot state
+    switch(TheRobotStateCore->getTheRobotCore()->getRobotType())
+    {
+        case RobotTypes::free_model:
+        {
+            // Robot
+            std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCoreAux=std::static_pointer_cast<FreeModelRobotStateCore>(TheRobotStateCore);
+            std::shared_ptr<const FreeModelRobotCore> TheRobotCoreAux=std::static_pointer_cast<const FreeModelRobotCore>(TheRobotStateCoreAux->getTheRobotCore());
+
+            // dimension of robot state
+            int dimensionRobotErrorState=TheRobotCoreAux->getDimensionErrorState();
+
+            // Resize and init Jacobian
+            TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimensionMeasurement, dimensionRobotErrorState);
+            TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.setZero();
+
+            // Fill Jacobian
+            // TODO
+
+            // end
+            break;
+        }
+        default:
+        {
+            return -2;
+        }
+
+    }
+
+
+    // Jacobian measurement - sensor state
+
+    // dimension of the sensor state
+    int dimensionSensorErrorState=TheImuStateCore->getTheSensorCore()->getDimensionErrorState();
+
+    // Resize and init Jacobian
+    TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimensionMeasurement, dimensionSensorErrorState);
+    TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
+
+    // Fill Jacobian
+    // TODO
+
+
+
+    /// Jacobians measurement - sensor parameters
+
+    // dimension of the sensor parameters
+    int dimensionSensorParameters=TheImuStateCore->getTheSensorCore()->getDimensionErrorParameters();
+
+    // Resize and init Jacobian
+    TheImuStateCore->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.resize(dimensionMeasurement, dimensionSensorParameters);
+    TheImuStateCore->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.setZero();
+
+    // Fill Jacobian
+    // TODO
+
+
+
+    /// Jacobians measurement - global parameters
+
+    // dimension of the global parameters
+    int dimensionGlobalParameters=TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
+
+    // Resize and init Jacobian
+    TheImuStateCore->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.resize(dimensionMeasurement, dimensionGlobalParameters);
+    TheImuStateCore->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.setZero();
+
+    // Fill Jacobian
+    // TODO
+
+
+
+    /// Jacobians measurement - sensor noise of the measurement
+
+    // Resize and init Jacobian
+    TheImuStateCore->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimensionMeasurement, dimensionMeasurement);
+    TheImuStateCore->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
+
+    // Fill Jacobian
+    // TODO
+
+
 
     // End
     return 0;

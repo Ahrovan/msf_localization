@@ -1,6 +1,6 @@
 
 
-#include "stamped_ring_buffer.h"
+#include "msf_localization_core/stamped_ring_buffer.h"
 
 
 #include "ros/ros.h"

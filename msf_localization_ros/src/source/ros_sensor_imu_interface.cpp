@@ -1,5 +1,5 @@
 
-#include "ros_sensor_imu_interface.h"
+#include "msf_localization_ros/ros_sensor_imu_interface.h"
 
 
 
@@ -58,7 +58,7 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
 
 
     // Orientation if enabled
-    if(this->isOrientationEnabled())
+    if(this->isMeasurementOrientationEnabled())
     {
         Eigen::Vector4d orientation(msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
 
@@ -66,11 +66,12 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
             std::cout<<"Error setting orientation"<<std::endl;
     }
 
-    msg->orientation_covariance;
+    //msg->orientation_covariance;
+    // TODO
 
 
     // Angular velocity if enabled
-    if(this->isAngularVelocityEnabled())
+    if(this->isMeasurementAngularVelocityEnabled())
     {
         Eigen::Vector3d angular_velocity(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
 
@@ -78,18 +79,21 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
             std::cout<<"Error setting angular_velocity"<<std::endl;
     }
 
-    msg->angular_velocity_covariance;
+    //msg->angular_velocity_covariance;
+    // TODO
 
 
     // Linear acceleration if enabled
-    if(this->isLinearAccelerationEnabled())
+    if(this->isMeasurementLinearAccelerationEnabled())
     {
         Eigen::Vector3d linear_acceleration(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
 
         if(TheImuSensorMeasurementCore->setLinearAcceleration(linear_acceleration))
             std::cout<<"Error setting linear_acceleration"<<std::endl;
     }
-    msg->linear_acceleration_covariance;
+
+    //msg->linear_acceleration_covariance;
+    // TODO
 
 
     // Set

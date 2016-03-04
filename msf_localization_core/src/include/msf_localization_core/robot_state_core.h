@@ -3,7 +3,7 @@
 #define _ROBOT_STATE_CORE_H
 
 
-#include "robot_core.h"
+#include "msf_localization_core/robot_core.h"
 
 
 class RobotStateCore

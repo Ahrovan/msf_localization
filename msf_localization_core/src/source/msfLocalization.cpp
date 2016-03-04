@@ -1,5 +1,5 @@
 
-#include "msfLocalization.h"
+#include "msf_localization_core/msfLocalization.h"
 
 
 
@@ -63,6 +63,8 @@ MsfLocalizationCore::MsfLocalizationCore()
     // Create Robot Core
     TheRobotCore=std::make_shared<RobotCore>();
 
+    // Create Global Parameters Core
+    TheGlobalParametersCore=std::make_shared<GlobalParametersCore>();
 
     // Sensors
     //Id
@@ -222,6 +224,8 @@ int MsfLocalizationCore::predictThreadFunction()
 
 
 
+
+
 int MsfLocalizationCore::bufferManagerThreadFunction()
 {
 
@@ -365,17 +369,32 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 #endif
 
     // Dimension of the state
-    unsigned int dimensionOfState=0;
-    unsigned int dimensionOfErrorState=0;
+    //unsigned int dimensionOfState=0;
+    //unsigned int dimensionOfErrorState=0;
+
+
+    ///// Global Parameters
+
+    // TODO Improve
+    std::shared_ptr<GlobalParametersStateCore> predictedStateGlobalParameters=std::make_shared<GlobalParametersStateCore>(PreviousState->TheGlobalParametersStateCore->getTheGlobalParametersCore());
+
+
+    // Copy the same values
+    predictedStateGlobalParameters->setGravity(PreviousState->TheGlobalParametersStateCore->getGravity());
+
+
+    // Add
+    PredictedState->TheGlobalParametersStateCore=predictedStateGlobalParameters;
+
 
 
 
     ///// Robot
 
     // Dimension of state
-    dimensionOfState+=TheRobotCore->getDimensionState();
+    //dimensionOfState+=TheRobotCore->getDimensionState();
     // Dimension of error state
-    dimensionOfErrorState+=TheRobotCore->getDimensionErrorState();
+    //dimensionOfErrorState+=TheRobotCore->getDimensionErrorState();
 
     // Robot Type
     switch(TheRobotCore->getRobotType())
@@ -437,9 +456,9 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         ++itSens)
     {
         // Dimension of state
-        dimensionOfState+=(*itSens)->getDimensionState();
+        //dimensionOfState+=(*itSens)->getDimensionState();
         // Dimension of the error state
-        dimensionOfErrorState+=(*itSens)->getDimensionErrorState();
+        //dimensionOfErrorState+=(*itSens)->getDimensionErrorState();
 
 
         // Auxiliar
@@ -539,6 +558,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     // Resize the covariance Matrix
+    int dimensionOfErrorState=PredictedState->getDimensionErrorState();
     PredictedState->covarianceMatrix.resize(dimensionOfErrorState,dimensionOfErrorState);
     PredictedState->covarianceMatrix.setZero();
 
@@ -934,9 +954,10 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         return 13;
     }
 
-//if(0)
-//{
-    // Measurement prediction
+
+
+
+    ///// Measurement prediction
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListPredictedMeasurements;
 
     for(std::list<std::shared_ptr<SensorMeasurementCore> >::iterator itListMeas=UpdatedState->TheListMeasurementCore.begin();
@@ -986,13 +1007,24 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorPredictedMeasurement;
 
                 // Call measurement prediction
-                if(TheImuSensorCore->predictMeasurement(TheTimeStamp, UpdatedState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
+                if(TheImuSensorCore->predictMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
                 {
 #ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
 #endif
                     return 3;
                 }
+
+
+                // Compute Jacobians of the Measurement
+                if(TheImuSensorCore->jacobiansMeasurements(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheImuSensorStateCore))
+                {
+#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                    std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
+#endif
+                    return 3;
+                }
+
 
                 // Push
                 TheListPredictedMeasurements.push_back(TheImuSensorPredictedMeasurement);
@@ -1012,9 +1044,57 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 
 
-    //std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
 
-//}
+    //// Total Jacobians Measurement
+
+    // Jacobian Measurement - Error State
+    Eigen::MatrixXd JacobianMeasurementErrorState;
+
+
+    // Jacobian Measurement - Measurement Noise
+    Eigen::MatrixXd JacobianMeasurementNoise;
+
+
+    // Jacobian Measurement - Global Parameters
+    Eigen::MatrixXd JacobianMeasurementGlobalParameters;
+
+
+    // Jacobian Measurement - Ohter Parameters (Robot Parameters)
+    // TODO
+
+
+    // Jacobian Measurement - Sensor Parameters
+    Eigen::MatrixXd JacobianMeasurementSensorParameters;
+
+
+
+
+    ///// Innovation (or residual) covariance: S
+
+    // Matrix
+    Eigen::MatrixXd innovationCovariance;
+
+    // Equation
+    // TODO
+
+
+    ///// Near-optimal Kalman gain: K
+
+    // Matrix
+    Eigen::MatrixXd kalmanGain;
+
+    // Equation
+    // TODO
+
+
+
+    ///// Updated state estimate: x(k+1|k+1)
+
+
+
+    ///// Updated covariance estimate: P(k+1|k+1)
+
+
 
 
     /////// Add element to the buffer
@@ -1112,13 +1192,13 @@ int MsfLocalizationCore::predictedFreeModelRobotCovariance(TimeStamp DeltaTime, 
     predictedStateCovarianceMatrix->block<9,9>(0,0)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,9>(0,0)*predictedStateRobot->errorStateJacobian.linear.transpose();
 
     // Angular part
-    predictedStateCovarianceMatrix->block<6,6>(9,9)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,6>(9,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
+    predictedStateCovarianceMatrix->block<9,9>(9,9)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<9,9>(9,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
 
     // Linear - angular
-    predictedStateCovarianceMatrix->block<9,6>(0,9)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,6>(0,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
+    predictedStateCovarianceMatrix->block<9,9>(0,9)=predictedStateRobot->errorStateJacobian.linear*previousStateCovarianceMatrix->block<9,9>(0,9)*predictedStateRobot->errorStateJacobian.angular.transpose();
 
     // Angular - linear
-    predictedStateCovarianceMatrix->block<6,9>(9,0)=predictedStateCovarianceMatrix->block<9,6>(0,9).transpose();
+    predictedStateCovarianceMatrix->block<9,9>(9,0)=predictedStateCovarianceMatrix->block<9,9>(0,9).transpose();
 
 
 
@@ -1128,7 +1208,7 @@ int MsfLocalizationCore::predictedFreeModelRobotCovariance(TimeStamp DeltaTime, 
     predictedStateCovarianceMatrix->block<3,3>(6,6)+=robotCore->getNoiseLinearAcceleration()*DeltaTime.get_double();
 
     // Noise in the angular velocity * Dt
-    predictedStateCovarianceMatrix->block<3,3>(12,12)+=robotCore->getNoiseAngularVelocity()*DeltaTime.get_double();
+    predictedStateCovarianceMatrix->block<3,3>(15,15)+=robotCore->getNoiseAngularAcceleration()*DeltaTime.get_double();
 
 
     // end
@@ -1394,13 +1474,13 @@ int MsfLocalizationCore::predictedImuImuCovariance(TimeStamp DeltaTime, std::sha
 
         if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
         {
-            predictedStateCovarianceMatrix->block<3,3>(InitPoint.col+previousErrorStateDimension,InitPoint.row+previousErrorStateDimension)+=TheImuSensor1Core->getNoiseBiasLinearAcceleration()*DeltaTime.get_double();
+            predictedStateCovarianceMatrix->block<3,3>(InitPoint.col+previousErrorStateDimension,InitPoint.row+previousErrorStateDimension)+=TheImuSensor1Core->getNoiseEstimationBiasLinearAcceleration()*DeltaTime.get_double();
             previousErrorStateDimension+=3;
         }
 
         if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
         {
-            predictedStateCovarianceMatrix->block<3,3>(InitPoint.col+previousErrorStateDimension,InitPoint.row+previousErrorStateDimension)+=TheImuSensor1Core->getNoiseBiasAngularVelocity()*DeltaTime.get_double();
+            predictedStateCovarianceMatrix->block<3,3>(InitPoint.col+previousErrorStateDimension,InitPoint.row+previousErrorStateDimension)+=TheImuSensor1Core->getNoiseEstimationBiasAngularVelocity()*DeltaTime.get_double();
         }
 
 
@@ -1486,7 +1566,7 @@ int MsfLocalizationCore::predictedFreeModelRobotImuCovariance(TimeStamp DeltaTim
     if(TheImuSensor1Core->isEstimationPositionSensorWrtRobotEnabled())
     {
         // Update variances
-        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot.transpose();
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.positionSensorWrtRobot.transpose();
 
         // Update dimension for next
         WorkingPoint.col+=3;
@@ -1496,7 +1576,7 @@ int MsfLocalizationCore::predictedFreeModelRobotImuCovariance(TimeStamp DeltaTim
     if(TheImuSensor1Core->isEstimationAttitudeSensorWrtRobotEnabled())
     {
         // Update variances
-        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot.transpose();
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.attitudeSensorWrtRobot.transpose();
 
         // Update dimension for next
         WorkingPoint.col+=3;
@@ -1506,7 +1586,7 @@ int MsfLocalizationCore::predictedFreeModelRobotImuCovariance(TimeStamp DeltaTim
     if(TheImuSensor1Core->isEstimationBiasLinearAccelerationEnabled())
     {
         // Update variances
-        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration.transpose();
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesLinearAcceleration.transpose();
 
         // Update dimension for next
         WorkingPoint.col+=3;
@@ -1516,14 +1596,14 @@ int MsfLocalizationCore::predictedFreeModelRobotImuCovariance(TimeStamp DeltaTim
     if(TheImuSensor1Core->isEstimationBiasAngularVelocityEnabled())
     {
         // Update variances
-        predictedStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<6,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity.transpose();
+        predictedStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)=predictedStateRobot->errorStateJacobian.angular*previousStateCovarianceMatrix->block<9,3>(WorkingPoint.row, WorkingPoint.col)*predictedImuStateSensor1->errorStateJacobian.biasesAngularVelocity.transpose();
 
         // Update dimension for next
         WorkingPoint.col+=3;
     }
 
     // Dimension
-    WorkingPoint.row+=6;
+    WorkingPoint.row+=9;
 
 
     // Final dimension

@@ -1,14 +1,23 @@
 
-#include "free_model_robot_core.h"
+#include "msf_localization_core/free_model_robot_core.h"
 
 
-FreeModelRobotCore::FreeModelRobotCore()
+FreeModelRobotCore::FreeModelRobotCore():
+    RobotCore()
 {
-    dimensionState=9+7;
-    dimensionErrorState=9+6;
+    dimensionState=9+10;
+    dimensionErrorState=9+9;
+
+    dimensionParameters=0;
+    dimensionErrorParameters=0;
 
     noiseLinearAcceleration.setZero();
-    noiseAngularVelocity.setZero();
+    noiseAngularVelocity.setZero(); // Not used anymore
+    noiseAngularAcceleration.setZero();
+
+    // TODO -> This is not the best moment to do this! The state might change!
+    InitErrorStateVariance.resize(dimensionErrorState, dimensionErrorState);
+    InitErrorStateVariance.setZero();
 
     return;
 }
@@ -42,6 +51,53 @@ int FreeModelRobotCore::setNoiseAngularVelocity(Eigen::Matrix3d noiseAngularVelo
 }
 
 
+Eigen::Matrix3d FreeModelRobotCore::getNoiseAngularAcceleration() const
+{
+    return this->noiseAngularAcceleration;
+}
+
+int FreeModelRobotCore::setNoiseAngularAcceleration(Eigen::Matrix3d noiseAngularAcceleration)
+{
+    this->noiseAngularAcceleration=noiseAngularAcceleration;
+    return 0;
+}
+
+int FreeModelRobotCore::setInitErrorStateVariancePosition(Eigen::Vector3d initVariance)
+{
+    this->InitErrorStateVariance.block<3,3>(0,0)=initVariance.asDiagonal();
+    return 0;
+}
+
+int FreeModelRobotCore::setInitErrorStateVarianceLinearSpeed(Eigen::Vector3d initVariance)
+{
+    this->InitErrorStateVariance.block<3,3>(3,3)=initVariance.asDiagonal();
+    return 0;
+}
+
+int FreeModelRobotCore::setInitErrorStateVarianceLinearAcceleration(Eigen::Vector3d initVariance)
+{
+    this->InitErrorStateVariance.block<3,3>(6,6)=initVariance.asDiagonal();
+    return 0;
+}
+
+int FreeModelRobotCore::setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance)
+{
+    this->InitErrorStateVariance.block<3,3>(9,9)=initVariance.asDiagonal();
+    return 0;
+}
+
+int FreeModelRobotCore::setInitErrorStateVarianceAngularVelocity(Eigen::Vector3d initVariance)
+{
+    this->InitErrorStateVariance.block<3,3>(12,12)=initVariance.asDiagonal();
+    return 0;
+}
+
+int FreeModelRobotCore::setInitErrorStateVarianceAngularAcceleration(Eigen::Vector3d initVariance)
+{
+    this->InitErrorStateVariance.block<3,3>(15,15)=initVariance.asDiagonal();
+    return 0;
+}
+
 int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
 {
     //std::cout<<"FreeModelRobotCore::predictState"<<std::endl;
@@ -72,45 +128,70 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
+    double dt=DeltaTime.get_double();
 
 
-    // Position
-    predictedState->position=pastState->position+pastState->linear_speed*DeltaTime.get_double();
+    /// Position
+    predictedState->position=pastState->position+pastState->linear_speed*dt;
 
-    // Linear Speed
-    predictedState->linear_speed=pastState->linear_speed+pastState->linear_acceleration*DeltaTime.get_double();
 
-    // Linear Acceleration
+    /// Linear Speed
+    predictedState->linear_speed=pastState->linear_speed+pastState->linear_acceleration*dt;
+
+
+    /// Linear Acceleration
     predictedState->linear_acceleration=pastState->linear_acceleration;
 
 
-    // Attitude
+    /// Attitude
+
+    // deltaQw
     Eigen::Vector4d deltaQw;
-    if(pastState->angular_velocity.norm() < 1e-3)
+    Eigen::Vector3d wContribution=pastState->angular_velocity+0.5*pastState->angular_acceleration*dt;
+    if(wContribution.norm() < 1e-3)
     {
         // Fill
         deltaQw[0]=1;
-        deltaQw.block<3,1>(1,0)=pastState->angular_velocity*DeltaTime.get_double();
+        deltaQw.block<3,1>(1,0)=wContribution*dt;
         // Unit quaternion
         deltaQw=deltaQw/deltaQw.norm();
     }
     else
     {
         // Fill
-        deltaQw[0]=cos(pastState->angular_velocity.norm()*DeltaTime.get_double()/2);
-        deltaQw.block<3,1>(1,0)=pastState->angular_velocity/pastState->angular_velocity.norm()*sin(pastState->angular_velocity.norm()*DeltaTime.get_double()/2);
-        // Unit quaternion -> Not needed!
+        deltaQw[0]=cos(wContribution.norm()*dt/2);
+        deltaQw.block<3,1>(1,0)=wContribution/wContribution.norm()*sin(wContribution.norm()*dt/2);
+        // Unit quaternion -> Not needed, just in case! ?
         deltaQw=deltaQw/deltaQw.norm();
     }
 
-    predictedState->attitude=Quaternion::cross(pastState->attitude,deltaQw);
+    // deltaQalpha
+    Eigen::Vector4d deltaQalpha;
+    Eigen::Vector3d alphaContribution;
+    alphaContribution=pastState->angular_velocity;
+    alphaContribution=alphaContribution.cross(pastState->angular_velocity+pastState->angular_acceleration*dt);
 
-    // Unit quaternion -> Not needed, Just in case
+    deltaQalpha[0]=0;
+    deltaQalpha.block<3,1>(1,0)=alphaContribution;
+    // Unit quaternion -> No needed, NO
+    //deltaQalpha=deltaQalpha/deltaQalpha.norm();
+
+    // prediction
+    predictedState->attitude=Quaternion::cross(pastState->attitude,deltaQw)+pow(dt,2)/24*Quaternion::cross(pastState->attitude,deltaQalpha);
+
+    // Unit quaternion -> Very needed!
     predictedState->attitude=predictedState->attitude/predictedState->attitude.norm();
 
 
-    // Angular Velocity
-    predictedState->angular_velocity=pastState->angular_velocity;
+
+    /// Angular Velocity
+    predictedState->angular_velocity=pastState->angular_velocity+pastState->angular_acceleration*dt;
+
+
+
+
+    /// Angular Acceleration
+    predictedState->angular_acceleration=pastState->angular_acceleration;
 
 
 
@@ -131,6 +212,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
+    // delta time
+    double dt=DeltaTime.get_double();
 
 
     // Jacobian
@@ -139,22 +222,23 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     predictedState->errorStateJacobian.linear.setZero();
 
 
-    predictedState->errorStateJacobian.angular.resize(6, 6);
+    predictedState->errorStateJacobian.angular.resize(9, 9);
     predictedState->errorStateJacobian.angular.setZero();
 
 
 
-    // Linear Part
+    /// Jacobian of the error: Linear Part
 
 
     // posi / posi
     predictedState->errorStateJacobian.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
 
     // posi / vel
-    predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*DeltaTime.get_double();
+    predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*dt;
 
-    // pos i/ acc
-    // zero
+    // posi / acc
+    predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+
 
 
     // vel / posi
@@ -164,20 +248,24 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     predictedState->errorStateJacobian.linear.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
 
     // vel / acc
-    predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*DeltaTime.get_double();
+    predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
 
 
 
+    // acc / posi
+    // zero
+
+    // acc / vel
+    // zero
 
     // acc / acc
     predictedState->errorStateJacobian.linear.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
 
 
 
-    // Angular Part
+    /// Jacobian of the error -> Angular Part
 
-    // delta time
-    double dt=DeltaTime.get_double();
+
 
     // References
     // Attitude k
@@ -197,6 +285,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
     // att / att
+    // TODO fix
     predictedState->errorStateJacobian.angular.block<3,3>(0,0)<<
         qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4 + dt*wr1*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) - dt*wr2*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) - dt*wr3*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2),        qrj1*qrk4 - qrj2*qrk3 + qrj3*qrk2 - qrj4*qrk1 + dt*wr1*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) + dt*wr2*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) + dt*wr3*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2),      qrj3*qrk1 - qrj1*qrk3 - qrj2*qrk4 + qrj4*qrk2 + dt*wr1*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2) - dt*wr2*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2) + dt*wr3*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2),
         qrj2*qrk3 - qrj1*qrk4 - qrj3*qrk2 + qrj4*qrk1 + dt*wr1*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) + dt*wr2*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) - dt*wr3*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2),        qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4 - dt*wr1*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) + dt*wr2*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) - dt*wr3*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2),      qrj1*qrk2 - qrj2*qrk1 - qrj3*qrk4 + qrj4*qrk3 + dt*wr1*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2) + dt*wr2*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2) + dt*wr3*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2),
@@ -204,14 +293,37 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
     // att / ang_vel
+    // TODO fix
     predictedState->errorStateJacobian.angular.block<3,3>(0,3)<<
          dt*(qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4),     dt*(qrj1*qrk4 - qrj2*qrk3 + qrj3*qrk2 - qrj4*qrk1),     -dt*(qrj1*qrk3 - qrj3*qrk1 + qrj2*qrk4 - qrj4*qrk2),
          -dt*(qrj1*qrk4 - qrj2*qrk3 + qrj3*qrk2 - qrj4*qrk1),    dt*(qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4),    dt*(qrj1*qrk2 - qrj2*qrk1 - qrj3*qrk4 + qrj4*qrk3),
          dt*(qrj1*qrk3 - qrj3*qrk1 + qrj2*qrk4 - qrj4*qrk2),     -dt*(qrj1*qrk2 - qrj2*qrk1 - qrj3*qrk4 + qrj4*qrk3),     dt*(qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4);
 
+    // att / ang_accel
+    // TODO
+    //predictedState->errorStateJacobian.angular.block<3,3>(0,6);
+
+
+
+    // ang_vel / att
+    // zero
 
     // ang_vel / ang_vel
     predictedState->errorStateJacobian.angular.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+
+    // ang_vel / ang_acc
+    predictedState->errorStateJacobian.angular.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+
+
+
+    // ang_acc / att
+    // zero
+
+    // ang_acc / ang_vel
+    // zero
+
+    // ang_acc / ang_acc
+    predictedState->errorStateJacobian.angular.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
 
 
 

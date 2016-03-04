@@ -1,5 +1,5 @@
 
-#include "imu_sensor_state_core.h"
+#include "msf_localization_core/imu_sensor_state_core.h"
 
 
 ImuSensorStateCore::ImuSensorStateCore()
@@ -30,6 +30,17 @@ int ImuSensorStateCore::setBiasesAngularVelocity(Eigen::Vector3d biasesAngularVe
     return 0;
 }
 
+Eigen::Vector3d ImuSensorStateCore::getScaleAngularVelocity() const
+{
+    return this->scaleAngularVelocity;
+}
+
+int ImuSensorStateCore::setScaleAngularVelocity(Eigen::Vector3d scaleAngularVelocity)
+{
+    this->scaleAngularVelocity=scaleAngularVelocity;
+    return 0;
+}
+
 
 Eigen::Vector3d ImuSensorStateCore::getBiasesLinearAcceleration() const
 {
@@ -39,5 +50,16 @@ Eigen::Vector3d ImuSensorStateCore::getBiasesLinearAcceleration() const
 int ImuSensorStateCore::setBiasesLinearAcceleration(Eigen::Vector3d biasesLinearAcceleration)
 {
     this->biasesLinearAcceleration=biasesLinearAcceleration;
+    return 0;
+}
+
+Eigen::Vector3d ImuSensorStateCore::getScaleLinearAcceleration() const
+{
+    return this->scaleLinearAcceleration;
+}
+
+int ImuSensorStateCore::setScaleLinearAcceleration(Eigen::Vector3d scaleLinearAcceleration)
+{
+    this->scaleLinearAcceleration=scaleLinearAcceleration;
     return 0;
 }

@@ -35,6 +35,10 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_state_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_sensor_state_core.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/global_parameters_core.cpp
+
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/global_parameters_state_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/robot_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/free_model_robot_core.cpp
 
@@ -56,34 +60,38 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
 )
  
 set(MSF_LOCALIZATION_CORE_HEADER_FILES
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/robot_state_core.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/free_model_robot_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/robot_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/free_model_robot_state_core.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/sensor_state_core.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/imu_sensor_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_sensor_state_core.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/robot_core.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/free_model_robot_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/global_parameters_core.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/sensor_basics.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/global_parameters_state_core.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/sensor_core.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/imu_sensor_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/robot_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/free_model_robot_core.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/sensor_measurement_core.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/imu_sensor_measurement_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_basics.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_storage_core.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/state_estimation_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_sensor_core.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msfLocalization.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_measurement_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_sensor_measurement_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/msf_storage_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/state_estimation_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/msfLocalization.h
 
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/quaternion_algebra.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/quaternion_algebra.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/ring_buffer.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/time_stamp.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/stamped_ring_buffer.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/ring_buffer.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/time_stamp.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/stamped_ring_buffer.h
 )
 
 

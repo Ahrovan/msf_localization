@@ -56,7 +56,7 @@
 
 
 //ROS
-#include "ros/ros.h"
+#include <ros/ros.h>
 
 
 // ROS msg
@@ -76,20 +76,24 @@
 
 
 // Robot
-#include "free_model_robot_core.h"
+#include "msf_localization_core/free_model_robot_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
 
 
 // ROS Sensor Interface
-#include "ros_sensor_interface.h"
+#include "msf_localization_ros/ros_sensor_interface.h"
 
 
 // ROS IMU Interface
-#include "ros_sensor_imu_interface.h"
+#include "msf_localization_ros/ros_sensor_imu_interface.h"
 
 
 // MSF Core
-#include "msfLocalization.h"
+#include "msf_localization_core/msfLocalization.h"
 
+
+#include "msf_localization_core/global_parameters_core.h"
+#include "msf_localization_core/global_parameters_state_core.h"
 
 
 class MsfLocalizationROS : public MsfLocalizationCore
@@ -124,8 +128,9 @@ protected:
 
     // Particular config readings
 protected:
-    int readFreeModelRobotConfig(pugi::xml_node robot, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<FreeModelRobotCore>& TheRobotCoreAux, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore, Eigen::MatrixXd& InitStateCovarianceMatrix);
-    int readImuConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosSensorImuInterface>& TheRosSensorImuInterface, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore, Eigen::MatrixXd& InitStateCovarianceMatrix);
+    int readGlobalParametersConfig(pugi::xml_node global_parameters, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<GlobalParametersCore>& TheGlobalParametersCoreAux, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
+    int readFreeModelRobotConfig(pugi::xml_node robot, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<FreeModelRobotCore>& TheRobotCoreAux, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
+    int readImuConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosSensorImuInterface>& TheRosSensorImuInterface, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
 
 
 

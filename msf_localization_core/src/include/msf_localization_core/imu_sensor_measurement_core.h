@@ -4,7 +4,7 @@
 
 
 
-#include "sensor_measurement_core.h"
+#include "msf_localization_core/sensor_measurement_core.h"
 
 
 class ImuSensorMeasurementCore : public SensorMeasurementCore

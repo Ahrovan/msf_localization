@@ -1,5 +1,5 @@
 
-#include "free_model_robot_state_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
 
 
 FreeModelRobotStateCore::FreeModelRobotStateCore()
@@ -66,5 +66,16 @@ Eigen::Vector3d FreeModelRobotStateCore::getAngularVelocity() const
 int FreeModelRobotStateCore::setAngularVelocity(Eigen::Vector3d angular_velocity)
 {
     this->angular_velocity=angular_velocity;
+    return 0;
+}
+
+Eigen::Vector3d FreeModelRobotStateCore::getAngularAcceleration() const
+{
+    return this->angular_acceleration;
+}
+
+int FreeModelRobotStateCore::setAngularAcceleration(Eigen::Vector3d angular_acceleration)
+{
+    this->angular_acceleration=angular_acceleration;
     return 0;
 }

@@ -27,12 +27,13 @@
 #include <memory>
 
 
+#include "msf_localization_core/global_parameters_state_core.h"
 
-#include "robot_state_core.h"
+#include "msf_localization_core/robot_state_core.h"
 
-#include "sensor_state_core.h"
+#include "msf_localization_core/sensor_state_core.h"
 
-#include "sensor_measurement_core.h"
+#include "msf_localization_core/sensor_measurement_core.h"
 
 
 
@@ -51,6 +52,10 @@ public:
     bool hasState() const;
 
 
+    // Global Parameters State
+public:
+    std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore;
+
     // Robot State
 public:
     std::shared_ptr<RobotStateCore> TheRobotStateCore;
@@ -60,7 +65,22 @@ public:
     std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
 
 
+
+
+
+
+    // Dimension total of state and error state
+public:
+    int getDimensionState() const;
+    int getDimensionErrorState() const;
+
+
     // Covariances Matrixes
+public:
+    int prepareInitErrorStateVariance();
+
+
+    // Covariances Matrixes of the error state
 public:
     Eigen::MatrixXd covarianceMatrix;
 

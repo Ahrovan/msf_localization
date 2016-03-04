@@ -45,28 +45,28 @@
 // Estimator Cores
 
 // Robot
-#include "robot_state_core.h"
-#include "free_model_robot_core.h"
-#include "free_model_robot_state_core.h"
+#include "msf_localization_core/robot_state_core.h"
+#include "msf_localization_core/free_model_robot_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
 
 
 // Sensor
-#include "sensor_state_core.h"
-#include "sensor_measurement_core.h"
+#include "msf_localization_core/sensor_state_core.h"
+#include "msf_localization_core/sensor_measurement_core.h"
 
 // Imu
-#include "imu_sensor_core.h"
-#include "imu_sensor_measurement_core.h"
-#include "imu_sensor_state_core.h"
+#include "msf_localization_core/imu_sensor_core.h"
+#include "msf_localization_core/imu_sensor_measurement_core.h"
+#include "msf_localization_core/imu_sensor_state_core.h"
 
 
-#include "stamped_ring_buffer.h"
+#include "msf_localization_core/stamped_ring_buffer.h"
 
-#include "state_estimation_core.h"
+#include "msf_localization_core/state_estimation_core.h"
 
 
 
-//#define _DEBUG_MSF_STORAGE
+#define _DEBUG_MSF_STORAGE
 
 
 

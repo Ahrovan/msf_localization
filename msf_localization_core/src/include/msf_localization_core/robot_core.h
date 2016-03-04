@@ -12,6 +12,8 @@
 #include <memory>
 
 
+#include <Eigen/Dense>
+
 
 enum class RobotTypes
 {
@@ -46,6 +48,21 @@ public:
     unsigned int getDimensionErrorState() const;
     int setDimensionErrorState(unsigned int dimensionErrorState);
 
+    // Dimension parameters
+protected:
+    unsigned int dimensionParameters;
+public:
+    unsigned int getDimensionParameters() const;
+    int setDimensionParameters(unsigned int dimensionParameters);
+
+    // Dimension error parameters
+protected:
+    unsigned int dimensionErrorParameters;
+public:
+    unsigned int getDimensionErrorParameters() const;
+    int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
+
+
 
     // Robot Core
 protected:
@@ -69,6 +86,14 @@ protected:
     std::weak_ptr<MsfStorageCore> TheMsfStorageCore;
 public:
     int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+    std::shared_ptr<MsfStorageCore> getTheMsfStorageCore() const;
+
+
+    ////// Init error state variances -> Temporal, only for the initial configuration
+protected:
+    Eigen::MatrixXd InitErrorStateVariance;
+public:
+    Eigen::MatrixXd getInitErrorStateVariance() const;
 
 
 };

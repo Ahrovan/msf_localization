@@ -3,9 +3,9 @@
 #define _STAMPED_RING_BUFFER_H
 
 
-#include "ring_buffer.h"
+#include "msf_localization_core/ring_buffer.h"
 
-#include "time_stamp.h"
+#include "msf_localization_core/time_stamp.h"
 
 
 

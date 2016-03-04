@@ -1,14 +1,16 @@
 
-#include "robot_core.h"
+#include "msf_localization_core/robot_core.h"
 
 
-#include "msf_storage_core.h"
+#include "msf_localization_core/msf_storage_core.h"
 
 
 
 RobotCore::RobotCore() :
     dimensionState(0),
-    dimensionErrorState(0)
+    dimensionErrorState(0),
+    dimensionParameters(0),
+    dimensionErrorParameters(0)
 {
     // Robot Type
     robotType=RobotTypes::undefined;
@@ -43,6 +45,28 @@ int RobotCore::setDimensionErrorState(unsigned int dimensionErrorState)
     return 0;
 }
 
+unsigned int RobotCore::getDimensionParameters() const
+{
+    return this->dimensionParameters;
+}
+
+int RobotCore::setDimensionParameters(unsigned int dimensionParameters)
+{
+    this->dimensionParameters=dimensionParameters;
+    return 0;
+}
+
+unsigned int RobotCore::getDimensionErrorParameters() const
+{
+    return this->dimensionErrorParameters;
+}
+
+int RobotCore::setDimensionErrorParameters(unsigned int dimensionErrorParameters)
+{
+    this->dimensionErrorParameters=dimensionErrorParameters;
+    return 0;
+}
+
 
 
 int RobotCore::setRobotType(RobotTypes robotType)
@@ -74,4 +98,14 @@ int RobotCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageC
     return 0;
 }
 
+std::shared_ptr<MsfStorageCore> RobotCore::getTheMsfStorageCore() const
+{
+    std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
+    return TheMsfStorageCoreSharedPtr;
+}
 
+
+Eigen::MatrixXd RobotCore::getInitErrorStateVariance() const
+{
+    return this->InitErrorStateVariance;
+}

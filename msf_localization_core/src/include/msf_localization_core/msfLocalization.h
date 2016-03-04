@@ -52,30 +52,32 @@
 // Estimator Cores
 
 // Robot
-#include "robot_core.h"
+#include "msf_localization_core/robot_core.h"
 
 // Sensor
-#include "sensor_core.h"
+#include "msf_localization_core/sensor_core.h"
 // IMU
-#include "imu_sensor_core.h"
+#include "msf_localization_core/imu_sensor_core.h"
 
 
 
 // Robot
-#include "robot_state_core.h"
+#include "msf_localization_core/robot_state_core.h"
 // Free Model Robot Core
-#include "free_model_robot_core.h"
+#include "msf_localization_core/free_model_robot_core.h"
 
 
-#include "sensor_state_core.h"
-#include "sensor_measurement_core.h"
+#include "msf_localization_core/sensor_state_core.h"
+#include "msf_localization_core/sensor_measurement_core.h"
 
 
-#include "state_estimation_core.h"
+#include "msf_localization_core/state_estimation_core.h"
 
 
-#include "msf_storage_core.h"
+#include "msf_localization_core/msf_storage_core.h"
 
+
+#include "msf_localization_core/global_parameters_core.h"
 
 
 /*
@@ -101,7 +103,7 @@ public:
 */
 
 
-//#define _DEBUG_MSF_LOCALIZATION_CORE
+#define _DEBUG_MSF_LOCALIZATION_CORE
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE
 
 
@@ -124,6 +126,11 @@ public:
 
 public:
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
+
+
+    // Global Parameters
+protected:
+    std::shared_ptr<GlobalParametersCore> TheGlobalParametersCore;
 
 
     // Robot Component
@@ -154,6 +161,7 @@ protected:
 public:
     int setStateEstimationEnabled(bool predictEnabled);
     bool isStateEstimationEnabled() const;
+
 
 
 

@@ -3,17 +3,20 @@
 #define _FREE_MODEL_ROBOT_CORE_H
 
 
+// Math
+#include "cmath"
+
 // Time Stamp
-#include "time_stamp.h"
+#include "msf_localization_core/time_stamp.h"
 
 // Quaternion algebra
-#include "quaternion_algebra.h"
+#include "msf_localization_core/quaternion_algebra.h"
 
 // Robot Core
-#include "robot_core.h"
+#include "msf_localization_core/robot_core.h"
 
 // State
-#include "free_model_robot_state_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
 
 
 class FreeModelRobotCore : public RobotCore
@@ -26,6 +29,8 @@ public:
 
 
     ///// Prediction Noises
+
+    // Noise Linear Acceleration
 protected:
 public:
     Eigen::Matrix3d noiseLinearAcceleration;
@@ -34,12 +39,35 @@ public:
     int setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration);
 
 
+    // Noise Angular Velocity -> NOT USED!
 protected:
 public:
     Eigen::Matrix3d noiseAngularVelocity;
 public:
     Eigen::Matrix3d getNoiseAngularVelocity() const;
     int setNoiseAngularVelocity(Eigen::Matrix3d noiseAngularVelocity);
+
+
+    // Noise Angular Acceleration
+protected:
+public:
+    Eigen::Matrix3d noiseAngularAcceleration;
+public:
+    Eigen::Matrix3d getNoiseAngularAcceleration() const;
+    int setNoiseAngularAcceleration(Eigen::Matrix3d noiseAngularAcceleration);
+
+
+
+    ////// Init error state variances -> Temporal, only for the initial configuration
+
+public:
+    int setInitErrorStateVariancePosition(Eigen::Vector3d initVariance);
+    int setInitErrorStateVarianceLinearSpeed(Eigen::Vector3d initVariance);
+    int setInitErrorStateVarianceLinearAcceleration(Eigen::Vector3d initVariance);
+    int setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance);
+    int setInitErrorStateVarianceAngularVelocity(Eigen::Vector3d initVariance);
+    int setInitErrorStateVarianceAngularAcceleration(Eigen::Vector3d initVariance);
+
 
 
 

@@ -1,22 +1,11 @@
 
-#include "imu_sensor_measurement_core.h"
+#include "msf_localization_core/imu_sensor_measurement_core.h"
 
-#include "imu_sensor_core.h"
+#include "msf_localization_core/imu_sensor_core.h"
 
 
 ImuSensorMeasurementCore::ImuSensorMeasurementCore()
 {
-    // SensorType
-    //std::shared_ptr<ImuSensorCore> ImuSensorCorePtrAux=std::dynamic_pointer_cast<ImuSensorCore>(this->TheSensorCorePtr.lock());
-//    if(!ImuSensorCorePtrAux.lock())
-//        std::cout<<"error"<<std::endl;
-    //ImuSensorCorePtrAux->setSensorType(SensorTypes::imu);
-
-    // Flags Enabled
-//    flagOrientationEnabled=true;
-//    flagAngularVelocityEnabled=true;
-//    flagLinearAccelerationEnabled=true;
-
     // Flags Set
     flagOrientationSet=false;
     flagAngularVelocitySet=false;
@@ -38,8 +27,8 @@ bool ImuSensorMeasurementCore::isOrientationSet() const
 
 int ImuSensorMeasurementCore::setOrientation(const Eigen::Vector4d Orientation)
 {
-    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->TheSensorCorePtr.lock());
-    if(TheSensorCorePtrAux->isOrientationEnabled())
+    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    if(TheSensorCorePtrAux->isMeasurementOrientationEnabled())
     {
         this->Orientation=Orientation;
         this->flagOrientationSet=true;
@@ -62,8 +51,8 @@ bool ImuSensorMeasurementCore::isAngularVelocitySet() const
 
 int ImuSensorMeasurementCore::setAngularVelocity(Eigen::Vector3d AngularVelocity)
 {
-    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->TheSensorCorePtr.lock());
-    if(TheSensorCorePtrAux->isAngularVelocityEnabled())
+    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    if(TheSensorCorePtrAux->isMeasurementAngularVelocityEnabled())
     {
         this->AngularVelocity=AngularVelocity;
         this->flagAngularVelocitySet=true;
@@ -85,8 +74,8 @@ bool ImuSensorMeasurementCore::isLinearAccelerationSet() const
 
 int ImuSensorMeasurementCore::setLinearAcceleration(Eigen::Vector3d LinearAcceleration)
 {
-    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->TheSensorCorePtr.lock());
-    if(TheSensorCorePtrAux->isLinearAccelerationEnabled())
+    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    if(TheSensorCorePtrAux->isMeasurementLinearAccelerationEnabled())
     {
         this->LinearAcceleration=LinearAcceleration;
         this->flagLinearAccelerationSet=true;

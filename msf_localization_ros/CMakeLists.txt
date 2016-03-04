@@ -36,11 +36,11 @@ set(MSF_LOCALIZATION_ROS_SOURCE_FILES
 )
  
 set(MSF_LOCALIZATION_ROS_HEADER_FILES
-	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/ros_sensor_interface.h
+	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_sensor_interface.h
 
-	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/ros_sensor_imu_interface.h
+	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_sensor_imu_interface.h
 
-	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/droneMsfLocalizationROSModule.h
+	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/droneMsfLocalizationROSModule.h
 )
 
 

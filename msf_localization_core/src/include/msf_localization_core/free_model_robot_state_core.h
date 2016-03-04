@@ -21,7 +21,7 @@ public:
     ~FreeModelRobotStateCore();
 
 
-    // State: xR=[pos, lin_speed, lin_accel, attit, ang_vel]'
+    // State: xR=[pos (3/3), lin_speed (3/3), lin_accel (3/3), attit (4/3), ang_vel (3/3), ang_acc (3/3)]'
 
 protected:
 public:
@@ -68,13 +68,24 @@ public:
 
 
 
+protected:
+public:
+    Eigen::Vector3d angular_acceleration;
+public:
+    Eigen::Vector3d getAngularAcceleration() const;
+    int setAngularAcceleration(Eigen::Vector3d angular_acceleration);
 
 
-    // Error State Jacobians
+
+
+    // Error State Jacobians (18 x 18)
 public:
     struct
     {
+        // Fx_robot linear (9 x 9)
         Eigen::MatrixXd linear;
+
+        // Fx_robot angular (9 x 9)
         Eigen::MatrixXd angular;
     } errorStateJacobian;
 
