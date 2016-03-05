@@ -98,7 +98,7 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS roscpp cmake_modules lib_pugixml)
+                COMPONENTS roscpp cmake_modules pugixml)
 
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
@@ -110,7 +110,7 @@ catkin_package(
         INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
         DEPENDS Boost Eigen
-        CATKIN_DEPENDS roscpp cmake_modules lib_pugixml
+        CATKIN_DEPENDS roscpp cmake_modules pugixml
   )
 
 

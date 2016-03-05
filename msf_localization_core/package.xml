@@ -16,7 +16,7 @@
 
         <depend>cmake_modules</depend>
 
-        <depend>lib_pugixml</depend>
+        <depend>pugixml</depend>
 
   
 </package>

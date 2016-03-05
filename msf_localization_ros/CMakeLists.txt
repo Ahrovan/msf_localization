@@ -47,14 +47,14 @@ set(MSF_LOCALIZATION_ROS_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf lib_pugixml msf_localization_core msf_localization_ros_srvs)
+                COMPONENTS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs)
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 
 catkin_package(
     DEPENDS Boost
-    CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf lib_pugixml msf_localization_core msf_localization_ros_srvs
+    CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs
   )
 
 

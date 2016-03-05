@@ -42,7 +42,7 @@
 
 
 //PUGIXML
-#include "pugixml.hpp"
+#include <pugixml/pugixml.hpp>
 
 
 // Boost
