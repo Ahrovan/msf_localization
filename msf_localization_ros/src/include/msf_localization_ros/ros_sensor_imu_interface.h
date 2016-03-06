@@ -12,6 +12,12 @@
 #include <sensor_msgs/Imu.h>
 
 
+// Time Stamp
+#include "msf_localization_core/time_stamp.h"
+
+// Imu Sensor Core
+#include "msf_localization_core/imu_sensor_core.h"
+
 
 // ROS Sensor Interface
 #include "msf_localization_ros/ros_sensor_interface.h"
@@ -25,9 +31,6 @@ class RosSensorImuInterface : public RosSensorInterface, public ImuSensorCore
 public:
     RosSensorImuInterface(ros::NodeHandle* nh);
 
-
-protected:
-    ros::NodeHandle* nh;
 
 
 public:

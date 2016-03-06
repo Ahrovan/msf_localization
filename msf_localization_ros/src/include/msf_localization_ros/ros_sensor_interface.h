@@ -16,16 +16,20 @@
 #include <std_msgs/Header.h>
 
 
-#include "msf_localization_core/msfLocalization.h"
 
 
 
-class RosSensorInterface : public virtual SensorCore
+class RosSensorInterface
 {
     //
-public:
+protected:
     RosSensorInterface();
-    ~RosSensorInterface();
+public:
+    virtual ~RosSensorInterface();
+
+
+protected:
+    ros::NodeHandle* nh;
 
 
     // Sensor Core

@@ -621,7 +621,7 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
 
 int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
     logFile<<"ImuSensorCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
 
@@ -663,7 +663,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     if(!predictedMeasurement)
     {
         predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>();
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() pointer created"<<std::endl;
 #endif
     }
@@ -680,7 +680,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     // Orientation
     if(this->isMeasurementOrientationEnabled())
     {
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() orientation"<<std::endl;
 #endif
 
@@ -691,7 +691,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     // Angular velocity
     if(isMeasurementAngularVelocityEnabled())
     {
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() angular velocity"<<std::endl;
 #endif
 
@@ -711,7 +711,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
                 // TODO improve!!!
                 ThePredictedAngularVelocity=currentFreeModelRobotState->getAngularVelocity()+currentImuState->getBiasesAngularVelocity();
 
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
                 logFile<<"ImuSensorCore::predictMeasurement() predicted w="<<ThePredictedAngularVelocity.transpose()<<std::endl;
 #endif
 
@@ -733,7 +733,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     // Linear acceleration
     if(isMeasurementLinearAccelerationEnabled())
     {
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() linear acceleration"<<std::endl;
 #endif
 
@@ -753,7 +753,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
                 // TODO improve!!!
                 ThePredictedLinearAcceleration=currentFreeModelRobotState->getLinearAcceleration()+currentImuState->getBiasesLinearAcceleration();
 
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
                 logFile<<"ImuSensorCore::predictMeasurement() predicted a="<<ThePredictedLinearAcceleration.transpose()<<std::endl;
 #endif
 
@@ -775,7 +775,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 
 
-#ifdef _DEBUG_SENSOR_CORE
+#if _DEBUG_SENSOR_CORE
     logFile<<"ImuSensorCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
 

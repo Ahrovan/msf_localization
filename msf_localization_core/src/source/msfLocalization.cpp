@@ -138,7 +138,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     if(this->stateEstimationEnabled==predictEnabled)
         return 0;
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::setStateEstimationEnabled()"<<std::endl;
@@ -151,7 +151,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     std::shared_ptr<StateEstimationCore> InitState;
     if(TheMsfStorageCore->getLastElementWithStateEstimate(InitTimeStamp, InitState))
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::setStateEstimationEnabled() error in getLastElementWithStateEstimate"<<std::endl;
 #endif
         return 2;
@@ -159,7 +159,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
 
     if(TheMsfStorageCore->purgeRingBuffer(-1))
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::setStateEstimationEnabled() error in purgeRingBuffer"<<std::endl;
 #endif
         return -2;
@@ -170,7 +170,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     InitTimeStamp=getTimeStamp();
     if(TheMsfStorageCore->addElement(InitTimeStamp, InitState))
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::setStateEstimationEnabled() error in addElement"<<std::endl;
 #endif
         return -3;
@@ -188,7 +188,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
         (*itListOfSensors)->setSensorEnabled(predictEnabled);
     }
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     logFile<<"MsfLocalizationCore::setStateEstimationEnabled() ended"<<std::endl;
 #endif
 
@@ -203,7 +203,7 @@ bool MsfLocalizationCore::isStateEstimationEnabled() const
 
 TimeStamp MsfLocalizationCore::getTimeStamp()
 {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     std::cout<<"MsfLocalizationCore::getTimeStamp()"<<std::endl;
 #endif
 
@@ -213,7 +213,7 @@ TimeStamp MsfLocalizationCore::getTimeStamp()
 
 int MsfLocalizationCore::predictThreadFunction()
 {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     logFile<<"MsfLocalizationCore::predictThreadFunction()"<<std::endl;
 #endif
 
@@ -240,7 +240,7 @@ int MsfLocalizationCore::getPreviousState(TimeStamp TheTimeStamp, TimeStamp& The
     // Get the previous not the last!
     if(TheMsfStorageCore->getPreviousElementWithStateEstimateByStamp(TheTimeStamp, ThePreviousTimeStamp, ThePreviousState))
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::getPreviousState() error getPreviousElementWithStateEstimateByStamp"<<std::endl;
 #endif
         return 1;
@@ -249,7 +249,7 @@ int MsfLocalizationCore::getPreviousState(TimeStamp TheTimeStamp, TimeStamp& The
     // Checks
     if(!ThePreviousState)
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::getPreviousState() error !PreviousState"<<std::endl;
 #endif
         return 2;
@@ -259,7 +259,7 @@ int MsfLocalizationCore::getPreviousState(TimeStamp TheTimeStamp, TimeStamp& The
     // Check
     if(!ThePreviousState->hasState())
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::getPreviousState() error !PreviousState->hasState()"<<std::endl;
 #endif
         return 3;
@@ -274,7 +274,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     if(!isStateEstimationEnabled())
         return 0;
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -288,7 +288,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     if(!PredictedState)
         PredictedState=std::make_shared<StateEstimationCore>();
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"predict: number of users of predicted state="<<PredictedState.use_count()<<std::endl;
@@ -303,7 +303,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
     }
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"predict: number of users of predicted state="<<PredictedState.use_count()<<std::endl;
@@ -317,7 +317,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
     if(this->getPreviousState(TheTimeStamp, PreviousTimeStamp, PreviousState))
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::predict() error getPreviousState"<<std::endl;
 #endif
         return 1;
@@ -326,7 +326,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
     if(!PreviousState)
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::predict() error !PreviousState"<<std::endl;
 #endif
         return 2;
@@ -336,7 +336,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     // Check
     if(!PreviousState->hasState())
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::predict() error !PreviousState->hasState()"<<std::endl;
 #endif
         return -1;
@@ -349,7 +349,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 //        return -2;
 //    }
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -360,7 +360,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /////// State
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() state TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -406,7 +406,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
             if(!pastStateRobot)
             {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                 std::cout<<"!!previous state for robot not found!"<<std::endl;
 #endif
                 return -2;
@@ -419,7 +419,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
             // State
             if(TheFreeModelRobotCore->predictState(PreviousTimeStamp, TheTimeStamp, pastStateRobot, predictedStateRobot))
             {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                 std::cout<<"!!Error predicting state of the robot"<<std::endl;
 #endif
                 return 1;
@@ -428,7 +428,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
             // Jacobians
             if(TheFreeModelRobotCore->predictStateErrorStateJacobians(PreviousTimeStamp, TheTimeStamp, pastStateRobot, predictedStateRobot))
             {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                 std::cout<<"!!Error predicting error state jacobians of the robot"<<std::endl;
 #endif
                 return 1;
@@ -467,7 +467,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         // Find
         if(findSensorStateCoreFromList(PreviousState->TheListSensorStateCore, (*itSens), pastStateSensor))
         {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
             logFile<<"MsfLocalizationCore::predict() error predict state sensors findSensorStateCoreFromList"<<std::endl;
 #endif
             return -2;
@@ -490,7 +490,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 // State
                 if(TheImuSensorCore->predictState(PreviousTimeStamp, TheTimeStamp, pastImuStateSensor, predictedImuStateSensor))
                 {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                     std::cout<<"!!Error predicting state of sensor"<<std::endl;
 #endif
                     return 1;
@@ -499,7 +499,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 // Jacobians
                 if(TheImuSensorCore->predictStateErrorStateJacobians(PreviousTimeStamp, TheTimeStamp, pastImuStateSensor, predictedImuStateSensor))
                 {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                     std::cout<<"!!Error predicting error state jacobians of the sensor"<<std::endl;
 #endif
                     return 1;
@@ -533,7 +533,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /////// Covariances
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() covariances TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -564,7 +564,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /// Robot
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() covariance robot TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -579,7 +579,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
             // Covariance
             if(predictedFreeModelRobotCovariance(DeltaTime, std::static_pointer_cast<FreeModelRobotCore>(TheRobotCore), std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore), &PreviousState->covarianceMatrix, &PredictedState->covarianceMatrix))
             {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                 std::cout<<"!!Error predicting covariances"<<std::endl;
 #endif
                 return -2;
@@ -597,7 +597,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /// Robot-Sensors
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() covariance robot-sensor TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -640,7 +640,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                 // Find
                 if(findSensorStateCoreFromList(PredictedState->TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
                 {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                     std::cout<<"!!Error findSensorStateCoreFromList"<<std::endl;
 #endif
                     return -2;
@@ -658,7 +658,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                                                   std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1),
                                                   &PreviousState->covarianceMatrix, WorkingInitPoint, &PredictedState->covarianceMatrix, RobotSensorsEndPoint))
                         {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                             std::cout<<"!!Error predicting covariances"<<std::endl;
 #endif
                             return 2;
@@ -691,7 +691,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
     /// Sensors
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() covariance sensors TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -723,7 +723,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         // Find
         if(findSensorStateCoreFromList(PredictedState->TheListSensorStateCore, (*it1Sens), predictedStateSensor1))
         {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
             std::cout<<"!!Error findSensorStateCoreFromList"<<std::endl;
 #endif
             return -2;
@@ -741,7 +741,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
             // Find
             if(findSensorStateCoreFromList(PredictedState->TheListSensorStateCore, (*it2Sens), predictedStateSensor2))
             {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                 std::cout<<"!!Error findSensorStateCoreFromList"<<std::endl;
 #endif
                 return -2;
@@ -765,7 +765,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
                                                       std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor1), std::static_pointer_cast<ImuSensorStateCore>(predictedStateSensor2),
                                                       &PreviousState->covarianceMatrix, WorkingInitPoint, &PredictedState->covarianceMatrix, SensorsEndPoint))
                             {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
                                 std::cout<<"!!Error predicting covariances"<<std::endl;
 #endif
                                 return 2;
@@ -821,13 +821,13 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     /////// Add element to the buffer
     if(TheMsfStorageCore->addElement(TheTimeStamp, PredictedState))
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         std::cout<<"!!Error addElement"<<std::endl;
 #endif
         return -2;
     }
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predict() ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -843,7 +843,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -859,7 +859,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Get the outdated element to do the update
     if(this->TheMsfStorageCore->getElement(TheTimeStamp, UpdatedState))
     {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::update() error 11!"<<std::endl;
@@ -873,7 +873,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Check
     if(!UpdatedState)
     {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::update() error2!"<<std::endl;
@@ -886,7 +886,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"number of users of updated state="<<UpdatedState.use_count()<<std::endl;
@@ -903,7 +903,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
     }
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"number of users of updated state="<<UpdatedState.use_count()<<std::endl;
@@ -915,7 +915,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Check if there are measurements
     if(UpdatedState->TheListMeasurementCore.size()==0)
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() ended without measurements TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
         this->log(logString.str());
@@ -930,7 +930,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Updated State
     if(!UpdatedState)
     {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         std::cout<<"MsfLocalizationCore::update() error 1"<<std::endl;
 #endif
         return 1;
@@ -938,7 +938,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
     if(!UpdatedState->TheRobotStateCore)
     {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         std::cout<<"MsfLocalizationCore::update() error 11"<<std::endl;
 #endif
         return 11;
@@ -948,7 +948,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // TODO No!
     if(UpdatedState->TheListSensorStateCore.size()==0)
     {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         std::cout<<"MsfLocalizationCore::update() error 13"<<std::endl;
 #endif
         return 13;
@@ -967,7 +967,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         // Check
         if(!(*itListMeas)->getTheSensorCore())
         {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             std::cout<<"MsfLocalizationCore::update() error 2"<<std::endl;
 #endif
             return 2;
@@ -986,14 +986,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 std::shared_ptr<SensorStateCore> TheSensorStateCore;
                 if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
                 {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
 #endif
                     return 4;
                 }
                 if(!TheSensorStateCore)
                 {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 5"<<std::endl;
 #endif
                     return 5;
@@ -1009,7 +1009,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 // Call measurement prediction
                 if(TheImuSensorCore->predictMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
                 {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
 #endif
                     return 3;
@@ -1019,7 +1019,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 // Compute Jacobians of the Measurement
                 if(TheImuSensorCore->jacobiansMeasurements(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheImuSensorStateCore))
                 {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
 #endif
                     return 3;
@@ -1100,7 +1100,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     /////// Add element to the buffer
     if(TheMsfStorageCore->addElement(TheTimeStamp, UpdatedState))
     {
-#ifdef _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         std::cout<<"!!Error addElement"<<std::endl;
 #endif
         return -2;
@@ -1112,7 +1112,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 //        UpdatedState.reset();
 
 
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     std::ostringstream logString;
     logString<<"MsfLocalizationCore::update() ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
     this->log(logString.str());
@@ -1138,7 +1138,7 @@ int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<S
 
         if(!(*itSensState))
         {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
             std::cout<<"!!pointer not set properly"<<std::endl;
 #endif
             return -200;
@@ -1146,7 +1146,7 @@ int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<S
 
         if(!(*itSensState)->getTheSensorCore())
         {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
             std::cout<<"!!Error getting the core"<<std::endl;
 #endif
             return -100;
@@ -1165,7 +1165,7 @@ int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<S
     // Check if not found
     if(!TheSensorStateCore)
     {
-#ifdef _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::findSensorStateCoreFromList() error !TheSensorStateCore"<<std::endl;
 #endif
         return -2;

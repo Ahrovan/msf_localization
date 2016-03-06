@@ -66,7 +66,7 @@
 
 
 
-#define _DEBUG_MSF_STORAGE
+#define _DEBUG_MSF_STORAGE 1
 
 
 

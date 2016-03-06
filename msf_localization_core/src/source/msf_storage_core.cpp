@@ -46,7 +46,7 @@ MsfStorageCore::~MsfStorageCore()
 
 int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement)
 {
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::setMeasurement() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -86,7 +86,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shar
     // Add TimeStamp to the outdated elements list
     this->addOutdatedElement(TheTimeStamp);
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -126,7 +126,7 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
 
 int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp()"<<std::endl;
@@ -164,7 +164,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
                 PreviousState=BufferElement.object;
                 //logFile<<"found with state!"<<std::endl;
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
                 {
                     std::ostringstream logString;
                     logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -178,7 +178,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
     }
     TheRingBufferMutex.unlock();
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() ended"<<std::endl;
@@ -265,7 +265,7 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStam
 
 int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
 {
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::addElement()"<<std::endl;
@@ -274,7 +274,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     }
 #endif
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     this->displayStateEstimationElement(TheTimeStamp, TheStateEstimationCore);
 #endif
 
@@ -288,7 +288,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     // Error flag
     int errorType;
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::addElement() pre addElementByStamp"<<std::endl;
@@ -305,7 +305,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     // Unlock
     TheRingBufferMutex.unlock();
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::addElement() post addElementByStamp"<<std::endl;
@@ -316,7 +316,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     if(errorType)
     {
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
         {
             std::ostringstream logString;
             logString<<"MsfStorageCore::addElement() error in addElementByStamp number: "<<errorType<<std::endl;
@@ -328,7 +328,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     }
 
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::addElement() ended"<<std::endl;
@@ -389,7 +389,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
                 // Jacobian
-#ifdef _DEBUG_DISPLAY
+#if _DEBUG_DISPLAY
                 logString<<std::endl;
                 logString<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
 
@@ -445,7 +445,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
                     // Jacobian
-#ifdef _DEBUG_DISPLAY
+#if _DEBUG_DISPLAY
                     logString<<std::endl;
                     if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
                         logString<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
@@ -591,7 +591,7 @@ int MsfStorageCore::displayRingBuffer()
 
 int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 {
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::purgeRingBuffer() numElementsFrom: "<<numElementsFrom<<std::endl;
@@ -617,7 +617,7 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 
     //std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
         logString<<"MsfStorageCore::purgeRingBuffer() ended"<<std::endl;
@@ -661,7 +661,7 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
         outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
     }
 
-#ifdef _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     // Display
     this->displayOutdatedBufferElements();
 #endif
