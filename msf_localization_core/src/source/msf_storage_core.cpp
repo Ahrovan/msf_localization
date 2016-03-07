@@ -148,6 +148,16 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
         // Get the element
         this->getElementI(BufferElement, itElement);
 
+
+#if _DEBUG_MSF_STORAGE
+        {
+            std::ostringstream logString;
+            logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+
         // Check the time stamp
         if(BufferElement.timeStamp>=ThePreviousTimeStamp)
         {

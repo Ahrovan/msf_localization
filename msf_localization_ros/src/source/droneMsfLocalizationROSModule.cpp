@@ -1153,34 +1153,34 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         }
 #endif
 
-        // Get state estimation core associated to the oldest element on the buffer
-        std::shared_ptr<StateEstimationCore> TheOutdatedElement;
-        if(this->TheMsfStorageCore->getElement(OldestTimeStamp, TheOutdatedElement))
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error 1!"<<std::endl;
-                this->log(logString.str());
-            }
+//        // Get state estimation core associated to the oldest element on the buffer
+//        std::shared_ptr<StateEstimationCore> TheOutdatedElement;
+//        if(this->TheMsfStorageCore->getElement(OldestTimeStamp, TheOutdatedElement))
+//        {
+//#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+//            {
+//                std::ostringstream logString;
+//                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error 1!"<<std::endl;
+//                this->log(logString.str());
+//            }
 
-#endif
-            continue;
-        }
+//#endif
+//            continue;
+//        }
 
-        // Check
-        if(!TheOutdatedElement)
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error2!"<<std::endl;
-                this->log(logString.str());
-            }
+//        // Check
+//        if(!TheOutdatedElement)
+//        {
+//#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+//            {
+//                std::ostringstream logString;
+//                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error2!"<<std::endl;
+//                this->log(logString.str());
+//            }
 
-#endif
-            continue;
-        }
+//#endif
+//            continue;
+//        }
 
 
         // Run predict and store updated predicted element
@@ -1212,8 +1212,8 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 //        }
 
 
-        if(TheOutdatedElement)
-            TheOutdatedElement.reset();
+//        if(TheOutdatedElement)
+//            TheOutdatedElement.reset();
 
 
 //        // Get the outdated element to do the update
@@ -1269,9 +1269,9 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #endif
 
 
-        // Free the ownership
-        if(TheOutdatedElement)
-            TheOutdatedElement.reset();
+//        // Free the ownership
+//        if(TheOutdatedElement)
+//            TheOutdatedElement.reset();
 
 
         if(errorUpdate)
