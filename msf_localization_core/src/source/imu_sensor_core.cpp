@@ -415,6 +415,74 @@ int ImuSensorCore::setNoiseScaleLinearAcceleration(Eigen::Matrix3d noiseScaleLin
     return 0;
 }
 
+Eigen::MatrixXd ImuSensorCore::getCovarianceMeasurement()
+{
+    Eigen::MatrixXd CovariancesMatrix;
+    CovariancesMatrix.resize(this->getDimensionMeasurement(), this->getDimensionMeasurement());
+    CovariancesMatrix.setZero();
+
+    unsigned int dimension=0;
+    if(this->isMeasurementLinearAccelerationEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementLinearAcceleration();
+        dimension+=3;
+    }
+    if(this->isMeasurementOrientationEnabled())
+    {
+        // TODO
+        dimension+=3;
+    }
+    if(this->isMeasurementAngularVelocityEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementAngularVelocity();
+        dimension+=3;
+    }
+
+    return CovariancesMatrix;
+}
+
+Eigen::MatrixXd ImuSensorCore::getCovarianceParameters()
+{
+    Eigen::MatrixXd CovariancesMatrix;
+    CovariancesMatrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
+    CovariancesMatrix.setZero();
+
+    unsigned int dimension=0;
+    if(!this->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoisePositionSensorWrtRobot();
+        dimension+=3;
+    }
+    if(!this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseAttitudeSensorWrtRobot();
+        dimension+=3;
+    }
+    if(!this->isEstimationBiasLinearAccelerationEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasLinearAcceleration();
+        dimension+=3;
+    }
+    if(!this->isEstimationScaleLinearAccelerationEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleLinearAcceleration();
+        dimension+=3;
+    }
+    if(!this->isEstimationBiasAngularVelocityEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasAngularVelocity();
+        dimension+=3;
+    }
+    if(!this->isEstimationScaleAngularVelocityEnabled())
+    {
+        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleAngularVelocity();
+        dimension+=3;
+    }
+
+
+    return CovariancesMatrix;
+}
+
 
 /*
 int ImuSensorCore::setInitErrorStateVariancePositionSensorWrtRobot(Eigen::Vector3d initVariance)
@@ -786,11 +854,13 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 
 
-int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore>& TheImuStateCore)
+int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
 
     // Checks
     // TODO
+
+    //predictedMeasurement
 
 
 
@@ -817,8 +887,8 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             int dimensionRobotErrorState=TheRobotCoreAux->getDimensionErrorState();
 
             // Resize and init Jacobian
-            TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimensionMeasurement, dimensionRobotErrorState);
-            TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.setZero();
+            predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimensionMeasurement, dimensionRobotErrorState);
+            predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.setZero();
 
             // Fill Jacobian
             // TODO
@@ -840,8 +910,8 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     int dimensionSensorErrorState=TheImuStateCore->getTheSensorCore()->getDimensionErrorState();
 
     // Resize and init Jacobian
-    TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimensionMeasurement, dimensionSensorErrorState);
-    TheImuStateCore->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimensionMeasurement, dimensionSensorErrorState);
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
 
     // Fill Jacobian
     // TODO
@@ -854,8 +924,8 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     int dimensionSensorParameters=TheImuStateCore->getTheSensorCore()->getDimensionErrorParameters();
 
     // Resize and init Jacobian
-    TheImuStateCore->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.resize(dimensionMeasurement, dimensionSensorParameters);
-    TheImuStateCore->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.setZero();
+    predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.resize(dimensionMeasurement, dimensionSensorParameters);
+    predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.setZero();
 
     // Fill Jacobian
     // TODO
@@ -868,8 +938,8 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     int dimensionGlobalParameters=TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
 
     // Resize and init Jacobian
-    TheImuStateCore->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.resize(dimensionMeasurement, dimensionGlobalParameters);
-    TheImuStateCore->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.setZero();
+    predictedMeasurement->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.resize(dimensionMeasurement, dimensionGlobalParameters);
+    predictedMeasurement->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.setZero();
 
     // Fill Jacobian
     // TODO
@@ -879,8 +949,8 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Jacobians measurement - sensor noise of the measurement
 
     // Resize and init Jacobian
-    TheImuStateCore->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimensionMeasurement, dimensionMeasurement);
-    TheImuStateCore->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
+    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimensionMeasurement, dimensionMeasurement);
+    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
 
     // Fill Jacobian
     // TODO

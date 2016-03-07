@@ -105,6 +105,12 @@ public:
     int setNoiseGravity(Eigen::Matrix3d noiseGravity);
 
 
+
+
+public:
+    Eigen::MatrixXd getCovarianceGlobalParameters();
+
+
 };
 
 

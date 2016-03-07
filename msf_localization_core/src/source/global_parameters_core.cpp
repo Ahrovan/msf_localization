@@ -155,3 +155,21 @@ int GlobalParametersCore::setNoiseGravity(Eigen::Matrix3d noiseGravity)
     this->noiseGravity=noiseGravity;
     return 0;
 }
+
+
+Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
+{
+    Eigen::MatrixXd covariance_matrix;
+    covariance_matrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
+    covariance_matrix.setZero();
+
+    unsigned int dimension=0;
+    if(!this->isEstimationGravityEnabled())
+    {
+        covariance_matrix.block<3,3>(dimension, dimension)=this->getNoiseGravity();
+        dimension+=3;
+    }
+
+
+    return covariance_matrix;
+}

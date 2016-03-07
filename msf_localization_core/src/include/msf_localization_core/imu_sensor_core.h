@@ -90,6 +90,9 @@ public:
 
 
 
+
+
+
     ///// State estimation and parameters
 
 
@@ -199,6 +202,11 @@ public:
 
 
 
+    ///// Get Covariances as a Eigen::MatrixXd
+public:
+    Eigen::MatrixXd getCovarianceMeasurement();
+    Eigen::MatrixXd getCovarianceParameters();
+
 
 
     ////// Init error state variances -> Temporal, only for the initial configuration
@@ -228,7 +236,7 @@ public:
 
     // Jacobian of the measurements
 public:
-    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore>& TheImuStateCore);
+    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
 
 
 

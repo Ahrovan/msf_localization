@@ -29,6 +29,44 @@ public:
     std::shared_ptr<SensorCore> getTheSensorCore() const;
 
 
+
+
+    /// Jacobians Measurement
+
+public:
+    struct
+    {
+        Eigen::MatrixXd jacobianMeasurementRobotErrorState;
+        Eigen::MatrixXd jacobianMeasurementGlobalParametersErrorState;
+        Eigen::MatrixXd jacobianMeasurementSensorErrorState;
+
+    } jacobianMeasurementErrorState;
+
+    struct
+    {
+        Eigen::MatrixXd jacobianMeasurementSensorParameters;
+
+    } jacobianMeasurementSensorParameters;
+
+    struct
+    {
+        Eigen::MatrixXd jacobianMeasurementGlobalParameters;
+
+    } jacobianMeasurementGlobalParameters;
+
+    struct
+    {
+        Eigen::MatrixXd jacobianMeasurementSensorNoise;
+
+    } jacobianMeasurementSensorNoise;
+
+
+
+
+    //// Get the full measurement as an Eigen::VectorXd
+public:
+    virtual Eigen::VectorXd getMeasurement()=0;
+
 };
 
 

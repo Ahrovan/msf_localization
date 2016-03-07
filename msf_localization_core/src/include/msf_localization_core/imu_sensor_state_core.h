@@ -79,33 +79,7 @@ public:
 
 
 
-    /// Jacobians Measurement
 
-public:
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementRobotErrorState;
-        Eigen::MatrixXd jacobianMeasurementSensorErrorState;
-
-    } jacobianMeasurementErrorState;
-
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementSensorParameters;
-
-    } jacobianMeasurementSensorParameters;
-
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementGlobalParameters;
-
-    } jacobianMeasurementGlobalParameters;
-
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementSensorNoise;
-
-    } jacobianMeasurementSensorNoise;
 
 
 

@@ -50,6 +50,13 @@ public:
     Eigen::Vector3d getLinearAcceleration() const;
 
 
+
+
+
+    //// Get the full measurement as a Eigen::VectorXd
+public:
+    Eigen::VectorXd getMeasurement();
+
 };
 
 

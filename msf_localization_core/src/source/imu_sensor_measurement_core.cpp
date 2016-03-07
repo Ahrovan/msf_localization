@@ -89,3 +89,36 @@ Eigen::Vector3d ImuSensorMeasurementCore::getLinearAcceleration() const
 {
     return this->LinearAcceleration;
 }
+
+
+Eigen::VectorXd ImuSensorMeasurementCore::getMeasurement()
+{
+    // Create the Measurement
+    Eigen::VectorXd TheMeasurement;
+    TheMeasurement.resize(this->getTheSensorCore()->getDimensionMeasurement(), 1);
+    TheMeasurement.setZero();
+
+    // Sensor Core
+    std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getTheSensorCore());
+
+    // Fill
+    unsigned int dimension=0;
+    if(TheImuSensorCore->isMeasurementLinearAccelerationEnabled())
+    {
+        TheMeasurement.block<3,1>(dimension,0)=getLinearAcceleration();
+        dimension+=3;
+    }
+    if(TheImuSensorCore->isMeasurementOrientationEnabled())
+    {
+        TheMeasurement.block<4,1>(dimension,0)=getOrientation();
+        dimension+=4;
+    }
+    if(TheImuSensorCore->isMeasurementAngularVelocityEnabled())
+    {
+        TheMeasurement.block<3,1>(dimension,0)=getAngularVelocity();
+        dimension+=3;
+    }
+
+
+    return TheMeasurement;
+}

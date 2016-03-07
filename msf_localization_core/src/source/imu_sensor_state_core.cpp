@@ -4,7 +4,7 @@
 
 ImuSensorStateCore::ImuSensorStateCore()
 {
-    // Init to zero
+    // Error State Jacobian: Init to zero
     errorStateJacobian.positionSensorWrtRobot.setZero();
     errorStateJacobian.attitudeSensorWrtRobot.setZero();
     errorStateJacobian.biasesLinearAcceleration.setZero();

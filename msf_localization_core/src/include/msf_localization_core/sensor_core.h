@@ -103,6 +103,7 @@ public:
 
 
 
+
     //// Pose of the sensor wrt robot
 
 
@@ -153,6 +154,14 @@ public:
 
 public:
     virtual int prepareInitErrorStateVariance();
+
+
+
+    ///// Get Covariances as a Eigen::MatrixXd
+public:
+    virtual Eigen::MatrixXd getCovarianceMeasurement()=0;
+    virtual Eigen::MatrixXd getCovarianceParameters()=0;
+
 
 
 
