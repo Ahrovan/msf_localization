@@ -217,7 +217,7 @@ public:
 
     ///// Predict functions
 
-    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, bias_ang_veloc]'
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
 
     // Prediction state function
 public:

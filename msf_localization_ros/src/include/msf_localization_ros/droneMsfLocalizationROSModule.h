@@ -143,6 +143,11 @@ protected:
     geometry_msgs::PoseWithCovarianceStamped robotPoseMsg;
 
 
+    // Tf
+protected:
+    tf::TransformBroadcaster* tfTransformBroadcaster;
+
+
 protected:
     double robotPoseRateVal;
     ros::Rate* robotPoseRate;

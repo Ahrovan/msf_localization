@@ -1145,7 +1145,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 
 
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() Innovation vector for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1382,7 +1382,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     CovarianceSensorParameters.resize(dimensionSensorParameters, dimensionSensorParameters);
     CovarianceSensorParameters.setZero();
 
-    // TODO Fill
+    // Fill
     {
         unsigned int dimensionTotalSensorParametersI=0;
         for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeasI=TheListMatchedMeasurements.begin();
@@ -1443,7 +1443,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     distance_mahalanobis=innovationVector.transpose()*innovation_covariance_inverse*innovationVector;
 
 
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() distance_mahalanobis ="<<distance_mahalanobis<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1462,7 +1462,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     kalmanGain=UpdatedState->covarianceMatrix*JacobianMeasurementErrorState.transpose()*innovation_covariance_inverse;
 
 
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() Kalman Gain for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1479,10 +1479,10 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     Eigen::VectorXd incrementErrorState=kalmanGain*innovationVector;
 
 
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
-        logString<<"MsfLocalizationCore::update() Increment Error State vector for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfLocalizationCore::update() Increment Delta State vector for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
         logString<<incrementErrorState.transpose()<<std::endl;
         this->log(logString.str());
     }
@@ -1491,19 +1491,80 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
     // Get the updated state from the increment of the Error State
 
-    // Robot
+    {
+        unsigned int dimension=0;
+
+        // Robot
+        unsigned int dimensionRobotErrorState=this->TheRobotCore->getDimensionErrorState();
+        Eigen::VectorXd incrementErrorStateRobot;
+        if(dimensionRobotErrorState)
+        {
+            incrementErrorStateRobot=incrementErrorState.block(dimension, 0, dimensionRobotErrorState, 1);
+            UpdatedState->TheRobotStateCore->updateStateFromIncrementErrorState(incrementErrorStateRobot);
+        }
+        dimension+=dimensionRobotErrorState;
+
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::update() incrementDeltaStateRobot for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<incrementErrorStateRobot.transpose()<<std::endl;
+            this->log(logString.str());
+        }
+#endif
 
 
-    // Global Parameters
+        // Global Parameters
+        unsigned int dimensionGlobalParametersErrorState=this->TheGlobalParametersCore->getDimensionErrorState();
+        Eigen::VectorXd incrementErrorStateGlobalParameters;
+        if(dimensionGlobalParametersErrorState)
+        {
+            incrementErrorStateGlobalParameters=incrementErrorState.block(dimension, 0, dimensionGlobalParametersErrorState, 1);
+            UpdatedState->TheGlobalParametersStateCore->updateStateFromIncrementErrorState(incrementErrorStateGlobalParameters);
+        }
+        dimension+=dimensionGlobalParametersErrorState;
+
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::update() incrementDeltaStateGlobalParameters for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<incrementErrorStateGlobalParameters.transpose()<<std::endl;
+            this->log(logString.str());
+        }
+#endif
 
 
-    // Sensors
+        // Sensors
+        for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+            itListSensorState!=UpdatedState->TheListSensorStateCore.end();
+            ++itListSensorState)
+        {
+            unsigned int dimensionSensorErrorState=(*itListSensorState)->getTheSensorCore()->getDimensionErrorState();
+            Eigen::VectorXd incrementErrorStateSensor;
+            if(dimensionSensorErrorState)
+            {
+                incrementErrorStateSensor=incrementErrorState.block(dimension, 0, dimensionSensorErrorState, 1);
+                (*itListSensorState)->updateStateFromIncrementErrorState(incrementErrorStateSensor);
+            }
+            dimension+=dimensionSensorErrorState;
+
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::update() incrementDeltaStateSensor for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                logString<<incrementErrorStateSensor.transpose()<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+        }
 
 
-    // Map
-    // TODO
+        // Map
+        // TODO
 
 
+
+    }
 
 
 
@@ -1514,9 +1575,16 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     AuxiliarMatrix=Eigen::MatrixXd::Identity(dimensionErrorState, dimensionErrorState)-kalmanGain*JacobianMeasurementErrorState;
 
     // Equation
-    //UpdatedState->covarianceMatrix=AuxiliarMatrix*UpdatedState->covarianceMatrix*AuxiliarMatrix.transpose()+kalmanGain*innovationCovariance*kalmanGain.traspose();
+    UpdatedState->covarianceMatrix=AuxiliarMatrix*UpdatedState->covarianceMatrix*AuxiliarMatrix.transpose()+kalmanGain*innovationCovariance*kalmanGain.transpose();
 
-
+#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::update() updated covariance for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<UpdatedState->covarianceMatrix<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
     ///// Reset Error State

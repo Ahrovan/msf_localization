@@ -187,7 +187,7 @@ protected:
 
     // Predict Thread
 protected:
-    double predictRateVale;
+    double predictRateValue;
     std::thread* predictThread;
     //SyncThreadState predictThreadState;
 protected:

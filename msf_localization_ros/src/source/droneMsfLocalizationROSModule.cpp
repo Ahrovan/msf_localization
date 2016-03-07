@@ -9,6 +9,9 @@ MsfLocalizationROS::MsfLocalizationROS(int argc,char **argv)
     // Node handle
     nh=new ros::NodeHandle();
 
+    // tf broadcaster
+    tfTransformBroadcaster=new tf::TransformBroadcaster;
+
     // Init
     init();
 
@@ -21,6 +24,8 @@ MsfLocalizationROS::~MsfLocalizationROS()
     close();
 
     // Delete
+    delete tfTransformBroadcaster;
+
     delete nh;
 
     return;
@@ -71,7 +76,7 @@ int MsfLocalizationROS::readConfigFile()
 
     // Reading Configs
     // TODO
-    predictRateVale=100.0; // In Hz
+    predictRateValue=10.0; // In Hz
 
 
 
@@ -881,7 +886,19 @@ try
         if(!PredictedState)
         {
 //            this->robotPoseThreadState.setProcessing(TheTimeStamp);
-            this->predict(TheTimeStamp);
+            // TODO this should be a while and being carefully with the memory
+            if(this->predict(TheTimeStamp))
+            {
+                // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationROS::robotPoseThreadFunction() error in predict()"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+                continue;
+            }
 //            this->robotPoseThreadState.setNotProcessing();
         }
 
@@ -954,6 +971,19 @@ try
         }
 //}
 
+
+        // TF
+
+        tf::Quaternion tf_rot(robotAttitude[1], robotAttitude[2], robotAttitude[3], robotAttitude[0]);
+        tf::Vector3 tf_tran(robotPosition[0], robotPosition[1], robotPosition[2]);
+
+        tf::Transform transform(tf_rot, tf_tran);
+
+        tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
+                                              "world", "robot"));
+
+
+
         // Free the ownership
         if(PredictedState)
             PredictedState.reset();
@@ -1014,7 +1044,7 @@ int MsfLocalizationROS::predictThreadFunction()
 #endif
 
 //return 0;
-    ros::Rate predictRate(predictRateVale);
+    ros::Rate predictRate(predictRateValue);
     //ros::Rate predictRate(100);
 
     try{
@@ -1051,8 +1081,20 @@ int MsfLocalizationROS::predictThreadFunction()
         if(!ThePredictedState)
         {
 //            predictThreadState.setProcessing(TheTimeStamp);
-            this->predict(TheTimeStamp);
+            // TODO Fix. This should be a while but being careful with the memory
+            if(this->predict(TheTimeStamp))
+            {
+                // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationROS::predictThreadFunction() error in predict()"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+                continue;
 //            predictThreadState.setNotProcessing();
+            }
         }
 
         if(ThePredictedState)
@@ -1251,6 +1293,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         int errorUpdate=0;
 //        try
 //        {
+        // TODO CHANGE NOW
             errorUpdate=this->update(OldestTimeStamp);
 //        }
 //        catch(...)

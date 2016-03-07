@@ -496,6 +496,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
         logString<<"+Covariance of the state:"<<std::endl;
         logString<<"\t\t";
         logString<<"size: "<<TheStateEstimationCore->covarianceMatrix.rows()<<" x "<<TheStateEstimationCore->covarianceMatrix.cols()<<std::endl;
+        logString<<TheStateEstimationCore->covarianceMatrix<<std::endl;
 
 
 
@@ -671,7 +672,7 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
         outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
     }
 
-#if _DEBUG_MSF_STORAGE
+#if 0 || _DEBUG_MSF_STORAGE
     // Display
     this->displayOutdatedBufferElements();
 #endif

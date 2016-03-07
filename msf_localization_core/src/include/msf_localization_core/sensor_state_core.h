@@ -63,7 +63,8 @@ public:
 
 
 
-
+public:
+    virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
 
 
 };

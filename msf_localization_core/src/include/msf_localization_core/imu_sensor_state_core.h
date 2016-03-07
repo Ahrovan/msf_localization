@@ -9,6 +9,8 @@
 
 #include "msf_localization_core/sensor_state_core.h"
 
+#include "msf_localization_core/quaternion_algebra.h"
+
 
 
 class ImuSensorStateCore : public SensorStateCore
@@ -21,7 +23,7 @@ public:
     ///// Imu State if enabled (or Parameters if disabled)
 
     // if enabled
-    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, bias_ang_veloc]'
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
 
 
     // Angular Velocity Biases
@@ -79,7 +81,8 @@ public:
 
 
 
-
+public:
+    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
 
 
 

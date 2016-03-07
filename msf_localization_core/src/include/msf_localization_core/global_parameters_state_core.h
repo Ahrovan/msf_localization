@@ -35,6 +35,11 @@ public:
     int setGravity(Eigen::Vector3d gravity);
 
 
+
+public:
+    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
+
+
 };
 
 

@@ -46,3 +46,17 @@ int GlobalParametersStateCore::setGravity(Eigen::Vector3d gravity)
     this->gravity=gravity;
     return 0;
 }
+
+
+int GlobalParametersStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+{
+    unsigned int dimension=0;
+    if(this->getTheGlobalParametersCore()->isEstimationGravityEnabled())
+    {
+        this->gravity+=increment_error_state.block<3,1>(dimension, 0);
+        dimension+=3;
+    }
+
+
+    return 0;
+}

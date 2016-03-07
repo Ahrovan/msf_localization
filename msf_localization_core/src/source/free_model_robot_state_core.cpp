@@ -79,3 +79,25 @@ int FreeModelRobotStateCore::setAngularAcceleration(Eigen::Vector3d angular_acce
     this->angular_acceleration=angular_acceleration;
     return 0;
 }
+
+
+int FreeModelRobotStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+{
+
+    position+=increment_error_state.block<3,1>(0,0);
+    linear_speed+=increment_error_state.block<3,1>(3,0);
+    linear_acceleration+=increment_error_state.block<3,1>(6,0);
+
+
+    Eigen::Vector4d DeltaQuat;
+    DeltaQuat[0]=1;
+    DeltaQuat.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(9,0);
+    DeltaQuat=DeltaQuat/DeltaQuat.norm();
+
+    attitude=Quaternion::cross(attitude, DeltaQuat);
+    angular_velocity+=increment_error_state.block<3,1>(12,0);
+    angular_acceleration+=increment_error_state.block<3,1>(15,0);
+
+
+    return 0;
+}
