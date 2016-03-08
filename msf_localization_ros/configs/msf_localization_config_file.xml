@@ -3,6 +3,8 @@
 
   <!-- Global parameters -->
   <global_parameters>
+    <name>world</name>
+
     <gravity>
       <enabled description="enable state estimation">0</enabled> <!-- TODO -->
       <init_estimation>0.0 0.0 -9.81</init_estimation>
@@ -15,6 +17,7 @@
 
   <!-- ROBOT -->
   <robot>
+    <name>robot</name>
     <position description="position of the robot wrt world (3D vector in m)">
       <init_estimation>0 0 0</init_estimation>
       <init_var>0.01 0.01 0.01</init_var>
@@ -55,6 +58,7 @@
   <sensor>
     <type>imu</type>
     <ros_topic>phidgets_imu_1042/imu/data_raw</ros_topic>
+    <name>phidgets_imu_1042</name>
 
     <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
       <position description="position of the sensor wrt robot (3D vector in m)">
@@ -64,7 +68,7 @@
       </position>
       <attitude description="attitude of the sensor wrt robot (quaternion vector)">
         <enabled description="enable state estimation">1</enabled>
-        <init_estimation>1 0 0 0</init_estimation>
+        <init_estimation>0 1 0 0</init_estimation>
         <init_var>0.031 0.031 0.031</init_var>
       </attitude>
     </pose_in_robot>

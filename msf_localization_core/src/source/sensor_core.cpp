@@ -17,6 +17,8 @@ SensorCore::SensorCore() :
     dimensionNoise(0)
 {
 
+    // Sensor name
+    sensor_name_="sensor";
 
     // Flags
     flagEstimationAttitudeSensorWrtRobot=false;
@@ -124,6 +126,17 @@ unsigned int SensorCore::getDimensionMeasurement() const
 unsigned int SensorCore::getDimensionNoise() const
 {
     return this->dimensionNoise;
+}
+
+int SensorCore::setSensorName(std::string sensor_name)
+{
+    this->sensor_name_=sensor_name;
+    return 0;
+}
+
+std::string SensorCore::getSensorName() const
+{
+    return this->sensor_name_;
 }
 
 

@@ -9,6 +9,9 @@ GlobalParametersCore::GlobalParametersCore() :
     dimensionParameters(3),
     dimensionErrorParameters(3)
 {
+    // Default name
+    world_name_="world";
+
     // Flags
     flagEstimationGravity=false;
 
@@ -31,6 +34,18 @@ GlobalParametersCore::GlobalParametersCore(std::weak_ptr<MsfStorageCore> TheMsfS
 GlobalParametersCore::~GlobalParametersCore()
 {
     return;
+}
+
+
+std::string GlobalParametersCore::getWorldName() const
+{
+    return this->world_name_;
+}
+
+int GlobalParametersCore::setWorldName(std::string world_name)
+{
+    this->world_name_=world_name;
+    return 0;
 }
 
 unsigned int GlobalParametersCore::getDimensionState() const

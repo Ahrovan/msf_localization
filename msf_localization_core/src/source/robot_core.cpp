@@ -15,12 +15,26 @@ RobotCore::RobotCore() :
     // Robot Type
     robotType=RobotTypes::undefined;
 
+    // Robot name default
+    robot_name_="robot";
+
     return;
 }
 
 RobotCore::~RobotCore()
 {
     return;
+}
+
+int RobotCore::setRobotName(std::string robot_name)
+{
+    this->robot_name_=robot_name;
+    return 0;
+}
+
+std::string RobotCore::getRobotName() const
+{
+    return this->robot_name_;
 }
 
 unsigned int RobotCore::getDimensionState() const

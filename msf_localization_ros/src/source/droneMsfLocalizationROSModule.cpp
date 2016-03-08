@@ -242,6 +242,11 @@ int MsfLocalizationROS::readGlobalParametersConfig(pugi::xml_node global_paramet
     std::string readingValue;
 
 
+    /// World name
+    readingValue=global_parameters.child_value("name");
+    TheGlobalParametersCoreAux->setWorldName(readingValue);
+
+
     /// Init State
 
     // Gravity
@@ -298,6 +303,11 @@ int MsfLocalizationROS::readFreeModelRobotConfig(pugi::xml_node robot, std::shar
 
     // Aux vars
     std::string readingValue;
+
+
+    // Name
+    readingValue=robot.child_value("name");
+    TheRobotCoreAux->setRobotName(readingValue);
 
 
     /// Init State
@@ -487,7 +497,9 @@ int MsfLocalizationROS::readImuConfig(pugi::xml_node sensor, unsigned int sensor
     std::string readingValue;
 
 
-
+    // Name
+    readingValue=sensor.child_value("name");
+    TheRosSensorImuInterface->setSensorName(readingValue);
 
 
     //// Sensor configurations
@@ -861,13 +873,13 @@ try
 {
     while(ros::ok())
     {
-        if(!this->isStateEstimationEnabled())
-        {
-            // Sleep
-            robotPoseRate->sleep();
-            // continue
-            continue;
-        }
+//        if(!this->isStateEstimationEnabled())
+//        {
+//            // Sleep
+//            robotPoseRate->sleep();
+//            // continue
+//            continue;
+//        }
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
@@ -878,8 +890,15 @@ try
 
         // Get Robot Pose
         // TODO
-        TimeStamp TheTimeStamp=getTimeStamp();
+        TimeStamp TheTimeStamp;
         std::shared_ptr<StateEstimationCore> PredictedState;
+
+
+
+        if(this->isStateEstimationEnabled())
+        {
+
+            TheTimeStamp=getTimeStamp();
 
         this->TheMsfStorageCore->getElement(TheTimeStamp, PredictedState);
 
@@ -925,6 +944,21 @@ try
             continue;
         }
 
+        }
+        else
+        {
+            // Get the last state estimation
+            this->TheMsfStorageCore->getLastElementWithStateEstimate(TheTimeStamp, PredictedState);
+
+
+            // Time Stamp is null, put the current one
+            if(TheTimeStamp==TimeStamp(0,0))
+            {
+                TheTimeStamp=getTimeStamp();
+            }
+
+        }
+
 
         if(!PredictedState)
         {
@@ -938,7 +972,7 @@ try
 
         // Frame id
         // TODO put as a ros param
-        robotPoseMsg.header.frame_id="world";
+        robotPoseMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
 //if(0)
 //{
         // Robot Pose
@@ -980,10 +1014,34 @@ try
         tf::Transform transform(tf_rot, tf_tran);
 
         tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                              "world", "robot"));
+                                              this->TheGlobalParametersCore->getWorldName(), this->TheRobotCore->getRobotName()));
 
 
 
+
+        for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensorState=PredictedState->TheListSensorStateCore.begin();
+            itSensorState!=PredictedState->TheListSensorStateCore.end();
+            ++itSensorState)
+        {
+
+            Eigen::Vector3d sensorPosition=(*itSensorState)->getPositionSensorWrtRobot();
+            Eigen::Vector4d sensorAttitude=(*itSensorState)->getAttitudeSensorWrtRobot();
+
+            tf::Quaternion tf_rot(sensorAttitude[1], sensorAttitude[2], sensorAttitude[3], sensorAttitude[0]);
+            tf::Vector3 tf_tran(sensorPosition[0], sensorPosition[1], sensorPosition[2]);
+
+            tf::Transform transform(tf_rot, tf_tran);
+
+
+            tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
+                                                  this->TheGlobalParametersCore->getWorldName(), (*itSensorState)->getTheSensorCore()->getSensorName()));
+
+        }
+
+
+
+
+//std::cout<<"aqui"<<std::endl;
         // Free the ownership
         if(PredictedState)
             PredictedState.reset();

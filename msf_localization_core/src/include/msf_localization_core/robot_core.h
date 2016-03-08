@@ -34,6 +34,13 @@ public:
     virtual ~RobotCore();
 
 
+protected:
+    std::string robot_name_;
+public:
+    int setRobotName(std::string robot_name);
+    std::string getRobotName() const;
+
+
     // Dimension state
 protected:
     unsigned int dimensionState;

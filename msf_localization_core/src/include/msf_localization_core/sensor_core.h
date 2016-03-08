@@ -102,6 +102,13 @@ public:
 
 
 
+    //// Name
+protected:
+    std::string sensor_name_;
+public:
+    int setSensorName(std::string sensor_name);
+    std::string getSensorName() const;
+
 
 
     //// Pose of the sensor wrt robot

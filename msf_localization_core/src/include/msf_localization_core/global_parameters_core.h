@@ -32,6 +32,13 @@ public:
     virtual ~GlobalParametersCore();
 
 
+protected:
+    std::string world_name_;
+public:
+    std::string getWorldName() const;
+    int setWorldName(std::string world_name);
+
+
     // Dimension state
 protected:
     unsigned int dimensionState;

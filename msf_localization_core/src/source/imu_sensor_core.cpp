@@ -11,6 +11,10 @@ ImuSensorCore::ImuSensorCore() :
     // Sensor Type
     setSensorType(SensorTypes::imu);
 
+
+    // Sensor name -> Default
+    sensor_name_="imu_sensor";
+
     // Flags measurement
     flagMeasurementOrientation=false;
     flagMeasurementAngularVelocity=false;
