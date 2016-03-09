@@ -4,7 +4,7 @@
 
 #include <Eigen/Dense>
 
-
+#include <cmath>
 
 class Quaternion
 {
@@ -25,6 +25,21 @@ public:
         return cross(tail...);
     }
 
+    // Quaternion Matrixes
+    // Q+
+    static Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d q);
+    // Q-
+    static Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d q);
+
+
+    // Rotation vector to quaternion
+    static Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d v_rot);
+
+    static Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot);
+
+
+    // Skew-Symmetric Matrix: https://en.wikipedia.org/wiki/Skew-symmetric_matrix
+    static Eigen::Matrix3d skewSymMat(const Eigen::Vector3d w);
 
 };
 

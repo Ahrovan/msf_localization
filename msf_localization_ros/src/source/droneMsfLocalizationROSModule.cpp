@@ -1034,7 +1034,7 @@ try
 
 
             tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                                  this->TheGlobalParametersCore->getWorldName(), (*itSensorState)->getTheSensorCore()->getSensorName()));
+                                                  this->TheRobotCore->getRobotName(), (*itSensorState)->getTheSensorCore()->getSensorName()));
 
         }
 
@@ -1351,7 +1351,6 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         int errorUpdate=0;
 //        try
 //        {
-        // TODO CHANGE NOW
             errorUpdate=this->update(OldestTimeStamp);
 //        }
 //        catch(...)

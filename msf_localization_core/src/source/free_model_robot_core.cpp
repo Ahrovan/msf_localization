@@ -146,38 +146,38 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
     /// Attitude
 
     // deltaQw
-    Eigen::Vector4d deltaQw;
-    Eigen::Vector3d wContribution=pastState->angular_velocity+0.5*pastState->angular_acceleration*dt;
-    if(wContribution.norm() < 1e-3)
-    {
-        // Fill
-        deltaQw[0]=1;
-        deltaQw.block<3,1>(1,0)=wContribution*dt;
-        // Unit quaternion
-        deltaQw=deltaQw/deltaQw.norm();
-    }
-    else
-    {
-        // Fill
-        deltaQw[0]=cos(wContribution.norm()*dt/2);
-        deltaQw.block<3,1>(1,0)=wContribution/wContribution.norm()*sin(wContribution.norm()*dt/2);
-        // Unit quaternion -> Not needed, just in case! ?
-        deltaQw=deltaQw/deltaQw.norm();
-    }
+
+    Eigen::Vector3d w_mean_dt=(pastState->angular_velocity+0.5*pastState->angular_acceleration*dt)*dt;
+    Eigen::Vector4d rotation_w_mean_dt_to_quat;
+    rotation_w_mean_dt_to_quat=Quaternion::rotationVectorToQuaternion(w_mean_dt);
+    rotation_w_mean_dt_to_quat=rotation_w_mean_dt_to_quat/rotation_w_mean_dt_to_quat.norm();
+
+    //std::cout<<"w_mean_dt="<<w_mean_dt<<std::endl;
+    //std::cout<<"rotation_w_mean_dt_to_quat="<<rotation_w_mean_dt_to_quat<<std::endl;
+
 
     // deltaQalpha
-    Eigen::Vector4d deltaQalpha;
     Eigen::Vector3d alphaContribution;
     alphaContribution=pastState->angular_velocity;
     alphaContribution=alphaContribution.cross(pastState->angular_velocity+pastState->angular_acceleration*dt);
 
+    Eigen::Vector4d deltaQalpha;
     deltaQalpha[0]=0;
     deltaQalpha.block<3,1>(1,0)=alphaContribution;
     // Unit quaternion -> No needed, NO
     //deltaQalpha=deltaQalpha/deltaQalpha.norm();
 
+    //std::cout<<"deltaQalpha="<<deltaQalpha<<std::endl;
+
     // prediction
-    predictedState->attitude=Quaternion::cross(pastState->attitude,deltaQw)+pow(dt,2)/24*Quaternion::cross(pastState->attitude,deltaQalpha);
+    //predictedState->attitude=Quaternion::cross(rotation_w_mean_dt_to_quat + pow(dt,2)/24*deltaQalpha, pastState->attitude);
+
+    Eigen::Vector4d quat_perturbation=rotation_w_mean_dt_to_quat + pow(dt,2)/24*deltaQalpha;
+
+    //std::cout<<"quat_perturbation="<<quat_perturbation<<std::endl;
+
+    predictedState->attitude=Quaternion::cross(quat_perturbation, pastState->attitude);
+
 
     // Unit quaternion -> Very needed!
     predictedState->attitude=predictedState->attitude/predictedState->attitude.norm();
@@ -187,12 +187,12 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
     /// Angular Velocity
     predictedState->angular_velocity=pastState->angular_velocity+pastState->angular_acceleration*dt;
 
-
+//std::cout<<"predictedState->angular_velocity="<<predictedState->angular_velocity<<std::endl;
 
 
     /// Angular Acceleration
     predictedState->angular_acceleration=pastState->angular_acceleration;
-
+//std::cout<<"predictedState->angular_acceleration="<<predictedState->angular_acceleration<<std::endl;
 
 
     return 0;
@@ -266,42 +266,52 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     /// Jacobian of the error -> Angular Part
 
 
+    // Auxiliar values
+    Eigen::Vector3d w_mean_dt=(pastState->angular_velocity+0.5*pastState->angular_acceleration*dt)*dt;
+    Eigen::Vector4d quat_w_mean_dt=Quaternion::rotationVectorToQuaternion(w_mean_dt);
+    Eigen::Vector4d quat_for_second_order_correction;
+    quat_for_second_order_correction.setZero();
+    quat_for_second_order_correction.block<3,1>(1,0)=pastState->angular_velocity.cross(predictedState->angular_velocity);
 
-    // References
-    // Attitude k
-    double qrj1=pastState->attitude[0];
-    double qrj2=pastState->attitude[1];
-    double qrj3=pastState->attitude[2];
-    double qrj4=pastState->attitude[3];
-    // Attitude k+1
-    double qrk1=predictedState->attitude[0];
-    double qrk2=predictedState->attitude[1];
-    double qrk3=predictedState->attitude[2];
-    double qrk4=predictedState->attitude[3];
-    // Angular velocity k
-    double wr1=pastState->angular_velocity[0];
-    double wr2=pastState->angular_velocity[1];
-    double wr3=pastState->angular_velocity[2];
+    // Auxiliar Matrixes
+    Eigen::Matrix4d quat_mat_plus_quat_ref_k1=Quaternion::quatMatPlus(predictedState->attitude);
+    Eigen::Matrix4d quat_mat_plus_quat_ref_k1_inv=quat_mat_plus_quat_ref_k1.inverse();
+    Eigen::MatrixXd mat_delta_q_delta_theta(4, 3);
+    mat_delta_q_delta_theta.setZero();
+    mat_delta_q_delta_theta(1,0)=1;
+    mat_delta_q_delta_theta(2,1)=1;
+    mat_delta_q_delta_theta(3,2)=1;
+    Eigen::Matrix4d quat_mat_plus_quat_ref_k=Quaternion::quatMatPlus(pastState->attitude);
+    Eigen::Matrix4d quat_mat_minus_quat_ref_k=Quaternion::quatMatMinus(pastState->attitude);
+    Eigen::MatrixXd mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
+    Eigen::Matrix3d skew_mat_alpha_dt=Quaternion::skewSymMat(pastState->angular_acceleration*dt);
+    Eigen::MatrixXd mat_aux_j2(4,3);
+    mat_aux_j2.setZero();
+    mat_aux_j2.block<3,3>(1,0)=-skew_mat_alpha_dt;
+    Eigen::MatrixXd mat_aux_j3(4,3);
+    mat_aux_j3.setZero();
+    mat_aux_j3.block<3,3>(1,0)=skew_mat_alpha_dt*dt;
+
+
+    //std::cout<<"w_mean_dt="<<w_mean_dt<<std::endl;
+    //std::cout<<"predictedState->angular_velocity="<<predictedState->angular_velocity<<std::endl;
+
+    //std::cout<<"quat_w_mean_dt="<<quat_w_mean_dt<<std::endl;
+    //std::cout<<"quat_for_second_order_correction="<<quat_for_second_order_correction<<std::endl;
 
 
     // att / att
-    // TODO fix
-    predictedState->errorStateJacobian.angular.block<3,3>(0,0)<<
-        qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4 + dt*wr1*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) - dt*wr2*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) - dt*wr3*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2),        qrj1*qrk4 - qrj2*qrk3 + qrj3*qrk2 - qrj4*qrk1 + dt*wr1*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) + dt*wr2*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) + dt*wr3*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2),      qrj3*qrk1 - qrj1*qrk3 - qrj2*qrk4 + qrj4*qrk2 + dt*wr1*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2) - dt*wr2*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2) + dt*wr3*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2),
-        qrj2*qrk3 - qrj1*qrk4 - qrj3*qrk2 + qrj4*qrk1 + dt*wr1*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) + dt*wr2*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) - dt*wr3*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2),        qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4 - dt*wr1*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) + dt*wr2*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) - dt*wr3*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2),      qrj1*qrk2 - qrj2*qrk1 - qrj3*qrk4 + qrj4*qrk3 + dt*wr1*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2) + dt*wr2*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2) + dt*wr3*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2),
-        qrj1*qrk3 - qrj3*qrk1 + qrj2*qrk4 - qrj4*qrk2 + dt*wr1*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2) + dt*wr2*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2) + dt*wr3*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2),        qrj2*qrk1 - qrj1*qrk2 + qrj3*qrk4 - qrj4*qrk3 - dt*wr1*((qrj1*qrk1)/2 + (qrj2*qrk2)/2 + (qrj3*qrk3)/2 + (qrj4*qrk4)/2) + dt*wr2*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2) + dt*wr3*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2),      qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4 - dt*wr1*((qrj1*qrk2)/2 - (qrj2*qrk1)/2 - (qrj3*qrk4)/2 + (qrj4*qrk3)/2) - dt*wr2*((qrj1*qrk3)/2 - (qrj3*qrk1)/2 + (qrj2*qrk4)/2 - (qrj4*qrk2)/2) + dt*wr3*((qrj1*qrk4)/2 - (qrj2*qrk3)/2 + (qrj3*qrk2)/2 - (qrj4*qrk1)/2);
+    predictedState->errorStateJacobian.angular.block<3,3>(0,0)=mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+pow(dt,2)/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
 
 
     // att / ang_vel
     // TODO fix
-    predictedState->errorStateJacobian.angular.block<3,3>(0,3)<<
-         dt*(qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4),     dt*(qrj1*qrk4 - qrj2*qrk3 + qrj3*qrk2 - qrj4*qrk1),     -dt*(qrj1*qrk3 - qrj3*qrk1 + qrj2*qrk4 - qrj4*qrk2),
-         -dt*(qrj1*qrk4 - qrj2*qrk3 + qrj3*qrk2 - qrj4*qrk1),    dt*(qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4),    dt*(qrj1*qrk2 - qrj2*qrk1 - qrj3*qrk4 + qrj4*qrk3),
-         dt*(qrj1*qrk3 - qrj3*qrk1 + qrj2*qrk4 - qrj4*qrk2),     -dt*(qrj1*qrk2 - qrj2*qrk1 - qrj3*qrk4 + qrj4*qrk3),     dt*(qrj1*qrk1 + qrj2*qrk2 + qrj3*qrk3 + qrj4*qrk4);
+    predictedState->errorStateJacobian.angular.block<3,3>(0,3)=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + pow(dt,2)/24*mat_aux_j2);
+
 
     // att / ang_accel
     // TODO
-    //predictedState->errorStateJacobian.angular.block<3,3>(0,6);
+    predictedState->errorStateJacobian.angular.block<3,3>(0,6)=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*pow(dt,2) + pow(dt,2)/24*mat_aux_j3);
 
 
 
@@ -324,6 +334,21 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
     // ang_acc / ang_acc
     predictedState->errorStateJacobian.angular.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+
+
+
+
+#if 1 || _DEBUG_ROBOT_CORE
+    {
+        std::ostringstream logString;
+        logString<<"FreeModelRobotCore::predictStateErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"Jacobian Linear"<<std::endl;
+        logString<<predictedState->errorStateJacobian.linear<<std::endl;
+        logString<<"Jacobian Angular"<<std::endl;
+        logString<<predictedState->errorStateJacobian.angular<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
 

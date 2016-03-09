@@ -18,11 +18,33 @@ RobotCore::RobotCore() :
     // Robot name default
     robot_name_="robot";
 
+
+
+
+    // LOG
+    const char* env_p = std::getenv("FUSEON_STACK");
+
+    logPath=std::string(env_p)+"/logs/"+"logRobotCoreFile.txt";
+
+    logFile.open(logPath);
+
+    if(!logFile.is_open())
+    {
+        std::cout<<"unable to open log file"<<std::endl;
+    }
+
     return;
 }
 
 RobotCore::~RobotCore()
 {
+    // Log
+    if(logFile.is_open())
+    {
+        logFile.close();
+    }
+
+
     return;
 }
 
@@ -122,4 +144,19 @@ std::shared_ptr<MsfStorageCore> RobotCore::getTheMsfStorageCore() const
 Eigen::MatrixXd RobotCore::getInitErrorStateVariance() const
 {
     return this->InitErrorStateVariance;
+}
+
+
+int RobotCore::log(std::string logString)
+{
+    // Lock mutex
+    TheLogFileMutex.lock();
+
+    // Write in file
+    logFile<<logString;
+
+    // Unlock mutex
+    TheLogFileMutex.unlock();
+
+    return 0;
 }

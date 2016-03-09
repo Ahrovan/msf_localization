@@ -9,7 +9,25 @@
 #include <iostream>
 
 
+//String
+//std::string, std::getline()
+#include <string>
+
+//String stream
+//std::istringstream
+#include <sstream>
+
+//File Stream
+//std::ofstream, std::ifstream
+#include <fstream>
+
+
+// Memory
 #include <memory>
+
+
+// Mutex
+#include <mutex>
 
 
 #include <Eigen/Dense>
@@ -102,6 +120,19 @@ protected:
 public:
     Eigen::MatrixXd getInitErrorStateVariance() const;
 
+
+
+
+
+    //// Debug log
+protected:
+    std::string logPath;
+    std::ofstream logFile;
+    // mutex to protect the log file
+protected:
+    std::mutex TheLogFileMutex;
+public:
+    int log(std::string logString);
 
 };
 
