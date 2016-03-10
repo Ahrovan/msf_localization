@@ -1432,6 +1432,8 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
     Eigen::MatrixXd innovation_covariance_inverse=innovationCovariance.inverse();
 
+    // TODO REMOVE RIGTH NOW
+    innovation_covariance_inverse.setZero();
 
 
     ///// Mahalanobis Distance

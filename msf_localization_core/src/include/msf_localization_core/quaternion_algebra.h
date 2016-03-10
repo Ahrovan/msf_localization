@@ -22,7 +22,7 @@ public:
     template <typename ...Tail>
     static Eigen::Vector4d cross(const Eigen::Vector4d head, Tail... tail)
     {
-        return cross(tail...);
+        return cross(head, cross(tail...));
     }
 
     // Quaternion Matrixes

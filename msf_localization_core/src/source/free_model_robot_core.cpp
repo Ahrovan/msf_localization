@@ -338,7 +338,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
 
-#if 1 || _DEBUG_ROBOT_CORE
+#if _DEBUG_ROBOT_CORE
     {
         std::ostringstream logString;
         logString<<"FreeModelRobotCore::predictStateErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
