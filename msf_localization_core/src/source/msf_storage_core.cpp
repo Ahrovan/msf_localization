@@ -492,11 +492,11 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
         /////// Covariance of the state
-        logString<<"\t";
-        logString<<"+Covariance of the state:"<<std::endl;
-        logString<<"\t\t";
-        logString<<"size: "<<TheStateEstimationCore->covarianceMatrix.rows()<<" x "<<TheStateEstimationCore->covarianceMatrix.cols()<<std::endl;
-        logString<<TheStateEstimationCore->covarianceMatrix<<std::endl;
+//        logString<<"\t";
+//        logString<<"+Covariance of the state:"<<std::endl;
+//        logString<<"\t\t";
+//        logString<<"size: "<<TheStateEstimationCore->covarianceMatrix.rows()<<" x "<<TheStateEstimationCore->covarianceMatrix.cols()<<std::endl;
+//        logString<<TheStateEstimationCore->covarianceMatrix<<std::endl;
 
 
 
@@ -528,16 +528,19 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                 }
                 case SensorTypes::imu:
                 {
+                    std::shared_ptr<const ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<const ImuSensorCore>(SensorCorePtrAux);
+
+
                     logString<<" (IMU)";
                     //std::shared_ptr<SensorMeasurementCore> measurePtrAux=(*itMeas);
                     //std::shared_ptr<ImuSensorMeasurementCore> measurePtr=dynamic_cast< std::shared_ptr<ImuSensorMeasurementCore> >(measurePtrAux);
                     std::shared_ptr<ImuSensorMeasurementCore> measurePtr=std::static_pointer_cast< ImuSensorMeasurementCore >(*itMeas);
                     //std::shared_ptr<ImuSensorMeasurementCore> measurePtr=std::dynamic_pointer_cast< ImuSensorMeasurementCore >(*itMeas);
-                    if(measurePtr->isOrientationSet())
+                    if(TheImuSensorCore->isMeasurementOrientationEnabled())
                         logString<<" orientation=["<<measurePtr->getOrientation().transpose()<<"]'";
-                    if(measurePtr->isAngularVelocitySet())
+                    if(TheImuSensorCore->isMeasurementAngularVelocityEnabled())
                         logString<<" angularVel=["<<measurePtr->getAngularVelocity().transpose()<<"]'";
-                    if(measurePtr->isLinearAccelerationSet())
+                    if(TheImuSensorCore->isMeasurementLinearAccelerationEnabled())
                         logString<<" linearAcc=["<<measurePtr->getLinearAcceleration().transpose()<<"]'";
                     break;
                 }

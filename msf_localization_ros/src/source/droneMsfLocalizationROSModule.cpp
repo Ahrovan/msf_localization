@@ -201,7 +201,7 @@ int MsfLocalizationROS::readConfigFile()
 
 
     // Display
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 && _DEBUG_MSF_LOCALIZATION_CORE
     logFile<<"Covariance Matrix"<<std::endl;
     logFile<<InitialState->covarianceMatrix<<std::endl;
 #endif

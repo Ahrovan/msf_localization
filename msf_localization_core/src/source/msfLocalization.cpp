@@ -81,6 +81,8 @@ MsfLocalizationCore::MsfLocalizationCore()
 
     logPath=std::string(env_p)+"/logs/"+"logMsfLocalizationCoreFile.txt";
 
+    //std::cout<<"logPath: "<<logPath<<std::endl;
+
     logFile.open(logPath);
 
     if(!logFile.is_open())
@@ -189,7 +191,11 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     }
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
-    logFile<<"MsfLocalizationCore::setStateEstimationEnabled() ended"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::setStateEstimationEnabled() ended"<<std::endl;
+        this->log(logString.str());
+    }
 #endif
 
 
@@ -974,16 +980,6 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 
 
-    // TODO No!
-    if(UpdatedState->TheListSensorStateCore.size()==0)
-    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        std::cout<<"MsfLocalizationCore::update() error 13"<<std::endl;
-#endif
-        return 13;
-    }
-
-
 
 
     ///// Measurement prediction
@@ -1145,7 +1141,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() Innovation vector for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1214,6 +1210,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         }
     }
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::update() JacobianMeasurementErrorState for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<JacobianMeasurementErrorState<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
     // Jacobian Measurement - Measurement Noise
@@ -1253,6 +1257,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         }
     }
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::update() JacobianMeasurementNoise for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<JacobianMeasurementNoise<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
     // Jacobian Measurement - Global Parameters
@@ -1274,6 +1286,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         }
     }
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::update() JacobianMeasurementGlobalParameters for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<JacobianMeasurementGlobalParameters<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
     // Jacobian Measurement - Ohter Parameters (Robot Parameters)
@@ -1303,7 +1323,9 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 if((*itListMatchedMeas)->getTheSensorCore() == (*itListPredictedMeas)->getTheSensorCore())
                 {
                     if(dimensionSensorParametersJ)
-                        JacobianMeasurementNoise.block(dimensionTotalMeasurementI, dimensionTotalSensorParametersJ, dimensionMeasurementI, dimensionSensorParametersJ)=(*itListPredictedMeas)->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters;
+                    {
+                        JacobianMeasurementSensorParameters.block(dimensionTotalMeasurementI, dimensionTotalSensorParametersJ, dimensionMeasurementI, dimensionSensorParametersJ)=(*itListPredictedMeas)->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters;
+                    }
                 }
                 else
                 {
@@ -1318,6 +1340,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::update() JacobianMeasurementSensorParameters for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<JacobianMeasurementSensorParameters<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
     ///// Noises and covariances
@@ -1445,7 +1475,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     distance_mahalanobis=innovationVector.transpose()*innovation_covariance_inverse*innovationVector;
 
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() distance_mahalanobis ="<<distance_mahalanobis<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1464,7 +1494,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     kalmanGain=UpdatedState->covarianceMatrix*JacobianMeasurementErrorState.transpose()*innovation_covariance_inverse;
 
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() Kalman Gain for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1481,7 +1511,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     Eigen::VectorXd incrementErrorState=kalmanGain*innovationVector;
 
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() Increment Delta State vector for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1506,7 +1536,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         }
         dimension+=dimensionRobotErrorState;
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::update() incrementDeltaStateRobot for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1526,7 +1556,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         }
         dimension+=dimensionGlobalParametersErrorState;
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::update() incrementDeltaStateGlobalParameters for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1550,7 +1580,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
             }
             dimension+=dimensionSensorErrorState;
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
             {
                 std::ostringstream logString;
                 logString<<"MsfLocalizationCore::update() incrementDeltaStateSensor for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -1579,7 +1609,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Equation
     UpdatedState->covarianceMatrix=AuxiliarMatrix*UpdatedState->covarianceMatrix*AuxiliarMatrix.transpose()+kalmanGain*innovationCovariance*kalmanGain.transpose();
 
-#if 0 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() updated covariance for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -2145,6 +2175,7 @@ int MsfLocalizationCore::startThreads()
 
 int MsfLocalizationCore::log(std::string logString)
 {
+
     // Lock mutex
     TheLogFileMutex.lock();
 

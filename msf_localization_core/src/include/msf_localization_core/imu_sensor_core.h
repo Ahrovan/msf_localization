@@ -41,6 +41,9 @@ public:
 
     ///// Measurements
 
+    // z=[z_lin_accel, z_attit, z_ang_vel]'
+
+
     // Orientation Measurement
 protected:
     bool flagMeasurementOrientation;

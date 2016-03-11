@@ -28,7 +28,7 @@
 
 
 
-//#define _DEBUG_SENSOR_CORE
+#define _DEBUG_SENSOR_CORE 1
 
 
 class MsfStorageCore;
