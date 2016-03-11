@@ -6,42 +6,54 @@
 
 #include <cmath>
 
-class Quaternion
+namespace Quaternion
 {
-public:
+    // Typedef
+    typedef Eigen::Vector4d Quaternion;
+    typedef Eigen::Vector3d PureQuaternion;
+
+
     // Conjugate
-    static Eigen::Vector4d conj(const Eigen::Vector4d q);
+    Quaternion conj(const Quaternion q);
 
     // Inverse
-    static Eigen::Vector4d inv(const Eigen::Vector4d q);
+    Eigen::Vector4d inv(const Eigen::Vector4d q);
 
     // Cross with two arguments
-    static Eigen::Vector4d cross(const Eigen::Vector4d q1, const Eigen::Vector4d q2);
+    Eigen::Vector4d cross(const Eigen::Vector4d q1, const Eigen::Vector4d q2);
+    Eigen::Vector4d cross_gen_pure(const Eigen::Vector4d q1, const Eigen::Vector3d q2);
+    Eigen::Vector4d cross_pure_gen(const Eigen::Vector3d q1, const Eigen::Vector4d q2);
+    Eigen::Vector4d cross_pure_pure(const Eigen::Vector3d q1, const Eigen::Vector3d q2);
 
-    // Cross with n arguments
+    // Cross with n arguments for general quaternions
     template <typename ...Tail>
-    static Eigen::Vector4d cross(const Eigen::Vector4d head, Tail... tail)
+    Eigen::Vector4d cross(const Eigen::Vector4d head, Tail... tail)
     {
         return cross(head, cross(tail...));
     }
 
+    // Sandwich product
+     Eigen::Vector3d cross_sandwich(const Eigen::Vector4d q1, const Eigen::Vector3d q2, const Eigen::Vector4d q3);
+
     // Quaternion Matrixes
     // Q+
-    static Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d q);
+    Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d q);
+    Eigen::Matrix4d quatMatPlus(const Eigen::Vector3d q);
     // Q-
-    static Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d q);
+    Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d q);
+    Eigen::Matrix4d quatMatMinus(const Eigen::Vector3d q);
 
 
     // Rotation vector to quaternion
-    static Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d v_rot);
+    Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d v_rot);
 
-    static Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot);
+    Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot);
 
 
     // Skew-Symmetric Matrix: https://en.wikipedia.org/wiki/Skew-symmetric_matrix
-    static Eigen::Matrix3d skewSymMat(const Eigen::Vector3d w);
+    Eigen::Matrix3d skewSymMat(const Eigen::Vector3d w);
 
-};
+}
 
 
 

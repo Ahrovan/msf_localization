@@ -2,8 +2,10 @@
 #include "msf_localization_core/quaternion_algebra.h"
 
 
+namespace Quaternion
+{
 
-Eigen::Vector4d Quaternion::conj(const Eigen::Vector4d q)
+Quaternion conj(const Quaternion q)
 {
     Eigen::Vector4d qr;
 
@@ -14,12 +16,12 @@ Eigen::Vector4d Quaternion::conj(const Eigen::Vector4d q)
 }
 
 
-Eigen::Vector4d Quaternion::inv(const Eigen::Vector4d q)
+Eigen::Vector4d inv(const Eigen::Vector4d q)
 {
     Eigen::Vector4d qr;
 
 
-    qr=Quaternion::conj(q)/q.norm();
+    qr=conj(q)/q.norm();
 
 
     return qr;
@@ -27,7 +29,7 @@ Eigen::Vector4d Quaternion::inv(const Eigen::Vector4d q)
 
 
 
-Eigen::Vector4d Quaternion::cross(const Eigen::Vector4d q1, const Eigen::Vector4d q2)
+Eigen::Vector4d cross(const Eigen::Vector4d q1, const Eigen::Vector4d q2)
 {
     Eigen::Vector4d qres;
 
@@ -48,9 +50,83 @@ Eigen::Vector4d Quaternion::cross(const Eigen::Vector4d q1, const Eigen::Vector4
     return qres;
 }
 
+Eigen::Vector4d cross_gen_pure(const Eigen::Vector4d q1, const Eigen::Vector3d q2)
+{
+    Eigen::Vector4d qres;
+
+    // Quat 1
+    double pr=q1[0];
+    Eigen::Vector3d pv=q1.block<3,1>(1,0);
+
+    // Quat 2
+    // qr=0
+    // qv=q2
+
+
+    // Result
+    qres[0]=-pv.transpose()*q2;
+    qres.block<3,1>(1,0)=pr*q2+pv.cross(q2);
+
+
+    return qres;
+}
+
+Eigen::Vector4d cross_pure_gen(const Eigen::Vector3d q1, const Eigen::Vector4d q2)
+{
+    Eigen::Vector4d qres;
+
+
+    // Quat 1
+    // pr=0
+    // pv=q1
+
+    // Quat 2
+    double qr=q2[0];
+    Eigen::Vector3d qv=q2.block<3,1>(1,0);
+
+    // Result
+    qres[0]=-q1.transpose()*qv;
+    qres.block<3,1>(1,0)=qr*q1+q1.cross(qv);
+
+
+    return qres;
+}
+
+Eigen::Vector4d cross_pure_pure(const Eigen::Vector3d q1, const Eigen::Vector3d q2)
+{
+    Eigen::Vector4d qres;
+
+
+    // Quat 1
+    //pr=0;
+    //pv=q1;
+
+    // Quat 2
+    //qr=0;
+    //qv=q2;
+
+    // Result
+    qres[0]=-q1.transpose()*q2;
+    qres.block<3,1>(1,0)=q1.cross(q2);
+
+
+    return qres;
+
+}
+
+
+Eigen::Vector3d cross_sandwich(const Eigen::Vector4d q1, const Eigen::Vector3d q2, const Eigen::Vector4d q3)
+{
+    Eigen::Vector4d qres;
+
+    qres = cross(q1, cross_pure_gen(q2, q3));
+
+    return qres.block<3,1>(1,0);
+}
+
 
 // Q+
-Eigen::Matrix4d Quaternion::quatMatPlus(const Eigen::Vector4d q)
+Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d q)
 {
     Eigen::Matrix4d QuatMat=q[0]*Eigen::Matrix4d::Identity(4,4);
 
@@ -61,8 +137,18 @@ Eigen::Matrix4d Quaternion::quatMatPlus(const Eigen::Vector4d q)
     return QuatMat;
 }
 
+Eigen::Matrix4d quatMatPlus(const Eigen::Vector3d q)
+{
+    Eigen::Vector4d quat;
+    quat[0]=0;
+    quat.block<3,1>(1,0)=q;
+
+    return quatMatPlus(quat);
+}
+
+
 // Q-
-Eigen::Matrix4d Quaternion::quatMatMinus(const Eigen::Vector4d q)
+Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d q)
 {
     Eigen::Matrix4d QuatMat=q[0]*Eigen::Matrix4d::Identity(4,4);
 
@@ -73,8 +159,17 @@ Eigen::Matrix4d Quaternion::quatMatMinus(const Eigen::Vector4d q)
     return QuatMat;
 }
 
+Eigen::Matrix4d quatMatMinus(const Eigen::Vector3d q)
+{
+    Eigen::Vector4d quat;
+    quat[0]=0;
+    quat.block<3,1>(1,0)=q;
 
-Eigen::Vector4d Quaternion::rotationVectorToQuaternion(const Eigen::Vector3d v_rot)
+    return quatMatMinus(quat);
+}
+
+
+Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d v_rot)
 {
     Eigen::Vector4d quat;
 
@@ -95,7 +190,7 @@ Eigen::Vector4d Quaternion::rotationVectorToQuaternion(const Eigen::Vector3d v_r
 }
 
 
-Eigen::MatrixXd Quaternion::jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot)
+Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot)
 {
     Eigen::MatrixXd jacobian_matrix(4,3);
     jacobian_matrix.setZero();
@@ -120,7 +215,7 @@ Eigen::MatrixXd Quaternion::jacobianRotationVectorToQuaternion(const Eigen::Vect
 }
 
 
-Eigen::Matrix3d Quaternion::skewSymMat(const Eigen::Vector3d w)
+Eigen::Matrix3d skewSymMat(const Eigen::Vector3d w)
 {
     Eigen::Matrix3d skewSymMat;
     skewSymMat<<0, -w[2], w[1],
@@ -128,4 +223,8 @@ Eigen::Matrix3d Quaternion::skewSymMat(const Eigen::Vector3d w)
                 -w[1], w[0], 0;
 
     return skewSymMat;
+}
+
+
+
 }

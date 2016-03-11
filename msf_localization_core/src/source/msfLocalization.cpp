@@ -1463,7 +1463,17 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     Eigen::MatrixXd innovation_covariance_inverse=innovationCovariance.inverse();
 
     // TODO REMOVE RIGTH NOW
-    innovation_covariance_inverse.setZero();
+    //innovation_covariance_inverse.setZero();
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::update() innovationCovariance for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<innovationCovariance<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
 
 
     ///// Mahalanobis Distance
