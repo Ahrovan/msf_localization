@@ -5,7 +5,7 @@
 
   <arg name="msf_localization_config_file" default="$(find msf_localization_ros)/configs/msf_localization_config_file.xml" />
 
-	<arg name="robot_pose_topic_name" 	default="msf_localization/robot_pose" />
+	<arg name="robot_pose_with_cov_topic_name" 	default="msf_localization/robot_pose_cov" />
   <arg name="robot_pose_rate" 	default="50" />
 
 
@@ -13,7 +13,7 @@
 
     <param name="msf_localization_config_file" value="$(arg msf_localization_config_file)" type="string"/>
 
-    <param name="robot_pose_topic_name" value="$(arg robot_pose_topic_name)" type="string"/>
+    <param name="robot_pose_with_cov_topic_name" value="$(arg robot_pose_with_cov_topic_name)" type="string"/>
     <param name="robot_pose_rate" value="$(arg robot_pose_rate)" type="double"/>
 
   </node>

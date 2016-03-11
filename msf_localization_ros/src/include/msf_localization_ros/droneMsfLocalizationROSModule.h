@@ -61,10 +61,12 @@
 
 // ROS msg
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 
 
 // ROS Msg geometry_msgs::Vector3
 #include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Vector3.h>
 
 
 // tf
@@ -137,10 +139,35 @@ protected:
 
     // Robot Pose Publisher
 protected:
-    ros::Publisher robotPosePub;
-    std::string robotPoseTopicName;
+    // Robot Pose with Covariance Stamped
+    ros::Publisher robotPoseWithCovarianceStampedPub;
+    std::string robotPoseWithCovarianceStampedTopicName;
+    geometry_msgs::PoseWithCovarianceStamped robotPoseWithCovarianceStampedMsg;
 
-    geometry_msgs::PoseWithCovarianceStamped robotPoseMsg;
+    // Robot Pose Stamped
+    ros::Publisher robotPoseStampedPub;
+    std::string robotPoseStampedTopicName;
+    geometry_msgs::PoseStamped robotPoseStampedMsg;
+
+    // Robot Linear Speed
+    ros::Publisher robotLinearSpeedStampedPub;
+    std::string robotLinearSpeedStampedTopicName;
+    geometry_msgs::Vector3Stamped robotLinearSpeedStampedMsg;
+
+    // Robot Linear Acceleration
+    ros::Publisher robotLinearAccelerationStampedPub;
+    std::string robotLinearAccelerationStampedTopicName;
+    geometry_msgs::Vector3Stamped robotLinearAccelerationStampedMsg;
+
+    // Robot Angular Velocity
+    ros::Publisher robotAngularVelocityStampedPub;
+    std::string robotAngularVelocityStampedTopicName;
+    geometry_msgs::Vector3Stamped robotAngularVelocityStampedMsg;
+
+    // Robot Angular Acceleration
+    ros::Publisher robotAngularAccelerationStampedPub;
+    std::string robotAngularAccelerationStampedTopicName;
+    geometry_msgs::Vector3Stamped robotAngularAccelerationStampedMsg;
 
 
     // Tf
