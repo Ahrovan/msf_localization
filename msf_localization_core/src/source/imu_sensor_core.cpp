@@ -834,81 +834,32 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
                 // Cast
                 std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
 
-                // Model
 
-                // Variables in robot frame
-                // Angular Speed
-                Eigen::Vector4d quat_angular_speed_r_w_w;
-                quat_angular_speed_r_w_w[0]=0;
-                quat_angular_speed_r_w_w.block<3,1>(1,0)=currentFreeModelRobotState->getAngularVelocity();
+                // Angular vel
+                Eigen::Vector3d angular_vel_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(currentFreeModelRobotState->getAttitude()), currentFreeModelRobotState->getAngularVelocity() ,currentFreeModelRobotState->getAttitude());
+                // Angular acceler
+                Eigen::Vector3d angular_acc_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(currentFreeModelRobotState->getAttitude()), currentFreeModelRobotState->getAngularAcceleration() ,currentFreeModelRobotState->getAttitude());
 
-                Eigen::Vector4d quat_angular_speed_r_w_r;
-                quat_angular_speed_r_w_r=Quaternion::cross(Quaternion::inv(currentFreeModelRobotState->getAttitude()), quat_angular_speed_r_w_w, currentFreeModelRobotState->getAttitude());
+                // Ficticious Acc: Normal
+                Eigen::Vector3d normal_acceleration=angular_vel_robot_wrt_world_in_robot.cross(angular_vel_robot_wrt_world_in_robot.cross(currentImuState->getPositionSensorWrtRobot()));
+                // Ficticious Acc: Tang
+                Eigen::Vector3d tangencial_acceleration=angular_acc_robot_wrt_world_in_robot.cross(currentImuState->getPositionSensorWrtRobot());
 
+                // Ficticious Acc total
+                Eigen::Vector3d ficticious_acceleration=normal_acceleration+tangencial_acceleration;
 
-                // Angular Acceleration
-                Eigen::Vector4d quat_angular_acceleration_r_w_w;
-                quat_angular_acceleration_r_w_w[0]=0;
-                quat_angular_acceleration_r_w_w.block<3,1>(1,0)=currentFreeModelRobotState->getAngularAcceleration();
+                // Attitude sensor wrt world
+                Eigen::Vector4d attitude_sensor_wrt_world=Quaternion::cross(currentFreeModelRobotState->getAttitude(), currentImuState->getAttitudeSensorWrtRobot());
 
-                Eigen::Vector4d quat_angular_acceleration_r_w_r;
-                quat_angular_acceleration_r_w_r=Quaternion::cross(Quaternion::inv(currentFreeModelRobotState->getAttitude()), quat_angular_acceleration_r_w_w, currentFreeModelRobotState->getAttitude());
+                // Acceleracion in sensor
+                Eigen::Vector3d accel_sensor_wrt_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), currentFreeModelRobotState->getLinearAcceleration(), attitude_sensor_wrt_world) + Quaternion::cross_sandwich(Quaternion::inv(currentImuState->getAttitudeSensorWrtRobot()), ficticious_acceleration, currentImuState->getAttitudeSensorWrtRobot());
 
-
-                // Ficticious Accelerations: Normal
-                Eigen::Vector3d normal_acceleration;
-
-                normal_acceleration=quat_angular_speed_r_w_r.block<3,1>(1,0).cross(quat_angular_speed_r_w_r.block<3,1>(1,0).cross(currentImuState->getPositionSensorWrtRobot()));
-
-                Eigen::Vector4d quaternion_normal_acceleration;
-                quaternion_normal_acceleration[0]=0;
-                quaternion_normal_acceleration.block<3,1>(1,0)=normal_acceleration;
-
-
-                // Ficticious Accelerations: Tangencial
-                Eigen::Vector3d tangencial_acceleration;
-
-                tangencial_acceleration=quat_angular_acceleration_r_w_r.block<3,1>(1,0).cross(currentImuState->getPositionSensorWrtRobot());
-
-                Eigen::Vector4d quaternion_tangencial_acceleration;
-                quaternion_tangencial_acceleration[0]=0;
-                quaternion_tangencial_acceleration.block<3,1>(1,0)=tangencial_acceleration;
-
-
-                // Ficticious Accelerations: Total
-                Eigen::Vector4d quaternion_ficticious_acceleration;
-
-                quaternion_ficticious_acceleration=Quaternion::cross(currentFreeModelRobotState->getAttitude(), quaternion_normal_acceleration + quaternion_tangencial_acceleration, Quaternion::inv(currentFreeModelRobotState->getAttitude()));
-
-                Eigen::Vector3d ficticious_acceleration=quaternion_ficticious_acceleration.block<3,1>(1,0);
-
-
-                // Total Acceleration Sensor in w
-                Eigen::Vector3d sensor_acceleration_w=currentFreeModelRobotState->getLinearAcceleration()+ficticious_acceleration;
-
-                Eigen::Vector4d quaternion_sensor_acceleration_w;
-                quaternion_sensor_acceleration_w[0]=0;
-                quaternion_sensor_acceleration_w.block<3,1>(1,0)=sensor_acceleration_w;
-
-
-                Eigen::Vector4d quaternion_attitude_sensor_world=Quaternion::cross(currentFreeModelRobotState->getAttitude(), currentImuState->getAttitudeSensorWrtRobot());
-
-
-                // Total Acceleration Sensor in S
-                Eigen::Vector4d quaternion_sensor_acceleration_s;
-                quaternion_sensor_acceleration_s=Quaternion::cross(Quaternion::inv(quaternion_attitude_sensor_world), quaternion_sensor_acceleration_w, quaternion_attitude_sensor_world);
-
-
-                // Gravity
-                Eigen::Vector4d quat_gravity_world;
-                quat_gravity_world[0]=0;
-                quat_gravity_world.block<3,1>(1,0)=TheGlobalParametersStateCore->getGravity();
-
-                Eigen::Vector4d quat_gravity_sensor=Quaternion::cross(Quaternion::inv(quaternion_attitude_sensor_world), quat_gravity_world, quaternion_attitude_sensor_world);
+                // Gravity in sensor
+                Eigen::Vector3d gravity_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), TheGlobalParametersStateCore->getGravity(), attitude_sensor_wrt_world);
 
 
                 // IMU Model
-                ThePredictedLinearAcceleration=currentImuState->getScaleLinearAcceleration().asDiagonal()*(quaternion_sensor_acceleration_s.block<3,1>(1,0)+quat_gravity_sensor.block<3,1>(1,0))+currentImuState->getBiasesLinearAcceleration();
+                ThePredictedLinearAcceleration=currentImuState->getScaleLinearAcceleration().asDiagonal()*(accel_sensor_wrt_sensor+gravity_sensor)+currentImuState->getBiasesLinearAcceleration();
 
 #if _DEBUG_SENSOR_CORE
 
@@ -989,10 +940,18 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     Eigen::Matrix4d mat_q_plus_attitude_world_wrt_sensor=Quaternion::quatMatPlus(Quaternion::inv(quat_attitude_sensor_wrt_world));
     Eigen::Matrix4d mat_q_minus_attitude_sensor_wrt_world=Quaternion::quatMatMinus(quat_attitude_sensor_wrt_world);
     Eigen::Matrix4d mat_q_plus_attitude_sensor_wrt_robot=Quaternion::quatMatPlus(TheImuStateCore->getAttitudeSensorWrtRobot());
+    Eigen::Matrix4d mat_q_plus_attitude_robot_wrt_sensor=Quaternion::quatMatPlus(Quaternion::inv(TheImuStateCore->getAttitudeSensorWrtRobot()));
+    Eigen::Matrix4d mat_q_plus_attitude_world_wrt_robot=Quaternion::quatMatPlus(Quaternion::inv(TheRobotStateCoreAux->getAttitude()));
 
     //
     Eigen::Matrix4d mat_q_plus_angular_velocity_robot_wrt_world_in_world = Quaternion::quatMatPlus(TheRobotStateCoreAux->getAngularVelocity());
     Eigen::Matrix4d mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world = Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheRobotStateCoreAux->getAngularVelocity(), quat_attitude_sensor_wrt_world));
+
+    Eigen::Matrix4d mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheGlobalParametersStateCore->getGravity(), TheRobotStateCoreAux->getAttitude()));
+    Eigen::Matrix4d mat_q_plus_gravity_wrt_world=Quaternion::quatMatPlus(TheGlobalParametersStateCore->getGravity());
+
+    Eigen::Matrix4d mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheRobotStateCoreAux->getLinearAcceleration(), TheRobotStateCoreAux->getAttitude()));
+    Eigen::Matrix4d mat_q_plus_linear_acceleration_robot_wrt_world=Quaternion::quatMatPlus(TheRobotStateCoreAux->getLinearAcceleration());
 
     //
     Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
@@ -1014,7 +973,15 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
 
 
-
+TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*(
+        // d(ga_I)/d(q_r_w)
+        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world*(mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot*mat_q_plus_gravity_wrt_world) ) +
+        // d(a_real)/d(q_r_w)
+        (mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world*(mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world* mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot* mat_q_plus_linear_acceleration_robot_wrt_world) ) +
+        // d(a_ficticious)/d(q_r_w)
+        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world*( Eigen::Matrix4d::Zero(4,4) + Eigen::Matrix4d::Zero(4,4)) )
+        // others
+        )*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
 
 
 //    Eigen::MatrixXd J2;
@@ -1057,12 +1024,21 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
                     // Zeros
 
                     // z_lin_acc / lin_acc
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_measurement_i, 6)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal();
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_measurement_i, 6)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose();
 
 
                     // z_lin_acc / attit
                     // TODO
-                    //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_measurement_i, 9);
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_measurement_i, 9)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*(
+                        // d(ga_I)/d(q_r_w)
+                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot*mat_q_plus_gravity_wrt_world) ) +
+                        // d(a_real)/d(q_r_w)
+                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world* mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot* mat_q_plus_linear_acceleration_robot_wrt_world) ) +
+                        // d(a_ficticious)/d(q_r_w)
+                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*( Eigen::Matrix4d::Zero(4,4) + Eigen::Matrix4d::Zero(4,4)) )
+                        // others
+                        )*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+
 
                     // z_lin_acc / ang_vel
                     // TODO
@@ -1080,7 +1056,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
                 if(this->isMeasurementOrientationEnabled())
                 {
                     // TODO
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState;
+                    //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState;
 
 
 
@@ -1166,13 +1142,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
                 dimension_error_state_sensor_i+=3;
             }
             else
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
                 dimension_error_parameter_sensor_i+=3;
             }
 
@@ -1181,13 +1157,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
                 dimension_error_state_sensor_i+=3;
             }
             else
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
                 dimension_error_parameter_sensor_i+=3;
             }
 
@@ -1209,13 +1185,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
                 dimension_error_state_sensor_i+=3;
             }
             else
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
                 dimension_error_parameter_sensor_i+=3;
             }
 
@@ -1261,13 +1237,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
                 dimension_error_state_sensor_i+=3;
             }
             else
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
                 dimension_error_parameter_sensor_i+=3;
             }
 
@@ -1276,13 +1252,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_measurement_i, dimension_error_state_sensor_i);
                 dimension_error_state_sensor_i+=3;
             }
             else
             {
                 // TODO
-                predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_measurement_i, dimension_error_parameter_sensor_i);
                 dimension_error_parameter_sensor_i+=3;
             }
 
@@ -1452,7 +1428,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
         if(this->isMeasurementLinearAccelerationEnabled())
         {
             // z_lin_acc / grav
-            predictedMeasurement->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.block<3,3>(dimension_measurement_i,0)=(TheImuStateCore->getScaleLinearAcceleration().asDiagonal());
+            predictedMeasurement->jacobianMeasurementGlobalParameters.jacobianMeasurementGlobalParameters.block<3,3>(dimension_measurement_i,0)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose();
 
             dimension_measurement_i+=3;
         }
