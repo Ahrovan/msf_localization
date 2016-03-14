@@ -177,6 +177,12 @@ protected:
 protected:
     int predict(TimeStamp TheTimeStamp);
 
+    int predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState);
+
+private:
+    int predictSemiCore(TimeStamp ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState);
+    int predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore> ThePreviousState, std::shared_ptr<StateEstimationCore>& ThePredictedState);
+
 
 
     // Update functions

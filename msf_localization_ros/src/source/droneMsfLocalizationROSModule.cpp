@@ -898,13 +898,7 @@ try
 {
     while(ros::ok())
     {
-//        if(!this->isStateEstimationEnabled())
-//        {
-//            // Sleep
-//            robotPoseRate->sleep();
-//            // continue
-//            continue;
-//        }
+
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
@@ -925,49 +919,26 @@ try
 
             TheTimeStamp=getTimeStamp();
 
-        this->TheMsfStorageCore->getElement(TheTimeStamp, PredictedState);
+            this->TheMsfStorageCore->getElement(TheTimeStamp, PredictedState);
 
-        if(!PredictedState)
-        {
-//            this->robotPoseThreadState.setProcessing(TheTimeStamp);
-            // TODO this should be a while and being carefully with the memory
-            if(this->predict(TheTimeStamp))
+            if(!PredictedState)
             {
-                // Error
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+
+                // TODO this should be a while and being carefully with the memory
+                if(this->predictNoAddBuffer(TheTimeStamp, PredictedState))
                 {
-                    std::ostringstream logString;
-                    logString<<"MsfLocalizationROS::robotPoseThreadFunction() error in predict()"<<std::endl;
-                    this->log(logString.str());
-                }
-#endif
-                continue;
-            }
-//            this->robotPoseThreadState.setNotProcessing();
-        }
-
-
-//        if()
-//        {
-//            std::cout<<"error getting robot pose"<<std::endl;
-//            continue;
-//        }
-
-
-
-        // Get the outdated element to do the update
-        if(this->TheMsfStorageCore->getElement(TheTimeStamp, PredictedState))
-        {
+                    // Error
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationROS::robotPoseThreadFunction() error 1!"<<std::endl;
-                this->log(logString.str());
-            }
-
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfLocalizationROS::robotPoseThreadFunction() error in predict()"<<std::endl;
+                        this->log(logString.str());
+                    }
 #endif
-            continue;
-        }
+                    continue;
+                }
+
+            }
 
         }
         else
@@ -985,10 +956,20 @@ try
         }
 
 
+        // Error with predicted state
         if(!PredictedState)
         {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationROS::robotPoseThreadFunction() error 1!"<<std::endl;
+                this->log(logString.str());
+            }
+
+#endif
             continue;
         }
+
 
 
         // Getters

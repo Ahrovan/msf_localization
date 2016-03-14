@@ -872,6 +872,20 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
                 //logFile<<"ImuSensorCore::predictMeasurement() predicted quaternion_normal_acceleration="<<quaternion_normal_acceleration.transpose()<<std::endl;
                 //logFile<<"ImuSensorCore::predictMeasurement() predicted ficticious_acceleration="<<ficticious_acceleration.transpose()<<std::endl;
 
+
+                logFile<<"ImuSensorCore::predictMeasurement() currentFreeModelRobotState->getLinearAcceleration()"<<std::endl;
+                logFile<<currentFreeModelRobotState->getLinearAcceleration().transpose()<<std::endl;
+
+
+                logFile<<"ImuSensorCore::predictMeasurement() ficticious_acceleration"<<std::endl;
+                logFile<<ficticious_acceleration.transpose()<<std::endl;
+
+                logFile<<"ImuSensorCore::predictMeasurement() accel_sensor_wrt_sensor"<<std::endl;
+                logFile<<accel_sensor_wrt_sensor.transpose()<<std::endl;
+
+                logFile<<"ImuSensorCore::predictMeasurement() gravity_sensor"<<std::endl;
+                logFile<<gravity_sensor.transpose()<<std::endl;
+
                 logFile<<"ImuSensorCore::predictMeasurement() predicted a="<<ThePredictedLinearAcceleration.transpose()<<std::endl;
 #endif
 
@@ -1024,7 +1038,7 @@ TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*
                     // Zeros
 
                     // z_lin_acc / lin_acc
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_measurement_i, 6)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose();
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_measurement_i, 6)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_world*mat_diff_w_amp_wrt_w.transpose();
 
 
                     // z_lin_acc / attit
