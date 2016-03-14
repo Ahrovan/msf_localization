@@ -948,6 +948,10 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
     Quaternion::PureQuaternion angular_velocity_imu_wrt_world_in_imu = Quaternion::cross_sandwich( Quaternion::inv(quat_attitude_sensor_wrt_world), TheRobotStateCoreAux->getAngularVelocity() , quat_attitude_sensor_wrt_world );
 
+    Quaternion::PureQuaternion angular_velocity_robot_wrt_world_in_robot = Quaternion::cross_sandwich(Quaternion::inv(TheRobotStateCoreAux->getAttitude()), TheRobotStateCoreAux->getAngularVelocity() , TheRobotStateCoreAux->getAttitude());
+
+    //Quaternion::PureQuaternion angular_acceleration_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(TheRobotStateCoreAux->getAttitude()), TheRobotStateCoreAux->getAngularAcceleration() , TheRobotStateCoreAux->getAttitude());
+
     //
     Eigen::Matrix4d mat_q_plus_attitude_robot_wrt_world=Quaternion::quatMatPlus(TheRobotStateCoreAux->getAttitude());
     Eigen::Matrix4d mat_q_minus_attitude_sensor_wrt_robot=Quaternion::quatMatMinus(TheImuStateCore->getAttitudeSensorWrtRobot());
@@ -966,6 +970,12 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
     Eigen::Matrix4d mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheRobotStateCoreAux->getLinearAcceleration(), TheRobotStateCoreAux->getAttitude()));
     Eigen::Matrix4d mat_q_plus_linear_acceleration_robot_wrt_world=Quaternion::quatMatPlus(TheRobotStateCoreAux->getLinearAcceleration());
+
+    Eigen::Matrix4d mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheRobotStateCoreAux->getAngularVelocity(), TheRobotStateCoreAux->getAttitude()));
+
+    Eigen::Matrix4d mat_q_minus_cross_angular_acceleration_robot_wrt_world_in_world_and_atti_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheRobotStateCoreAux->getAngularAcceleration(), TheRobotStateCoreAux->getAttitude()));
+
+    Eigen::Matrix4d mat_q_plus_angular_acceleration_robot_wrt_world=Quaternion::quatMatPlus(TheRobotStateCoreAux->getAngularAcceleration());
 
     //
     Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
@@ -987,15 +997,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
 
 
-TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*(
-        // d(ga_I)/d(q_r_w)
-        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world*(mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot*mat_q_plus_gravity_wrt_world) ) +
-        // d(a_real)/d(q_r_w)
-        (mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world*(mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world* mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot* mat_q_plus_linear_acceleration_robot_wrt_world) ) +
-        // d(a_ficticious)/d(q_r_w)
-        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world*( Eigen::Matrix4d::Zero(4,4) + Eigen::Matrix4d::Zero(4,4)) )
-        // others
-        )*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+
 
 
 //    Eigen::MatrixXd J2;
@@ -1049,9 +1051,15 @@ TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*
                         // d(a_real)/d(q_r_w)
                         ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world* mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot* mat_q_plus_linear_acceleration_robot_wrt_world) ) +
                         // d(a_ficticious)/d(q_r_w)
-                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*( Eigen::Matrix4d::Zero(4,4) + Eigen::Matrix4d::Zero(4,4)) )
+                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(
+                              // an
+                              mat_diff_w_amp_wrt_w.transpose()*(-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(TheImuStateCore->getPositionSensorWrtRobot())))*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_velocity_robot_wrt_world_in_world)
+                              +
+                              // at
+                              mat_diff_w_amp_wrt_w.transpose()*(-1*Quaternion::skewSymMat(TheImuStateCore->getPositionSensorWrtRobot()))*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_acceleration_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_acceleration_robot_wrt_world)
+                              )
                         // others
-                        )*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+                        ))*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
 
 
                     // z_lin_acc / ang_vel
