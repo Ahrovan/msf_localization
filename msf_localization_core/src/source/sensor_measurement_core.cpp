@@ -8,6 +8,14 @@ SensorMeasurementCore::SensorMeasurementCore()
     return;
 }
 
+SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr) :
+    SensorMeasurementCore()
+{
+    setTheSensorCore(TheSensorCorePtr);
+
+    return;
+}
+
 SensorMeasurementCore::~SensorMeasurementCore()
 {
     return;

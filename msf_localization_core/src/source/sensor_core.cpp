@@ -47,6 +47,20 @@ SensorCore::SensorCore() :
     return;
 }
 
+SensorCore::SensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
+    SensorCore()
+{
+
+    // set the sensor core
+    setTheSensorCore(TheSensorCorePtr);
+
+    // set the msf storage core
+    setTheMsfStorageCore(TheMsfStorageCore);
+
+    // end
+    return;
+}
+
 SensorCore::~SensorCore()
 {
     // Log

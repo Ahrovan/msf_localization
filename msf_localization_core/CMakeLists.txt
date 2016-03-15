@@ -63,6 +63,10 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_measurement_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_sensor_measurement_core.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/visual_marker_eye_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/visual_marker_eye_state_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/visual_marker_measurement_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/msf_storage_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/state_estimation_core.cpp
 
@@ -93,6 +97,12 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_measurement_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_sensor_measurement_core.h
+
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/visual_marker_eye_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/visual_marker_eye_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/visual_marker_measurement_core.h
+
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/msf_storage_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/state_estimation_core.h

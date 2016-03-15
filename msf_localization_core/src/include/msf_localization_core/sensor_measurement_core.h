@@ -18,6 +18,7 @@ class SensorMeasurementCore
 {
 public:
     SensorMeasurementCore();
+    SensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
     ~SensorMeasurementCore();
 
 

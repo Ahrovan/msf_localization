@@ -34,6 +34,12 @@ ImuSensorCore::ImuSensorCore() :
     dimensionParameters+=12;
     dimensionErrorParameters+=12;
 
+    // Dimension measurements -> Again just in case
+    dimensionMeasurement=0;
+
+    // Dimension noise -> Again just in case
+    dimensionNoise=0;
+
     // Noises measurements
     noiseMeasurementAngularVelocity.setZero();
     noiseMeasurementLinearAcceleration.setZero();

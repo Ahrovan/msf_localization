@@ -13,7 +13,8 @@
 enum class SensorTypes
 {
     undefined=0,
-    imu=1
+    imu=1,
+    visual_marker_eye=2
 };
 
 
