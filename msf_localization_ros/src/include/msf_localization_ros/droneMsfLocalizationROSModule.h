@@ -89,6 +89,8 @@
 // ROS IMU Interface
 #include "msf_localization_ros/ros_sensor_imu_interface.h"
 
+// ROS Aruco Eye
+#include "msf_localization_ros/ros_aruco_eye_interface.h"
 
 // MSF Core
 #include "msf_localization_core/msfLocalization.h"
@@ -131,9 +133,16 @@ protected:
     // Particular config readings
 protected:
     int readGlobalParametersConfig(pugi::xml_node global_parameters, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<GlobalParametersCore>& TheGlobalParametersCoreAux, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
-    int readFreeModelRobotConfig(pugi::xml_node robot, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<FreeModelRobotCore>& TheRobotCoreAux, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
-    int readImuConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosSensorImuInterface>& TheRosSensorImuInterface, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
 
+protected:
+    int readFreeModelRobotConfig(pugi::xml_node robot, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<FreeModelRobotCore>& TheRobotCoreAux, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
+
+protected:
+    int readImuConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosSensorImuInterface>& TheRosSensorImuInterface, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
+    int readArucoEyeConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosArucoEyeInterface>& TheRosArucoEyeInterface, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
+
+protected:
+    //int read
 
 
 

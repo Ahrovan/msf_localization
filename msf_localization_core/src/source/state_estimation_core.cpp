@@ -5,11 +5,7 @@
 
 
 
-StateEstimationCore::StateEstimationCore() //:
-    //flagHasState(false),
-    //flagHasRobotState(false),
-    //flagHasSensorState(false),
-    //flagHasMeasurement(false)
+StateEstimationCore::StateEstimationCore()
 {
     return;
 }
@@ -18,18 +14,13 @@ StateEstimationCore::~StateEstimationCore()
 {
     // Be tidy
 
-//    // Remove the intelliguent pointers
-//    TheRobotStateCore.reset();
-
-
     // TheListSensorStateCore
-//    for(std::list<SensorStateCore*>::iterator it=TheListSensorStateCore.begin(); it!=TheListSensorStateCore.end(); ++it)
-//        delete *it;
     this->TheListSensorStateCore.clear();
 
+    // TheListMapElementStateCore
+    this->TheListMapElementStateCore.clear();
+
     // TheListMeasurementCore
-//    for(std::list<SensorMeasurementCore*>::iterator it=TheListMeasurementCore.begin(); it!=TheListMeasurementCore.end(); ++it)
-//        delete *it;
     this->TheListMeasurementCore.clear();
 
 
@@ -60,6 +51,9 @@ int StateEstimationCore::getDimensionState() const
 {
     int dimensionState=0;
 
+    // Global Parameters
+    // TODO
+
     // Robot
     dimensionState+=this->TheRobotStateCore->getTheRobotCore()->getDimensionState();
 
@@ -71,6 +65,9 @@ int StateEstimationCore::getDimensionState() const
         dimensionState+=(*itSensor)->getTheSensorCore()->getDimensionState();
     }
 
+    // Map
+    // TODO
+
 
     // end
     return dimensionState;
@@ -80,6 +77,9 @@ int StateEstimationCore::getDimensionState() const
 int StateEstimationCore::getDimensionErrorState() const
 {
     int dimensionErrorState=0;
+
+    // Global Parameters
+    // TODO
 
     // Robot
     dimensionErrorState+=this->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
@@ -91,6 +91,9 @@ int StateEstimationCore::getDimensionErrorState() const
     {
         dimensionErrorState+=(*itSensor)->getTheSensorCore()->getDimensionErrorState();
     }
+
+    // Map
+    // TODO
 
 
     // end
@@ -111,6 +114,11 @@ int StateEstimationCore::prepareInitErrorStateVariance()
     // Add matrix
     int pointCovMatrix=0;
 
+
+    // Global Parameters
+    // TODO
+
+
     // Robot
     int dimensionRobot=this->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
     covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionRobot, dimensionRobot)=this->TheRobotStateCore->getTheRobotCore()->getInitErrorStateVariance();
@@ -127,8 +135,11 @@ int StateEstimationCore::prepareInitErrorStateVariance()
         pointCovMatrix+=dimensionSensor;
     }
 
+
     // Map
     // TODO
 
+
+    // End
     return 0;
 }

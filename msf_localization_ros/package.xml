@@ -22,5 +22,8 @@
 	<depend>msf_localization_core</depend>
 	<depend>msf_localization_ros_srvs</depend>
 
+  <depend>aruco_eye_msgs</depend>
+
+
 </package>
 

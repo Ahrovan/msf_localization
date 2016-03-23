@@ -68,7 +68,11 @@ MsfLocalizationCore::MsfLocalizationCore()
 
     // Sensors
     //Id
-    firstAvailableId=0;
+    firstAvailableSensorId=0;
+
+    // Map elements
+    // Id
+    firstAvailableMapElementId=0;
 
 
     // Create Storage Core

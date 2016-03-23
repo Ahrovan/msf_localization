@@ -82,6 +82,9 @@
 
 #include "msf_localization_core/global_parameters_core.h"
 
+#include "msf_localization_core/map_element_core.h"
+
+
 
 /*
 class SyncThreadState
@@ -147,7 +150,16 @@ protected:
 //public:
     std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
 protected:
-    unsigned int firstAvailableId;
+    unsigned int firstAvailableSensorId;
+
+
+    // Map Elements
+protected:
+    std::list< std::shared_ptr<MapElementCore> > TheListOfMapElementCore;
+protected:
+    unsigned int firstAvailableMapElementId;
+
+
 
 
 

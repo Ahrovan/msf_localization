@@ -48,6 +48,8 @@ protected:
 public:
     int setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
     std::shared_ptr<SensorCore> getTheSensorCore() const;
+    std::shared_ptr<SensorCore> getTheSensorCoreShared() const;
+    std::weak_ptr<SensorCore> getTheSensorCoreWeak() const;
 
 
     // Pointer to the MSF Storage Core

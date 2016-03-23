@@ -1,7 +1,7 @@
 
 
-#ifndef _VISUAL_MARKER_EYE_STATE_CORE_H
-#define _VISUAL_MARKER_EYE_STATE_CORE_H
+#ifndef _CODED_VISUAL_MARKER_EYE_STATE_CORE_H
+#define _CODED_VISUAL_MARKER_EYE_STATE_CORE_H
 
 
 #include <Eigen/Dense>
@@ -13,11 +13,11 @@
 
 
 
-class VisualMarkerEyeStateCore : public SensorStateCore
+class CodedVisualMarkerEyeStateCore : public SensorStateCore
 {
 public:
-    VisualMarkerEyeStateCore();
-    ~VisualMarkerEyeStateCore();
+    CodedVisualMarkerEyeStateCore();
+    ~CodedVisualMarkerEyeStateCore();
 
 
     ///// State if enabled (or Parameters if disabled)

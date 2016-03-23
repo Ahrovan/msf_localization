@@ -1,5 +1,5 @@
 
-#ifndef _VISUAL_MARKER_EYE_CORE_H
+#ifndef _CODED_VISUAL_MARKER_EYE_CORE_H
 #define _VISUAL_MARKER_EYE_CORE_H
 
 
@@ -15,10 +15,10 @@
 #include "msf_localization_core/sensor_core.h"
 
 // VM Measurement
-#include "msf_localization_core/visual_marker_measurement_core.h"
+#include "msf_localization_core/coded_visual_marker_measurement_core.h"
 
 // VM State
-#include "msf_localization_core/visual_marker_eye_state_core.h"
+#include "msf_localization_core/coded_visual_marker_eye_state_core.h"
 
 
 // Robot state
@@ -33,13 +33,13 @@
 
 
 
-class VisualMarkerEyeCore : public virtual SensorCore
+class CodedVisualMarkerEyeCore : public virtual SensorCore
 {
 public:
-    VisualMarkerEyeCore();
-    VisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_core, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    CodedVisualMarkerEyeCore();
+    CodedVisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_core, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 public:
-    ~VisualMarkerEyeCore();
+    ~CodedVisualMarkerEyeCore();
 
 public:
     int init();
@@ -86,7 +86,7 @@ public:
 
     // Store Measurement
 public:
-    int setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<VisualMarkerMeasurementCore> the_visual_marker_measurement);
+    int setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement);
 
 
 
@@ -120,22 +120,22 @@ public:
 
     // Prediction state function
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<VisualMarkerEyeStateCore> pastState, std::shared_ptr<VisualMarkerEyeStateCore>& predictedState);
+    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState, std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 
     // Jacobian of the error state
 public:
-    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<VisualMarkerEyeStateCore> pastState, std::shared_ptr<VisualMarkerEyeStateCore>& predictedState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState, std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 
 
 
     // Prediction measurements
 public:
-    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<VisualMarkerEyeStateCore> currentImuState, std::shared_ptr<VisualMarkerMeasurementCore>& predictedMeasurement);
+    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentImuState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
 
     // Jacobian of the measurements
 public:
-    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<VisualMarkerEyeStateCore> TheImuStateCore, std::shared_ptr<VisualMarkerMeasurementCore>& predictedMeasurement);
+    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<CodedVisualMarkerEyeStateCore> TheImuStateCore, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
 
 

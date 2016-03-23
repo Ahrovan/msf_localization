@@ -18,6 +18,9 @@
 // Imu Sensor Core
 #include "msf_localization_core/imu_sensor_core.h"
 
+// Sensor measurement core
+#include "msf_localization_core/imu_sensor_measurement_core.h"
+
 
 // ROS Sensor Interface
 #include "msf_localization_ros/ros_sensor_interface.h"

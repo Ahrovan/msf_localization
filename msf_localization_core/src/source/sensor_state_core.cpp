@@ -24,6 +24,17 @@ std::shared_ptr<const SensorCore> SensorStateCore::getTheSensorCore() const
     return TheSensorCoreSharedPtr;
 }
 
+std::shared_ptr<const SensorCore> SensorStateCore::getTheSensorCoreShared() const
+{
+    std::shared_ptr<const SensorCore> TheSensorCoreSharedPtr=this->TheSensorCorePtr.lock();
+    return TheSensorCoreSharedPtr;
+}
+
+std::weak_ptr<const SensorCore> SensorStateCore::getTheSensorCoreWeak() const
+{
+    return this->TheSensorCorePtr;
+}
+
 
 
 Eigen::Vector3d SensorStateCore::getPositionSensorWrtRobot() const

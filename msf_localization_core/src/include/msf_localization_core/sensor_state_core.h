@@ -37,6 +37,8 @@ protected:
 public:
     int setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
     std::shared_ptr<const SensorCore> getTheSensorCore() const;
+    std::shared_ptr<const SensorCore> getTheSensorCoreShared() const;
+    std::weak_ptr<const SensorCore> getTheSensorCoreWeak() const;
 
 
 

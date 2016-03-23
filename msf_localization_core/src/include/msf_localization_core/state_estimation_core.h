@@ -33,6 +33,8 @@
 
 #include "msf_localization_core/sensor_state_core.h"
 
+#include "msf_localization_core/map_element_state_core.h"
+
 #include "msf_localization_core/sensor_measurement_core.h"
 
 
@@ -62,7 +64,11 @@ public:
 
     // Sensors State
 public:
-    std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
+    std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
+
+    // Map State
+public:
+    std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
 
 
 
@@ -101,9 +107,6 @@ public:
 
 
 
-    /// Others
-    // Kalman Gain
-    // TODO?
 
 
 };

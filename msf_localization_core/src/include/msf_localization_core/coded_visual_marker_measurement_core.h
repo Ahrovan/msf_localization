@@ -1,19 +1,19 @@
 
-#ifndef _VISUAL_MARKER_MEASUREMENT_CORE_H
-#define _VISUAL_MARKER_MEASUREMENT_CORE_H
+#ifndef _CODED_VISUAL_MARKER_MEASUREMENT_CORE_H
+#define _CODED_VISUAL_MARKER_MEASUREMENT_CORE_H
 
 
 
 #include "msf_localization_core/sensor_measurement_core.h"
 
 
-class VisualMarkerMeasurementCore : public SensorMeasurementCore
+class CodedVisualMarkerMeasurementCore : public SensorMeasurementCore
 {
 public:
-    VisualMarkerMeasurementCore();
-    VisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core);
+    CodedVisualMarkerMeasurementCore();
+    CodedVisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core);
 public:
-    ~VisualMarkerMeasurementCore();
+    ~CodedVisualMarkerMeasurementCore();
 
 
 

@@ -1,11 +1,11 @@
 
-#include "msf_localization_core/visual_marker_eye_core.h"
+#include "msf_localization_core/coded_visual_marker_eye_core.h"
 
 // Circular Dependency
 #include "msf_localization_core/msf_storage_core.h"
 
 
-VisualMarkerEyeCore::VisualMarkerEyeCore() :
+CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
     SensorCore()
 {
     //
@@ -15,7 +15,7 @@ VisualMarkerEyeCore::VisualMarkerEyeCore() :
     return;
 }
 
-VisualMarkerEyeCore::VisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_core, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_core, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     SensorCore(the_sensor_core, the_msf_storage_core)
 {
     //
@@ -24,13 +24,13 @@ VisualMarkerEyeCore::VisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_co
     return;
 }
 
-VisualMarkerEyeCore::~VisualMarkerEyeCore()
+CodedVisualMarkerEyeCore::~CodedVisualMarkerEyeCore()
 {
 
     return;
 }
 
-int VisualMarkerEyeCore::init()
+int CodedVisualMarkerEyeCore::init()
 {
     // Sensor Type
     setSensorType(SensorTypes::visual_marker_eye);
@@ -73,12 +73,12 @@ int VisualMarkerEyeCore::init()
     return 0;
 }
 
-bool VisualMarkerEyeCore::isMeasurementPositionEnabled() const
+bool CodedVisualMarkerEyeCore::isMeasurementPositionEnabled() const
 {
     return this->flag_measurement_position_;
 }
 
-int VisualMarkerEyeCore::enableMeasurementPosition()
+int CodedVisualMarkerEyeCore::enableMeasurementPosition()
 {
     if(!this->flag_measurement_position_)
     {
@@ -88,23 +88,23 @@ int VisualMarkerEyeCore::enableMeasurementPosition()
     return 0;
 }
 
-Eigen::Matrix3d VisualMarkerEyeCore::getNoiseMeasurementPosition() const
+Eigen::Matrix3d CodedVisualMarkerEyeCore::getNoiseMeasurementPosition() const
 {
     return this->noise_measurement_position_;
 }
 
-int VisualMarkerEyeCore::setNoiseMeasurementPosition(Eigen::Matrix3d noise_measurement_position)
+int CodedVisualMarkerEyeCore::setNoiseMeasurementPosition(Eigen::Matrix3d noise_measurement_position)
 {
     this->noise_measurement_position_=noise_measurement_position;
     return 0;
 }
 
-bool VisualMarkerEyeCore::isMeasurementAttitudeEnabled() const
+bool CodedVisualMarkerEyeCore::isMeasurementAttitudeEnabled() const
 {
     return this->flag_measurement_attitude_;
 }
 
-int VisualMarkerEyeCore::enableMeasurementAttitude()
+int CodedVisualMarkerEyeCore::enableMeasurementAttitude()
 {
     if(!this->flag_measurement_attitude_)
     {
@@ -114,32 +114,32 @@ int VisualMarkerEyeCore::enableMeasurementAttitude()
     return 0;
 }
 
-Eigen::Matrix3d VisualMarkerEyeCore::getNoiseMeasurementAttitude() const
+Eigen::Matrix3d CodedVisualMarkerEyeCore::getNoiseMeasurementAttitude() const
 {
     return this->noise_measurement_attitude_;
 }
 
-int VisualMarkerEyeCore::setNoiseMeasurementAttitude(Eigen::Matrix3d noise_measurement_attitude)
+int CodedVisualMarkerEyeCore::setNoiseMeasurementAttitude(Eigen::Matrix3d noise_measurement_attitude)
 {
     this->noise_measurement_attitude_=noise_measurement_attitude;
     return 0;
 }
 
-int VisualMarkerEyeCore::setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<VisualMarkerMeasurementCore> the_visual_marker_measurement)
+int CodedVisualMarkerEyeCore::setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement)
 {
     if(!isSensorEnabled())
         return 0;
 
     if(this->getTheMsfStorageCore()->setMeasurement(the_time_stamp, the_visual_marker_measurement))
     {
-        std::cout<<"VisualMarkerEyeCore::setMeasurement() error"<<std::endl;
+        std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
         return 1;
     }
 
     return 0;
 }
 
-Eigen::MatrixXd VisualMarkerEyeCore::getCovarianceMeasurement()
+Eigen::MatrixXd CodedVisualMarkerEyeCore::getCovarianceMeasurement()
 {
     Eigen::MatrixXd covariances_matrix;
     covariances_matrix.resize(this->getDimensionMeasurement(), this->getDimensionMeasurement());
@@ -160,7 +160,7 @@ Eigen::MatrixXd VisualMarkerEyeCore::getCovarianceMeasurement()
     return covariances_matrix;
 }
 
-Eigen::MatrixXd VisualMarkerEyeCore::getCovarianceParameters()
+Eigen::MatrixXd CodedVisualMarkerEyeCore::getCovarianceParameters()
 {
     Eigen::MatrixXd covariances_matrix;
     covariances_matrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
@@ -181,7 +181,7 @@ Eigen::MatrixXd VisualMarkerEyeCore::getCovarianceParameters()
     return covariances_matrix;
 }
 
-int VisualMarkerEyeCore::prepareInitErrorStateVariance()
+int CodedVisualMarkerEyeCore::prepareInitErrorStateVariance()
 {
     int error=SensorCore::prepareInitErrorStateVariance();
 

@@ -118,21 +118,10 @@ int MsfLocalizationROS::readConfigFile()
         std::shared_ptr<FreeModelRobotCore> TheRobotCoreAux;
         // Create a class for the RobotStateCore
         std::shared_ptr<FreeModelRobotStateCore> RobotInitStateCore;
-//        // Robot Init State Covariance Matrix
-//        Eigen::MatrixXd InitStateCovatrianceMatrix;
 
         // Read configs
         if(readFreeModelRobotConfig(robot, this->TheMsfStorageCore, TheRobotCoreAux, RobotInitStateCore))
             return -2;
-
-
-//        // Update covariance
-//        unsigned int previousNumCols=InitialState->covarianceMatrix.cols();
-//        unsigned int previousNumRows=InitialState->covarianceMatrix.rows();
-
-//        InitialState->covarianceMatrix.conservativeResize(previousNumRows+InitStateCovatrianceMatrix.rows(), previousNumCols+InitStateCovatrianceMatrix.cols());
-//        InitialState->covarianceMatrix.block(previousNumRows, previousNumCols, InitStateCovatrianceMatrix.rows(), InitStateCovatrianceMatrix.cols())=InitStateCovatrianceMatrix;
-
 
         // Finish
 
@@ -158,28 +147,17 @@ int MsfLocalizationROS::readConfigFile()
         //// IMU Sensor Type
         if(sensorType=="imu")
         {
-
             // Create a class for the SensoreCore
             std::shared_ptr<RosSensorImuInterface> TheRosSensorImuInterface;
             // Create a class for the SensorStateCore
             std::shared_ptr<ImuSensorStateCore> SensorInitStateCore;
 
-            // Create a matrix with the additional covariance
-            //Eigen::MatrixXd InitStateCovatrianceMatrix;
-
             // Read configs
-            if(readImuConfig(sensor, firstAvailableId, this->TheMsfStorageCore, TheRosSensorImuInterface, SensorInitStateCore))
+            if(readImuConfig(sensor, firstAvailableSensorId, this->TheMsfStorageCore, TheRosSensorImuInterface, SensorInitStateCore))
                 return -2;
 
             // Update id
-            firstAvailableId++;
-
-//            // Update covariance
-//            unsigned int previousNumCols=InitialState->covarianceMatrix.cols();
-//            unsigned int previousNumRows=InitialState->covarianceMatrix.rows();
-
-//            InitialState->covarianceMatrix.conservativeResize(previousNumRows+InitStateCovatrianceMatrix.rows(), previousNumCols+InitStateCovatrianceMatrix.cols());
-//            InitialState->covarianceMatrix.block(previousNumRows, previousNumCols, InitStateCovatrianceMatrix.rows(), InitStateCovatrianceMatrix.cols())=InitStateCovatrianceMatrix;
+            firstAvailableSensorId++;
 
 
             // Finish
@@ -191,9 +169,45 @@ int MsfLocalizationROS::readConfigFile()
             InitialState->TheListSensorStateCore.push_back(SensorInitStateCore);
         }
 
+        //// Aruco Eye Sensor Type
+        if(sensorType=="aruco_eye")
+        {
+            // Create a class for the SensoreCore
+            std::shared_ptr<RosArucoEyeInterface> TheRosSensorInterface;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<CodedVisualMarkerEyeStateCore> TheSensorStateCore;
+
+            // Read configs
+            if(readArucoEyeConfig(sensor, firstAvailableSensorId, this->TheMsfStorageCore, TheRosSensorInterface, TheSensorStateCore))
+                return -2;
+
+            // Update id
+            firstAvailableSensorId++;
+
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfSensorCore.push_back(TheRosSensorInterface);
+
+            // Push the init state of the sensor
+            InitialState->TheListSensorStateCore.push_back(TheSensorStateCore);
+
+        }
+
 
     }
 
+
+
+    ///// Map elements
+
+    // TODO
+
+
+
+
+    //// Finish
 
     // Initial State Prepare
     InitialState->prepareInitErrorStateVariance();
@@ -769,6 +783,188 @@ int MsfLocalizationROS::readImuConfig(pugi::xml_node sensor, unsigned int sensor
 
     // Open
     TheRosSensorImuInterface->open();
+
+    // End
+    return 0;
+}
+
+
+int MsfLocalizationROS::readArucoEyeConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosArucoEyeInterface>& TheRosArucoEyeInterface, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore)
+{
+    // Create a class for the SensoreCore
+    if(!TheRosArucoEyeInterface)
+        TheRosArucoEyeInterface=std::make_shared<RosArucoEyeInterface>(nh);
+
+    // Set pointer to the SensorCore
+    TheRosArucoEyeInterface->setTheSensorCore(TheRosArucoEyeInterface);
+
+    // Create a class for the SensorStateCore
+    if(!SensorInitStateCore)
+        SensorInitStateCore=std::make_shared<CodedVisualMarkerEyeStateCore>();
+
+    // Set pointer to the SensorCore
+    SensorInitStateCore->setTheSensorCore(TheRosArucoEyeInterface);
+
+
+    // Set sensor type
+    TheRosArucoEyeInterface->setSensorType(SensorTypes::visual_marker_eye);
+
+    // Set Id
+    TheRosArucoEyeInterface->setSensorId(sensorId);
+
+    // Set the access to the Storage core
+    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
+    TheRosArucoEyeInterface->setTheMsfStorageCore(TheMsfStorageCore);
+
+
+    // Sensor Topic
+    std::string sensorTopic=sensor.child_value("ros_topic");
+    TheRosArucoEyeInterface->setMarkerListTopicName(sensorTopic);
+
+
+    // Auxiliar reading value
+    std::string readingValue;
+
+
+    // Name
+    readingValue=sensor.child_value("name");
+    TheRosArucoEyeInterface->setSensorName(readingValue);
+
+
+    //// Sensor configurations
+
+
+    /// Pose of the sensor wrt robot
+    pugi::xml_node pose_in_robot=sensor.child("pose_in_robot");
+
+    // Position of the sensor wrt robot
+    readingValue=pose_in_robot.child("position").child_value("enabled");
+    if(std::stoi(readingValue))
+        TheRosArucoEyeInterface->enableEstimationPositionSensorWrtRobot();
+
+    // Attitude of the sensor wrt robot
+    readingValue=pose_in_robot.child("attitude").child_value("enabled");
+    if(std::stoi(readingValue))
+        TheRosArucoEyeInterface->enableEstimationAttitudeSensorWrtRobot();
+
+
+    /// Other Parameters
+    pugi::xml_node parameters = sensor.child("parameters");
+
+    // None
+
+
+
+    //// Measurements
+    pugi::xml_node measurements = sensor.child("measurements");
+
+    /// Orientation
+    pugi::xml_node meas_orientation = measurements.child("orientation");
+
+    readingValue=meas_orientation.child_value("enabled");
+    if(std::stoi(readingValue))
+        TheRosArucoEyeInterface->enableMeasurementAttitude();
+
+    readingValue=meas_orientation.child_value("var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRosArucoEyeInterface->setNoiseMeasurementAttitude(variance.asDiagonal());
+    }
+
+
+    /// Position
+    pugi::xml_node meas_position = measurements.child("position");
+
+    readingValue=meas_position.child_value("enabled");
+    if(std::stoi(readingValue))
+        TheRosArucoEyeInterface->enableMeasurementPosition();
+
+    readingValue=meas_position.child_value("var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRosArucoEyeInterface->setNoiseMeasurementPosition(variance.asDiagonal());
+    }
+
+
+
+
+    //// Init State
+
+    /// Pose of the sensor wrt robot
+
+    // Position of the sensor wrt robot
+    readingValue=pose_in_robot.child("position").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d init_estimation;
+        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
+        SensorInitStateCore->setPositionSensorWrtRobot(init_estimation);
+    }
+
+    // Attitude of the sensor wrt robot
+    readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector4d init_estimation;
+        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
+        SensorInitStateCore->setAttitudeSensorWrtRobot(init_estimation);
+    }
+
+
+    /// Parameters
+
+    // None
+
+
+
+    //// Init Variances
+
+
+    /// Pose of the sensor wrt robot
+
+    // Position of the sensor wrt robot
+    readingValue=pose_in_robot.child("position").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRosArucoEyeInterface->setNoisePositionSensorWrtRobot(variance.asDiagonal());
+    }
+
+
+    // Attitude of the sensor wrt robot
+    readingValue=pose_in_robot.child("attitude").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRosArucoEyeInterface->setNoiseAttitudeSensorWrtRobot(variance.asDiagonal());
+    }
+
+
+
+    /// Other Parameters
+
+    // None
+
+
+    // Noises in the estimation (if enabled)
+
+    // None
+
+
+    // Prepare covariance matrix
+    TheRosArucoEyeInterface->prepareInitErrorStateVariance();
+
+
+    /// Finish
+
+    // Open
+    TheRosArucoEyeInterface->open();
 
     // End
     return 0;

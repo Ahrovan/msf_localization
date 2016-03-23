@@ -1,9 +1,9 @@
 
-#include "msf_localization_core/visual_marker_measurement_core.h"
+#include "msf_localization_core/coded_visual_marker_measurement_core.h"
 
-#include "msf_localization_core/visual_marker_eye_core.h"
+#include "msf_localization_core/coded_visual_marker_eye_core.h"
 
-VisualMarkerMeasurementCore::VisualMarkerMeasurementCore() :
+CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore() :
     SensorMeasurementCore()
 {
     // Initial values of the measurement
@@ -16,29 +16,29 @@ VisualMarkerMeasurementCore::VisualMarkerMeasurementCore() :
     return;
 }
 
-VisualMarkerMeasurementCore::VisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
+CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
     SensorMeasurementCore(the_sensor_core)
 {
 
     return;
 }
 
-VisualMarkerMeasurementCore::~VisualMarkerMeasurementCore()
+CodedVisualMarkerMeasurementCore::~CodedVisualMarkerMeasurementCore()
 {
 
     return;
 }
 
-int VisualMarkerMeasurementCore::setVisualMarkerId(const int id)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerId(const int id)
 {
     this->id_=id;
     return 0;
 }
 
-int VisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vector3d position)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vector3d position)
 {
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<VisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<VisualMarkerEyeCore>(this->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getTheSensorCore());
 
     if(the_visual_marker_eye_core->isMeasurementPositionEnabled())
     {
@@ -51,10 +51,10 @@ int VisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vector3d p
     return 0;
 }
 
-int VisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vector4d attitude)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vector4d attitude)
 {
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<VisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<VisualMarkerEyeCore>(this->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getTheSensorCore());
 
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
@@ -68,7 +68,7 @@ int VisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vector4d a
     return 0;
 }
 
-int VisualMarkerMeasurementCore::setVisualMarkerMeasurement(const int id, const Eigen::Vector3d position, Eigen::Vector4d attitude)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerMeasurement(const int id, const Eigen::Vector3d position, Eigen::Vector4d attitude)
 {
     int error=0;
     error+=setVisualMarkerId(id);
@@ -78,23 +78,23 @@ int VisualMarkerMeasurementCore::setVisualMarkerMeasurement(const int id, const 
 }
 
 
-int VisualMarkerMeasurementCore::getVisualMarkerId() const
+int CodedVisualMarkerMeasurementCore::getVisualMarkerId() const
 {
     return this->id_;
 }
 
-Eigen::Vector3d VisualMarkerMeasurementCore::getVisualMarkerPosition() const
+Eigen::Vector3d CodedVisualMarkerMeasurementCore::getVisualMarkerPosition() const
 {
     return this->position_;
 }
 
-Eigen::Vector4d VisualMarkerMeasurementCore::getVisualMarkerAttitude() const
+Eigen::Vector4d CodedVisualMarkerMeasurementCore::getVisualMarkerAttitude() const
 {
     return this->attitude_;
 }
 
 
-Eigen::VectorXd VisualMarkerMeasurementCore::getMeasurement()
+Eigen::VectorXd CodedVisualMarkerMeasurementCore::getMeasurement()
 {
     // Create the Measurement
     Eigen::VectorXd the_measurement;
@@ -102,7 +102,7 @@ Eigen::VectorXd VisualMarkerMeasurementCore::getMeasurement()
     the_measurement.setZero();
 
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<VisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<VisualMarkerEyeCore>(this->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getTheSensorCore());
 
     // Fill
     unsigned int dimension=0;
