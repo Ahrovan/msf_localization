@@ -58,6 +58,12 @@ public:
 
 
 
+
+public:
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
+
+
+
     ////// Init error state variances -> Temporal, only for the initial configuration
 
 public:
@@ -74,15 +80,15 @@ public:
 
     ///// Predict functions
 
-    // State: xR=[pos, lin_speed, lin_accel, attit, ang_vel]'
+    // State: xR=[pos, lin_speed, lin_accel, attit, ang_vel, ang_accel]'
 
     // Prediction state function
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState);
+    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState);
 
     // Jacobian
 public:
-    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState);
 
 
 

@@ -207,8 +207,8 @@ public:
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:
-    Eigen::MatrixXd getCovarianceMeasurement();
-    Eigen::MatrixXd getCovarianceParameters();
+    Eigen::SparseMatrix<double> getCovarianceMeasurement();
+    Eigen::SparseMatrix<double> getCovarianceParameters();
 
 
 
@@ -218,17 +218,22 @@ public:
 
 
 
+public:
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
+
+
+
     ///// Predict functions
 
     // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
 
     // Prediction state function
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState);
+    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
 
     // Jacobian of the error state
 public:
-    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
 
 
 

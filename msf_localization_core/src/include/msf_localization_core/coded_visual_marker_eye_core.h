@@ -1,6 +1,6 @@
 
 #ifndef _CODED_VISUAL_MARKER_EYE_CORE_H
-#define _VISUAL_MARKER_EYE_CORE_H
+#define _CODED_VISUAL_MARKER_EYE_CORE_H
 
 
 
@@ -103,8 +103,8 @@ public:
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:
-    Eigen::MatrixXd getCovarianceMeasurement();
-    Eigen::MatrixXd getCovarianceParameters();
+    Eigen::SparseMatrix<double> getCovarianceMeasurement();
+    Eigen::SparseMatrix<double> getCovarianceParameters();
 
 
 
@@ -113,29 +113,32 @@ public:
     int prepareInitErrorStateVariance();
 
 
+public:
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
+
 
     ///// Predict functions
 
-    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot]'
 
     // Prediction state function
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState, std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
+    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
 
     // Jacobian of the error state
 public:
-    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState, std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
 
 
 
     // Prediction measurements
 public:
-    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentImuState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
 
     // Jacobian of the measurements
 public:
-    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<CodedVisualMarkerEyeStateCore> TheImuStateCore, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
 
 

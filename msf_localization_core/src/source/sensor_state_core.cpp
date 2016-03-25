@@ -8,6 +8,13 @@ SensorStateCore::SensorStateCore()
     return;
 }
 
+SensorStateCore::SensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr)
+{
+    setTheSensorCore(TheSensorCorePtr);
+
+    return;
+}
+
 SensorStateCore::~SensorStateCore()
 {
     return;

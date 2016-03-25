@@ -14,6 +14,7 @@ class SensorStateCore
 {
 public:
     SensorStateCore();
+    SensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
     ~SensorStateCore();
 
 
@@ -63,6 +64,12 @@ public:
     Eigen::Vector4d getAttitudeSensorWrtRobot() const;
     int setAttitudeSensorWrtRobot(Eigen::Vector4d attitudeSensorWrtRobot);
 
+
+
+
+public:
+    virtual Eigen::MatrixXd getJacobianErrorState()=0;
+    virtual Eigen::SparseMatrix<double> getJacobianErrorStateNoise()=0;
 
 
 public:

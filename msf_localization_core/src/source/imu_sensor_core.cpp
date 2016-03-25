@@ -207,6 +207,8 @@ int ImuSensorCore::enableEstimationBiasAngularVelocity()
         this->dimensionParameters-=3;
         //
         this->dimensionErrorParameters-=3;
+        //
+        this->dimensionNoise+=3;
     }
     return 0;
 }
@@ -225,6 +227,8 @@ int ImuSensorCore::enableParameterBiasAngularVelocity()
         this->dimensionParameters+=3;
         //
         this->dimensionErrorParameters+=3;
+        //
+        this->dimensionNoise-=3;
     }
     return 0;
 }
@@ -328,6 +332,8 @@ int ImuSensorCore::enableEstimationBiasLinearAcceleration()
         this->dimensionParameters-=3;
         //
         this->dimensionErrorParameters-=3;
+        //
+        this->dimensionNoise+=3;
     }
     return 0;
 }
@@ -346,6 +352,8 @@ int ImuSensorCore::enableParameterBiasLinearAcceleration()
         this->dimensionParameters+=3;
         //
         this->dimensionErrorParameters+=3;
+        //
+        this->dimensionNoise-=3;
     }
     return 0;
 }
@@ -425,16 +433,24 @@ int ImuSensorCore::setNoiseScaleLinearAcceleration(Eigen::Matrix3d noiseScaleLin
     return 0;
 }
 
-Eigen::MatrixXd ImuSensorCore::getCovarianceMeasurement()
+Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceMeasurement()
 {
-    Eigen::MatrixXd CovariancesMatrix;
+    Eigen::SparseMatrix<double> CovariancesMatrix;
+
     CovariancesMatrix.resize(this->getDimensionMeasurement(), this->getDimensionMeasurement());
-    CovariancesMatrix.setZero();
+    //CovariancesMatrix.setZero();
+    CovariancesMatrix.reserve(this->getDimensionMeasurement());
+
+    std::vector<Eigen::Triplet<double> > tripletCovarianceMeasurement;
 
     unsigned int dimension=0;
     if(this->isMeasurementLinearAccelerationEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementLinearAcceleration();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementLinearAcceleration();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseMeasurementLinearAcceleration(i,i)));
+
         dimension+=3;
     }
     if(this->isMeasurementOrientationEnabled())
@@ -444,50 +460,89 @@ Eigen::MatrixXd ImuSensorCore::getCovarianceMeasurement()
     }
     if(this->isMeasurementAngularVelocityEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementAngularVelocity();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementAngularVelocity();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseMeasurementAngularVelocity(i,i)));
+
         dimension+=3;
     }
+
+    CovariancesMatrix.setFromTriplets(tripletCovarianceMeasurement.begin(), tripletCovarianceMeasurement.end());
+
 
     return CovariancesMatrix;
 }
 
-Eigen::MatrixXd ImuSensorCore::getCovarianceParameters()
+Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
 {
-    Eigen::MatrixXd CovariancesMatrix;
+    Eigen::SparseMatrix<double> CovariancesMatrix;
+
     CovariancesMatrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
-    CovariancesMatrix.setZero();
+    //CovariancesMatrix.setZero();
+    CovariancesMatrix.reserve(this->getDimensionErrorParameters());
+
+    std::vector<Eigen::Triplet<double> > tripletCovarianceParameters;
+
 
     unsigned int dimension=0;
     if(!this->isEstimationPositionSensorWrtRobotEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoisePositionSensorWrtRobot();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoisePositionSensorWrtRobot();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noisePositionSensorWrtRobot(i,i)));
+
+
         dimension+=3;
     }
     if(!this->isEstimationAttitudeSensorWrtRobotEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseAttitudeSensorWrtRobot();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseAttitudeSensorWrtRobot();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseAttitudeSensorWrtRobot(i,i)));
+
         dimension+=3;
     }
     if(!this->isEstimationBiasLinearAccelerationEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasLinearAcceleration();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasLinearAcceleration();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseBiasLinearAcceleration(i,i)));
+
         dimension+=3;
     }
     if(!this->isEstimationScaleLinearAccelerationEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleLinearAcceleration();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleLinearAcceleration();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseScaleLinearAcceleration(i,i)));
+
         dimension+=3;
     }
     if(!this->isEstimationBiasAngularVelocityEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasAngularVelocity();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasAngularVelocity();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseBiasAngularVelocity(i,i)));
+
         dimension+=3;
     }
     if(!this->isEstimationScaleAngularVelocityEnabled())
     {
-        CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleAngularVelocity();
+        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleAngularVelocity();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseScaleAngularVelocity(i,i)));
+
         dimension+=3;
     }
+
+    CovariancesMatrix.setFromTriplets(tripletCovarianceParameters.begin(), tripletCovarianceParameters.end());
 
 
     return CovariancesMatrix;
@@ -589,7 +644,7 @@ int ImuSensorCore::prepareInitErrorStateVariance()
     {
         this->InitErrorStateVariance.block<3,3>(point,point)=noiseBiasAngularVelocity;
     }
-    //TODO
+    // TODO
     // Add kw
 
 
@@ -598,11 +653,71 @@ int ImuSensorCore::prepareInitErrorStateVariance()
 }
 
 
+Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp deltaTimeStamp) const
+{
+    Eigen::SparseMatrix<double> covariance_noise;
+
+    // Dimension noise
+    int dimension_noise=getDimensionNoise();
 
 
-int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
+    // Resize
+    covariance_noise.resize(dimension_noise, dimension_noise);
+    //covariance_noise.setZero();
+    covariance_noise.reserve(dimension_noise);
+
+    std::vector<Eigen::Triplet<double> > tripletCovarianceNoise;
+
+    // dt
+    double dt=deltaTimeStamp.get_double();
+
+    // Fill
+    int dimension_noise_i=0;
+    if(isEstimationBiasLinearAccelerationEnabled())
+    {
+        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasLinearAcceleration*deltaTimeStamp.get_double();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceNoise.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,noiseEstimationBiasLinearAcceleration(i,i)*dt));
+
+
+        dimension_noise_i+=3;
+    }
+
+    if(isEstimationBiasAngularVelocityEnabled())
+    {
+        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasAngularVelocity*deltaTimeStamp.get_double();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceNoise.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,noiseEstimationBiasAngularVelocity(i,i)*dt));
+
+
+        dimension_noise_i+=3;
+    }
+
+
+    covariance_noise.setFromTriplets(tripletCovarianceNoise.begin(), tripletCovarianceNoise.end());
+
+
+//    std::cout<<"covariance_noise"<<std::endl;
+//    std::cout<<Eigen::MatrixXd(covariance_noise)<<std::endl;
+
+
+    // End
+    return covariance_noise;
+}
+
+
+
+int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
 {
     //std::cout<<"ImuSensorCore::predictState()"<<std::endl;
+
+
+    // Poly
+    std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
+    std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
+
 
     // Checks in the past state
     if(!pastState->getTheSensorCore())
@@ -654,14 +769,24 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     predictedState->scaleLinearAcceleration=pastState->scaleLinearAcceleration;
 
 
+
+    predictedStateI=predictedState;
+
+
     //std::cout<<"ImuSensorCore::predictState() end"<<std::endl;
 
     return 0;
 }
 
-int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<ImuSensorStateCore> pastState, std::shared_ptr<ImuSensorStateCore>& predictedState)
+int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
 {
     //std::cout<<"ImuSensorCore::predictStateErrorStateJacobians"<<std::endl;
+
+
+    // Poly
+    std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
+    std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
+
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)
@@ -670,7 +795,7 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
     }
 
 
-    // Jacobians
+    //// Jacobians Error State
     // posi / posi
     if(flagEstimationPositionSensorWrtRobot)
         predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
@@ -696,6 +821,92 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
         predictedState->errorStateJacobian.scaleAngularVelocity=Eigen::Matrix3d::Identity();
 
 
+
+
+
+
+    //// Jacobian Error State Noise
+
+    //Eigen::SparseMatrix<double> jacobian_error_state_noise;
+
+    predictedState->jacobianErrorStateNoise.resize(getDimensionErrorState(), getDimensionNoise());
+    //jacobian_error_state_noise.setZero();
+    predictedState->jacobianErrorStateNoise.reserve(getDimensionNoise());
+
+//predictedStateI=predictedState;
+//return 0;
+
+
+
+    // Fill
+    int dimension_noise_i=0;
+
+    std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
+
+
+    // bias linear acceleration
+    if(isEstimationBiasLinearAccelerationEnabled())
+    {
+        int dimension_error_state_i=0;
+
+        if(isEstimationPositionSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+        if(isEstimationAttitudeSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+
+        // Update jacobian
+        //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+        for(int i=0; i<3; i++)
+            tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
+
+
+
+        // Update dimension for next
+        dimension_noise_i+=3;
+    }
+
+    // bias angular velocity
+    if(isEstimationBiasAngularVelocityEnabled())
+    {
+        int dimension_error_state_i=0;
+
+        if(isEstimationPositionSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+        if(isEstimationAttitudeSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+        if(isEstimationBiasLinearAccelerationEnabled())
+            dimension_error_state_i+=3;
+
+        if(isEstimationScaleLinearAccelerationEnabled())
+            dimension_error_state_i+=3;
+
+        // Update jacobian
+        //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+        for(int i=0; i<3; i++)
+            tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
+
+        // Update dimension for next
+        dimension_noise_i+=3;
+    }
+
+
+
+    predictedState->jacobianErrorStateNoise.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
+
+
+//    {
+//        std::ostringstream logString;
+//        logString<<"jacobianErrorStateNoise imu:"<<std::endl;
+//        logString<<Eigen::MatrixXd(predictedState->jacobianErrorStateNoise)<<std::endl;
+//        this->log(logString.str());
+//    }
+
+
+    predictedStateI=predictedState;
 
 
     return 0;

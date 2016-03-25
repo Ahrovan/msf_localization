@@ -135,7 +135,7 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS roscpp cmake_modules pugixml)
+                COMPONENTS cmake_modules pugixml)
 
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
@@ -147,7 +147,7 @@ catkin_package(
         INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
         DEPENDS Boost Eigen
-        CATKIN_DEPENDS roscpp cmake_modules pugixml
+        CATKIN_DEPENDS pugixml
   )
 
 
@@ -164,8 +164,3 @@ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${Eigen_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-
-add_executable(${PROJECT_NAME}_test_buffer ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/test_ring_buffer.cpp)
-add_dependencies(${PROJECT_NAME}_test_buffer ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_test_buffer ${Boost_LIBRARIES})
-target_link_libraries(${PROJECT_NAME}_test_buffer ${catkin_LIBRARIES})

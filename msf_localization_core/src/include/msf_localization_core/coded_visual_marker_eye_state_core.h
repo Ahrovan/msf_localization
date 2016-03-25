@@ -17,7 +17,11 @@ class CodedVisualMarkerEyeStateCore : public SensorStateCore
 {
 public:
     CodedVisualMarkerEyeStateCore();
+    CodedVisualMarkerEyeStateCore(std::weak_ptr<const SensorCore> the_sensor_core_ptr);
     ~CodedVisualMarkerEyeStateCore();
+
+protected:
+    int init();
 
 
     ///// State if enabled (or Parameters if disabled)
@@ -34,10 +38,20 @@ public:
 public:
     struct
     {
-        Eigen::Matrix3d positionSensorWrtRobot;
-        Eigen::Matrix3d attitudeSensorWrtRobot;
-    } errorStateJacobian;
+        Eigen::Matrix3d position_sensor_wrt_robot_;
+        Eigen::Matrix3d attitude_sensor_wrt_robot_;
+    } error_state_jacobian_;
 
+    Eigen::SparseMatrix<double> jacobian_error_state_;
+
+
+
+public:
+    Eigen::SparseMatrix<double> jacobian_error_state_noise_;
+
+public:
+    Eigen::MatrixXd getJacobianErrorState();
+    Eigen::SparseMatrix<double> getJacobianErrorStateNoise(); //TODO
 
 
 public:

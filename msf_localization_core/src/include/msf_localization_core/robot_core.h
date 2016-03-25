@@ -31,6 +31,13 @@
 
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
+
+
+
+#include "msf_localization_core/time_stamp.h"
+
+//#include "msf_localization_core/robot_state_core.h"
 
 
 enum class RobotTypes
@@ -43,6 +50,9 @@ enum class RobotTypes
 
 
 class MsfStorageCore;
+class RobotStateCore;
+
+
 
 class RobotCore
 {
@@ -120,6 +130,21 @@ protected:
 public:
     Eigen::MatrixXd getInitErrorStateVariance() const;
 
+
+
+
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) =0;
+
+
+
+    // Prediction state function
+public:
+    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState) =0;
+
+    // Jacobian
+public:
+    virtual int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState) =0;
 
 
 

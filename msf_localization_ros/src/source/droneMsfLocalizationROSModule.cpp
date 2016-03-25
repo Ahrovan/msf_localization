@@ -76,7 +76,7 @@ int MsfLocalizationROS::readConfigFile()
 
     // Reading Configs
     // TODO
-    predictRateValue=10.0; // In Hz
+    predictRateValue=50.0; // In Hz
 
 
 
@@ -807,7 +807,7 @@ int MsfLocalizationROS::readArucoEyeConfig(pugi::xml_node sensor, unsigned int s
 
 
     // Set sensor type
-    TheRosArucoEyeInterface->setSensorType(SensorTypes::visual_marker_eye);
+    TheRosArucoEyeInterface->setSensorType(SensorTypes::coded_visual_marker_eye);
 
     // Set Id
     TheRosArucoEyeInterface->setSensorId(sensorId);
@@ -1531,7 +1531,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
             continue;
         }
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationROS::bufferManagerThreadFunction() updating TS: sec="<<OldestTimeStamp.sec<<" s; nsec="<<OldestTimeStamp.nsec<<" ns"<<std::endl;
@@ -1539,11 +1539,13 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         }
 #endif
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
+
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
         {
             this->log(this->TheMsfStorageCore->getDisplayOutdatedElements());
         }
 #endif
+
 
 //        // Get state estimation core associated to the oldest element on the buffer
 //        std::shared_ptr<StateEstimationCore> TheOutdatedElement;
@@ -1576,6 +1578,10 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 
         // Run predict and store updated predicted element
+
+        {
+            ros::Time begin = ros::Time::now();
+
         if(this->predict(OldestTimeStamp))
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
@@ -1588,6 +1594,12 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 #endif
             continue;
+        }
+
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> predict() time: "<<(ros::Time::now()-begin).toNSec()<<" ns"<<std::endl;
+            this->log(logString.str());
+
         }
 
 //        // Not needed, it should never happend
@@ -1643,6 +1655,9 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         int errorUpdate=0;
 //        try
 //        {
+        {
+            ros::Time begin = ros::Time::now();
+
             errorUpdate=this->update(OldestTimeStamp);
 //        }
 //        catch(...)
@@ -1650,6 +1665,10 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 //            std::cout<<"EXCEPTION ON UPDATE"<<std::endl;
 //        }
 
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> update() time: "<<(ros::Time::now()-begin).toNSec()<<" ns"<<std::endl;
+            this->log(logString.str());
+            }
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE

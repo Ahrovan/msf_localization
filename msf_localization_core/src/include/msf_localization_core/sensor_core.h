@@ -17,14 +17,18 @@
 
 #include <string>
 
+#include <mutex>
+
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 
 #include "msf_localization_core/sensor_basics.h"
 
 
 // For TimeStamp
+#include "msf_localization_core/time_stamp.h"
 
 
 
@@ -32,6 +36,7 @@
 
 
 class MsfStorageCore;
+class SensorStateCore;
 
 
 class SensorCore : public SensorBasics
@@ -169,8 +174,23 @@ public:
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:
-    virtual Eigen::MatrixXd getCovarianceMeasurement()=0;
-    virtual Eigen::MatrixXd getCovarianceParameters()=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
+
+
+
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const =0;
+
+
+
+    // Prediction state function
+public:
+    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState) =0;
+
+    // Jacobian of the error state
+public:
+    virtual int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState) =0;
 
 
 
@@ -180,6 +200,10 @@ protected:
     std::string logPath;
     std::ofstream logFile;
 
+protected:
+    std::mutex TheLogFileMutex;
+public:
+    int log(std::string logString);
 
 };
 

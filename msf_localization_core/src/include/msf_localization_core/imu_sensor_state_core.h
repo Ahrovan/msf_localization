@@ -80,6 +80,14 @@ public:
     } errorStateJacobian;
 
 
+public:
+    Eigen::SparseMatrix<double> jacobianErrorStateNoise;
+
+
+public:
+    Eigen::MatrixXd getJacobianErrorState();
+    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
+
 
 public:
     int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);

@@ -62,6 +62,49 @@ int FreeModelRobotCore::setNoiseAngularAcceleration(Eigen::Matrix3d noiseAngular
     return 0;
 }
 
+Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
+{
+    Eigen::SparseMatrix<double> covariance_noise;
+
+    // Resize
+    covariance_noise.resize(3+3,3+3);
+    //covariance_noise.setZero();
+    covariance_noise.reserve(3+3);
+
+    std::vector<Eigen::Triplet<double> > tripletList;
+
+    //
+    double dt=deltaTimeStamp.get_double();
+
+
+    // Fill
+    //covariance_noise.block<3,3>(0,0)=this->noiseLinearAcceleration*deltaTimeStamp.get_double();
+    for(int i=0; i<3; i++)
+        tripletList.push_back(Eigen::Triplet<double>(i,i,this->noiseLinearAcceleration(i,i)*dt));
+
+
+
+    //covariance_noise.block<3,3>(3,3)=this->noiseAngularAcceleration*deltaTimeStamp.get_double();
+    for(int i=0; i<3; i++)
+        tripletList.push_back(Eigen::Triplet<double>(3+i,3+i,this->noiseAngularAcceleration(i,i)*dt));
+
+
+    covariance_noise.setFromTriplets(tripletList.begin(), tripletList.end());
+
+
+//    {
+//        std::ostringstream logString;
+//        logString<<"covariance_noise"<<std::endl;
+//        logString<<covariance_noise<<std::endl;
+//        this->log(logString.str());
+//    }
+
+
+    // End
+    return covariance_noise;
+}
+
+
 int FreeModelRobotCore::setInitErrorStateVariancePosition(Eigen::Vector3d initVariance)
 {
     this->InitErrorStateVariance.block<3,3>(0,0)=initVariance.asDiagonal();
@@ -98,9 +141,15 @@ int FreeModelRobotCore::setInitErrorStateVarianceAngularAcceleration(Eigen::Vect
     return 0;
 }
 
-int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
+int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
 {
     //std::cout<<"FreeModelRobotCore::predictState"<<std::endl;
+
+    // Polymorph
+    std::shared_ptr<FreeModelRobotStateCore> pastState=std::static_pointer_cast<FreeModelRobotStateCore>(pastStateI);
+    std::shared_ptr<FreeModelRobotStateCore> predictedState=std::static_pointer_cast<FreeModelRobotStateCore>(predictedStateI);
+
+
 
     // Checks in the past state
     if(!pastState->getTheRobotCore())
@@ -181,7 +230,7 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
     // Unit quaternion -> Very needed!
     predictedState->attitude=predictedState->attitude/predictedState->attitude.norm();
-
+//std::cout<<"predictedState->attitude="<<predictedState->attitude.transpose()<<std::endl;
 
 
     /// Angular Velocity
@@ -192,20 +241,32 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
     /// Angular Acceleration
     predictedState->angular_acceleration=pastState->angular_acceleration;
-//std::cout<<"predictedState->angular_acceleration="<<predictedState->angular_acceleration<<std::endl;
+//std::cout<<"predictedState->angular_acceleration="<<predictedState->angular_acceleration.transpose()<<std::endl;
 
+
+    // Finish
+    predictedStateI=predictedState;
 
     return 0;
 }
 
 // Jacobian
-int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
+int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
 {
     //std::cout<<"FreeModelRobotCore::predictStateErrorStateJacobians"<<std::endl;
+
+
+    // Polymorph
+    std::shared_ptr<FreeModelRobotStateCore> pastState=std::static_pointer_cast<FreeModelRobotStateCore>(pastStateI);
+    std::shared_ptr<FreeModelRobotStateCore> predictedState=std::static_pointer_cast<FreeModelRobotStateCore>(predictedStateI);
+
+
+
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
+        std::cout<<"FreeModelRobotCore::predictStateErrorStateJacobians error en predictedState"<<std::endl;
         return 1;
     }
 
@@ -216,28 +277,44 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     double dt=DeltaTime.get_double();
 
 
-    // Jacobian
+    ///// Jacobian Error State
+
     // Jacobian Size
-    predictedState->errorStateJacobian.linear.resize(9, 9);
-    predictedState->errorStateJacobian.linear.setZero();
+
+    predictedState->errorStateJacobian.resize(18,18);
+    predictedState->errorStateJacobian.reserve(18+36);
+
+//    predictedState->errorStateJacobian.linear.resize(9, 9);
+//    predictedState->errorStateJacobian.linear.reserve(18);
+//    //predictedState->errorStateJacobian.linear.setZero();
 
 
-    predictedState->errorStateJacobian.angular.resize(9, 9);
-    predictedState->errorStateJacobian.angular.setZero();
+//    predictedState->errorStateJacobian.angular.resize(9, 9);
+//    predictedState->errorStateJacobian.linear.reserve(36);
+//    //predictedState->errorStateJacobian.angular.setZero();
 
 
 
     /// Jacobian of the error: Linear Part
+    std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
+    // posi / posi  
+    //predictedState->errorStateJacobian.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i,1));
 
-    // posi / posi
-    predictedState->errorStateJacobian.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
 
     // posi / vel
-    predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*dt;
+    //predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*dt;
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,3+i,dt));
+
 
     // posi / acc
-    predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+    //predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+    double dt2=pow(dt,2);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,dt2));
 
 
 
@@ -245,10 +322,15 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // zero
 
     // vel / vel
-    predictedState->errorStateJacobian.linear.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    //predictedState->errorStateJacobian.linear.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,3+i,1));
+
 
     // vel / acc
-    predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    //predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,6+i,dt));
 
 
 
@@ -259,7 +341,11 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // zero
 
     // acc / acc
-    predictedState->errorStateJacobian.linear.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    //predictedState->errorStateJacobian.linear.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(6+i,6+i,1));
+
+
 
 
 
@@ -300,30 +386,51 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     //std::cout<<"quat_for_second_order_correction="<<quat_for_second_order_correction<<std::endl;
 
 
-    // att / att
-    predictedState->errorStateJacobian.angular.block<3,3>(0,0)=mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+pow(dt,2)/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
+    // att / att [9 non-zero]
+    Eigen::Matrix3d jacobianAttAtt=mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+pow(dt,2)/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
+    //predictedState->errorStateJacobian.angular.block<3,3>(0,0)=jacobianAttAtt;
+    //predictedState->errorStateJacobian.angular=jacobianAttAtt.sparseView();
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+            tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+j,jacobianAttAtt(i,j)));
 
 
-    // att / ang_vel
+
+    // att / ang_vel [9 non-zero]
     // TODO fix
-    predictedState->errorStateJacobian.angular.block<3,3>(0,3)=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + pow(dt,2)/24*mat_aux_j2);
+    Eigen::Matrix3d jacobianAttAngVel=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + pow(dt,2)/24*mat_aux_j2);
+    //predictedState->errorStateJacobian.angular.block<3,3>(0,3)=jacobianAttAngVel;
+    //predictedState->errorStateJacobian.angular=jacobianAttAngVel.sparseView();
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+            tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+3+j,jacobianAttAngVel(i,j)));
 
 
-    // att / ang_accel
+    // att / ang_accel [9 non-zero]
     // TODO
-    predictedState->errorStateJacobian.angular.block<3,3>(0,6)=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*pow(dt,2) + pow(dt,2)/24*mat_aux_j3);
+    Eigen::Matrix3d jacobianAttAngAcc=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*pow(dt,2) + pow(dt,2)/24*mat_aux_j3);
+    //predictedState->errorStateJacobian.angular.block<3,3>(0,6)=jacobianAttAngVel;
+    //predictedState->errorStateJacobian.angular=jacobianAttAngAcc.sparseView();
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+            tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+6+j,jacobianAttAngAcc(i,j)));
 
 
 
     // ang_vel / att
     // zero
 
-    // ang_vel / ang_vel
-    predictedState->errorStateJacobian.angular.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    // ang_vel / ang_vel [3 non-zero]
+    //predictedState->errorStateJacobian.angular.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+3+i,1));
 
-    // ang_vel / ang_acc
-    predictedState->errorStateJacobian.angular.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
 
+
+    // ang_vel / ang_acc [3 non-zero]
+    //predictedState->errorStateJacobian.angular.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+6+i,dt));
 
 
     // ang_acc / att
@@ -332,9 +439,45 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // ang_acc / ang_vel
     // zero
 
-    // ang_acc / ang_acc
-    predictedState->errorStateJacobian.angular.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    // ang_acc / ang_acc [3 non-zero]
+    //predictedState->errorStateJacobian.angular.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+6+i,9+6+i,1));
 
+
+
+    predictedState->errorStateJacobian.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+
+
+
+
+    ///// Jacobian Error State Noise
+
+    // Jacobian Size
+
+
+    predictedState->errorStateNoiseJacobian.resize(dimensionErrorState,3+3);
+    predictedState->errorStateNoiseJacobian.reserve(3+3);
+
+
+    std::vector<Eigen::Triplet<double> > tripletListNoiseJacobian;
+
+
+
+    // Fill
+
+    //jacobian_error_state_noise.block<3,3>(6,0)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(6+i,i,1));
+
+
+    //jacobian_error_state_noise.block<3,3>(15,3)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(9+6+i,3+i,1));
+
+
+
+    predictedState->errorStateNoiseJacobian.setFromTriplets(tripletListNoiseJacobian.begin(), tripletListNoiseJacobian.end());
 
 
 
@@ -342,14 +485,17 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     {
         std::ostringstream logString;
         logString<<"FreeModelRobotCore::predictStateErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
-        logString<<"Jacobian Linear"<<std::endl;
-        logString<<predictedState->errorStateJacobian.linear<<std::endl;
-        logString<<"Jacobian Angular"<<std::endl;
-        logString<<predictedState->errorStateJacobian.angular<<std::endl;
+        logString<<"Jacobian Error State"<<std::endl;
+        logString<<Eigen::MatrixXd(predictedState->errorStateJacobian)<<std::endl;
+        logString<<"Jacobian Error State Noise"<<std::endl;
+        logString<<Eigen::MatrixXd(predictedState->errorStateNoiseJacobian)<<std::endl;
         this->log(logString.str());
     }
 #endif
 
+
+    // Finish
+    predictedStateI=predictedState;
 
 
 

@@ -5,6 +5,9 @@
 
 #include "msf_localization_core/robot_core.h"
 
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
 
 class RobotStateCore
 {
@@ -34,6 +37,10 @@ protected:
 protected:
     // TODO predictState()
 
+
+public:
+    virtual Eigen::SparseMatrix<double> getJacobianErrorState()=0;
+    virtual Eigen::SparseMatrix<double> getJacobianErrorStateNoise()=0;
 
 
 public:

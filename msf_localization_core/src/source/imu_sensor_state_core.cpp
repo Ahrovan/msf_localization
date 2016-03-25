@@ -67,6 +67,147 @@ int ImuSensorStateCore::setScaleLinearAcceleration(Eigen::Vector3d scaleLinearAc
     return 0;
 }
 
+Eigen::MatrixXd ImuSensorStateCore::getJacobianErrorState()
+{
+    Eigen::MatrixXd jacobian_error_state;
+
+    std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCoreShared());
+
+    // Resize the jacobian
+    int dimension_error_state=the_imu_sensor_core->getDimensionErrorState();
+
+    jacobian_error_state.resize(dimension_error_state, dimension_error_state);
+    jacobian_error_state.setZero();
+
+
+    // Fill
+    int dimension_error_state_i=0;
+
+    // Position sensor wrt robot
+    if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        // Update jacobian
+        jacobian_error_state.block<3,3>(dimension_error_state_i, dimension_error_state_i)=errorStateJacobian.positionSensorWrtRobot;
+
+        // Update dimension for next
+        dimension_error_state_i+=3;
+    }
+
+    // Attitude sensor wrt robot
+    if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        // Update jacobian
+        jacobian_error_state.block<3,3>(dimension_error_state_i, dimension_error_state_i)=errorStateJacobian.attitudeSensorWrtRobot;
+
+        // Update dimension for next
+        dimension_error_state_i+=3;
+    }
+
+    // bias linear acceleration
+    if(the_imu_sensor_core->isEstimationBiasLinearAccelerationEnabled())
+    {
+        // Update jacobian
+        jacobian_error_state.block<3,3>(dimension_error_state_i, dimension_error_state_i)=errorStateJacobian.biasesLinearAcceleration;
+
+        // Update dimension for next
+        dimension_error_state_i+=3;
+    }
+
+    // Ka
+    // TODO
+
+    // bias angular velocity
+    if(the_imu_sensor_core->isEstimationBiasAngularVelocityEnabled())
+    {
+        // Update jacobian
+        jacobian_error_state.block<3,3>(dimension_error_state_i, dimension_error_state_i)=errorStateJacobian.biasesAngularVelocity;
+
+        // Update dimension for next
+        dimension_error_state_i+=3;
+    }
+
+    // Kw
+    // TODO
+
+
+    // End
+    return jacobian_error_state;
+}
+
+
+Eigen::SparseMatrix<double> ImuSensorStateCore::getJacobianErrorStateNoise()
+{
+    return jacobianErrorStateNoise;
+
+    /*
+
+    Eigen::MatrixXd jacobian_error_state_noise;
+
+    std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCoreShared());
+
+    // Resize the jacobian
+    int dimension_error_state=the_imu_sensor_core->getDimensionErrorState();
+    int dimension_noise=the_imu_sensor_core->getDimensionNoise();
+
+    jacobian_error_state_noise.resize(dimension_error_state, dimension_noise);
+    jacobian_error_state_noise.setZero();
+
+
+    // Fill
+    int dimension_noise_i=0;
+
+
+    // bias linear acceleration
+    if(the_imu_sensor_core->isEstimationBiasLinearAccelerationEnabled())
+    {
+        int dimension_error_state_i=0;
+
+        if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+        if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+
+        // Update jacobian
+        jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+
+        // Update dimension for next
+        dimension_noise_i+=3;
+    }
+
+    // bias angular velocity
+    if(the_imu_sensor_core->isEstimationBiasAngularVelocityEnabled())
+    {
+        int dimension_error_state_i=0;
+
+        if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+        if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            dimension_error_state_i+=3;
+
+        if(the_imu_sensor_core->isEstimationBiasLinearAccelerationEnabled())
+            dimension_error_state_i+=3;
+
+        if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
+            dimension_error_state_i+=3;
+
+        // Update jacobian
+        jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+
+        // Update dimension for next
+        dimension_noise_i+=3;
+    }
+
+
+    // End
+    return jacobian_error_state_noise;
+
+    */
+
+}
+
 int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
 {
     unsigned int dimension=0;

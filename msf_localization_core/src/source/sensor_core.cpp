@@ -285,3 +285,19 @@ int SensorCore::prepareInitErrorStateVariance()
     this->InitErrorStateVariance.setZero();
     return 0;
 }
+
+
+int SensorCore::log(std::string logString)
+{
+
+    // Lock mutex
+    TheLogFileMutex.lock();
+
+    // Write in file
+    logFile<<logString;
+
+    // Unlock mutex
+    TheLogFileMutex.unlock();
+
+    return 0;
+}
