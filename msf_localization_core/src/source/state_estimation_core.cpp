@@ -93,7 +93,12 @@ int StateEstimationCore::getDimensionErrorState() const
     }
 
     // Map
-    // TODO
+    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+        itMapElement!=TheListMapElementStateCore.end();
+        ++itMapElement)
+    {
+        dimensionErrorState+=(*itMapElement)->getTheMapElementCore()->getDimensionErrorState();
+    }
 
 
     // end
@@ -103,6 +108,8 @@ int StateEstimationCore::getDimensionErrorState() const
 
 int StateEstimationCore::prepareInitErrorStateVariance()
 {
+    //std::cout<<"StateEstimationCore::prepareInitErrorStateVariance()"<<std::endl;
+
     // Dimension
     int dimensionErrorState=this->getDimensionErrorState();
 
@@ -146,6 +153,8 @@ int StateEstimationCore::prepareInitErrorStateVariance()
         pointCovMatrix+=dimensionMapElement;
     }
 
+
+    //std::cout<<"StateEstimationCore::prepareInitErrorStateVariance() ended"<<std::endl;
 
     // End
     return 0;
