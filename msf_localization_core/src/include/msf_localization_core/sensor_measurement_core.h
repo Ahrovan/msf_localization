@@ -64,6 +64,11 @@ public:
 
 
 
+    //// Get the innovation vector as an Eigen::VectorXd
+public:
+    virtual Eigen::VectorXd getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurement, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurement)=0;
+
+
     //// Get the full measurement as an Eigen::VectorXd
 public:
     virtual Eigen::VectorXd getMeasurement()=0;

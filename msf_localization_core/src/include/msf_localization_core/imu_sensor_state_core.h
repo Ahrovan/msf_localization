@@ -80,6 +80,11 @@ public:
     } errorStateJacobian;
 
 
+    // TODO
+//public:
+//    Eigen::SparseMatrix<double> jacobianErrorState;
+
+
 public:
     Eigen::SparseMatrix<double> jacobianErrorStateNoise;
 

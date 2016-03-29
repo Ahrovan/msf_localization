@@ -102,6 +102,13 @@ public:
     unsigned int getDimensionMeasurement() const;
 
 
+    // Dimension of the error measurement
+protected:
+    unsigned int dimensionErrorMeasurement;
+public:
+    unsigned int getDimensionErrorMeasurement() const;
+
+
     // Dimension of the sensor noise
 protected:
     unsigned int dimensionNoise;

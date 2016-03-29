@@ -225,11 +225,12 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
     //std::cout<<"quat_perturbation="<<quat_perturbation<<std::endl;
 
-    predictedState->attitude=Quaternion::cross(quat_perturbation, pastState->attitude);
+    Eigen::Vector4d predictedAttitude=Quaternion::cross(quat_perturbation, pastState->attitude);
 
 
     // Unit quaternion -> Very needed!
-    predictedState->attitude=predictedState->attitude/predictedState->attitude.norm();
+
+    predictedState->attitude=predictedAttitude/predictedAttitude.norm();
 //std::cout<<"predictedState->attitude="<<predictedState->attitude.transpose()<<std::endl;
 
 

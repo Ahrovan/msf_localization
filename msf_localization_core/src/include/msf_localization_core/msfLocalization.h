@@ -85,6 +85,9 @@
 #include "msf_localization_core/global_parameters_core.h"
 
 #include "msf_localization_core/map_element_core.h"
+#include "msf_localization_core/coded_visual_marker_landmark_core.h"
+
+#include "msf_localization_core/coded_visual_marker_landmark_state_core.h"
 
 
 

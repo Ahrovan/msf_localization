@@ -142,7 +142,7 @@ protected:
     int readArucoEyeConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosArucoEyeInterface>& TheRosArucoEyeInterface, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
 
 protected:
-    //int read
+    int readCodedVisualMarkerConfig(pugi::xml_node map_element, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<CodedVisualMarkerLandmarkCore>& TheMapElementCore, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& InitStateCore);
 
 
 

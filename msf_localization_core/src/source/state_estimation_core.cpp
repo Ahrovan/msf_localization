@@ -137,7 +137,14 @@ int StateEstimationCore::prepareInitErrorStateVariance()
 
 
     // Map
-    // TODO
+    for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itLisMapElementState=TheListMapElementStateCore.begin();
+        itLisMapElementState!=TheListMapElementStateCore.end();
+        ++itLisMapElementState)
+    {
+        int dimensionMapElement=(*itLisMapElementState)->getTheMapElementCore()->getDimensionErrorState();
+        covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionMapElement, dimensionMapElement)=(*itLisMapElementState)->getTheMapElementCore()->getInitCovarianceErrorState();
+        pointCovMatrix+=dimensionMapElement;
+    }
 
 
     // End

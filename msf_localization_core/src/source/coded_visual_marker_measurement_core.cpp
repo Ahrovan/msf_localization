@@ -93,6 +93,45 @@ Eigen::Vector4d CodedVisualMarkerMeasurementCore::getVisualMarkerAttitude() cons
     return this->attitude_;
 }
 
+Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
+{
+    // Create the Measurement
+    Eigen::VectorXd the_innovation;
+    the_innovation.resize(this->getTheSensorCore()->getDimensionErrorMeasurement(), 1);
+    the_innovation.setZero();
+
+    // Check
+    if(theMatchedMeasurementI->getTheSensorCore() != thePredictedMeasurementI->getTheSensorCore())
+    {
+        std::cout<<"CodedVisualMarkerMeasurementCore::getInnovation() error"<<std::endl;
+    }
+
+    // Cast
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(theMatchedMeasurementI->getTheSensorCore());
+
+    // Cast
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> theMatchedMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(theMatchedMeasurementI);
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> thePredictedMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(thePredictedMeasurementI);
+
+    // Fill
+    unsigned int dimension=0;
+    if(the_visual_marker_eye_core->isMeasurementPositionEnabled())
+    {
+        the_innovation.block<3,1>(dimension,0)=theMatchedMeasurement->position_-thePredictedMeasurement->position_;
+        dimension+=3;
+    }
+    if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
+    {
+        Eigen::Vector4d quat_innov_attitude=Quaternion::cross(Quaternion::inv(thePredictedMeasurement->attitude_), theMatchedMeasurement->attitude_);
+
+        the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
+        dimension+=3;
+    }
+
+
+    return the_innovation;
+}
+
 
 Eigen::VectorXd CodedVisualMarkerMeasurementCore::getMeasurement()
 {
@@ -116,4 +155,6 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getMeasurement()
         the_measurement.block<4,1>(dimension,0)=attitude_;
         dimension+=4;
     }
+
+    return the_measurement;
 }

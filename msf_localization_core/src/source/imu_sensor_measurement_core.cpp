@@ -90,6 +90,26 @@ Eigen::Vector3d ImuSensorMeasurementCore::getLinearAcceleration() const
     return this->LinearAcceleration;
 }
 
+Eigen::VectorXd ImuSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
+{
+    // Create the Measurement
+    Eigen::VectorXd TheInnovation;
+    TheInnovation.resize(this->getTheSensorCore()->getDimensionErrorMeasurement(), 1);
+    TheInnovation.setZero();
+
+    // Check
+    if(theMatchedMeasurementI->getTheSensorCore() != thePredictedMeasurementI->getTheSensorCore())
+    {
+        std::cout<<"CodedVisualMarkerMeasurementCore::getInnovation() error"<<std::endl;
+    }
+
+
+    // TODO Improve!
+    TheInnovation=theMatchedMeasurementI->getMeasurement()-thePredictedMeasurementI->getMeasurement();
+
+
+    return TheInnovation;
+}
 
 Eigen::VectorXd ImuSensorMeasurementCore::getMeasurement()
 {

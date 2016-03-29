@@ -6,7 +6,7 @@ MapElementStateCore::MapElementStateCore()
     return;
 }
 
-MapElementStateCore::MapElementStateCore(std::weak_ptr<const MapElementCore> the_map_element_core_ptr) :
+MapElementStateCore::MapElementStateCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr) :
     MapElementStateCore()
 {
     // set the core
@@ -21,25 +21,25 @@ MapElementStateCore::~MapElementStateCore()
 }
 
 
-int MapElementStateCore::setTheMapElementCore(std::weak_ptr<const MapElementCore> the_map_element_core_ptr)
+int MapElementStateCore::setTheMapElementCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr)
 {
     this->the_map_element_core_ptr_=the_map_element_core_ptr;
     return 0;
 }
 
-std::shared_ptr<const MapElementCore> MapElementStateCore::getTheMapElementCore() const
+std::shared_ptr<MapElementCore> MapElementStateCore::getTheMapElementCore() const
 {
-    std::shared_ptr<const MapElementCore> the_map_element_core_ptr=this->the_map_element_core_ptr_.lock();
+    std::shared_ptr<MapElementCore> the_map_element_core_ptr=this->the_map_element_core_ptr_.lock();
     return the_map_element_core_ptr;
 }
 
-std::shared_ptr<const MapElementCore> MapElementStateCore::getTheMapElementCoreShared() const
+std::shared_ptr<MapElementCore> MapElementStateCore::getTheMapElementCoreShared() const
 {
-    std::shared_ptr<const MapElementCore> the_map_element_core_ptr=this->the_map_element_core_ptr_.lock();
+    std::shared_ptr<MapElementCore> the_map_element_core_ptr=this->the_map_element_core_ptr_.lock();
     return the_map_element_core_ptr;
 }
 
-std::weak_ptr<const MapElementCore> MapElementStateCore::getTheMapElementCoreWeak() const
+std::weak_ptr<MapElementCore> MapElementStateCore::getTheMapElementCoreWeak() const
 {
     return this->the_map_element_core_ptr_;
 }

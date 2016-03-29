@@ -27,18 +27,74 @@ public:
     ~CodedVisualMarkerLandmarkCore();
 
 
-
-    ///// Prediction Noises
-
-
+protected:
+    int init();
 
 
 
-    ////// Init error state variances -> Temporal, only for the initial configuration
+    ///// Id
+protected:
+    int id_;
+public:
+    int getId() const;
+    int setId(int id);
+
+
+    ///// State if enabled (or Parameters if disabled)
+
+    // State: x_map=[t_land_wrt_world, q_land_wrt_world]'
+
+
+    // Position Visual Marker Wrt World 3x1
+protected:
+    bool flag_estimation_position_visual_marker_wrt_world;
+public:
+    bool isEstimationPositionVisualMarkerWrtWorldEnabled();
+    int enableEstimationPositionVisualMarkerWrtWorld();
+    int enableParameterPositionVisualMarkerWrtWorld();
+
+
+    // Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
+protected:
+    Eigen::Matrix3d covariancePositionVisualMarkerWrtWorld;
+public:
+    Eigen::Matrix3d getCovariancePositionVisualMarkerWrtWorld() const;
+    int setCovariancePositionVisualMarkerWrtWorld(Eigen::Matrix3d covariancePositionVisualMarkerWrtWorld);
+
+
+
+    // Attitude Visual Marker Wrt World 4x1 [3x1]
+protected:
+    bool flag_estimation_attitude_visual_marker_wrt_world;
+public:
+    bool isEstimationAttitudeVisualMarkerWrtWorldEnabled();
+    int enableEstimationAttitudeVisualMarkerWrtWorld();
+    int enableParameterAttitudeVisualMarkerWrtWorld();
+
+
+    // Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
+protected:
+    Eigen::Matrix3d covarianceAttitudeVisualMarkerWrtWorld;
+public:
+    Eigen::Matrix3d getCovarianceAttitudeVisualMarkerWrtWorld() const;
+    int setCovarianceAttitudeVisualMarkerWrtWorld(Eigen::Matrix3d covarianceAttitudeVisualMarkerWrtWorld);
+
+
+
+
+    ////// Init error state covariances -> Temporal, only for the initial configuration
+public:
+    Eigen::MatrixXd getInitCovarianceErrorState();
+
+
+    ///// Get Covariances as a Eigen::MatrixXd
+public:
+    Eigen::SparseMatrix<double> getCovarianceMeasurement();
+    Eigen::SparseMatrix<double> getCovarianceParameters();
 
 public:
-    int setInitErrorStateVariancePosition(Eigen::Vector3d initVariance);
-    int setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance);
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
+
 
 
 
@@ -50,14 +106,24 @@ public:
 
     // Prediction state function
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState);
+    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
 
     // Jacobian
 public:
-    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState);
+    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
 
 
+    /*
+    // Prediction measurements
+public:
+    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
+
+    // Jacobian of the measurements
+public:
+    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+
+    */
 
 };
 

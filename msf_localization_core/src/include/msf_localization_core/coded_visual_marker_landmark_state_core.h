@@ -22,7 +22,7 @@ class CodedVisualMarkerLandmarkStateCore : public MapElementStateCore
 {
 public:
     CodedVisualMarkerLandmarkStateCore();
-    CodedVisualMarkerLandmarkStateCore(std::weak_ptr<const MapElementCore> the_map_element_core_pt);
+    CodedVisualMarkerLandmarkStateCore(std::weak_ptr<MapElementCore> the_map_element_core_pt);
     ~CodedVisualMarkerLandmarkStateCore();
 
 protected:
@@ -49,19 +49,18 @@ public:
 
 
 
-    // Error State Jacobians (6 x 6)
+    // Jacobians Error State (6 x 6) -> 6 non-zero elements
 public:
-    struct
-    {
-        // Fx_robot linear (3 x 3)
-        Eigen::MatrixXd linear;
+    Eigen::SparseMatrix<double>  jacobian_error_state_;
 
-        // Fx_robot angular (3 x 3)
-        Eigen::MatrixXd angular;
-    } error_state_jacobian_;
+    // Jacobian Error State Noise (0x0)
+public:
+    Eigen::SparseMatrix<double> jacobian_error_state_noise_;
 
 
-
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorState();
+    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
 public:

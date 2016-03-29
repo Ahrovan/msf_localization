@@ -31,6 +31,11 @@
 
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
+
+
+#include "msf_localization_core/time_stamp.h"
+
 
 
 
@@ -44,6 +49,8 @@ enum class MapElementTypes
 
 
 class MsfStorageCore;
+class MapElementStateCore;
+
 
 class MapElementCore
 {
@@ -118,10 +125,42 @@ public:
 
 
     ////// Init error state variances -> Temporal, only for the initial configuration
-protected:
-    Eigen::MatrixXd InitErrorStateVariance;
+//protected:
+//    Eigen::MatrixXd InitErrorStateVariance;
+//public:
+//    Eigen::MatrixXd getInitErrorStateVariance() const;
+//public:
+//    virtual int prepareInitErrorStateVariance()=0;
+
 public:
-    Eigen::MatrixXd getInitErrorStateVariance() const;
+    virtual Eigen::MatrixXd getInitCovarianceErrorState()=0;
+
+
+
+
+    ///// Get Covariances as a Eigen::MatrixXd
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
+
+
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const=0;
+
+
+
+
+
+
+    ///// Predict functions
+
+    // Prediction state function
+public:
+    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
+
+    // Jacobian
+public:
+    virtual int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
 
 
 

@@ -30,6 +30,10 @@
 #include "msf_localization_core/global_parameters_core.h"
 #include "msf_localization_core/global_parameters_state_core.h"
 
+// Map
+#include "msf_localization_core/coded_visual_marker_landmark_core.h"
+#include "msf_localization_core/coded_visual_marker_landmark_state_core.h"
+
 
 
 
@@ -131,14 +135,15 @@ public:
 
 
 
+
     // Prediction measurements
 public:
-    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+    int predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
 
     // Jacobian of the measurements
 public:
-    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+    int jacobiansMeasurements(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
 
 

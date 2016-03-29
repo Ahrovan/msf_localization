@@ -10,7 +10,7 @@ CodedVisualMarkerLandmarkStateCore::CodedVisualMarkerLandmarkStateCore() :
     return;
 }
 
-CodedVisualMarkerLandmarkStateCore::CodedVisualMarkerLandmarkStateCore(std::weak_ptr<const MapElementCore> the_map_element_core_pt) :
+CodedVisualMarkerLandmarkStateCore::CodedVisualMarkerLandmarkStateCore(std::weak_ptr<MapElementCore> the_map_element_core_pt) :
     MapElementStateCore(the_map_element_core_pt)
 {
     init();
@@ -49,6 +49,16 @@ int CodedVisualMarkerLandmarkStateCore::setAttitude(Eigen::Vector4d attitude)
 {
     this->attitude_=attitude;
     return 0;
+}
+
+Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkStateCore::getJacobianErrorState()
+{
+    return this->jacobian_error_state_;
+}
+
+Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkStateCore::getJacobianErrorStateNoise()
+{
+    return this->jacobian_error_state_noise_;
 }
 
 int CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)

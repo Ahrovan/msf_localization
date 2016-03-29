@@ -202,9 +202,40 @@ int MsfLocalizationROS::readConfigFile()
 
     ///// Map elements
 
-    // TODO
+
+    // Reading map elements
+    for(pugi::xml_node map_element = msf_localization.child("map_element"); map_element; map_element = map_element.next_sibling("map_element"))
+    {
+        std::cout<<"map_element; "<<std::endl;
+
+        // Sensor Type
+        std::string mapElementType=map_element.child_value("type");
 
 
+        // Coded visual marker
+        if(mapElementType=="coded_visual_marker")
+        {
+            // Create a class for the SensoreCore
+            std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<CodedVisualMarkerLandmarkStateCore> MapElementInitStateCore;
+
+            // Read configs
+            if(readCodedVisualMarkerConfig(map_element, TheMsfStorageCore, TheMapElementCore, MapElementInitStateCore))
+                return -2;
+
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfMapElementCore.push_back(TheMapElementCore);
+
+            // Push the init state of the sensor
+            InitialState->TheListMapElementStateCore.push_back(MapElementInitStateCore);
+        }
+
+
+    }
 
 
     //// Finish
@@ -971,6 +1002,137 @@ int MsfLocalizationROS::readArucoEyeConfig(pugi::xml_node sensor, unsigned int s
 }
 
 
+int MsfLocalizationROS::readCodedVisualMarkerConfig(pugi::xml_node map_element, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<CodedVisualMarkerLandmarkCore>& TheMapElementCore, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore)
+{
+    // Create a class for the SensoreCore
+    if(!TheMapElementCore)
+        TheMapElementCore=std::make_shared<CodedVisualMarkerLandmarkCore>();
+
+    // Set pointer to the SensorCore
+    TheMapElementCore->setTheMapElementCore(TheMapElementCore);
+
+    // Create a class for the SensorStateCore
+    if(!MapElementInitStateCore)
+        MapElementInitStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>();
+
+    // Set pointer to the SensorCore
+    MapElementInitStateCore->setTheMapElementCore(TheMapElementCore);
+
+
+    // Set sensor type
+    TheMapElementCore->setMapElementType(MapElementTypes::coded_visual_marker);
+
+
+    // Set the access to the Storage core
+    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
+    TheMapElementCore->setTheMsfStorageCore(TheMsfStorageCore);
+
+
+    // Visual landmark
+    pugi::xml_node visual_landmark=map_element.child("visual_landmark");
+
+
+    // Auxiliar reading value
+    std::string readingValue;
+
+
+    /// id
+    std::string idString=visual_landmark.child_value("id");
+    TheMapElementCore->setId(std::stoi(idString));
+
+
+    /// Name
+    TheMapElementCore->setMapElementName("aruco_marker_"+idString);
+
+
+    //// Configs
+
+    /// Pose of the map element wrt worl
+    pugi::xml_node pose_in_world=visual_landmark.child("pose_in_world");
+
+    // Position of the sensor wrt robot
+    readingValue=pose_in_world.child("position").child_value("enabled");
+    if(std::stoi(readingValue))
+        TheMapElementCore->enableEstimationPositionVisualMarkerWrtWorld();
+
+    // Attitude of the sensor wrt robot
+    readingValue=pose_in_world.child("attitude").child_value("enabled");
+    if(std::stoi(readingValue))
+        TheMapElementCore->enableEstimationAttitudeVisualMarkerWrtWorld();
+
+
+
+    //// Init State
+
+    /// Pose of the visual marker wrt world
+
+    // Position of the visual marker wrt world
+    readingValue=pose_in_world.child("position").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d init_estimation;
+        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
+        MapElementInitStateCore->setPosition(init_estimation);
+    }
+
+    // Attitude of the visual marker wrt world
+    readingValue=pose_in_world.child("attitude").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector4d init_estimation;
+        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
+        MapElementInitStateCore->setAttitude(init_estimation);
+    }
+
+
+    /// Parameters
+
+    // None
+
+
+    //// Init Variances
+
+
+    /// Pose of the visual marker wrt world
+
+    // Position of the visual marker wrt world
+    readingValue=pose_in_world.child("position").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheMapElementCore->setCovariancePositionVisualMarkerWrtWorld(variance.asDiagonal());
+    }
+
+
+    // Attitude of the visual marker wrt world
+    readingValue=pose_in_world.child("attitude").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheMapElementCore->setCovarianceAttitudeVisualMarkerWrtWorld(variance.asDiagonal());
+    }
+
+
+
+    /// Other Parameters
+
+    // None
+
+
+    // Noises in the estimation (if enabled)
+
+    // None
+
+
+    /// Finish
+
+
+    // End
+    return 0;
+}
+
 
 
 int MsfLocalizationROS::readParameters()
@@ -1312,6 +1474,36 @@ try
             tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
                                                   this->TheRobotCore->getRobotName(), (*itSensorState)->getTheSensorCore()->getSensorName()));
 
+        }
+
+
+        // TF Map elements
+        for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElementState=PredictedState->TheListMapElementStateCore.begin();
+            itMapElementState!=PredictedState->TheListMapElementStateCore.end();
+            ++itMapElementState)
+        {
+
+            switch((*itMapElementState)->getTheMapElementCore()->getMapElementType())
+            {
+                case MapElementTypes::coded_visual_marker:
+                {
+                    // Cast
+                    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*itMapElementState);
+
+                    Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPosition();
+                    Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitude();
+
+                    tf::Quaternion tf_rot(mapElementAttitude[1], mapElementAttitude[2], mapElementAttitude[3], mapElementAttitude[0]);
+                    tf::Vector3 tf_tran(mapElementPosition[0], mapElementPosition[1], mapElementPosition[2]);
+
+                    tf::Transform transform(tf_rot, tf_tran);
+
+
+                    tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
+                                                          this->TheGlobalParametersCore->getWorldName(), (*itMapElementState)->getTheMapElementCore()->getMapElementName()));
+
+                }
+            }
         }
 
 

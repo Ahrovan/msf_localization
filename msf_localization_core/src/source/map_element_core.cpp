@@ -164,12 +164,6 @@ std::shared_ptr<MsfStorageCore> MapElementCore::getTheMsfStorageCore() const
 }
 
 
-Eigen::MatrixXd MapElementCore::getInitErrorStateVariance() const
-{
-    return this->InitErrorStateVariance;
-}
-
-
 int MapElementCore::log(std::string logString)
 {
     // Lock mutex

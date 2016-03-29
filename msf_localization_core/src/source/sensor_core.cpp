@@ -14,6 +14,7 @@ SensorCore::SensorCore() :
     dimensionParameters(4+3),
     dimensionErrorParameters(3+3),
     dimensionMeasurement(0),
+    dimensionErrorMeasurement(0),
     dimensionNoise(0)
 {
 
@@ -146,6 +147,11 @@ unsigned int SensorCore::getDimensionErrorParameters() const
 unsigned int SensorCore::getDimensionMeasurement() const
 {
     return this->dimensionMeasurement;
+}
+
+unsigned int SensorCore::getDimensionErrorMeasurement() const
+{
+    return this->dimensionErrorMeasurement;
 }
 
 unsigned int SensorCore::getDimensionNoise() const

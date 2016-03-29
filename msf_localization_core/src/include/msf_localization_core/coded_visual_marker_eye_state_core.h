@@ -27,7 +27,7 @@ protected:
     ///// State if enabled (or Parameters if disabled)
 
     // if enabled
-    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot]'
+    // State: x_sen=[t_sens_wrt_robot, q_sens_wrt_robot]'
 
 
 
@@ -42,7 +42,9 @@ public:
         Eigen::Matrix3d attitude_sensor_wrt_robot_;
     } error_state_jacobian_;
 
-    Eigen::SparseMatrix<double> jacobian_error_state_;
+    // TODO
+//public:
+    //Eigen::SparseMatrix<double> jacobian_error_state_;
 
 
 
@@ -51,7 +53,7 @@ public:
 
 public:
     Eigen::MatrixXd getJacobianErrorState();
-    Eigen::SparseMatrix<double> getJacobianErrorStateNoise(); //TODO
+    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
 public:
