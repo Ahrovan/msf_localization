@@ -115,6 +115,7 @@ public:
 
 
 #define _DEBUG_MSF_LOCALIZATION_CORE 0
+#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 0
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 
 
@@ -246,6 +247,8 @@ public:
     // Helper functions
 protected:
     int findSensorStateCoreFromList(std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore, std::shared_ptr<SensorCore> TheSensorCore, std::shared_ptr<SensorStateCore>& TheSensorStateCore);
+
+    int findMapElementStateCoreFromList(std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurementCore, std::shared_ptr<MapElementStateCore>& TheMapElementStateCore);
 
 
     // Helper functions

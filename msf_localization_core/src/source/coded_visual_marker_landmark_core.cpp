@@ -160,6 +160,7 @@ Eigen::MatrixXd CodedVisualMarkerLandmarkCore::getInitCovarianceErrorState()
     return covariance;
 }
 
+/*
 Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceMeasurement()
 {
     Eigen::SparseMatrix<double> covariance;
@@ -167,6 +168,7 @@ Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceMeasurem
 
     return covariance;
 }
+*/
 
 Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceParameters()
 {

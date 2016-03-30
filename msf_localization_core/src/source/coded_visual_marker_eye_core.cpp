@@ -395,22 +395,188 @@ int CodedVisualMarkerEyeCore::predictStateErrorStateJacobians(const TimeStamp pr
 }
 
 
-int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorStateI, const std::shared_ptr<MapElementStateCore> currentMapElementStateI, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
 {
+#if _DEBUG_SENSOR_CORE
+    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+#endif
+
+    // Check
+    if(!this->getTheSensorCore())
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 50"<<std::endl;
+        return 50;
+    }
+
+    // Check global parameters
+    if(!TheGlobalParametersStateCore)
+        return 1;
+
+    if(!TheGlobalParametersStateCore->getTheGlobalParametersCore())
+        return 1;
+
+
+    // Check sensor
+    if(!currentSensorStateI)
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 1"<<std::endl;
+        return 1;
+    }
+
+    // Check sensor
+    if(!currentSensorStateI->getTheSensorCore())
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 1"<<std::endl;
+        return 1;
+    }
+
+    // Cast
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorStateI);
+
+    // Robot check
+    if(!currentRobotState)
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
+        return 2;
+    }
+
+    // Robot core check
+    if(!currentRobotState->getTheRobotCore())
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 3"<<std::endl;
+        return 3;
+    }
+
+
+    // Map element
+    if(!currentMapElementStateI)
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
+        return 4;
+    }
+
+    // Map element core
+    if(!currentMapElementStateI->getTheMapElementCore())
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
+        return 5;
+    }
+
+    // Cast
+    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
+
+    // Checks
     // TODO
 
+
+    // Create pointer
+    // TODO check if it must be done here
+    if(!predictedMeasurement)
+    {
+        predictedMeasurement=std::make_shared<CodedVisualMarkerMeasurementCore>();
+#if _DEBUG_SENSOR_CORE
+        logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() pointer created"<<std::endl;
+#endif
+    }
+
+
+    // Set the sensor core -> Needed
+    if(predictedMeasurement)
+    {
+        predictedMeasurement->setTheSensorCore(this->getTheSensorCore());
+    }
+
+
+    // id -> Needed
+    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getTheMapElementCore());
+    predictedMeasurement->setVisualMarkerId(TheCodedVisualMarkerLandmarkCore->getId());
+
+
+
+    // Prediction
+
+    // Switch depending on robot used
+    switch(currentRobotState->getTheRobotCore()->getRobotType())
+    {
+        // Free model robot
+        case RobotTypes::free_model:
+        {
+            // Cast
+            std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
+
+
+
+            // Aux vars
+            Eigen::Vector4d attitude_visual_marker_eye_wrt_world=
+                    Quaternion::cross(currentFreeModelRobotState->getAttitude(), currentSensorState->getAttitudeSensorWrtRobot());
+
+
+            // Position
+            if(this->isMeasurementPositionEnabled())
+            {
+                // Aux Variable
+                Eigen::Vector3d position_visual_marker_wrt_visual_marker_eye;
+                position_visual_marker_wrt_visual_marker_eye.setZero();
+
+
+                Eigen::Vector3d position_visual_marker_eye_wrt_world=
+                        Quaternion::cross_sandwich(currentFreeModelRobotState->getAttitude(), currentSensorState->getPositionSensorWrtRobot(), Quaternion::inv(currentFreeModelRobotState->getAttitude()));
+
+
+                // Equation
+                position_visual_marker_wrt_visual_marker_eye=
+                        Quaternion::cross_sandwich(attitude_visual_marker_eye_wrt_world, currentMapElementState->getPosition()-position_visual_marker_eye_wrt_world-currentFreeModelRobotState->getPosition(), Quaternion::inv(attitude_visual_marker_eye_wrt_world));
+
+                // Set
+                predictedMeasurement->setVisualMarkerPosition(position_visual_marker_wrt_visual_marker_eye);
+            }
+
+
+
+            // Attitude
+            if(this->isMeasurementAttitudeEnabled())
+            {
+                // Aux Variable
+                Eigen::Vector4d attitude_visual_marker_wrt_visual_marker_eye;
+                attitude_visual_marker_wrt_visual_marker_eye.setZero();
+
+                // Equation
+                attitude_visual_marker_wrt_visual_marker_eye=
+                        Quaternion::cross(Quaternion::inv(attitude_visual_marker_eye_wrt_world), currentMapElementState->getAttitude());
+
+
+                // Set
+                predictedMeasurement->setVisualMarkerAttitude(attitude_visual_marker_wrt_visual_marker_eye);
+            }
+
+            break;
+        }
+
+        // Default
+        default:
+            return -1000;
+    }
+
+
+#if _DEBUG_SENSOR_CORE
+    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+#endif
+
+
+    // End
     return 0;
 }
 
 
 
-int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<MapElementStateCore> currentMapElementState, std::shared_ptr<SensorMeasurementCore> matchedMeasurement, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
 {
     // TODO
 
 
-    // sensor core
-    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(currentSensorState->getTheSensorCoreShared());
+    // sensor
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> the_sensor_state_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorState);
+    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(the_sensor_state_core->getTheSensorCoreShared());
 
 
     // dimension of the measurement
@@ -418,21 +584,274 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
 
     // Robot
-    std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCoreAux=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
-    std::shared_ptr<const FreeModelRobotCore> TheRobotCoreAux=std::static_pointer_cast<const FreeModelRobotCore>(TheRobotStateCoreAux->getTheRobotCore());
+    std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCoreAux=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
+    std::shared_ptr<const FreeModelRobotCore> TheRobotCoreAux=std::dynamic_pointer_cast<const FreeModelRobotCore>(TheRobotStateCoreAux->getTheRobotCore());
+
+
+    // Map element
+    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> TheMapElementStateCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementState);
+    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(TheMapElementStateCore->getTheMapElementCore());
+
+
+    // Matched measurement
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> TheMatchedMeasurementCore=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
 
 
     // TODO
 
 
+    // Auxiliar variables
+    Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
+    //Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=predictedMeasurement->getVisualMarkerAttitude();
 
-    /// Jacobians measurement - sensor noise of the measurement
+    Eigen::Matrix4d mat_q_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(att_visual_marker_wrt_visual_marker_eye);
+    Eigen::Matrix4d inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye=mat_q_plus_att_visual_marker_wrt_visual_marker_eye.inverse();
+    Eigen::Matrix4d mat_q_minus_att_visual_marker_wrt_world=Quaternion::quatMatMinus(TheMapElementStateCore->getAttitude());
+
+    Eigen::Matrix4d mat_q_plus_att_robot_wrt_world=Quaternion::quatMatPlus(TheRobotStateCoreAux->getAttitude());
+    Eigen::Matrix4d mat_q_minus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatMinus(the_sensor_state_core->getAttitudeSensorWrtRobot());
+    Eigen::Matrix4d mat_q_plus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatPlus(the_sensor_state_core->getAttitudeSensorWrtRobot());
+
+    Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
+    mat_diff_quat_inv_wrt_quat<<1, 0, 0, 0,
+                                0, -1, 0, 0,
+                                0, 0, -1, 0,
+                                0, 0, 0, -1;
+
+    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
+    mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
+                                        1, 0, 0,
+                                        0, 1, 0,
+                                        0, 0, 1;
+
+
+
+    //// Jacobian Measurement Error - Error State && Jacobian Measurement Error - Error Parameters
+
+    /// Jacobian Measurement Error - Robot Error State
+
+    // Dimension
+    int dimension_robot_error_state=TheRobotCoreAux->getDimensionErrorState();
+
+    // Resize and init
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimension_error_measurement, dimension_robot_error_state);
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.setZero();
+
+    // Fill
+    {
+        int dimension_error_measurement_i=0;
+        if(this->isMeasurementPositionEnabled())
+        {
+            // pos
+            //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,0);
+            // TODO
+
+            // lin_vel
+            // zeros
+
+            // lin_acc
+            // zeros
+
+            // attit
+            //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9);
+            // TODO
+
+            // ang_vel
+            // zeros
+
+            // ang_acc
+            // zeros
+
+            dimension_error_measurement_i+=3;
+        }
+
+        if(this->isMeasurementAttitudeEnabled())
+        {
+            // pos
+            // zeros
+
+            // lin_vel
+            // zeros
+
+            // lin_acc
+            // zeros
+
+            // attit
+            predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+                    mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_minus_att_visual_marker_eye_wrt_robot*mat_q_plus_att_robot_wrt_world*mat_diff_error_quat_wrt_error_theta;
+
+            // ang_vel
+            // zeros
+
+            // ang_acc
+            // zeros
+
+
+            dimension_error_measurement_i+=3;
+        }
+    }
+
+
+
+    /// Jacobian Measurement Error - Global Parameters Error State & Error Parameters
+
+    // Dimension
+    int dimension_global_parameters_error_state=currentGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
+    int dimension_global_parameters_error_parameters=currentGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
+
+    // Resize and init
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.resize(dimension_error_measurement, dimension_global_parameters_error_state);
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.setZero();
+
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimension_error_measurement, dimension_global_parameters_error_parameters);
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.setZero();
+
+    // Fill
+    // No dependency on global parameters -> Everything is set to zero
+
+
+
+    /// Jacobian Measurement Error - Sensor Error State & Error Parameters
+
+    // Dimension
+    int dimension_sensor_error_state=the_sensor_core->getDimensionErrorState();
+    int dimension_sensor_error_parameters=the_sensor_core->getDimensionErrorParameters();
+
+    // Resize and init
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimension_error_measurement, dimension_sensor_error_state);
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
+
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.resize(dimension_error_measurement, dimension_sensor_error_parameters);
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.setZero();
+
+    // Fill
+    {
+        int dimension_error_measurement_i=0;
+        if(this->isMeasurementPositionEnabled())
+        {
+            int dimension_sensor_error_parameters_i=0;
+            int dimension_sensor_error_state_i=0;
+
+            // pos
+            if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            {
+                // TODO
+                dimension_sensor_error_state_i+=3;
+            }
+            else
+            {
+                // TODO
+                dimension_sensor_error_parameters_i+=3;
+            }
+
+            // att
+            if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            {
+                // TODO
+
+                dimension_sensor_error_state_i+=3;
+            }
+            else
+            {
+                // TODO
+
+                dimension_sensor_error_parameters_i+=3;
+            }
+
+            dimension_error_measurement_i+=3;
+        }
+
+        if(this->isMeasurementAttitudeEnabled())
+        {
+            int dimension_sensor_error_parameters_i=0;
+            int dimension_sensor_error_state_i=0;
+
+            // pos
+            if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            {
+                // Zeros
+                dimension_sensor_error_state_i+=3;
+            }
+            else
+            {
+                // Zeros
+                dimension_sensor_error_parameters_i+=3;
+            }
+
+            // att
+            if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            {
+                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
+
+                dimension_sensor_error_state_i+=3;
+            }
+            else
+            {
+                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
+
+
+                dimension_sensor_error_parameters_i+=3;
+            }
+
+            dimension_error_measurement_i+=3;
+        }
+    }
+
+
+
+    /// Jacobian Measurement Error - Map Element Error State & Error Parameters
+
+    // Dimension
+    int dimension_map_element_error_state=TheMapElementCore->getDimensionErrorState();
+    int dimension_map_element_error_parameters=TheMapElementCore->getDimensionErrorParameters();
+
+    // Resize and init
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.resize(dimension_error_measurement, dimension_map_element_error_state);
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.setZero();
+
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.resize(dimension_error_measurement, dimension_map_element_error_parameters);
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.setZero();
+
+
+    // Fill
+    {
+        int dimension_error_measurement_i=0;
+        if(this->isMeasurementPositionEnabled())
+        {
+            // pos
+            // TODO
+
+            // att
+            // TODO
+
+            dimension_error_measurement_i+=3;
+        }
+
+        if(this->isMeasurementAttitudeEnabled())
+        {
+            // pos
+            // Zeros
+
+            // att
+            // TODO
+
+            dimension_error_measurement_i+=3;
+        }
+    }
+
+
+
+
+
+    /// Jacobians error measurement - sensor noise of the measurement
 
     // Resize and init Jacobian
     predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimensionErrorMeasurement, dimensionErrorMeasurement);
     predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
 
-    // Fill Jacobian
+    // Fill Jacobian -> Identity
     predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise=Eigen::MatrixXd::Identity(dimensionErrorMeasurement, dimensionErrorMeasurement);
 
 

@@ -19,7 +19,7 @@
   <robot>
     <name>robot</name>
     <position description="position of the robot wrt world (3D vector in m)">
-      <init_estimation>0 0 0</init_estimation>
+      <init_estimation>1 1 1</init_estimation>
       <init_var>0.01 0.01 0.01</init_var>
     </position>
 
@@ -29,26 +29,26 @@
     </lin_speed>
 
     <lin_accel>
-      <init_estimation>0.01 0.02 0</init_estimation>
-      <init_var>0.012 0.012 0.012</init_var>
-      <noise>0.005 0.005 0.005</noise>
+      <init_estimation>0.00 0.00 0</init_estimation>
+      <init_var>0.0 0.0 0.0</init_var>
+      <noise>0.0 0.0 0.0</noise>
     </lin_accel>
 
 
     <attitude description="attitude of the robot wrt world (quaternion vector)">
-      <init_estimation>1 0 0 0</init_estimation>
+      <init_estimation>1 0 0 0</init_estimation> <!-- 0 0 0 1 -->
       <init_var>0.02 0.02 0.02</init_var>
     </attitude>
 
     <ang_velocity>
-      <init_estimation>0 0 0.0</init_estimation>
+      <init_estimation>0.0 0.0 0.0</init_estimation>
       <init_var>0.021 0.021 0.021</init_var>
     </ang_velocity>
 
     <ang_accel>
-      <init_estimation>0 0 0.002</init_estimation>
+      <init_estimation>0.0 0.0 0.0</init_estimation>
       <init_var>0.022 0.022 0.022</init_var>
-      <noise>0.005 0.005 0.005</noise>
+      <noise>0.5 0.5 0.5</noise>
     </ang_accel>
 
   </robot>
@@ -57,78 +57,207 @@
   <!-- LIST OF SENSORS -->
   <sensor>
     <type>imu</type>
-    <ros_topic>phidgets_imu_1042/imu/data_raw</ros_topic>
-    <name>phidgets_imu_1042</name>
-
-    <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
-      <position description="position of the sensor wrt robot (3D vector in m)">
-        <enabled description="enable state estimation">1</enabled>
-        <init_estimation>0 0 0</init_estimation>
-        <init_var>0.03 0.03 0.03</init_var>
-      </position>
-      <attitude description="attitude of the sensor wrt robot (quaternion vector)">
-        <enabled description="enable state estimation">1</enabled>
-        <init_estimation>0 1 0 0</init_estimation>
-        <init_var>0.031 0.031 0.031</init_var>
-      </attitude>
-    </pose_in_robot>
+    <ros_topic>phidgets_imu_1044/imu/data_raw</ros_topic>
+    <name>phidgets_imu_1044</name>
 
 
     <measurements description="info about the measurements given by this sensor">
 
-      <orientation description="TODO">
-        <enabled>0</enabled> <!-- TODO -->
-        <use_subscribed_cov>0</use_subscribed_cov> <!-- TODO -->
-        <covar></covar> <!-- TODO -->
-      </orientation>
-     
       <linear_acceleration>
         <enabled>1</enabled>
         <use_subscribed_cov>0</use_subscribed_cov> <!-- TODO -->
-        <covar>0.15 0.15 0.15</covar>       
+        <var>0.055 0.055 0.055</var>       
       </linear_acceleration> 
+
+      <orientation description="TODO">
+        <enabled>0</enabled> <!-- TODO -->
+        <use_subscribed_cov>0</use_subscribed_cov> <!-- TODO -->
+        <var></var> <!-- TODO -->
+      </orientation>
 
       <angular_velocity>
         <enabled>1</enabled>
         <use_subscribed_cov>0</use_subscribed_cov> <!-- TODO -->
-        <covar>0.1 0.1 0.1</covar>
+        <var>0.002 0.002 0.002</var>
       </angular_velocity>
 
     </measurements>
+
+
+    <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
+      <position description="position of the sensor wrt robot (3D vector in m)">
+        <enabled description="enable state estimation">0</enabled>
+        <init_estimation>-0.027 0.0 -0.012</init_estimation> <!-- -0.05 -0.05 -0.05 -->
+        <init_var>0.0 0.0 0.0</init_var>
+      </position>
+      <attitude description="attitude of the sensor wrt robot (quaternion vector)">
+        <enabled description="enable state estimation">0</enabled>
+        <init_estimation> 0 1 0 0</init_estimation> <!-- 0 1 0 0 -->
+        <init_var>0.0 0.0 0.0</init_var>
+      </attitude>
+    </pose_in_robot>
+
 
     <parameters description="info about the calibration parameters given by this sensor">
 
       <linear_acceleration description="parameters relative to the accelerometers">
         <biases>
-          <enabled description="enable state estimation">1</enabled>
-          <init_estimation>0 0 0</init_estimation>
-          <init_var>0.04 0.04 0.04</init_var>
+          <enabled description="enable state estimation">0</enabled>
+          <init_estimation>0.0 0.0 0.0</init_estimation>
+          <init_var>1.4 1.4 1.4</init_var>
           <noise>0.005 0.005 0.005</noise>
         </biases>
         <scale>
           <enabled description="enable state estimation">0</enabled> <!-- TODO -->
-          <init_estimation>0 0 0</init_estimation>
-          <init_var>0.041 0.041 0.041</init_var>
+          <init_estimation>1 1 1</init_estimation>
+          <init_var>0.05 0.05 0.05</init_var>
         </scale>
       </linear_acceleration>
 
       <angular_velocity description="parameters relative to the gyroscopes">
         <biases>
-          <enabled description="enable state estimation">1</enabled>
-          <init_estimation>0 0 0</init_estimation>
-          <init_var>0.041 0.041 0.041</init_var>
+          <enabled description="enable state estimation">0</enabled>
+          <init_estimation>0.0 0.0 0.0</init_estimation>
+          <init_var>1.5 1.5 1.5</init_var>
           <noise>0.005 0.005 0.005</noise>
         </biases>
         <scale>
           <enabled description="enable state estimation">0</enabled> <!-- TODO -->
-          <init_estimation>0 0 0</init_estimation>
-          <init_var>0.041 0.041 0.041</init_var>
+          <init_estimation>1 1 1</init_estimation>
+          <init_var>0.0041 0.0041 0.0041</init_var>
         </scale>
       </angular_velocity>
 
     </parameters>
 
   </sensor>
+
+
+<!--
+  <sensor>
+    <type>imu</type>
+    <ros_topic>phidgets_imu_1042/imu/data_raw</ros_topic>
+    <name>phidgets_imu_1042</name>
+
+
+    <measurements description="info about the measurements given by this sensor">
+
+      <linear_acceleration>
+        <enabled>1</enabled>
+        <use_subscribed_cov>0</use_subscribed_cov>
+        <var>0.055 0.055 0.055</var>       
+      </linear_acceleration> 
+
+      <orientation description="TODO">
+        <enabled>0</enabled> 
+        <use_subscribed_cov>0</use_subscribed_cov> 
+        <var></var> 
+      </orientation>
+
+      <angular_velocity>
+        <enabled>1</enabled>
+        <use_subscribed_cov>0</use_subscribed_cov>
+        <var>0.002 0.002 0.002</var>
+      </angular_velocity>
+
+    </measurements>
+
+
+    <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
+      <position description="position of the sensor wrt robot (3D vector in m)">
+        <enabled description="enable state estimation">1</enabled>
+        <init_estimation>-0.06 0.0 -0.012</init_estimation> 
+        <init_var>0.0 0.0 0.0</init_var>
+      </position>
+      <attitude description="attitude of the sensor wrt robot (quaternion vector)">
+        <enabled description="enable state estimation">1</enabled>
+        <init_estimation> 0 1 0 0</init_estimation>
+        <init_var>0.0 0.0 0.0</init_var>
+      </attitude>
+    </pose_in_robot>
+
+
+    <parameters description="info about the calibration parameters given by this sensor">
+
+      <linear_acceleration description="parameters relative to the accelerometers">
+        <biases>
+          <enabled description="enable state estimation">1</enabled>
+          <init_estimation>0.0 0.0 0.0</init_estimation>
+          <init_var>1.4 1.4 1.4</init_var>
+          <noise>0.005 0.005 0.005</noise>
+        </biases>
+        <scale>
+          <enabled description="enable state estimation">0</enabled>
+          <init_estimation>1 1 1</init_estimation>
+          <init_var>0.05 0.05 0.05</init_var>
+        </scale>
+      </linear_acceleration>
+
+      <angular_velocity description="parameters relative to the gyroscopes">
+        <biases>
+          <enabled description="enable state estimation">1</enabled>
+          <init_estimation>0.0 0.0 0.0</init_estimation>
+          <init_var>1.5 1.5 1.5</init_var>
+          <noise>0.005 0.005 0.005</noise>
+        </biases>
+        <scale>
+          <enabled description="enable state estimation">0</enabled>
+          <init_estimation>1 1 1</init_estimation>
+          <init_var>0.0041 0.0041 0.0041</init_var>
+        </scale>
+      </angular_velocity>
+
+    </parameters>
+
+  </sensor>
+-->
+
+
+
+  <sensor>
+    <type>aruco_eye</type>
+    <ros_topic>ueye_camera/aruco_eye/aruco_markers_observation</ros_topic>
+    <name>aruco_eye</name>
+
+
+    <measurements description="info about the measurements given by this sensor">
+
+      <position>
+        <enabled>0</enabled>
+        <use_subscribed_cov>0</use_subscribed_cov> <!-- TODO -->
+        <var>0.1 0.1 0.1</var>       
+      </position> 
+
+      <orientation>
+        <enabled>1</enabled>
+        <use_subscribed_cov>0</use_subscribed_cov> <!-- TODO -->
+        <var>0.05 0.05 0.05</var>
+      </orientation>
+
+    </measurements>
+
+
+    <pose_in_robot description="initial estimate of the pose of the sensor wrt robot">
+      <position description="position of the sensor wrt robot (3D vector in m)">
+        <enabled description="enable state estimation">0</enabled>
+        <init_estimation>0.02 0.02 -0.021</init_estimation>
+        <init_var>0.001 0.001 0.001</init_var>
+      </position>
+      <attitude description="attitude of the sensor wrt robot (quaternion vector)">
+        <enabled description="enable state estimation">0</enabled>
+        <init_estimation>0 -0.707 0.707  0</init_estimation>
+        <init_var>0.001 0.001 0.001</init_var>
+      </attitude>
+    </pose_in_robot>
+
+
+    <parameters description="info about the calibration parameters given by this sensor">
+
+    </parameters>
+
+
+  </sensor>
+
 
 
   <sensor>
@@ -142,7 +271,47 @@
 
 
   <!-- MAP -->
-  <!-- TODO -->
+  <map_element>
+    <type>coded_visual_marker</type>
+
+    <visual_landmark>
+      <id>0</id>
+      <pose_in_world>
+        <position description="position wrt world in m">
+          <enabled description="enable state estimation" info="TODO">0</enabled>
+          <init_estimation>1 1 0</init_estimation>
+          <init_var>0.0 0.0 0.0</init_var>  
+        </position> 
+        <attitude description="attitude wrt world in quaternion">
+          <enabled description="enable state estimation" info="TODO">0</enabled>
+          <init_estimation>0 0 0.707 0.707</init_estimation>
+          <init_var>0.0 0.0 0.0</init_var>
+        </attitude>
+      </pose_in_world>
+    </visual_landmark>
+  </map_element>
+
+
+  <map_element>
+    <type>coded_visual_marker</type>
+
+    <visual_landmark>
+      <id>10</id>
+      <pose_in_world>
+        <position description="position wrt world in m">
+          <enabled description="enable state estimation" info="TODO">0</enabled>
+          <init_estimation>2 2 0</init_estimation>
+          <init_var>0.0 0.0 0.0</init_var>  
+        </position> 
+        <attitude description="attitude wrt world in quaternion">
+          <enabled description="enable state estimation" info="TODO">0</enabled>
+          <init_estimation>0 0 0.707 0.707</init_estimation>
+          <init_var>0.0 0.0 0.0</init_var>
+        </attitude>
+      </pose_in_world>
+    </visual_landmark>
+
+  </map_element>
 
 
 

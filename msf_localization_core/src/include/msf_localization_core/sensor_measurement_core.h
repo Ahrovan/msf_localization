@@ -13,6 +13,13 @@
 #include "msf_localization_core/sensor_core.h"
 
 
+enum class MeasurementTypes
+{
+    undefined=0,
+    imu=1,
+    coded_visual_marker=2
+};
+
 
 class SensorMeasurementCore
 {
@@ -30,19 +37,37 @@ public:
     std::shared_ptr<SensorCore> getTheSensorCore() const;
 
 
+protected:
+    MeasurementTypes measurementType;
+public:
+    int setMeasurementType(MeasurementTypes measurementType);
+    MeasurementTypes getMeasurementType() const;
+
 
 
     /// Jacobians Measurement
 
 public:
+    // Jacobian Error Measurement - Error State
     struct
     {
         Eigen::MatrixXd jacobianMeasurementRobotErrorState;
         Eigen::MatrixXd jacobianMeasurementGlobalParametersErrorState;
         Eigen::MatrixXd jacobianMeasurementSensorErrorState;
-
+        Eigen::MatrixXd jacobianMeasurementMapElementErrorState; // TODO
     } jacobianMeasurementErrorState;
 
+
+    // Jacobian Error Measurement - Error Parameters
+    struct
+    {
+        // TODO Robot Parameters
+        Eigen::MatrixXd jacobianMeasurementGlobalParameters;
+        Eigen::MatrixXd jacobianMeasurementSensorParameters;
+        Eigen::MatrixXd jacobianMeasurementMapElementParameters;
+    } jacobianMeasurementErrorParameters;
+
+    /*
     struct
     {
         Eigen::MatrixXd jacobianMeasurementSensorParameters;
@@ -55,6 +80,13 @@ public:
 
     } jacobianMeasurementGlobalParameters;
 
+    struct
+    {
+        Eigen::MatrixXd jacobianMeasurementMapElementParameters;
+    } jacobianMeasurementMapElementParameters;
+    */
+
+    // Jacobian Error Measurement - Sensor Noise
     struct
     {
         Eigen::MatrixXd jacobianMeasurementSensorNoise;
@@ -72,6 +104,19 @@ public:
     //// Get the full measurement as an Eigen::VectorXd
 public:
     virtual Eigen::VectorXd getMeasurement()=0;
+
+
+
+
+//    //// Debug log
+//protected:
+//    std::string logPath;
+//    std::ofstream logFile;
+//    // mutex to protect the log file
+//protected:
+//    std::mutex TheLogFileMutex;
+//public:
+//    int log(std::string logString);
 
 };
 

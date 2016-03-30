@@ -140,7 +140,7 @@ public:
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:
-    virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
+    //virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
     virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
 
 

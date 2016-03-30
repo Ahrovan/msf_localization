@@ -35,7 +35,7 @@ SensorCore::SensorCore() :
     // LOG
     const char* env_p = std::getenv("FUSEON_STACK");
 
-    logPath=std::string(env_p)+"/logs/"+"SensorCoreLogFile.txt";
+    logPath=std::string(env_p)+"/logs/"+"logSensorCoreFile.txt";
 
     logFile.open(logPath);
 

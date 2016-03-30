@@ -11,6 +11,9 @@ ImuSensorMeasurementCore::ImuSensorMeasurementCore()
     flagAngularVelocitySet=false;
     flagLinearAccelerationSet=false;
 
+    // Measurement type
+    measurementType=MeasurementTypes::imu;
+
     return;
 }
 

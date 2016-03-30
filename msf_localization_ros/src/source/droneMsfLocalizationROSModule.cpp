@@ -1771,8 +1771,10 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
         // Run predict and store updated predicted element
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_ROS
         {
             ros::Time begin = ros::Time::now();
+#endif
 
         if(this->predict(OldestTimeStamp))
         {
@@ -1788,11 +1790,13 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
             continue;
         }
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_ROS
             std::ostringstream logString;
             logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> predict() time: "<<(ros::Time::now()-begin).toNSec()<<" ns"<<std::endl;
             this->log(logString.str());
 
         }
+#endif
 
 //        // Not needed, it should never happend
 //        if(!TheOutdatedElement)
@@ -1847,8 +1851,11 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         int errorUpdate=0;
 //        try
 //        {
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_ROS
         {
             ros::Time begin = ros::Time::now();
+#endif
 
             errorUpdate=this->update(OldestTimeStamp);
 //        }
@@ -1857,10 +1864,12 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 //            std::cout<<"EXCEPTION ON UPDATE"<<std::endl;
 //        }
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_ROS
             std::ostringstream logString;
             logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> update() time: "<<(ros::Time::now()-begin).toNSec()<<" ns"<<std::endl;
             this->log(logString.str());
             }
+#endif
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -1882,7 +1891,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             {
                 std::ostringstream logString;
-                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error in the update"<<std::endl;
+                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error in the update: "<<errorUpdate<<std::endl;
                 this->log(logString.str());
             }
 #endif

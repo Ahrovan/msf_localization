@@ -13,6 +13,9 @@ CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore() :
 
     // Initial values of the Jacobians
 
+    // Measurement type
+    measurementType=MeasurementTypes::coded_visual_marker;
+
     return;
 }
 
@@ -119,6 +122,9 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<
     {
         the_innovation.block<3,1>(dimension,0)=theMatchedMeasurement->position_-thePredictedMeasurement->position_;
         dimension+=3;
+
+//        logFile<<"theMatchedMeasurement->position_: "<<theMatchedMeasurement->position_.transpose()<<std::endl;
+//        logFile<<"thePredictedMeasurement->position_: "<<thePredictedMeasurement->position_.transpose()<<std::endl;
     }
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
@@ -126,6 +132,9 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<
 
         the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
         dimension+=3;
+
+//        logFile<<"theMatchedMeasurement->attitude_: "<<theMatchedMeasurement->attitude_.transpose()<<std::endl;
+//        logFile<<"thePredictedMeasurement->attitude_: "<<thePredictedMeasurement->attitude_.transpose()<<std::endl;
     }
 
 

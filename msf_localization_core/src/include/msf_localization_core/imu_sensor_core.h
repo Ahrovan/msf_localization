@@ -207,7 +207,9 @@ public:
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:
+    // Covariance Sensor Error Measurements
     Eigen::SparseMatrix<double> getCovarianceMeasurement();
+    // Covariance Sensor Error Parameters
     Eigen::SparseMatrix<double> getCovarianceParameters();
 
 

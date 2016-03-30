@@ -89,10 +89,13 @@ public:
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:
-    Eigen::SparseMatrix<double> getCovarianceMeasurement();
+    // Covariance Map Element Error Measurements
+    //Eigen::SparseMatrix<double> getCovarianceMeasurement();
+    // Covariance Map Element Error Parameters
     Eigen::SparseMatrix<double> getCovarianceParameters();
 
 public:
+    // Covariance Map Element Error Noise
     Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
 
 

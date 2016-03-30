@@ -66,7 +66,12 @@ int StateEstimationCore::getDimensionState() const
     }
 
     // Map
-    // TODO
+    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+        itMapElement!=TheListMapElementStateCore.end();
+        ++itMapElement)
+    {
+        dimensionState+=(*itMapElement)->getTheMapElementCore()->getDimensionState();
+    }
 
 
     // end
