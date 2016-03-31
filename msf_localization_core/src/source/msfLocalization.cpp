@@ -293,10 +293,15 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     }
 #endif
 
+    // The predicted state
+    std::shared_ptr<StateEstimationCore> PredictedState;
+    // New element to be added to the buffer
+    PredictedState=std::make_shared<StateEstimationCore>();
+
 
     // Get the predicted element if any
-    std::shared_ptr<StateEstimationCore> PredictedState;
-    if(this->TheMsfStorageCore->getElement(TheTimeStamp, PredictedState))
+    std::shared_ptr<StateEstimationCore> OldPredictedState;
+    if(this->TheMsfStorageCore->getElement(TheTimeStamp, OldPredictedState))
     {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
@@ -309,11 +314,28 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         //return -10;
     }
 
+    // Check if it exists
+    if(!OldPredictedState)
+    {
+        // Nothing to do
 
-    // New element that is going to be added to the buffer
-    if(!PredictedState)
-        PredictedState=std::make_shared<StateEstimationCore>();
+    }
+    else
+    {
+        // Copy elements
 
+        // Measurements
+        // std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
+        PredictedState->TheListMeasurementCore=OldPredictedState->TheListMeasurementCore;
+
+        // Nothing else needed
+    }
+
+    // Release the old predicted state pointer
+    OldPredictedState.reset();
+
+
+    /*
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
@@ -321,6 +343,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         this->log(logString.str());
     }
 #endif
+
 
     while(PredictedState.use_count()>2)
     {
@@ -345,7 +368,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         this->log(logString.str());
     }
 #endif
-
+    */
 
 
     ///// Predict Core
@@ -356,7 +379,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 
 
 
-    /////// Add element to the buffer
+    /////// Add element to the buffer -> Check if the element that is going to be added is not used
     if(TheMsfStorageCore->addElement(TheTimeStamp, PredictedState))
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
@@ -364,6 +387,9 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 #endif
         return -2;
     }
+
+    // Release the predicted state pointer -> Not really needed
+    PredictedState.reset();
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -393,8 +419,15 @@ int MsfLocalizationCore::predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_
 #endif
 
 
+    // The predicted state
+    if(!ThePredictedState)
+        ThePredictedState=std::make_shared<StateEstimationCore>();
+
+
+
     // Get the predicted element if any
-    if(this->TheMsfStorageCore->getElement(TheTimeStamp, ThePredictedState))
+    std::shared_ptr<StateEstimationCore> OldPredictedState;
+    if(this->TheMsfStorageCore->getElement(TheTimeStamp, OldPredictedState))
     {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
@@ -408,10 +441,27 @@ int MsfLocalizationCore::predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_
     }
 
 
-    // New element that is going to be added to the buffer
-    if(!ThePredictedState)
-        ThePredictedState=std::make_shared<StateEstimationCore>();
+    // Check if exist old predicted state
+    if(!OldPredictedState)
+    {
+        // Nothing to do
+    }
+    else
+    {
+        // Copy elements
 
+        // Measurements
+        // std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
+        ThePredictedState->TheListMeasurementCore=OldPredictedState->TheListMeasurementCore;
+
+        // Nothing else needed
+    }
+
+    // Release the old predicted state pointer
+    OldPredictedState.reset();
+
+
+    /*
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
@@ -443,7 +493,7 @@ int MsfLocalizationCore::predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_
         this->log(logString.str());
     }
 #endif
-
+    */
 
 
     ///// Predict Core
@@ -574,7 +624,9 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
     ///// Robot
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
     TimeStamp beginTimePredictRobot=getTimeStamp();
+#endif
     {
         // State
         std::shared_ptr<RobotStateCore> predictedStateRobot;
@@ -866,8 +918,6 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
 
 
-
-
     /// Robot-Sensors
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
@@ -884,9 +934,6 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
     // Init Point
     WorkingInitPoint.col=TheRobotCore->getDimensionErrorState();
     WorkingInitPoint.row=0;
-
-
-
 
 
     // Iterate on the sensors
@@ -924,9 +971,9 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
 
         // Set the Symmetric
-        Eigen::MatrixXd auxMatSym=ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState).transpose();
+        Eigen::MatrixXd auxMatSym=ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState);
         ThePredictedState->covarianceMatrix.block(WorkingInitPoint.col, WorkingInitPoint.row,dimensionSensorErrorState, dimensionRobotErrorState)=
-                auxMatSym;
+                auxMatSym.transpose();
 
 
 //        logFile<<"ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)"<<std::endl;
@@ -946,6 +993,8 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         this->log(logString.str());
     }
 #endif
+
+//return 0;
 
 
     /// Sensors
@@ -1012,26 +1061,29 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
 
             // Calculate
-            ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)=
-                    jacobianSensor1ErrorState*ThePreviousState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)*predictedStateSensor2->getJacobianErrorState().transpose();
+            Eigen::MatrixXd CovarianceAuxMatrix=jacobianSensor1ErrorState*ThePreviousState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)*predictedStateSensor2->getJacobianErrorState().transpose();
+
 
 
             // Noise if the same
             if((*it1Sens) == (*it2Sens))
             {
                 Eigen::SparseMatrix<double> covarianceErrorStateNoise=predictedStateSensor1->getJacobianErrorStateNoise() * (*it1Sens)->getCovarianceNoise(DeltaTime) * predictedStateSensor1->getJacobianErrorStateNoise().transpose();
-                ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)+=
+                ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState)=
+                        CovarianceAuxMatrix+
                         Eigen::MatrixXd(covarianceErrorStateNoise);
             }
 
 
-            // Symmetric if different
+            // Value and Symmetric if different
             if((*it1Sens) != (*it2Sens))
             {
-                Eigen::MatrixXd AuxMatSym=ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState).transpose();
-                ThePredictedState->covarianceMatrix.block(WorkingInitPoint.col, WorkingInitPoint.row, dimensionSensor2ErrorState, dimensionSensor1ErrorState)=
-                        AuxMatSym;
+                //Eigen::MatrixXd AuxMatSym=ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState).eval();
+                ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState)=
+                        CovarianceAuxMatrix;
 
+                ThePredictedState->covarianceMatrix.block(WorkingInitPoint.col, WorkingInitPoint.row, dimensionSensor2ErrorState, dimensionSensor1ErrorState)=
+                        CovarianceAuxMatrix.transpose().eval();
             }
 
             // Update Working Point
@@ -1051,6 +1103,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         this->log(logString.str());
     }
 #endif
+
 
     /// Robot-Map
     // TODO
@@ -1094,12 +1147,10 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 #endif
 
-    // Get
-    std::shared_ptr<StateEstimationCore> UpdatedState;
-
 
     // Get the outdated element to do the update
-    if(this->TheMsfStorageCore->getElement(TheTimeStamp, UpdatedState))
+    std::shared_ptr<StateEstimationCore> OldState;
+    if(this->TheMsfStorageCore->getElement(TheTimeStamp, OldState))
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         {
@@ -1113,7 +1164,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     }
 
     // Check
-    if(!UpdatedState)
+    if(!OldState)
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         {
@@ -1128,10 +1179,11 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
 
+
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
-        logString<<"number of users of updated state="<<UpdatedState.use_count()<<std::endl;
+        logString<<"number of users of updated state="<<OldState.use_count()<<std::endl;
 
         this->log(logString.str());
     }
@@ -1144,7 +1196,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
         TimeStamp begin=getTimeStamp();
 #endif
 
-    while(UpdatedState.use_count()>2)
+    while(OldState.use_count()>2)
     {
         // Do nothig. Sleep a little
         // TODO optimize this!
@@ -1166,14 +1218,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
-        logString<<"number of users of updated state="<<UpdatedState.use_count()<<std::endl;
+        logString<<"number of users of updated state="<<OldState.use_count()<<std::endl;
         this->log(logString.str());
     }
 #endif
 
 
     // Check if there are measurements
-    if(UpdatedState->TheListMeasurementCore.size()==0)
+    if(OldState->TheListMeasurementCore.size()==0)
     {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         std::ostringstream logString;
@@ -1187,16 +1239,9 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Checks
     // TODO finish
 
-    // Updated State
-    if(!UpdatedState)
-    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        std::cout<<"MsfLocalizationCore::update() error 1"<<std::endl;
-#endif
-        return 1;
-    }
 
-    if(!UpdatedState->TheRobotStateCore)
+    // Check the Robot State Core -> Not really needed
+    if(!OldState->TheRobotStateCore)
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         std::cout<<"MsfLocalizationCore::update() error 11"<<std::endl;
@@ -1206,6 +1251,92 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
 
+
+
+
+    // Create new updated state
+    std::shared_ptr<StateEstimationCore> UpdatedState=std::make_shared<StateEstimationCore>();
+
+
+    // Copy all elements in updated state
+
+
+    // Measurements
+    UpdatedState->TheListMeasurementCore=OldState->TheListMeasurementCore;
+
+
+    // Covariance
+    UpdatedState->covarianceMatrix=OldState->covarianceMatrix;
+
+
+    // Global Parameters
+    //std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore;
+    UpdatedState->TheGlobalParametersStateCore=OldState->TheGlobalParametersStateCore;
+    //UpdatedState->TheGlobalParametersStateCore=std::make_shared<GlobalParametersStateCore>();
+    //*UpdatedState->TheGlobalParametersStateCore=*OldState->TheGlobalParametersStateCore;
+
+    // Robot Stat
+    //std::shared_ptr<RobotStateCore> TheRobotStateCore;
+    UpdatedState->TheRobotStateCore=OldState->TheRobotStateCore;
+//    UpdatedState->TheRobotStateCore=std::make_shared<RobotStateCore>();
+//    *UpdatedState->TheRobotStateCore=*OldState->TheRobotStateCore;
+
+    // Sensors State
+    //std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
+    UpdatedState->TheListSensorStateCore=OldState->TheListSensorStateCore;
+
+    // Map State
+    //std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
+    UpdatedState->TheListMapElementStateCore=OldState->TheListMapElementStateCore;
+
+
+
+
+    ///// Update Core
+    if(this->updateCore(TheTimeStamp, OldState, UpdatedState))
+    {
+        std::cout<<"Error updating state"<<std::endl;
+        return -10;
+    }
+
+
+    // Release old state -> Not really needed
+    if(OldState)
+        OldState.reset();
+
+
+
+    /////// Add element to the buffer -> Check that nobody is using the OldState because is is going to be overwritten
+    if(TheMsfStorageCore->addElement(TheTimeStamp, UpdatedState))
+    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+        std::cout<<"!!Error addElement"<<std::endl;
+#endif
+        return -2;
+    }
+
+
+    // Release update state -> Not really needed
+    if(UpdatedState)
+        UpdatedState.reset();
+
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    std::ostringstream logString;
+    logString<<"MsfLocalizationCore::update() ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+    this->log(logString.str());
+#endif
+
+    // End
+    return 0;
+}
+
+
+
+int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore> OldState, std::shared_ptr<StateEstimationCore>& UpdatedState)
+{
+
+//return 0;
 
     ///// Measurement prediction and matching
 
@@ -1241,7 +1372,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
             {
                 // Find the sensor state
                 std::shared_ptr<SensorStateCore> TheSensorStateCore;
-                if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
+                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
                 {
         #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
@@ -1268,7 +1399,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorPredictedMeasurement;
 
                 // Call measurement prediction
-                if(TheImuSensorCore->predictMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
+                if(TheImuSensorCore->predictMeasurement(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
@@ -1277,8 +1408,29 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 }
 
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::shared_ptr<ImuSensorMeasurementCore> imuMeasurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>((*itListMeas));
+
+            std::ostringstream logString;
+
+            logString<<"MsfLocalizationCore::update() matched Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<" a: "<<imuMeasurement->getLinearAcceleration().transpose()<<std::endl;
+            logString<<" w: "<<imuMeasurement->getAngularVelocity().transpose()<<std::endl;
+
+            logString<<"MsfLocalizationCore::update() predicted Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<" a: "<<TheImuSensorPredictedMeasurement->getLinearAcceleration().transpose()<<std::endl;
+            logString<<" w: "<<TheImuSensorPredictedMeasurement->getAngularVelocity().transpose()<<std::endl;
+
+            this->log(logString.str());
+        }
+#endif
+
+
+
+
                 // Compute Jacobians of the Measurement
-                if(TheImuSensorCore->jacobiansMeasurements(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
+                if(TheImuSensorCore->jacobiansMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
@@ -1305,7 +1457,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
             {
                 // Find the sensor state
                 std::shared_ptr<SensorStateCore> TheSensorStateCore;
-                if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
+                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
@@ -1322,7 +1474,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
                 // Find the map element state
                 std::shared_ptr<MapElementStateCore> TheMapElementStateCore;
-                if(findMapElementStateCoreFromList(UpdatedState->TheListMapElementStateCore, (*itListMeas), TheMapElementStateCore))
+                if(findMapElementStateCoreFromList(OldState->TheListMapElementStateCore, (*itListMeas), TheMapElementStateCore))
                 {
                     //std::cout<<"error"<<std::endl;
                     break;
@@ -1339,7 +1491,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
                 // Measurement prediction
-                if(TheVisualMarkerSensorCore->predictMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, TheCodedVisualMarkerPredictedMeasurement))
+                if(TheVisualMarkerSensorCore->predictMeasurement(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, TheCodedVisualMarkerPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
@@ -1348,9 +1500,29 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
                 }
 
 
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+                {
+                    std::shared_ptr<CodedVisualMarkerMeasurementCore> visualMarkerMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>((*itListMeas));
+
+                    std::ostringstream logString;
+
+                    logString<<"MsfLocalizationCore::update() matched Measurements VM for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<" t: "<<visualMarkerMeasurement->getVisualMarkerPosition().transpose()<<std::endl;
+                    logString<<" q: "<<visualMarkerMeasurement->getVisualMarkerAttitude().transpose()<<std::endl;
+
+                    logString<<"MsfLocalizationCore::update() predicted Measurements VM for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<" t: "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerPosition().transpose()<<std::endl;
+                    logString<<" q: "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerAttitude().transpose()<<std::endl;
+
+                    this->log(logString.str());
+                }
+#endif
+
+
                 // Jacobian Measurement prediction
                 // TODO
-                if(TheVisualMarkerSensorCore->jacobiansMeasurements(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, (*itListMeas), TheCodedVisualMarkerPredictedMeasurement))
+                if(TheVisualMarkerSensorCore->jacobiansMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, (*itListMeas), TheCodedVisualMarkerPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
@@ -1418,19 +1590,19 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     /// Error State
     unsigned int dimensionErrorState=0;
     // Robot
-    dimensionErrorState+=UpdatedState->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
+    dimensionErrorState+=OldState->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
     // Global Parameters
-    dimensionErrorState+=UpdatedState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
+    dimensionErrorState+=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
     // Sensors
-    for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListMatchedMeas=UpdatedState->TheListSensorStateCore.begin();
-        itListMatchedMeas!=UpdatedState->TheListSensorStateCore.end();
+    for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListMatchedMeas=OldState->TheListSensorStateCore.begin();
+        itListMatchedMeas!=OldState->TheListSensorStateCore.end();
         ++itListMatchedMeas)
     {
         dimensionErrorState+=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorState();
     }
     // Map
-    for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMatchedMeas=UpdatedState->TheListMapElementStateCore.begin();
-        itListMatchedMeas!=UpdatedState->TheListMapElementStateCore.end();
+    for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMatchedMeas=OldState->TheListMapElementStateCore.begin();
+        itListMatchedMeas!=OldState->TheListMapElementStateCore.end();
         ++itListMatchedMeas)
     {
         dimensionErrorState+=(*itListMatchedMeas)->getTheMapElementCore()->getDimensionErrorState();
@@ -1447,7 +1619,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
     /// Global Parameters
     unsigned int dimensionGlobalParameters=0;
-    dimensionGlobalParameters=UpdatedState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
+    dimensionGlobalParameters=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
 
     /// Sensor Parameters
     unsigned int dimensionSensorParameters=0;
@@ -1477,7 +1649,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
             {
                 // Match map element
                 std::shared_ptr<MapElementStateCore> TheMapElementStateCore;
-                if(findMapElementStateCoreFromList(UpdatedState->TheListMapElementStateCore, (*itListMatchedMeas), TheMapElementStateCore))
+                if(findMapElementStateCoreFromList(OldState->TheListMapElementStateCore, (*itListMatchedMeas), TheMapElementStateCore))
                 {
                     std::cout<<"Error"<<std::endl;
                     return -200;
@@ -1952,8 +2124,8 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
-        logString<<"MsfLocalizationCore::update() UpdatedState->covarianceMatrix for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-        logString<<UpdatedState->covarianceMatrix<<std::endl;
+        logString<<"MsfLocalizationCore::update() OldState->covarianceMatrix for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<OldState->covarianceMatrix<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -2008,7 +2180,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     Eigen::MatrixXd innovationCovariance;
 
     // Equation
-    innovationCovariance=JacobianMeasurementErrorState*UpdatedState->covarianceMatrix*JacobianMeasurementErrorState.transpose()+
+    innovationCovariance=JacobianMeasurementErrorState*OldState->covarianceMatrix*JacobianMeasurementErrorState.transpose()+
             JacobianMeasurementNoise*CovarianceMeasurement*JacobianMeasurementNoise.transpose()+
             JacobianMeasurementGlobalParameters*CovarianceGlobalParameters*JacobianMeasurementGlobalParameters.transpose()+
             JacobianMeasurementSensorParameters*CovarianceSensorParameters*JacobianMeasurementSensorParameters.transpose()+
@@ -2076,7 +2248,7 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     Eigen::MatrixXd kalmanGain;
 
     // Equation
-    kalmanGain=UpdatedState->covarianceMatrix*JacobianMeasurementErrorState.transpose()*innovation_covariance_inverse;
+    kalmanGain=OldState->covarianceMatrix*JacobianMeasurementErrorState.transpose()*innovation_covariance_inverse;
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -2164,8 +2336,8 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
         // Sensors
-        for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
-            itListSensorState!=UpdatedState->TheListSensorStateCore.end();
+        for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=OldState->TheListSensorStateCore.begin();
+            itListSensorState!=OldState->TheListSensorStateCore.end();
             ++itListSensorState)
         {
             unsigned int dimensionSensorErrorState=(*itListSensorState)->getTheSensorCore()->getDimensionErrorState();
@@ -2189,8 +2361,8 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
         // Map
-        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
-            itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
+        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
+            itListMapElementState!=OldState->TheListMapElementStateCore.end();
             ++itListMapElementState)
         {
             unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();
@@ -2232,11 +2404,10 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     TimeStamp beginUpdatedCovariance=getTimeStamp();
 #endif
 
-    Eigen::MatrixXd oldUpdatedCovarianceMatrix=UpdatedState->covarianceMatrix;
+    //Eigen::MatrixXd oldUpdatedCovarianceMatrix=OldState->covarianceMatrix;
+    //UpdatedState->covarianceMatrix=OldState->covarianceMatrix;
 
 
-//    Eigen::MatrixXd AuxiliarMatrix;//(dimensionErrorState, dimensionErrorState);
-//    AuxiliarMatrix=Eigen::MatrixXd::Identity(dimensionErrorState, dimensionErrorState)-kalmanGain*JacobianMeasurementErrorState;
 
 
 //#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
@@ -2271,8 +2442,14 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     //UpdatedState->covarianceMatrix.noalias()=AuxiliarMatrix*oldUpdatedCovarianceMatrix*AuxiliarMatrix.transpose()+kalmanGain*innovationCovariance*kalmanGain.transpose();
 
 
-    UpdatedState->covarianceMatrix+=
-            oldUpdatedCovarianceMatrix*JacobianMeasurementErrorState.transpose()*( -innovation_covariance_inverse + innovation_covariance_inverse* JacobianMeasurementErrorState*oldUpdatedCovarianceMatrix*JacobianMeasurementErrorState.transpose()  *innovation_covariance_inverse.transpose()  )*JacobianMeasurementErrorState*oldUpdatedCovarianceMatrix;
+    Eigen::MatrixXd AuxiliarMatrix(dimensionErrorState, dimensionErrorState);
+    AuxiliarMatrix=Eigen::MatrixXd::Identity(dimensionErrorState, dimensionErrorState)-kalmanGain*JacobianMeasurementErrorState;
+
+    UpdatedState->covarianceMatrix=
+            AuxiliarMatrix*OldState->covarianceMatrix*AuxiliarMatrix.transpose()+kalmanGain*innovationCovariance*kalmanGain.transpose();
+
+//    UpdatedState->covarianceMatrix=OldState->covarianceMatrix+
+//            OldState->covarianceMatrix*JacobianMeasurementErrorState.transpose()*( -innovation_covariance_inverse + innovation_covariance_inverse* JacobianMeasurementErrorState*OldState->covarianceMatrix*JacobianMeasurementErrorState.transpose()  *innovation_covariance_inverse.transpose()  )*JacobianMeasurementErrorState*OldState->covarianceMatrix;
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
     {
@@ -2316,30 +2493,13 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
 
 
 
-    /////// Add element to the buffer
-    if(TheMsfStorageCore->addElement(TheTimeStamp, UpdatedState))
-    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        std::cout<<"!!Error addElement"<<std::endl;
-#endif
-        return -2;
-    }
 
 
-//    // Free update vector -> NO!
-//    if(UpdatedState)
-//        UpdatedState.reset();
-
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
-    std::ostringstream logString;
-    logString<<"MsfLocalizationCore::update() ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-    this->log(logString.str());
-#endif
 
     // End
     return 0;
 }
+
 
 
 

@@ -207,6 +207,9 @@ private:
 protected:
     int update(TimeStamp TheTimeStamp);
 
+private:
+    int updateCore(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore> OldState, std::shared_ptr<StateEstimationCore>& UpdatedState);
+
 
 
 

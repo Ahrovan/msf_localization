@@ -9,7 +9,7 @@
   <arg name="robot_pose_rate" 	default="50" />
 
 
-  <node name="$(arg msf_localization_ros_node_name)" pkg="msf_localization_ros" type="msf_localization_ros" output="screen" launch-prefix="nice -10">
+  <node name="$(arg msf_localization_ros_node_name)" pkg="msf_localization_ros" type="msf_localization_ros" output="screen" launch-prefix="nice -n -20">
 
     <param name="msf_localization_config_file" value="$(arg msf_localization_config_file)" type="string"/>
 
