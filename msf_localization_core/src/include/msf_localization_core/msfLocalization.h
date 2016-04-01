@@ -38,9 +38,6 @@
 #include <thread>
 
 
-//PUGIXML
-//#include "pugixml.hpp"
-
 
 // Boost
 #include <boost/filesystem.hpp>
@@ -50,6 +47,12 @@
 
 // Chrono
 #include <chrono>
+
+
+#include <limits>
+
+
+#include <cmath>        // std::abs
 
 
 // Estimator Cores

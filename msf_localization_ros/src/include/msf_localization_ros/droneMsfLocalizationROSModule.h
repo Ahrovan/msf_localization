@@ -100,7 +100,7 @@
 #include "msf_localization_core/global_parameters_state_core.h"
 
 
-#define _DEBUG_TIME_MSF_LOCALIZATION_ROS 0
+#define _DEBUG_TIME_MSF_LOCALIZATION_ROS 1
 
 
 class MsfLocalizationROS : public MsfLocalizationCore

@@ -97,6 +97,12 @@ public:
     unsigned int getDimensionErrorParameters() const;
     int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
 
+    // Dimension of the noise
+protected:
+    unsigned int dimensionNoise;
+public:
+    unsigned int getDimensionNoise() const;
+    int setDimensionNoise(unsigned int dimensionNoise);
 
 
     // Robot Core

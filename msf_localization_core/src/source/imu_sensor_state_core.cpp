@@ -232,6 +232,9 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
     if(TheImuSensorCore->isEstimationBiasLinearAccelerationEnabled())
     {
         this->biasesLinearAcceleration+=increment_error_state.block<3,1>(dimension, 0);
+
+        std::cout<<"biasesLinearAcceleration="<<this->biasesLinearAcceleration.transpose()<<std::endl;
+
         dimension+=3;
     }
     if(TheImuSensorCore->isEstimationScaleLinearAccelerationEnabled())
@@ -242,6 +245,9 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
     if(TheImuSensorCore->isEstimationBiasAngularVelocityEnabled())
     {
         this->biasesAngularVelocity+=increment_error_state.block<3,1>(dimension, 0);
+
+        std::cout<<"biasesAngularVelocity="<<this->biasesAngularVelocity.transpose()<<std::endl;
+
         dimension+=3;
     }
     if(TheImuSensorCore->isEstimationScaleAngularVelocityEnabled())

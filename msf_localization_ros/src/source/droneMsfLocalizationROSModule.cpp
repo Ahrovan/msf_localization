@@ -473,6 +473,24 @@ int MsfLocalizationROS::readFreeModelRobotConfig(pugi::xml_node robot, std::shar
     // Noises Estimation
 
     // Linear acceleration
+    readingValue=robot.child("position").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRobotCoreAux->setNoisePosition(variance.asDiagonal());
+    }
+
+    // Linear velocity
+    readingValue=robot.child("lin_speed").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRobotCoreAux->setNoiseLinearSpeed(variance.asDiagonal());
+    }
+
+    // Linear acceleration
     readingValue=robot.child("lin_accel").child_value("noise");
     {
         std::istringstream stm(readingValue);
@@ -481,14 +499,23 @@ int MsfLocalizationROS::readFreeModelRobotConfig(pugi::xml_node robot, std::shar
         TheRobotCoreAux->setNoiseLinearAcceleration(variance.asDiagonal());
     }
 
-//    // Angular velocity -> Not used
-//    readingValue=robot.child("ang_velocity").child_value("noise");
-//    {
-//        std::istringstream stm(readingValue);
-//        Eigen::Vector3d variance;
-//        stm>>variance[0]>>variance[1]>>variance[2];
-//        TheRobotCoreAux->setNoiseAngularVelocity(variance.asDiagonal());
-//    }
+    // Attitude
+    readingValue=robot.child("attitude").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRobotCoreAux->setNoiseAttitude(variance.asDiagonal());
+    }
+
+    // Angular velocity
+    readingValue=robot.child("ang_velocity").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRobotCoreAux->setNoiseAngularVelocity(variance.asDiagonal());
+    }
 
     // Angular acceleration
     readingValue=robot.child("ang_accel").child_value("noise");
@@ -603,6 +630,23 @@ int MsfLocalizationROS::readImuConfig(pugi::xml_node sensor, unsigned int sensor
     //// Measurements
     pugi::xml_node measurements = sensor.child("measurements");
 
+
+    /// Linear Acceleration
+    pugi::xml_node meas_linear_acceleration = measurements.child("linear_acceleration");
+
+    readingValue=meas_linear_acceleration.child_value("enabled");
+    if(std::stoi(readingValue))
+        TheRosSensorImuInterface->enableMeasurementLinearAcceleration();
+
+    readingValue=meas_linear_acceleration.child_value("var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        TheRosSensorImuInterface->setNoiseMeasurementLinearAcceleration(variance.asDiagonal());
+    }
+
+
     /// Orientation
     pugi::xml_node orientation = measurements.child("orientation");
 
@@ -630,20 +674,6 @@ int MsfLocalizationROS::readImuConfig(pugi::xml_node sensor, unsigned int sensor
 
 
 
-    /// Linear Acceleration
-    pugi::xml_node meas_linear_acceleration = measurements.child("linear_acceleration");
-
-    readingValue=meas_linear_acceleration.child_value("enabled");
-    if(std::stoi(readingValue))
-        TheRosSensorImuInterface->enableMeasurementLinearAcceleration();
-
-    readingValue=meas_linear_acceleration.child_value("var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        TheRosSensorImuInterface->setNoiseMeasurementLinearAcceleration(variance.asDiagonal());
-    }
 
 
 
@@ -1612,7 +1642,6 @@ int MsfLocalizationROS::predictThreadFunction()
 
 
         // Search if element already exists
-        // TODO
         TimeStamp TheTimeStamp=getTimeStamp();
         std::shared_ptr<StateEstimationCore> ThePredictedState;
 

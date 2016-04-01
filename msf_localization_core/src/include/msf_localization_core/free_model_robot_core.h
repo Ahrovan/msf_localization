@@ -30,6 +30,25 @@ public:
 
     ///// Prediction Noises
 
+
+    // Noise Position
+protected:
+public:
+    Eigen::Matrix3d noisePosition;
+public:
+    Eigen::Matrix3d getNoisePosition() const;
+    int setNoisePosition(Eigen::Matrix3d noisePosition);
+
+
+    // Noise Linear Speed
+protected:
+public:
+    Eigen::Matrix3d noiseLinearSpeed;
+public:
+    Eigen::Matrix3d getNoiseLinearSpeed() const;
+    int setNoiseLinearSpeed(Eigen::Matrix3d noiseLinearSpeed);
+
+
     // Noise Linear Acceleration
 protected:
 public:
@@ -37,6 +56,15 @@ public:
 public:
     Eigen::Matrix3d getNoiseLinearAcceleration() const;
     int setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration);
+
+
+    // Noise Attitude -> NOT USED!
+protected:
+public:
+    Eigen::Matrix3d noiseAttitude;
+public:
+    Eigen::Matrix3d getNoiseAttitude() const;
+    int setNoiseAttitude(Eigen::Matrix3d noiseAttitude);
 
 
     // Noise Angular Velocity -> NOT USED!

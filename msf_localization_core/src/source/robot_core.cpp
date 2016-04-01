@@ -10,7 +10,8 @@ RobotCore::RobotCore() :
     dimensionState(0),
     dimensionErrorState(0),
     dimensionParameters(0),
-    dimensionErrorParameters(0)
+    dimensionErrorParameters(0),
+    dimensionNoise(0)
 {
     // Robot Type
     robotType=RobotTypes::undefined;
@@ -100,6 +101,17 @@ unsigned int RobotCore::getDimensionErrorParameters() const
 int RobotCore::setDimensionErrorParameters(unsigned int dimensionErrorParameters)
 {
     this->dimensionErrorParameters=dimensionErrorParameters;
+    return 0;
+}
+
+unsigned int RobotCore::getDimensionNoise() const
+{
+    return this->dimensionNoise;
+}
+
+int RobotCore::setDimensionNoise(unsigned int dimensionNoise)
+{
+    this->dimensionNoise=dimensionNoise;
     return 0;
 }
 

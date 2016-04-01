@@ -11,8 +11,13 @@ FreeModelRobotCore::FreeModelRobotCore():
     dimensionParameters=0;
     dimensionErrorParameters=0;
 
+    dimensionNoise=9+9;
+
+    noisePosition.setZero();
+    noiseLinearSpeed.setZero();
     noiseLinearAcceleration.setZero();
-    noiseAngularVelocity.setZero(); // Not used anymore
+    noiseAngularVelocity.setZero();
+    noiseAttitude.setZero();
     noiseAngularAcceleration.setZero();
 
     // TODO -> This is not the best moment to do this! The state might change!
@@ -28,6 +33,28 @@ FreeModelRobotCore::~FreeModelRobotCore()
 }
 
 
+Eigen::Matrix3d FreeModelRobotCore::getNoisePosition() const
+{
+    return this->noisePosition;
+}
+
+int FreeModelRobotCore::setNoisePosition(Eigen::Matrix3d noisePosition)
+{
+    this->noisePosition=noisePosition;
+    return 0;
+}
+
+Eigen::Matrix3d FreeModelRobotCore::getNoiseLinearSpeed() const
+{
+    return this->noiseLinearSpeed;
+}
+
+int FreeModelRobotCore::setNoiseLinearSpeed(Eigen::Matrix3d noiseLinearSpeed)
+{
+    this->noiseLinearSpeed=noiseLinearSpeed;
+    return 0;
+}
+
 Eigen::Matrix3d FreeModelRobotCore::getNoiseLinearAcceleration() const
 {
     return this->noiseLinearAcceleration;
@@ -36,6 +63,17 @@ Eigen::Matrix3d FreeModelRobotCore::getNoiseLinearAcceleration() const
 int FreeModelRobotCore::setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration)
 {
     this->noiseLinearAcceleration=noiseLinearAcceleration;
+    return 0;
+}
+
+Eigen::Matrix3d FreeModelRobotCore::getNoiseAttitude() const
+{
+    return this->noiseAttitude;
+}
+
+int FreeModelRobotCore::setNoiseAttitude(Eigen::Matrix3d noiseAttitude)
+{
+    this->noiseAttitude=noiseAttitude;
     return 0;
 }
 
@@ -67,26 +105,50 @@ Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceNoise(const TimeSta
     Eigen::SparseMatrix<double> covariance_noise;
 
     // Resize
-    covariance_noise.resize(3+3,3+3);
+    covariance_noise.resize(dimensionNoise, dimensionNoise);
     //covariance_noise.setZero();
-    covariance_noise.reserve(3+3);
+    covariance_noise.reserve(dimensionNoise);
 
     std::vector<Eigen::Triplet<double> > tripletList;
 
     //
     double dt=deltaTimeStamp.get_double();
 
+    int dimension_noise_i=0;
 
     // Fill
-    //covariance_noise.block<3,3>(0,0)=this->noiseLinearAcceleration*deltaTimeStamp.get_double();
+
+    // Position
     for(int i=0; i<3; i++)
-        tripletList.push_back(Eigen::Triplet<double>(i,i,this->noiseLinearAcceleration(i,i)*dt));
+        tripletList.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,this->noisePosition(i,i)*dt));
+    dimension_noise_i+=3;
 
-
-
-    //covariance_noise.block<3,3>(3,3)=this->noiseAngularAcceleration*deltaTimeStamp.get_double();
+    // Linear Speed
     for(int i=0; i<3; i++)
-        tripletList.push_back(Eigen::Triplet<double>(3+i,3+i,this->noiseAngularAcceleration(i,i)*dt));
+        tripletList.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,this->noiseLinearSpeed(i,i)*dt));
+    dimension_noise_i+=3;
+
+    // Linear Acceleration
+    for(int i=0; i<3; i++)
+        tripletList.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,this->noiseLinearAcceleration(i,i)*dt));
+    dimension_noise_i+=3;
+
+
+
+    // Attitude
+    for(int i=0; i<3; i++)
+        tripletList.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,this->noiseAttitude(i,i)*dt));
+    dimension_noise_i+=3;
+
+    // Angular Velocity
+    for(int i=0; i<3; i++)
+        tripletList.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,this->noiseAngularVelocity(i,i)*dt));
+    dimension_noise_i+=3;
+
+    // Angular Acceleration
+    for(int i=0; i<3; i++)
+        tripletList.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,this->noiseAngularAcceleration(i,i)*dt));
+    dimension_noise_i+=3;
 
 
     covariance_noise.setFromTriplets(tripletList.begin(), tripletList.end());
@@ -457,24 +519,56 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // Jacobian Size
 
 
-    predictedState->errorStateNoiseJacobian.resize(dimensionErrorState,3+3);
-    predictedState->errorStateNoiseJacobian.reserve(3+3);
+    predictedState->errorStateNoiseJacobian.resize(dimensionErrorState, dimensionNoise);
+    predictedState->errorStateNoiseJacobian.reserve(dimensionNoise);
 
 
     std::vector<Eigen::Triplet<double> > tripletListNoiseJacobian;
 
+    int dimension_state_i=0;
+    int dimension_noise_i=0;
 
 
     // Fill
 
+    // Position
+    for(int i=0; i<3; i++)
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
+    dimension_state_i+=3;
+    dimension_noise_i+=3;
+
+    // Linear Velocity
+    for(int i=0; i<3; i++)
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
+    dimension_state_i+=3;
+    dimension_noise_i+=3;
+
+    // Linear Acceleration
     //jacobian_error_state_noise.block<3,3>(6,0)=Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
-        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(6+i,i,1));
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
+    dimension_state_i+=3;
+    dimension_noise_i+=3;
 
 
+    // Attitude
+    for(int i=0; i<3; i++)
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
+    dimension_state_i+=3;
+    dimension_noise_i+=3;
+
+    // Angular Velocity
+    for(int i=0; i<3; i++)
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
+    dimension_state_i+=3;
+    dimension_noise_i+=3;
+
+    // Angular Acceleration
     //jacobian_error_state_noise.block<3,3>(15,3)=Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
-        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(9+6+i,3+i,1));
+        tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
+    dimension_state_i+=3;
+    dimension_noise_i+=3;
 
 
 

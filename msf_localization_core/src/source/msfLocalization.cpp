@@ -1338,6 +1338,33 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 //return 0;
 
+    // Iterative EKF Vars and preparation
+    bool iterativeEkfEnabled=false;
+    bool iterativeEkfEnd=false;
+
+    int numMaxIterations=2;
+    int numIterations=0;
+
+    double toleranceDistanceMahalanobis=1e-5;
+
+
+
+    // Mahalanobis Distance
+    double mahalanobisDistanceOld=std::numeric_limits<double>::infinity();
+
+
+    // Loop
+    while(!iterativeEkfEnd)
+    {
+
+        // Iterative EKF
+        if(!iterativeEkfEnabled)
+        {
+            iterativeEkfEnd=true;
+        }
+
+
+
     ///// Measurement prediction and matching
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -1409,21 +1436,21 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
-        {
-            std::shared_ptr<ImuSensorMeasurementCore> imuMeasurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>((*itListMeas));
+                {
+                    std::shared_ptr<ImuSensorMeasurementCore> imuMeasurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>((*itListMeas));
 
-            std::ostringstream logString;
+                    std::ostringstream logString;
 
-            logString<<"MsfLocalizationCore::update() matched Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-            logString<<" a: "<<imuMeasurement->getLinearAcceleration().transpose()<<std::endl;
-            logString<<" w: "<<imuMeasurement->getAngularVelocity().transpose()<<std::endl;
+                    logString<<"MsfLocalizationCore::update() matched Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<" a: "<<imuMeasurement->getLinearAcceleration().transpose()<<std::endl;
+                    logString<<" w: "<<imuMeasurement->getAngularVelocity().transpose()<<std::endl;
 
-            logString<<"MsfLocalizationCore::update() predicted Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-            logString<<" a: "<<TheImuSensorPredictedMeasurement->getLinearAcceleration().transpose()<<std::endl;
-            logString<<" w: "<<TheImuSensorPredictedMeasurement->getAngularVelocity().transpose()<<std::endl;
+                    logString<<"MsfLocalizationCore::update() predicted Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<" a: "<<TheImuSensorPredictedMeasurement->getLinearAcceleration().transpose()<<std::endl;
+                    logString<<" w: "<<TheImuSensorPredictedMeasurement->getAngularVelocity().transpose()<<std::endl;
 
-            this->log(logString.str());
-        }
+                    this->log(logString.str());
+                }
 #endif
 
 
@@ -1754,7 +1781,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 dimensionErrorStateI=(*itListSensorCore)->getDimensionErrorState();
                 if((*itListSensorCore) == (*itListPredictedMeas)->getTheSensorCore())
                 {
-                    if(dimensionErrorStateI)
+                    if(dimensionErrorMeasurementI && dimensionErrorStateI)
                         JacobianMeasurementErrorState.block(dimensionTotalMeasurementI, dimensionTotalErrorStateI, dimensionErrorMeasurementI, dimensionErrorStateI)=(*itListPredictedMeas)->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState;
                 }
                 else
@@ -1789,7 +1816,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
                                 if(TheVisualMarkerLandmarkCore->getId() == TheVisualMarkerMeasurementCore->getVisualMarkerId())
                                 {
-                                    if(dimensionErrorStateI)
+                                    if(dimensionErrorMeasurementI && dimensionErrorStateI)
                                         JacobianMeasurementErrorState.block(dimensionTotalMeasurementI, dimensionTotalErrorStateI, dimensionErrorMeasurementI, dimensionErrorStateI)=(*itListPredictedMeas)->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState;
                                 }
                                 else
@@ -1861,7 +1888,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 unsigned int dimensionErrorMeasurementJ=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
                 if((*itListMatchedMeas)->getTheSensorCore() == (*itListPredictedMeas)->getTheSensorCore())
                 {
-                    if(dimensionErrorMeasurementJ)
+                    if(dimensionErrorMeasurementI && dimensionErrorMeasurementJ)
                         JacobianMeasurementNoise.block(dimensionTotalMeasurementI, dimensionTotalMeasurementJ, dimensionErrorMeasurementI, dimensionErrorMeasurementJ)=(*itListPredictedMeas)->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise;
                 }
                 else
@@ -1900,7 +1927,10 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         {
             unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
             unsigned int dimensionGlobalParametersI=this->TheGlobalParametersCore->getDimensionErrorParameters();
-            JacobianMeasurementNoise.block(dimensionTotalMeasurementI, 0, dimensionErrorMeasurementI, dimensionGlobalParametersI)=(*itListPredictedMeas)->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters;
+
+            if(dimensionErrorMeasurementI && dimensionGlobalParametersI)
+                JacobianMeasurementNoise.block(dimensionTotalMeasurementI, 0, dimensionErrorMeasurementI, dimensionGlobalParametersI)=(*itListPredictedMeas)->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters;
+
             dimensionTotalMeasurementI+=dimensionErrorMeasurementI;
         }
     }
@@ -2227,6 +2257,19 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     // Equation
     distance_mahalanobis=innovationVector.transpose()*innovation_covariance_inverse*innovationVector;
 
+    //std::cout<<"distance_mahalanobis: "<<distance_mahalanobis<<std::endl;
+
+    // Comparation with mahalanobisDistanceOld;
+//    std::cout<<"distance_mahalanobis-mahalanobisDistanceOld="<<distance_mahalanobis-mahalanobisDistanceOld<<std::endl;
+//    std::cout<<"abs(distance_mahalanobis-mahalanobisDistanceOld)="<<std::abs(distance_mahalanobis-mahalanobisDistanceOld)<<std::endl;
+    if(std::abs(distance_mahalanobis-mahalanobisDistanceOld)<toleranceDistanceMahalanobis)
+    {
+       iterativeEkfEnd=true;
+       //std::cout<<"num iter: "<<numIterations<<std::endl;
+    }
+    else
+       mahalanobisDistanceOld=distance_mahalanobis;
+
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
@@ -2493,6 +2536,56 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
 
+    //// Iterative EKF
+
+    // Check number iterations
+    numIterations++;
+    if(numIterations>=numMaxIterations)
+    {
+        iterativeEkfEnd=true;
+        //std::cout<<"max num iter reached!"<<std::endl;
+    }
+
+    // Prepare next iteration
+    if(!iterativeEkfEnd)
+    {
+        // OldState <- Updated State
+
+
+        // Measurements
+        OldState->TheListMeasurementCore=UpdatedState->TheListMeasurementCore;
+
+
+        // Covariance
+        OldState->covarianceMatrix=UpdatedState->covarianceMatrix;
+
+
+        // Global Parameters
+        //std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore;
+        OldState->TheGlobalParametersStateCore=UpdatedState->TheGlobalParametersStateCore;
+        //UpdatedState->TheGlobalParametersStateCore=std::make_shared<GlobalParametersStateCore>();
+        //*UpdatedState->TheGlobalParametersStateCore=*OldState->TheGlobalParametersStateCore;
+
+        // Robot Stat
+        //std::shared_ptr<RobotStateCore> TheRobotStateCore;
+        OldState->TheRobotStateCore=UpdatedState->TheRobotStateCore;
+    //    UpdatedState->TheRobotStateCore=std::make_shared<RobotStateCore>();
+    //    *UpdatedState->TheRobotStateCore=*OldState->TheRobotStateCore;
+
+        // Sensors State
+        //std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
+        OldState->TheListSensorStateCore=UpdatedState->TheListSensorStateCore;
+
+        // Map State
+        //std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
+        OldState->TheListMapElementStateCore=UpdatedState->TheListMapElementStateCore;
+
+
+    }
+
+
+
+    }
 
 
 

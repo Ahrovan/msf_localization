@@ -151,6 +151,16 @@ public:
     // TODO
 
 
+    // Angular Velocity Sensitivity
+protected:
+    bool flagEstimationSensitivityAngularVelocity; // TODO
+public:
+    bool isEstimationSensitivityAngularVelocityEnabled() const;
+    int enableEstimationSensitivityAngularVelocity();
+    int enableParameterSensitivityAngularVelocity();
+
+
+
 
     /// Linear Acceleration biases: ba (3x1)
 
