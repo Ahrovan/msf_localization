@@ -601,7 +601,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
 
     // Auxiliar variables
-
+    Eigen::Vector3d tran_inc_wrt_world=TheMapElementStateCore->getPosition()-TheRobotStateCoreAux->getPosition()-Quaternion::cross_sandwich(TheRobotStateCoreAux->getAttitude(), the_sensor_state_core->getPositionSensorWrtRobot(), Quaternion::inv(TheRobotStateCoreAux->getAttitude()));
     Eigen::Vector3d tran_inc2_wrt_world=TheMapElementStateCore->getPosition()-TheRobotStateCoreAux->getPosition();
 
     //Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
@@ -618,6 +618,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     Eigen::Matrix4d inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye=mat_q_plus_att_visual_marker_wrt_visual_marker_eye.inverse();
 
     Eigen::Matrix4d mat_q_minus_att_visual_marker_wrt_world=Quaternion::quatMatMinus(TheMapElementStateCore->getAttitude());
+    Eigen::Matrix4d mat_q_plus_att_visual_marker_wrt_world=Quaternion::quatMatPlus(TheMapElementStateCore->getAttitude());
 
     Eigen::Matrix4d mat_q_plus_att_robot_wrt_world=Quaternion::quatMatPlus(TheRobotStateCoreAux->getAttitude());
 
@@ -627,6 +628,14 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     Eigen::Matrix4d mat_q_plus_tran_inc2_wrt_world=Quaternion::quatMatPlus(tran_inc2_wrt_world);
 
     Eigen::Matrix4d mat_q_minus_tinc2aux_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(tran_inc2_wrt_world, att_visual_marker_eye_wrt_world));
+
+    Eigen::Matrix4d mat_q_minus_aux1=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(the_sensor_state_core->getPositionSensorWrtRobot(),the_sensor_state_core->getAttitudeSensorWrtRobot()));
+
+    Eigen::Matrix4d mat_q_plus_tra_visual_marker_eye_wrt_robot=Quaternion::quatMatPlus(the_sensor_state_core->getAttitudeSensorWrtRobot());
+
+    Eigen::Matrix4d mat_q_plus_tran_inc_wrt_world=Quaternion::quatMatPlus(tran_inc_wrt_world);
+
+    Eigen::Matrix4d mat_q_mins_aux2=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(tran_inc_wrt_world, att_visual_marker_eye_wrt_world));
 
     Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
     mat_diff_quat_inv_wrt_quat<<1, 0, 0, 0,
@@ -644,7 +653,6 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     mat_diff_vector_wrt_vector_amp<<0, 1, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 1;
-
 
 
 
@@ -749,6 +757,8 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     // Fill
     {
         int dimension_error_measurement_i=0;
+
+        // pos
         if(this->isMeasurementPositionEnabled())
         {
             int dimension_sensor_error_parameters_i=0;
@@ -757,32 +767,35 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
             // pos
             if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                // TODO
+                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3, 3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+                        -mat_diff_vector_wrt_vector_amp*(mat_q_minus_aux1*mat_diff_quat_inv_wrt_quat + mat_q_plus_att_visual_marker_eye_wrt_robot*mat_q_plus_tra_visual_marker_eye_wrt_robot )*mat_diff_vector_wrt_vector_amp.transpose();
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
-                // TODO
+                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+                        -mat_diff_vector_wrt_vector_amp*(mat_q_minus_aux1*mat_diff_quat_inv_wrt_quat + mat_q_plus_att_visual_marker_eye_wrt_robot*mat_q_plus_tra_visual_marker_eye_wrt_robot )*mat_diff_vector_wrt_vector_amp.transpose();
                 dimension_sensor_error_parameters_i+=3;
             }
 
             // att
             if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                // TODO
-
+                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3, 3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+                        mat_diff_vector_wrt_vector_amp*( mat_q_mins_aux2*mat_diff_quat_inv_wrt_quat + mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_plus_tran_inc_wrt_world )*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*0.5*mat_diff_error_quat_wrt_error_theta;
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
-                // TODO
-
+                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+                        mat_diff_vector_wrt_vector_amp*( mat_q_mins_aux2*mat_diff_quat_inv_wrt_quat + mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_plus_tran_inc_wrt_world )*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*0.5*mat_diff_error_quat_wrt_error_theta;
                 dimension_sensor_error_parameters_i+=3;
             }
 
             dimension_error_measurement_i+=3;
         }
 
+        // att
         if(this->isMeasurementAttitudeEnabled())
         {
             int dimension_sensor_error_parameters_i=0;
@@ -805,15 +818,12 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
             {
                 predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
                         mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
-
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
                 predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
                         mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
-
-
                 dimension_sensor_error_parameters_i+=3;
             }
 
@@ -840,24 +850,73 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     // Fill
     {
         int dimension_error_measurement_i=0;
+
+        // pos
         if(this->isMeasurementPositionEnabled())
         {
+            int dimension_map_element_error_parameters_i=0;
+            int dimension_map_element_error_state_i=0;
+
             // pos
-            // TODO
+            if(TheMapElementCore->isEstimationPositionVisualMarkerWrtWorldEnabled())
+            {
+                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
+                        mat_diff_vector_wrt_vector_amp*mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_eye_wrt_world  *mat_diff_vector_wrt_vector_amp.transpose();
+                dimension_map_element_error_state_i+=3;
+            }
+            else
+            {
+                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
+                        mat_diff_vector_wrt_vector_amp*mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_eye_wrt_world  *mat_diff_vector_wrt_vector_amp.transpose();
+                dimension_map_element_error_parameters_i+=3;
+            }
 
             // att
-            // TODO
+            if(TheMapElementCore->isEstimationAttitudeVisualMarkerWrtWorldEnabled())
+            {
+                // Zeros
+                dimension_map_element_error_state_i+=3;
+            }
+            else
+            {
+                // Zeros
+                dimension_map_element_error_parameters_i+=3;
+            }
 
             dimension_error_measurement_i+=3;
         }
 
+        // att
         if(this->isMeasurementAttitudeEnabled())
         {
+            int dimension_map_element_error_parameters_i=0;
+            int dimension_map_element_error_state_i=0;
+
             // pos
-            // Zeros
+            if(TheMapElementCore->isEstimationPositionVisualMarkerWrtWorldEnabled())
+            {
+                // Zeros
+                dimension_map_element_error_state_i+=3;
+            }
+            else
+            {
+                // Zeros
+                dimension_map_element_error_parameters_i+=3;
+            }
 
             // att
-            // TODO
+            if(TheMapElementCore->isEstimationAttitudeVisualMarkerWrtWorldEnabled())
+            {
+                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye* mat_q_plus_att_world_wrt_visual_marker_eye *mat_q_plus_att_visual_marker_wrt_world*mat_diff_error_quat_wrt_error_theta;
+                dimension_map_element_error_state_i+=3;
+            }
+            else
+            {
+                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye* mat_q_plus_att_world_wrt_visual_marker_eye *mat_q_plus_att_visual_marker_wrt_world*mat_diff_error_quat_wrt_error_theta;
+                dimension_map_element_error_parameters_i+=3;
+            }
 
             dimension_error_measurement_i+=3;
         }
