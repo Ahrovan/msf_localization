@@ -1005,6 +1005,8 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     else
         TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(newMapElementCore);
 
+    // Configurations of the map element core. Only needed if was not previously set. Can be done anycase.
+
     // Set id in the map element core
     if(TheCodeCodedVisualMarkerLandmarkCore->setId(TheCodedVisualMarkerMeasurement->getVisualMarkerId()))
         return 2;

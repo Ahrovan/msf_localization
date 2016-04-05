@@ -135,6 +135,9 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<
     }
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
+        if(thePredictedMeasurement->attitude_[0]<0 || theMatchedMeasurement->attitude_[0]<0)
+            std::cout<<"Error quaternion not set ok"<<std::endl;
+
         Eigen::Vector4d quat_innov_attitude=Quaternion::cross(Quaternion::inv(thePredictedMeasurement->attitude_), theMatchedMeasurement->attitude_);
 
         the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);

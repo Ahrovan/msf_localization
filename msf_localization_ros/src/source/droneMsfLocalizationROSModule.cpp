@@ -1308,6 +1308,14 @@ try
             if(!PredictedState)
             {
 
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationROS::robotPoseThreadFunction() predicting TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+
                 // TODO this should be a while and being carefully with the memory
                 if(this->predictNoAddBuffer(TheTimeStamp, PredictedState))
                 {
@@ -1519,6 +1527,22 @@ try
                     Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPosition();
                     Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitude();
 
+
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+
+                        logString<<"Visual Marker id="<<std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(theCodedVisualMarkersLandamarkState->getTheMapElementCore())->getId()<<std::endl;
+                        logString<<"  - Attitude: "<<mapElementAttitude.transpose()<<std::endl;
+
+
+                        this->log(logString.str());
+                    }
+#endif
+
+
+
                     tf::Quaternion tf_rot(mapElementAttitude[1], mapElementAttitude[2], mapElementAttitude[3], mapElementAttitude[0]);
                     tf::Vector3 tf_tran(mapElementPosition[0], mapElementPosition[1], mapElementPosition[2]);
 
@@ -1649,6 +1673,16 @@ int MsfLocalizationROS::predictThreadFunction()
         {
 //            predictThreadState.setProcessing(TheTimeStamp);
             // TODO Fix. This should be a while but being careful with the memory
+
+
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::predictThreadFunction() predicting TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
             if(this->predict(TheTimeStamp))
             {
                 // Error

@@ -292,13 +292,15 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
     // Unit quaternion -> Very needed!
 
-    predictedState->attitude=predictedAttitude/predictedAttitude.norm();
+    //predictedState->attitude=predictedAttitude/predictedAttitude.norm();
 //std::cout<<"predictedState->attitude="<<predictedState->attitude.transpose()<<std::endl;
 
 
-    // Quaternion -> Real part always positive
-    if(predictedState->attitude[0]<0)
-        predictedState->attitude=-predictedState->attitude;
+    // Quaternion unit (very needed) + Real part always positive
+    if(predictedAttitude[0]<0)
+        predictedState->attitude=-predictedAttitude/predictedAttitude.norm();
+    else
+        predictedState->attitude=predictedAttitude/predictedAttitude.norm();
 
 
 
