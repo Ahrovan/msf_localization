@@ -1086,11 +1086,14 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     // Sensor State
     if(!currentSensorState)
         return 30;
-    if(!currentSensorState->getTheSensorCore())
-        return 31;
     // Cast
     std::shared_ptr<CodedVisualMarkerEyeStateCore> TheSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorState);
 
+    // Sensor Core
+    if(!currentSensorState->getTheSensorCore())
+        return 31;
+    // Cast
+    std::shared_ptr<const CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(currentSensorState->getTheSensorCore());
 
     // Matched Measurement
     if(!matchedMeasurement)
@@ -1119,40 +1122,182 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     int dimension_map_new_element_error_state_total=TheCodeCodedVisualMarkerLandmarkCore->getDimensionErrorState();
 
 
-    /// Jacobian Mapping Error-State
+
+    // Aux vars
+    Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(TheSensorState->getAttitudeSensorWrtRobot(), TheCodedVisualMarkerMeasurement->getVisualMarkerPosition(), Quaternion::inv(TheSensorState->getAttitudeSensorWrtRobot()))+TheSensorState->getPositionSensorWrtRobot();
+
+    Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(TheRobotState->getAttitude(), TheSensorState->getAttitudeSensorWrtRobot());
 
 
-    // Robot
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_world=Quaternion::quatMatPlus(TheCodedVisualMarkerLandmarkStateCore->getAttitude());
+    Eigen::Matrix4d mat_inv_quat_plus_att_visual_marker_wrt_world=mat_quat_plus_att_visual_marker_wrt_world.inverse();
+
+    Eigen::Matrix4d mat_quat_minus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatMinus(TheCodedVisualMarkerMeasurement->getVisualMarkerAttitude());
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(TheCodedVisualMarkerMeasurement->getVisualMarkerAttitude());
+
+    Eigen::Matrix4d mat_quat_minus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatMinus(TheSensorState->getAttitudeSensorWrtRobot());
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatPlus(TheSensorState->getAttitudeSensorWrtRobot());
+
+    Eigen::Matrix4d mat_quat_minus_att_world_wrt_visual_marker_eye=Quaternion::quatMatMinus(Quaternion::inv(att_visual_marker_eye_wrt_world));
+
+    Eigen::Matrix4d mat_quat_plus_att_robot_wrt_world=Quaternion::quatMatPlus(TheRobotState->getAttitude());
+
+    Eigen::Matrix4d mat_quat_minus_att_world_wrt_robot=Quaternion::quatMatMinus(Quaternion::inv(TheRobotState->getAttitude()));
+
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_eye_wrt_world=Quaternion::quatMatPlus(att_visual_marker_eye_wrt_world);
+
+    Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_robot=Quaternion::quatMatPlus(tran_visual_marker_wrt_robot);
+
+    Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(TheCodedVisualMarkerMeasurement->getVisualMarkerPosition());
+
+    Eigen::Matrix4d mat_quat_minus_aux1=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(tran_visual_marker_wrt_robot, TheRobotState->getAttitude()));
+    Eigen::Matrix4d mat_quat_minus_aux2=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(TheCodedVisualMarkerMeasurement->getVisualMarkerPosition(), att_visual_marker_eye_wrt_world));
+
+
+    Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
+    mat_diff_quat_inv_wrt_quat<<1, 0, 0, 0,
+                                0, -1, 0, 0,
+                                0, 0, -1, 0,
+                                0, 0, 0, -1;
+
+    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
+    mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
+                                        1, 0, 0,
+                                        0, 1, 0,
+                                        0, 0, 1;
+
+    Eigen::MatrixXd mat_diff_vector_wrt_vector_amp(3,4);
+    mat_diff_vector_wrt_vector_amp<<0, 1, 0, 0,
+                                    0, 0, 1, 0,
+                                    0, 0, 0, 1;
+
+
+
+
+    //// Jacobian Mapping Error-State
+
+
+    /// Robot
     int dimension_robot_error_state_total=TheRobotState->getTheRobotCore()->getDimensionErrorState();
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.resize(dimension_map_new_element_error_state_total, dimension_robot_error_state_total);
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.setZero();
 
-    // TODO
+
+    // tran landmark -> Enabled by default -> TODO Check
+
+        // tran robot
+        TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.block<3,3>(0,0)=
+                Eigen::Matrix3d::Identity(3,3);
+
+        // lin vel robot
+        // Zeros
+
+        // lin acc robot
+        // Zeros
+
+        // attitude robot
+        TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.block<3,3>(0,9)=
+                mat_diff_vector_wrt_vector_amp*(mat_quat_minus_aux1*mat_diff_quat_inv_wrt_quat + mat_quat_plus_att_robot_wrt_world*mat_quat_plus_tran_visual_marker_wrt_robot  )*mat_quat_plus_att_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+
+        // ang vel robot
+        // Zeros
+
+        // ang acc robot
+        // Zeros
+
+
+    // atti landmark -> Enabled by default -> TODO Check
+
+        // tran robot
+        // Zeros
+
+        // lin vel robot
+        // Zeros
+
+        // lin acc robot
+        // Zeros
+
+        // attitude robot
+        TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.block<3,3>(3,9)=
+            mat_diff_error_quat_wrt_error_theta.transpose()*mat_inv_quat_plus_att_visual_marker_wrt_world*mat_quat_minus_att_visual_marker_wrt_visual_marker_eye*mat_quat_minus_att_visual_marker_eye_wrt_robot* mat_quat_plus_att_robot_wrt_world *mat_diff_error_quat_wrt_error_theta;
+
+        // ang vel robot
+        // Zeros
+
+        // ang acc robot
+        // Zeros
 
 
 
-    // Global Parameters
+
+    /// Global Parameters
     int dimension_global_parameters_error_state_total=TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_.resize(dimension_map_new_element_error_state_total, dimension_global_parameters_error_state_total);
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_.setZero();
 
-    // TODO
+
+    // Zeros -> Do nothing
 
 
 
-    // Sensor
+    /// Sensor
     int dimension_sensor_error_state_total=TheSensorState->getTheSensorCore()->getDimensionErrorState();
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_.resize(dimension_map_new_element_error_state_total, dimension_sensor_error_state_total);
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_.setZero();
 
 
+    {
+        int dimension_map_new_element_error_state_i=0;
 
-    // TODO
+        // tran landmark -> Enabled by default -> TODO Check
+        {
+            int dimension_error_state_i=0;
+
+            // Posi sensor wrt robot
+            if(TheSensorCore->isEstimationPositionSensorWrtRobotEnabled())
+            {
+                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_.block<3,3>(dimension_map_new_element_error_state_i, dimension_error_state_i)=
+                    mat_diff_vector_wrt_vector_amp*mat_quat_plus_att_robot_wrt_world* mat_quat_minus_att_world_wrt_robot *mat_diff_vector_wrt_vector_amp.transpose();
+                dimension_error_state_i+=3;
+            }
+
+            // Atti sensor wrt robot
+            if(TheSensorCore->isEstimationAttitudeSensorWrtRobotEnabled())
+            {
+                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_.block<3,3>(dimension_map_new_element_error_state_i, dimension_error_state_i)=
+                    mat_diff_vector_wrt_vector_amp*( mat_quat_minus_aux2 *mat_diff_quat_inv_wrt_quat + mat_quat_plus_att_visual_marker_eye_wrt_world* mat_quat_plus_tran_visual_marker_wrt_visual_marker_eye )*mat_quat_plus_att_robot_wrt_world*mat_quat_plus_att_visual_marker_eye_wrt_robot*0.5*mat_diff_error_quat_wrt_error_theta;
+                dimension_error_state_i+=3;
+            }
+            dimension_map_new_element_error_state_i+=3;
+        }
+
+
+        // atti landmark -> Enabled by default -> TODO Check
+        {
+            int dimension_error_state_i=0;
+
+            // Posi sensor wrt robot
+            if(TheSensorCore->isEstimationPositionSensorWrtRobotEnabled())
+            {
+                // Zeros
+                dimension_error_state_i+=3;
+            }
+
+            // Atti sensor wrt robot
+            if(TheSensorCore->isEstimationAttitudeSensorWrtRobotEnabled())
+            {
+                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_.block<3,3>(dimension_map_new_element_error_state_i, dimension_error_state_i)=
+                    mat_diff_error_quat_wrt_error_theta.transpose()*mat_inv_quat_plus_att_visual_marker_wrt_world*mat_quat_plus_att_robot_wrt_world*mat_quat_minus_att_visual_marker_wrt_visual_marker_eye* mat_quat_plus_att_visual_marker_eye_wrt_robot *mat_diff_error_quat_wrt_error_theta;
+                dimension_error_state_i+=3;
+            }
+            dimension_map_new_element_error_state_i+=3;
+        }
+    }
 
 
 
 
-    /// Jacobian Mapping Error-State Noise
+    //// Jacobian Mapping Error-State Noise
 
     int dimension_map_new_element_measurement=TheCodedVisualMarkerMeasurement->getTheSensorCore()->getDimensionErrorMeasurement();
 
@@ -1160,12 +1305,58 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.setZero();
 
 
-    // TODO
+    {
+        int dimension_map_new_element_error_state_i=0;
+
+        // tran landmark -> Enabled by default -> TODO Check
+        {
+            int dimension_measurement_i=0;
+            // tran meas
+            if(TheSensorCore->isMeasurementPositionEnabled())
+            {
+                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
+                     mat_diff_vector_wrt_vector_amp* mat_quat_plus_att_visual_marker_eye_wrt_world* mat_quat_minus_att_world_wrt_visual_marker_eye *mat_diff_vector_wrt_vector_amp.transpose();
+                dimension_measurement_i+=3;
+            }
+
+            // Atti meas
+            if(TheSensorCore->isMeasurementAttitudeEnabled())
+            {
+                // Zeros
+                dimension_measurement_i+=3;
+            }
+
+            dimension_map_new_element_error_state_i+=3;
+        }
+
+
+        // atti landmark -> Enabled by default -> TODO Check
+        {
+            int dimension_measurement_i=0;
+
+            // tran meas
+            if(TheSensorCore->isMeasurementPositionEnabled())
+            {
+                // Zeros
+                dimension_measurement_i+=3;
+            }
+
+            // Atti meas
+            if(TheSensorCore->isMeasurementAttitudeEnabled())
+            {
+                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
+                    mat_diff_error_quat_wrt_error_theta.transpose()*mat_inv_quat_plus_att_visual_marker_wrt_world*mat_quat_plus_att_visual_marker_eye_wrt_world*mat_quat_plus_att_visual_marker_wrt_visual_marker_eye  *mat_diff_error_quat_wrt_error_theta;
+                dimension_measurement_i+=3;
+            }
+
+            dimension_map_new_element_error_state_i+=3;
+        }
+    }
 
 
 
 
-    // End
+    /// End
     newMapElementState=TheCodedVisualMarkerLandmarkStateCore;
 
     return 0;
