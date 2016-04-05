@@ -28,7 +28,7 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
 
 
     // Iteration over all the measurements
-
+    std::list< std::shared_ptr<SensorMeasurementCore> > the_visual_marker_measurement_core_list;
     for(auto it_visual_markers=msg->markers.begin();
         it_visual_markers!=msg->markers.end();
         ++it_visual_markers)
@@ -66,11 +66,15 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
         }
 
 
-        // Set
-        this->setMeasurement(the_time_stamp, the_visual_marker_measurement_core);
 
+        // Push back
+        the_visual_marker_measurement_core_list.push_back(the_visual_marker_measurement_core);
 
     }
+
+
+    // Set
+    this->setMeasurementList(the_time_stamp, the_visual_marker_measurement_core_list);
 
 
 

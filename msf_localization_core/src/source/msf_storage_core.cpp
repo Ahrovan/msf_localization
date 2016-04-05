@@ -98,6 +98,58 @@ int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shar
     return 0;
 }
 
+int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::list<std::shared_ptr<SensorMeasurementCore>> TheListSensorMeasurement)
+{
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setMeasurementList() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
+
+    // This is already safe
+    this->getElement(TheTimeStamp, TheStateEstimationCore);
+
+    if(!TheStateEstimationCore)
+    {
+        TheStateEstimationCore=std::make_shared<StateEstimationCore>();
+    }
+
+
+    // Measurements
+    for(std::list<std::shared_ptr<SensorMeasurementCore>>::const_iterator itSensorMeasurements=TheListSensorMeasurement.begin();
+        itSensorMeasurements!=TheListSensorMeasurement.end();
+        ++itSensorMeasurements)
+    {
+        TheStateEstimationCore->TheListMeasurementCore.push_back((*itSensorMeasurements));
+
+
+        // This is already safe
+        this->addElement(TheTimeStamp, TheStateEstimationCore);
+
+    }
+
+
+
+
+    // Add TimeStamp to the outdated elements list
+    this->addOutdatedElement(TheTimeStamp);
+
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
+    return 0;
+}
+
 
 int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {

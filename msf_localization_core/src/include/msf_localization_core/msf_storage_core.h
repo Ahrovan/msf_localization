@@ -109,7 +109,7 @@ public:
     // Set a measurement in the ring buffer with given time stamp (safe)
 public:
     int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
-
+    int setMeasurementList(const TimeStamp TheTimeStamp, const std::list< std::shared_ptr<SensorMeasurementCore> > TheListSensorMeasurement);
 
 
     // Purge Ring Buffer (safe)

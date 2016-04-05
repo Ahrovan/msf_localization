@@ -164,7 +164,15 @@ int FreeModelRobotStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd 
     DeltaQuat.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(9,0);
     DeltaQuat=DeltaQuat/DeltaQuat.norm();
 
-    attitude=Quaternion::cross(attitude, DeltaQuat);
+    Eigen::Vector4d attitudeAux=Quaternion::cross(attitude, DeltaQuat);
+
+    // Quaternion -> Real part always positive
+    if(attitudeAux[0]<0)
+        attitude=-attitudeAux;
+    else
+        attitude=attitudeAux;
+
+
     angular_velocity+=increment_error_state.block<3,1>(12,0);
     angular_acceleration+=increment_error_state.block<3,1>(15,0);
 

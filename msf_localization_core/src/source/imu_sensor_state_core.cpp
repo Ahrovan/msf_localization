@@ -226,7 +226,13 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
         DeltaQuat.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(dimension,0);
         DeltaQuat=DeltaQuat/DeltaQuat.norm();
 
-        this->attitudeSensorWrtRobot=Quaternion::cross(this->attitudeSensorWrtRobot, DeltaQuat);
+        Eigen::Vector4d attitudeSensorWrtRobot=Quaternion::cross(this->attitudeSensorWrtRobot, DeltaQuat);
+
+        if(attitudeSensorWrtRobot[0]<0)
+            this->attitudeSensorWrtRobot=-attitudeSensorWrtRobot;
+        else
+            this->attitudeSensorWrtRobot=attitudeSensorWrtRobot;
+
         dimension+=3;
     }
     if(TheImuSensorCore->isEstimationBiasLinearAccelerationEnabled())

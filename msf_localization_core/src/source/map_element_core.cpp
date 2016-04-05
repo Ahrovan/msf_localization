@@ -10,7 +10,8 @@ MapElementCore::MapElementCore() :
     dimensionState(0),
     dimensionErrorState(0),
     dimensionParameters(0),
-    dimensionErrorParameters(0)
+    dimensionErrorParameters(0),
+    dimensionNoise(0)
 {
     // Default Type
     map_element_type_=MapElementTypes::undefined;
@@ -115,6 +116,16 @@ int MapElementCore::setDimensionErrorParameters(unsigned int dimensionErrorParam
     return 0;
 }
 
+unsigned int MapElementCore::getDimensionNoise() const
+{
+    return this->dimensionNoise;
+}
+
+int MapElementCore::setDimensionNoise(unsigned int dimensionNoise)
+{
+    this->dimensionNoise=dimensionNoise;
+    return 0;
+}
 
 
 int MapElementCore::setMapElementType(MapElementTypes map_element_type)

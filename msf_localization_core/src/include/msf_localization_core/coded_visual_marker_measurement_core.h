@@ -15,6 +15,9 @@ public:
 public:
     ~CodedVisualMarkerMeasurementCore();
 
+protected:
+    int init();
+
 
 
     // Measurement

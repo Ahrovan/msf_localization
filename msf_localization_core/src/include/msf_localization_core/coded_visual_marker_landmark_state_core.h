@@ -63,6 +63,27 @@ public:
     Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
+    // Jacobians mapping
+public:
+    struct JacobianMappingErrorState
+    {
+        Eigen::MatrixXd jacobian_mapping_robot_error_state_;
+        Eigen::MatrixXd jacobian_mapping_global_parameters_error_state_;
+        Eigen::MatrixXd jacobian_mapping_sensor_error_state_;
+    } jacobian_mapping_error_state_;
+
+    Eigen::MatrixXd jacobian_mapping_error_state_noise_;
+
+
+public:
+    Eigen::MatrixXd getJacobianMappingRobotErrorState();
+    Eigen::MatrixXd getJacobianMappingGlobalParametersErrorState();
+    Eigen::MatrixXd getJacobianMappingSensorErrorState();
+
+    Eigen::MatrixXd getJacobianMappingErrorStateNoise();
+
+
+
 public:
     int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
 

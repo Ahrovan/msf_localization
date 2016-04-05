@@ -802,7 +802,10 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     predictedState->positionSensorWrtRobot=pastState->positionSensorWrtRobot;
 
     // Attitude of sensor wrt Robot
-    predictedState->attitudeSensorWrtRobot=pastState->attitudeSensorWrtRobot;
+    if(pastState->attitudeSensorWrtRobot[0]<0)
+        predictedState->attitudeSensorWrtRobot=-pastState->attitudeSensorWrtRobot;
+    else
+        predictedState->attitudeSensorWrtRobot=pastState->attitudeSensorWrtRobot;
 
 
     // Bias Angular Velocity

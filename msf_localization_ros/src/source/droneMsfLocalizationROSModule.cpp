@@ -1049,10 +1049,6 @@ int MsfLocalizationROS::readCodedVisualMarkerConfig(pugi::xml_node map_element, 
     MapElementInitStateCore->setTheMapElementCore(TheMapElementCore);
 
 
-    // Set sensor type
-    TheMapElementCore->setMapElementType(MapElementTypes::coded_visual_marker);
-
-
     // Set the access to the Storage core
     //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
     TheMapElementCore->setTheMsfStorageCore(TheMsfStorageCore);
@@ -1072,7 +1068,7 @@ int MsfLocalizationROS::readCodedVisualMarkerConfig(pugi::xml_node map_element, 
 
 
     /// Name
-    TheMapElementCore->setMapElementName("aruco_marker_"+idString);
+    TheMapElementCore->setMapElementName("visual_marker_"+idString);
 
 
     //// Configs

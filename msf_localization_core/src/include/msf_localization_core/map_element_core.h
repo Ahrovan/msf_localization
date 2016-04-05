@@ -97,6 +97,14 @@ public:
     int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
 
 
+    // Dimension of the map noise
+protected:
+    unsigned int dimensionNoise;
+public:
+    unsigned int getDimensionNoise() const;
+    int setDimensionNoise(unsigned int dimensionNoise);
+
+
 
     // Robot Core
 protected:

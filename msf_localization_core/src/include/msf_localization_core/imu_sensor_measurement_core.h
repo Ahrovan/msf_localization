@@ -13,6 +13,8 @@ public:
     ImuSensorMeasurementCore();
     ~ImuSensorMeasurementCore();
 
+protected:
+    int init();
 
 
 protected:

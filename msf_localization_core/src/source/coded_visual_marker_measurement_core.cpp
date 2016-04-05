@@ -6,6 +6,26 @@
 CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore() :
     SensorMeasurementCore()
 {
+    init();
+
+    return;
+}
+
+CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
+    SensorMeasurementCore(the_sensor_core)
+{
+    init();
+    return;
+}
+
+CodedVisualMarkerMeasurementCore::~CodedVisualMarkerMeasurementCore()
+{
+
+    return;
+}
+
+int CodedVisualMarkerMeasurementCore::init()
+{
     // Initial values of the measurement
     this->id_=-1;
     this->position_.setZero();
@@ -16,20 +36,7 @@ CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore() :
     // Measurement type
     measurementType=MeasurementTypes::coded_visual_marker;
 
-    return;
-}
-
-CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
-    SensorMeasurementCore(the_sensor_core)
-{
-
-    return;
-}
-
-CodedVisualMarkerMeasurementCore::~CodedVisualMarkerMeasurementCore()
-{
-
-    return;
+    return 0;
 }
 
 int CodedVisualMarkerMeasurementCore::setVisualMarkerId(const int id)
@@ -61,7 +68,10 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vecto
 
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
-        this->attitude_=attitude;
+        if(attitude[0]<0)
+            this->attitude_=-attitude;
+        else
+            this->attitude_=attitude;
     }
     else
     {

@@ -1373,9 +1373,12 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListPredictedMeasurements;
+    TheListPredictedMeasurements.resize(0); // Not needed, just in case
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListMatchedMeasurements;
+    TheListMatchedMeasurements.resize(0); // Not needed, just in case
 
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListUnmatchedMeasurements;
+    TheListUnmatchedMeasurements.resize(0); // Not needed, just in case
 
     for(std::list<std::shared_ptr<SensorMeasurementCore> >::iterator itListMeas=UpdatedState->TheListMeasurementCore.begin();
         itListMeas!=UpdatedState->TheListMeasurementCore.end();
@@ -1389,8 +1392,6 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 #endif
             return 2;
         }
-
-
 
         // Find the type
         switch((*itListMeas)->getTheSensorCore()->getSensorType())
@@ -1503,7 +1504,6 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 std::shared_ptr<MapElementStateCore> TheMapElementStateCore;
                 if(findMapElementStateCoreFromList(OldState->TheListMapElementStateCore, (*itListMeas), TheMapElementStateCore))
                 {
-                    //std::cout<<"error"<<std::endl;
                     break;
                 }
                 if(!TheMapElementStateCore)
@@ -1548,7 +1548,6 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                 // Jacobian Measurement prediction
-                // TODO
                 if(TheVisualMarkerSensorCore->jacobiansMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, (*itListMeas), TheCodedVisualMarkerPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
@@ -2528,15 +2527,286 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 #endif
 
 
+
+    ////////////////////////
     ///// Reset Error State
+    ////////////////////////
 
     // TODO
 
 
 
 
+    ////////////////////////
+    ///// Mapping new elements based on unmatched measurements
+    /////////////////////////
 
-    //// Iterative EKF
+    if(TheListUnmatchedMeasurements.size() != 0)
+    {
+        // Aux lists
+        std::list< std::shared_ptr<MapElementCore> > TheListNewMapElementsCore;
+        TheListNewMapElementsCore.resize(0); // Not needed but just in case
+        std::list< std::shared_ptr<MapElementStateCore> > TheListNewMapElementsStateCore;
+        TheListNewMapElementsStateCore.resize(0); // Not needed but just in case
+
+
+        /// New Map Elements State Prediction
+
+        // Iterate over the unmatched measurements
+        std::list< std::shared_ptr<SensorMeasurementCore> > TheListUnmatchedMeasurementsWithMapElement;
+        TheListUnmatchedMeasurementsWithMapElement.resize(0); // Not needed, but just in case
+        for(std::list<std::shared_ptr<SensorMeasurementCore>>::iterator itUnmatchedMeas=TheListUnmatchedMeasurements.begin();
+            itUnmatchedMeas!=TheListUnmatchedMeasurements.end();
+            ++itUnmatchedMeas)
+        {
+            // Aux Vars
+            std::shared_ptr<MapElementCore> TheNewMapElementCore;
+            std::shared_ptr<MapElementStateCore> TheNewMapElementStateCore;
+
+
+            // Switch depending on measurement type
+            switch((*itUnmatchedMeas)->getMeasurementType())
+            {
+                case MeasurementTypes::coded_visual_marker:
+                {
+                    //std::cout<<"Meas type: coded_visual_marker"<<std::endl;
+
+                    // Get The Sensor State
+                    std::shared_ptr<SensorStateCore> TheSensorState;
+                    if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itUnmatchedMeas)->getTheSensorCore(), TheSensorState))
+                    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                        std::cout<<"MsfLocalizationCore::update() error 40"<<std::endl;
+#endif
+                        return 40;
+                    }
+                    if(!TheSensorState)
+                    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                        std::cout<<"MsfLocalizationCore::update() error 50"<<std::endl;
+#endif
+                        return 50;
+                    }
+
+
+                    // Sensor Core
+                    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itUnmatchedMeas)->getTheSensorCore());
+
+
+                    // Predict state of the new element based on measurement and old state
+                    // TODO Check!
+                    if(TheSensorCore->mapMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheSensorState, (*itUnmatchedMeas), TheNewMapElementCore, TheNewMapElementStateCore) )
+                    {
+                        std::cout<<"error TheSensorCore->mapMeasurement()"<<std::endl;
+                        continue;
+                    }
+
+
+                    // Predict jacobian state of the new element based on measurement and old state
+                    // TODO
+                    if(TheSensorCore->jacobiansMapMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheSensorState, (*itUnmatchedMeas), TheNewMapElementStateCore))
+                    {
+                        std::cout<<"error TheSensorCore->jacobiansMapMeasurement()"<<std::endl;
+                        continue;
+                    }
+
+
+                    // End
+                    break;
+                }
+                case MeasurementTypes::imu:
+                {
+                    //std::cout<<"Meas type: imu"<<std::endl;
+                    continue;
+                }
+                case MeasurementTypes::undefined:
+                {
+                    //std::cout<<"Meas type: undef"<<std::endl;
+                    continue;
+                }
+                default:
+                {
+                    //std::cout<<"Meas type: default"<<std::endl;
+                    continue;
+                }
+            }
+
+
+            // Push into the lists
+            TheListUnmatchedMeasurementsWithMapElement.push_back((*itUnmatchedMeas));
+            TheListNewMapElementsCore.push_back(TheNewMapElementCore);
+            TheListNewMapElementsStateCore.push_back(TheNewMapElementStateCore);
+
+        }
+
+
+        /// New Map Elements Covariance Prediction
+
+
+        // Dimensions
+
+        // Dimension Error State
+        int dimension_error_state_total=0;
+        // Robot
+        dimension_error_state_total+=OldState->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
+        // Global Parameters
+        dimension_error_state_total+=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
+        // Sensors
+        for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListSensState=OldState->TheListSensorStateCore.begin();
+            itListSensState!=OldState->TheListSensorStateCore.end();
+            ++itListSensState)
+        {
+            dimension_error_state_total+=(*itListSensState)->getTheSensorCore()->getDimensionErrorState();
+        }
+        // Map
+        for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
+            itListMapElementState!=OldState->TheListMapElementStateCore.end();
+            ++itListMapElementState)
+        {
+            dimension_error_state_total+=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();
+        }
+
+    #if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::update() dimension error state="<<dimension_error_state_total<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+    #endif
+
+        // Dimension New Map Elements Error State
+        int dimension_new_map_elements_error_state_total=0;
+        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itNewMapElementsState=TheListNewMapElementsStateCore.begin();
+            itNewMapElementsState!=TheListNewMapElementsStateCore.end();
+            ++itNewMapElementsState)
+        {
+            dimension_new_map_elements_error_state_total+=(*itNewMapElementsState)->getTheMapElementCore()->getDimensionErrorState();
+        }
+
+        // Dimension New Map Elements Noise Error State
+        int dimension_new_map_elements_noise_measurement_total=0;
+        for(std::list<std::shared_ptr<SensorMeasurementCore>>::iterator itUnmatchedMeas=TheListUnmatchedMeasurementsWithMapElement.begin();
+            itUnmatchedMeas!=TheListUnmatchedMeasurementsWithMapElement.end();
+            ++itUnmatchedMeas)
+        {
+            dimension_new_map_elements_noise_measurement_total+=(*itUnmatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+        }
+
+
+    #if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            //logString<<"MsfLocalizationCore::update() dimension_new_map_elements_error_state_total="<<dimension_new_map_elements_error_state_total<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<"MsfLocalizationCore::update() dimension_new_map_elements_noise_measurement_total="<<dimension_new_map_elements_noise_measurement_total<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+    #endif
+
+
+        // Jacobian Error-State
+
+        Eigen::MatrixXd jacobianMapErrorState(dimension_new_map_elements_error_state_total, dimension_error_state_total);
+        jacobianMapErrorState.setZero();
+
+        // TODO
+
+        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itNewMapElementsState=TheListNewMapElementsStateCore.begin();
+            itNewMapElementsState!=TheListNewMapElementsStateCore.end();
+            ++itNewMapElementsState)
+        {
+            int dimension_new_map_element_error_state_i=0;
+
+            // Robot
+
+
+            // Global Parameters
+
+
+            // Sensors
+
+
+            // Map Elements
+
+
+        }
+
+
+
+        // Jacobian Noise
+
+        Eigen::MatrixXd jacobianMapNoise(dimension_new_map_elements_error_state_total, dimension_new_map_elements_noise_measurement_total);
+        jacobianMapNoise.setZero();
+
+        // TODO
+
+
+        // Covariance Noise
+
+        Eigen::MatrixXd covarianceMapNewElements(dimension_new_map_elements_noise_measurement_total, dimension_new_map_elements_noise_measurement_total);
+        covarianceMapNewElements.setZero();
+
+        // TODO
+
+
+
+        /// Add State of new map elements and cores
+
+        // New Map Cores
+        for(std::list<std::shared_ptr<MapElementCore>>::iterator itNewMapElementsCore=TheListNewMapElementsCore.begin();
+            itNewMapElementsCore!=TheListNewMapElementsCore.end();
+            ++itNewMapElementsCore)
+        {
+            this->TheListOfMapElementCore.push_back((*itNewMapElementsCore));
+        }
+
+
+
+        // New Map State
+        for(std::list<std::shared_ptr<MapElementStateCore>>::iterator itNewMapElementsStateCore=TheListNewMapElementsStateCore.begin();
+            itNewMapElementsStateCore!=TheListNewMapElementsStateCore.end();
+            ++itNewMapElementsStateCore)
+        {
+            UpdatedState->TheListMapElementStateCore.push_back((*itNewMapElementsStateCore));
+        }
+
+
+
+        /// State Covariance Update
+
+        Eigen::MatrixXd covarianceUpdated(dimension_error_state_total+dimension_new_map_elements_error_state_total, dimension_error_state_total+dimension_new_map_elements_error_state_total);
+        covarianceUpdated.setZero();
+
+        //
+        covarianceUpdated.block(0, 0, dimension_error_state_total, dimension_error_state_total)=UpdatedState->covarianceMatrix;
+
+        //
+        covarianceUpdated.block(dimension_error_state_total, dimension_error_state_total, dimension_new_map_elements_error_state_total, dimension_new_map_elements_error_state_total)=
+                jacobianMapErrorState*UpdatedState->covarianceMatrix*jacobianMapErrorState.transpose()+
+                jacobianMapNoise*covarianceMapNewElements*jacobianMapNoise.transpose();
+
+        //
+        Eigen::MatrixXd covarianceUpdatedCrossElem(dimension_error_state_total, dimension_new_map_elements_error_state_total);
+        covarianceUpdatedCrossElem.setZero();
+        covarianceUpdatedCrossElem=UpdatedState->covarianceMatrix*jacobianMapErrorState.transpose();
+        covarianceUpdated.block(0, dimension_error_state_total, dimension_error_state_total, dimension_new_map_elements_error_state_total)=
+                covarianceUpdatedCrossElem;
+
+
+        // Sym Value
+        covarianceUpdated.block(dimension_error_state_total, 0, dimension_new_map_elements_error_state_total, dimension_error_state_total)=
+                covarianceUpdatedCrossElem.transpose();
+
+
+        // Update
+        UpdatedState->covarianceMatrix=covarianceUpdated;
+
+    }
+
+
+
+    ////////////////////////
+    //// Iterative EKF - Checks and Reset
+    ///////////////////////
 
     // Check number iterations
     numIterations++;
@@ -2682,6 +2952,7 @@ int MsfLocalizationCore::findMapElementStateCoreFromList(std::list< std::shared_
             // Default
             case MapElementTypes::undefined:
             default:
+                std::cout<<"MsfLocalizationCore::findMapElementStateCoreFromList() something happened"<<std::endl;
                 break;
         }
 

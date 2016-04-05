@@ -6,13 +6,7 @@
 
 ImuSensorMeasurementCore::ImuSensorMeasurementCore()
 {
-    // Flags Set
-    flagOrientationSet=false;
-    flagAngularVelocitySet=false;
-    flagLinearAccelerationSet=false;
-
-    // Measurement type
-    measurementType=MeasurementTypes::imu;
+    init();
 
     return;
 }
@@ -22,6 +16,18 @@ ImuSensorMeasurementCore::~ImuSensorMeasurementCore()
     return;
 }
 
+int ImuSensorMeasurementCore::init()
+{
+    // Flags Set
+    flagOrientationSet=false;
+    flagAngularVelocitySet=false;
+    flagLinearAccelerationSet=false;
+
+    // Measurement type
+    measurementType=MeasurementTypes::imu;
+
+    return 0;
+}
 
 bool ImuSensorMeasurementCore::isOrientationSet() const
 {

@@ -296,6 +296,12 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 //std::cout<<"predictedState->attitude="<<predictedState->attitude.transpose()<<std::endl;
 
 
+    // Quaternion -> Real part always positive
+    if(predictedState->attitude[0]<0)
+        predictedState->attitude=-predictedState->attitude;
+
+
+
     /// Angular Velocity
     predictedState->angular_velocity=pastState->angular_velocity+pastState->angular_acceleration*dt;
 

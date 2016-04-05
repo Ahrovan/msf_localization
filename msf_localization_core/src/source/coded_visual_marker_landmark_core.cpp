@@ -31,6 +31,9 @@ int CodedVisualMarkerLandmarkCore::init()
     // Id
     id_=-1;
 
+    // Map Type
+    map_element_type_=MapElementTypes::coded_visual_marker;
+
 
     return 0;
 }
@@ -264,9 +267,15 @@ int CodedVisualMarkerLandmarkCore::predictState(const TimeStamp previousTimeStam
 
     /// Attitude
     if(flag_estimation_attitude_visual_marker_wrt_world)
-        predictedState->attitude_=pastState->attitude_;
+        if(pastState->attitude_[0]<0)
+            predictedState->attitude_=-pastState->attitude_;
+        else
+            predictedState->attitude_=pastState->attitude_;
     else
-        predictedState->attitude_=pastState->attitude_;
+        if(pastState->attitude_[0]<0)
+            predictedState->attitude_=-pastState->attitude_;
+        else
+            predictedState->attitude_=pastState->attitude_;
 
 
     // Finish

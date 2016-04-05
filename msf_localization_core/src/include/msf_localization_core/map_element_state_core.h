@@ -48,6 +48,14 @@ public:
 
 
 public:
+    virtual Eigen::MatrixXd getJacobianMappingRobotErrorState()=0;
+    virtual Eigen::MatrixXd getJacobianMappingGlobalParametersErrorState()=0;
+    virtual Eigen::MatrixXd getJacobianMappingSensorErrorState()=0;
+
+    virtual Eigen::MatrixXd getJacobianMappingErrorStateNoise()=0;
+
+
+public:
     virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
 
 
