@@ -59,7 +59,22 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
         // Measurement Attitude
         if(this->isMeasurementAttitudeEnabled())
         {
-            Eigen::Vector4d orientation((it_visual_markers)->pose.pose.orientation.w, (it_visual_markers)->pose.pose.orientation.x, (it_visual_markers)->pose.pose.orientation.y, (it_visual_markers)->pose.pose.orientation.z);
+            Eigen::Vector4d orientation;
+            Eigen::Vector4d orientation_aux;
+
+            orientation_aux<<(it_visual_markers)->pose.pose.orientation.w,
+                        (it_visual_markers)->pose.pose.orientation.x,
+                        (it_visual_markers)->pose.pose.orientation.y,
+                        (it_visual_markers)->pose.pose.orientation.z;
+
+            if(orientation_aux[0]<0)
+            {
+                orientation=-orientation_aux;
+            }
+            else
+            {
+                orientation=orientation_aux;
+            }
 
             if(the_visual_marker_measurement_core->setVisualMarkerAttitude(orientation))
                 std::cout<<"Error setting orientation"<<std::endl;

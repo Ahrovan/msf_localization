@@ -167,9 +167,12 @@ int FreeModelRobotStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd 
     Eigen::Vector4d attitudeAux=Quaternion::cross(attitude, DeltaQuat);
 
     // Quaternion -> Real part always positive
-    if(attitudeAux[0]<0)
-        attitude=-attitudeAux;
-    else
+//    if(attitudeAux[0]<0)
+//    {
+//        attitude=-attitudeAux;
+//        std::cout<<"FreeModelRobotStateCore::updateStateFromIncrementErrorState() quaternion!!"<<std::endl;
+//    }
+//    else
         attitude=attitudeAux;
 
 

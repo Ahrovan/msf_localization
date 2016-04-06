@@ -68,9 +68,9 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vecto
 
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
-        if(attitude[0]<0)
-            this->attitude_=-attitude;
-        else
+//        if(attitude[0]<0)
+//            this->attitude_=-attitude;
+//        else
             this->attitude_=attitude;
     }
     else
@@ -135,8 +135,8 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<
     }
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
-        if(thePredictedMeasurement->attitude_[0]<0 || theMatchedMeasurement->attitude_[0]<0)
-            std::cout<<"Error quaternion not set ok"<<std::endl;
+//        if(thePredictedMeasurement->attitude_[0]<0 || theMatchedMeasurement->attitude_[0]<0)
+//            std::cout<<"CodedVisualMarkerMeasurementCore::getInnovation() Error quaternion not set ok"<<std::endl;
 
         Eigen::Vector4d quat_innov_attitude=Quaternion::cross(Quaternion::inv(thePredictedMeasurement->attitude_), theMatchedMeasurement->attitude_);
 

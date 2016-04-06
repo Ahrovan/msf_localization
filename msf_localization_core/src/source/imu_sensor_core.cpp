@@ -802,9 +802,12 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     predictedState->positionSensorWrtRobot=pastState->positionSensorWrtRobot;
 
     // Attitude of sensor wrt Robot
-    if(pastState->attitudeSensorWrtRobot[0]<0)
-        predictedState->attitudeSensorWrtRobot=-pastState->attitudeSensorWrtRobot;
-    else
+//    if(pastState->attitudeSensorWrtRobot[0]<0)
+//    {
+//        predictedState->attitudeSensorWrtRobot=-pastState->attitudeSensorWrtRobot;
+//        std::cout<<"ImuSensorCore::predictState() quaternion!"<<std::endl;
+//    }
+//    else
         predictedState->attitudeSensorWrtRobot=pastState->attitudeSensorWrtRobot;
 
 

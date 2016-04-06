@@ -267,14 +267,20 @@ int CodedVisualMarkerLandmarkCore::predictState(const TimeStamp previousTimeStam
 
     /// Attitude
     if(flag_estimation_attitude_visual_marker_wrt_world)
-        if(pastState->attitude_[0]<0)
-            predictedState->attitude_=-pastState->attitude_;
-        else
+//        if(pastState->attitude_[0]<0)
+//        {
+//            predictedState->attitude_=-pastState->attitude_;
+//            std::cout<<"CodedVisualMarkerLandmarkCore::predictState() quaternion!!"<<std::endl;
+//        }
+//        else
             predictedState->attitude_=pastState->attitude_;
     else
-        if(pastState->attitude_[0]<0)
-            predictedState->attitude_=-pastState->attitude_;
-        else
+//        if(pastState->attitude_[0]<0)
+//        {
+//            predictedState->attitude_=-pastState->attitude_;
+//            std::cout<<"CodedVisualMarkerLandmarkCore::predictState() quaternion!!"<<std::endl;
+//        }
+//        else
             predictedState->attitude_=pastState->attitude_;
 
 

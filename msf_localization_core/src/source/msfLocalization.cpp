@@ -1294,7 +1294,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
 
     /// Display
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 && _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predictCore() predicted covariance for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
@@ -2562,8 +2562,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
         // Sensors
-        for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=OldState->TheListSensorStateCore.begin();
-            itListSensorState!=OldState->TheListSensorStateCore.end();
+        for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+            itListSensorState!=UpdatedState->TheListSensorStateCore.end();
             ++itListSensorState)
         {
             unsigned int dimensionSensorErrorState=(*itListSensorState)->getTheSensorCore()->getDimensionErrorState();
@@ -2587,8 +2587,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
         // Map
-        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
-            itListMapElementState!=OldState->TheListMapElementStateCore.end();
+        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+            itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
             ++itListMapElementState)
         {
             unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();

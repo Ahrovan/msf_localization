@@ -228,9 +228,12 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
 
         Eigen::Vector4d attitudeSensorWrtRobot=Quaternion::cross(this->attitudeSensorWrtRobot, DeltaQuat);
 
-        if(attitudeSensorWrtRobot[0]<0)
-            this->attitudeSensorWrtRobot=-attitudeSensorWrtRobot;
-        else
+//        if(attitudeSensorWrtRobot[0]<0)
+//        {
+//            this->attitudeSensorWrtRobot=-attitudeSensorWrtRobot;
+//            std::cout<<"ImuSensorStateCore::updateStateFromIncrementErrorState() quaternion!!"<<std::endl;
+//        }
+//        else
             this->attitudeSensorWrtRobot=attitudeSensorWrtRobot;
 
         dimension+=3;

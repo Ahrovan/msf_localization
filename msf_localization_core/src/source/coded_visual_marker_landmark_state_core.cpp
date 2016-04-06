@@ -94,9 +94,12 @@ int CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState(Eigen
 
     Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_, DeltaQuat);
 
-    if(attitude_aux[0]<0)
-        attitude_=-attitude_aux;
-    else
+//    if(attitude_aux[0]<0)
+//    {
+//        attitude_=-attitude_aux;
+//        std::cout<<"CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState() quaternion!!"<<std::endl;
+//    }
+//    else
         attitude_=attitude_aux;
 
 
