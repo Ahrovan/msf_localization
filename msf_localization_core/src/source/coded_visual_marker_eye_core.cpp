@@ -623,8 +623,8 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     Eigen::Vector3d tran_inc_wrt_world=TheMapElementStateCore->getPosition()-TheRobotStateCoreAux->getPosition()-Quaternion::cross_sandwich(TheRobotStateCoreAux->getAttitude(), the_sensor_state_core->getPositionSensorWrtRobot(), Quaternion::inv(TheRobotStateCoreAux->getAttitude()));
     Eigen::Vector3d tran_inc2_wrt_world=TheMapElementStateCore->getPosition()-TheRobotStateCoreAux->getPosition();
 
-    //Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
-    Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=predictedMeasurement->getVisualMarkerAttitude();
+    Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
+    //Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=predictedMeasurement->getVisualMarkerAttitude();
 
     Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(TheRobotStateCoreAux->getAttitude(), the_sensor_state_core->getAttitudeSensorWrtRobot());
     Eigen::Vector4d att_world_wrt_visual_marker_eye=Quaternion::inv(att_visual_marker_eye_wrt_world);

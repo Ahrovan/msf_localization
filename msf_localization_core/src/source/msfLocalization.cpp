@@ -2892,7 +2892,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         }
 
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             //logString<<"MsfLocalizationCore::update() dimension_new_map_elements_error_state_total="<<dimension_new_map_elements_error_state_total<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -2981,7 +2981,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             }
         }
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::update() jacobianMapErrorState for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -3038,7 +3038,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         }
 
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::update() jacobianMapNoise for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
