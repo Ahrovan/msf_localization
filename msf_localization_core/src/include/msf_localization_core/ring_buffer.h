@@ -211,6 +211,14 @@ public:
         return 0;
     }
 
+    // Purge element
+    int purgeElement(typename std::list<BufferObjectType>::iterator itElement)
+    {
+        TheElementsList.erase(itElement);
+
+        return 0;
+    }
+
 
 
 };

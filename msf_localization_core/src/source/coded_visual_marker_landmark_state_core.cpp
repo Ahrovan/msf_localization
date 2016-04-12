@@ -87,10 +87,12 @@ int CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState(Eigen
     position_+=increment_error_state.block<3,1>(0,0);
 
 
-    Eigen::Vector4d DeltaQuat;
-    DeltaQuat[0]=1;
-    DeltaQuat.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(3,0);
-    DeltaQuat=DeltaQuat/DeltaQuat.norm();
+    Eigen::Vector4d DeltaQuat, DeltaQuatAux;
+    double NormDeltaQuatAux;
+    DeltaQuatAux[0]=1;
+    DeltaQuatAux.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(3,0);
+    NormDeltaQuatAux=DeltaQuatAux.norm();
+    DeltaQuat=DeltaQuatAux/NormDeltaQuatAux;
 
     Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_, DeltaQuat);
 

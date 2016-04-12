@@ -159,10 +159,12 @@ int FreeModelRobotStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd 
     linear_acceleration+=increment_error_state.block<3,1>(6,0);
 
 
-    Eigen::Vector4d DeltaQuat;
-    DeltaQuat[0]=1;
-    DeltaQuat.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(9,0);
-    DeltaQuat=DeltaQuat/DeltaQuat.norm();
+    Eigen::Vector4d DeltaQuat, DeltaQuatAux;
+    double normDeltaQuatAux;
+    DeltaQuatAux[0]=1;
+    DeltaQuatAux.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(9,0);
+    normDeltaQuatAux=DeltaQuatAux.norm();
+    DeltaQuat=DeltaQuatAux/normDeltaQuatAux;
 
     Eigen::Vector4d attitudeAux=Quaternion::cross(attitude, DeltaQuat);
 

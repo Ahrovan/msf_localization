@@ -1835,7 +1835,9 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
             ros::Time begin = ros::Time::now();
 #endif
 
-        if(this->predict(OldestTimeStamp))
+            int errorPredict=this->predict(OldestTimeStamp);
+
+        if(errorPredict)
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
 
@@ -1844,8 +1846,14 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
                 logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error 5!"<<std::endl;
                 this->log(logString.str());
             }
-
 #endif
+
+            // Add to the processing list -> No
+            //this->TheMsfStorageCore->addOutdatedElement(OldestTimeStamp);
+
+            // Delete from buffer to avoid using it! -> No
+            //this->TheMsfStorageCore->purgeElementRingBuffer(OldestTimeStamp);
+
             continue;
         }
 

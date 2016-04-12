@@ -697,6 +697,18 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 }
 
 
+int MsfStorageCore::purgeElementRingBuffer(const TimeStamp TheTimeStamp)
+{
+
+    TheRingBufferMutex.lock();
+    int error=purgeElementByStamp(TheTimeStamp);
+
+    TheRingBufferMutex.unlock();
+
+    return error;
+}
+
+
 
 
 int MsfStorageCore::addOutdatedElement(TimeStamp TheTimeStamp)

@@ -116,6 +116,8 @@ public:
 public:
     int purgeRingBuffer(int numElementsFrom);
 
+    int purgeElementRingBuffer(const TimeStamp TheTimeStamp);
+
 
 
     // Display Elements in the ring buffer (safe)

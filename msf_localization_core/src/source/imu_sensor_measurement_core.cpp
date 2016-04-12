@@ -116,6 +116,8 @@ Eigen::VectorXd ImuSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMe
     // TODO Improve!
     TheInnovation=theMatchedMeasurementI->getMeasurement()-thePredictedMeasurementI->getMeasurement();
 
+    //std::cout<<"Innov IMU="<<TheInnovation.transpose()<<std::endl;
+
 
     return TheInnovation;
 }

@@ -293,6 +293,22 @@ public:
         return -1;
     }
 
+    int purgeElementByStamp(TimeStamp timeStamp)
+    {
+        typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
+        int resultSearch=this->searchIElementByStamp(itElement,timeStamp);
+
+        if(resultSearch)
+            return resultSearch;
+
+        int resultPurge=this->purgeElement(itElement);
+
+        if(resultPurge)
+            return resultPurge;
+
+        return 0;
+    }
+
 
 };
 

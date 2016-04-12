@@ -1062,6 +1062,12 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
                 // Ficticious Acc total
                 Eigen::Vector3d ficticious_acceleration=normal_acceleration+tangencial_acceleration;
+                //std::cout<<"ficticious_accel= "<<ficticious_acceleration.transpose()<<std::endl;
+
+
+//                Eigen::Vector3d ficticious_acceleration;
+//                ficticious_acceleration.setZero();
+
 
                 // Attitude sensor wrt world
                 Eigen::Vector4d attitude_sensor_wrt_world=Quaternion::cross(currentFreeModelRobotState->getAttitude(), currentImuState->getAttitudeSensorWrtRobot());

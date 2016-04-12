@@ -258,6 +258,8 @@ protected:
 
     int findMapElementStateCoreWithMeasurementFromList(std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurementCore, std::shared_ptr<MapElementStateCore>& TheMapElementStateCore);
 
+    int findMapElementCoreWithMeasurementFromList(std::list< std::shared_ptr<MapElementCore> > TheListMapElementCore, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurementCore, std::shared_ptr<MapElementCore>& TheMapElementCore);
+
 
     // Helper functions
 protected:

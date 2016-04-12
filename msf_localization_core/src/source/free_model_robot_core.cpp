@@ -388,7 +388,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     //predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
     double dt2=pow(dt,2);
     for(int i=0; i<3; i++)
-        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,dt2));
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,0.5*dt2));
 
 
 

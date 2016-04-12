@@ -1135,9 +1135,9 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
             // Find
             if(findMapElementStateCoreWithMapCoreFromList(ThePredictedState->TheListMapElementStateCore, (*it1MapElement), predictedStateMapElement))
             {
-    #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                std::cout<<"!!Error findMapElementStateCoreFromList Robot-Map TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-    #endif
+//    #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+//                std::cout<<"!!Error findMapElementStateCoreFromList Robot-Map TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+//    #endif
 //                return -2;
                 // The core has been added to the the msfLocalization, but we don't have the predicted state yet. No problema
                 continue;
@@ -1200,9 +1200,9 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
             // Find
             if(findMapElementStateCoreWithMapCoreFromList(ThePredictedState->TheListMapElementStateCore, (*it1MapElement), predictedStateMapElement1))
             {
-    #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                std::cout<<"!!Error findMapElementStateCoreFromList for it1MapElement Map-Map"<<std::endl;
-    #endif
+//    #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+//                std::cout<<"!!Error findMapElementStateCoreFromList for it1MapElement Map-Map"<<std::endl;
+//    #endif
 //                return -2;
                 // The core has been added to the the msfLocalization, but we don't have the predicted state yet. No problema
                 continue;
@@ -1228,9 +1228,9 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
                 // Find
                 if(findMapElementStateCoreWithMapCoreFromList(ThePredictedState->TheListMapElementStateCore, (*it2MapElement), predictedStateMapElement2))
                 {
-    #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"!!Error findMapElementStateCoreFromList for it2MapElement Map-Map"<<std::endl;
-    #endif
+//    #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+//                    std::cout<<"!!Error findMapElementStateCoreFromList for it2MapElement Map-Map"<<std::endl;
+//    #endif
 //                    return -2;
                     // The core has been added to the the msfLocalization, but we don't have the predicted state yet. No problema
                     continue;
@@ -2344,7 +2344,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 #endif
 
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if 0 && _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::update() CovarianceSensorParameters for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
@@ -2755,6 +2755,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         {
             // Aux Vars
             std::shared_ptr<MapElementCore> TheNewMapElementCore;
+            bool flagNewMapElementCore;
             std::shared_ptr<MapElementStateCore> TheNewMapElementStateCore;
 
 
@@ -2788,8 +2789,17 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                     // Find Map Element Core -> Might be added before
-                    // TODO
-
+                    if(findMapElementCoreWithMeasurementFromList(this->TheListOfMapElementCore, (*itUnmatchedMeas), TheNewMapElementCore))
+                    {
+                        // Not found
+                        flagNewMapElementCore=true;
+                    }
+                    else
+                    {
+                        // Found
+                        flagNewMapElementCore=false;
+                        // Do nothing
+                    }
 
 
                     // Predict state of the new element based on measurement and old state
@@ -2833,8 +2843,12 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
             // Push into the lists
             TheListUnmatchedMeasurementsWithMapElement.push_back((*itUnmatchedMeas));
-            TheListNewMapElementsCore.push_back(TheNewMapElementCore);
+            //TheListNewMapElementsCore.push_back(TheNewMapElementCore);
             TheListNewMapElementsStateCore.push_back(TheNewMapElementStateCore);
+
+            // Push into the list if new
+            if(flagNewMapElementCore)
+                this->TheListOfMapElementCore.push_back(TheNewMapElementCore);
 
         }
 
@@ -2873,6 +2887,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         }
 #endif
 
+
         // Dimension New Map Elements Error State
         int dimension_new_map_elements_error_state_total=0;
         for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itNewMapElementsState=TheListNewMapElementsStateCore.begin();
@@ -2881,6 +2896,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         {
             dimension_new_map_elements_error_state_total+=(*itNewMapElementsState)->getTheMapElementCore()->getDimensionErrorState();
         }
+
 
         // Dimension New Map Elements Noise Error State
         int dimension_new_map_elements_noise_measurement_total=0;
@@ -3102,7 +3118,9 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
         /// Add State of new map elements and cores
 
-        // New Map Cores
+        // New Map Cores.
+        // Already Added!
+        /*
         for(std::list<std::shared_ptr<MapElementCore>>::iterator itNewMapElementsCore=TheListNewMapElementsCore.begin();
             itNewMapElementsCore!=TheListNewMapElementsCore.end();
             ++itNewMapElementsCore)
@@ -3112,6 +3130,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
             this->TheListOfMapElementCore.push_back((*itNewMapElementsCore));
         }
+        */
 
 
 
@@ -3164,6 +3183,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             this->log(logString.str());
         }
  #endif
+
 
     }
 
@@ -3349,6 +3369,49 @@ int MsfLocalizationCore::findMapElementStateCoreWithMeasurementFromList(std::lis
 
     }
 
+
+
+    return 1;
+}
+
+
+int MsfLocalizationCore::findMapElementCoreWithMeasurementFromList(std::list< std::shared_ptr<MapElementCore> > TheListMapElementCore, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurementCore, std::shared_ptr<MapElementCore>& TheMapElementCore)
+{
+    // Cast
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> the_coded_visual_marker_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(TheSensorMeasurementCore);
+
+
+    // Match with the map element
+    for(std::list<std::shared_ptr<MapElementCore>>::iterator itVisualMarkerLandmark=TheListMapElementCore.begin();
+        itVisualMarkerLandmark!=TheListMapElementCore.end();
+        ++itVisualMarkerLandmark)
+    {
+        switch((*itVisualMarkerLandmark)->getMapElementType())
+        {
+            // Coded visual markers
+            case MapElementTypes::coded_visual_marker:
+            {
+                // Cast
+                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark));
+
+                // Check ids
+                if(the_coded_visual_marker_landmark_core->getId() == the_coded_visual_marker_measurement->getVisualMarkerId())
+                {
+                    TheMapElementCore=*itVisualMarkerLandmark;
+                    return 0;
+                }
+
+                // End
+                break;
+            }
+            // Default
+            case MapElementTypes::undefined:
+            default:
+                std::cout<<"MsfLocalizationCore::findMapElementStateCoreFromList() something happened"<<std::endl;
+                break;
+        }
+
+    }
 
 
     return 1;
