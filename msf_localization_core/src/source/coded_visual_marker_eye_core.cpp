@@ -383,6 +383,7 @@ int CodedVisualMarkerEyeCore::predictStateErrorStateJacobians(const TimeStamp pr
     /// Jacobian of the error -> Angular Part
 
     // att / att
+    // TODO Fix!!
     if(this->isEstimationAttitudeSensorWrtRobotEnabled())
     {
         predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.resize(3, 3);

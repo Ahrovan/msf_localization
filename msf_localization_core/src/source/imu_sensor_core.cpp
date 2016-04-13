@@ -858,6 +858,7 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
         predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
 
     // att / att
+    // TODO Fix!!
     if(flagEstimationAttitudeSensorWrtRobot)
         predictedState->errorStateJacobian.attitudeSensorWrtRobot=Eigen::Matrix3d::Identity();
 
@@ -1333,34 +1334,52 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
 
                     // z_lin_acc / lin_acc
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 6)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_world*mat_diff_w_amp_wrt_w.transpose();
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 6)=
+                            TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_world*mat_diff_w_amp_wrt_w.transpose();
+
+
 
 
                     // z_lin_acc / attit
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 9)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*(
+                    Eigen::MatrixXd jacobianMeas_an_wrt_q_r_w=-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(TheImuStateCore->getPositionSensorWrtRobot()))*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_velocity_robot_wrt_world_in_world);
+                    Eigen::MatrixXd jacobianMeas_at_wrt_q_r_w=-1*Quaternion::skewSymMat(TheImuStateCore->getPositionSensorWrtRobot())*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_acceleration_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_acceleration_robot_wrt_world);
+
+//                    std::cout<<"jacobianMeas_an_wrt_q_r_w="<<std::endl;
+//                    std::cout<<jacobianMeas_an_wrt_q_r_w<<std::endl;
+
+//                    std::cout<<"jacobianMeas_at_wrt_q_r_w="<<std::endl;
+//                    std::cout<<jacobianMeas_at_wrt_q_r_w<<std::endl;
+
+
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 9)=
+                        // common 1
+                        TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*(
                         // d(ga_I)/d(q_r_w)
                         ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot*mat_q_plus_gravity_wrt_world) ) +
                         // d(a_real)/d(q_r_w)
                         ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world* mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot* mat_q_plus_linear_acceleration_robot_wrt_world) ) +
                         // d(a_ficticious)/d(q_r_w)
-                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(
-                              // an
-                              mat_diff_w_amp_wrt_w.transpose()*(-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(TheImuStateCore->getPositionSensorWrtRobot())))*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_velocity_robot_wrt_world_in_world)
-                              +
-                              // at
-                              mat_diff_w_amp_wrt_w.transpose()*(-1*Quaternion::skewSymMat(TheImuStateCore->getPositionSensorWrtRobot()))*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_acceleration_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_acceleration_robot_wrt_world)
-                              //Eigen::Matrix4d::Zero(4,4)
-                              )
-                        // others
-                        ))*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+                        ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()*
+                            (
+                            // an
+                            jacobianMeas_an_wrt_q_r_w
+                            +
+                            // at
+                            jacobianMeas_at_wrt_q_r_w
+                            )
+                        )
+                        // common 2
+                        )*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
 
 
                     // z_lin_acc / ang_vel
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 12)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()* (-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(TheImuStateCore->getPositionSensorWrtRobot()))) *mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot* mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 12)=
+                            TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()* (-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(TheImuStateCore->getPositionSensorWrtRobot()))) *mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot* mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
 
 
                     // z_lin_acc / ang_acc
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 15)=TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()*(-1*Quaternion::skewSymMat(TheImuStateCore->getPositionSensorWrtRobot()))*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot*mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 15)=
+                            TheImuStateCore->getScaleLinearAcceleration().asDiagonal()*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()*(-1*Quaternion::skewSymMat(TheImuStateCore->getPositionSensorWrtRobot()))*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot*mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
 
 
                     dimension_error_measurement_i+=3;
@@ -1392,11 +1411,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
 
                     // z_ang_vel / attit
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 9)=TheImuStateCore->getScaleAngularVelocity().asDiagonal()*mat_diff_w_amp_wrt_w*( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world )*mat_q_minus_attitude_sensor_wrt_robot*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 9)=
+                            TheImuStateCore->getScaleAngularVelocity().asDiagonal()*mat_diff_w_amp_wrt_w*( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world )*mat_q_minus_attitude_sensor_wrt_robot*mat_q_plus_attitude_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
 
 
                     // z_ang_vel / ang_vel
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 12)=TheImuStateCore->getScaleAngularVelocity().asDiagonal()*mat_diff_w_amp_wrt_w* mat_q_plus_attitude_world_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world *mat_diff_w_amp_wrt_w.transpose();
+                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i, 12)=
+                            TheImuStateCore->getScaleAngularVelocity().asDiagonal()*mat_diff_w_amp_wrt_w* mat_q_plus_attitude_world_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world *mat_diff_w_amp_wrt_w.transpose();
 
 
                     // z_ang_vel / ang_acc
@@ -1419,6 +1440,8 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
     }
 
+//    std::cout<<"predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState="<<std::endl;
+//    std::cout<<predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState<<std::endl;
 
 
     /// Jacobian measurement - sensor state & Jacobians measurement - sensor parameters

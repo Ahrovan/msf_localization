@@ -102,6 +102,8 @@
 
 #define _DEBUG_TIME_MSF_LOCALIZATION_ROS 1
 
+#define _DEBUG_MODE 0
+
 
 class MsfLocalizationROS : public MsfLocalizationCore
 {

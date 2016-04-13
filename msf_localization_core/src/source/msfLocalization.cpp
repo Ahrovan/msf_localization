@@ -1721,11 +1721,11 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
                     std::ostringstream logString;
 
-                    logString<<"MsfLocalizationCore::update() matched Measurements VM for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<"MsfLocalizationCore::update() matched Measurements VM "<<visualMarkerMeasurement->getVisualMarkerId()<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
                     logString<<" t: "<<visualMarkerMeasurement->getVisualMarkerPosition().transpose()<<std::endl;
                     logString<<" q: "<<visualMarkerMeasurement->getVisualMarkerAttitude().transpose()<<std::endl;
 
-                    logString<<"MsfLocalizationCore::update() predicted Measurements VM for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<"MsfLocalizationCore::update() predicted Measurements VM "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerId()<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
                     logString<<" t: "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerPosition().transpose()<<std::endl;
                     logString<<" q: "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerAttitude().transpose()<<std::endl;
 
@@ -2674,8 +2674,14 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     Eigen::MatrixXd AuxiliarMatrix(dimensionErrorState, dimensionErrorState);
     AuxiliarMatrix=Eigen::MatrixXd::Identity(dimensionErrorState, dimensionErrorState)-kalmanGain*JacobianMeasurementErrorState;
 
+    // OP1
     UpdatedState->covarianceMatrix=
             AuxiliarMatrix*OldState->covarianceMatrix*AuxiliarMatrix.transpose()+kalmanGain*innovationCovariance*kalmanGain.transpose();
+
+    // OP2
+//    UpdatedState->covarianceMatrix=
+//            AuxiliarMatrix*OldState->covarianceMatrix;
+
 
 //    UpdatedState->covarianceMatrix=OldState->covarianceMatrix+
 //            OldState->covarianceMatrix*JacobianMeasurementErrorState.transpose()*( -innovation_covariance_inverse + innovation_covariance_inverse* JacobianMeasurementErrorState*OldState->covarianceMatrix*JacobianMeasurementErrorState.transpose()  *innovation_covariance_inverse.transpose()  )*JacobianMeasurementErrorState*OldState->covarianceMatrix;
@@ -2718,59 +2724,79 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     ////////////////////////
     ///// Reset Error State
     ////////////////////////
+/*
+    // Aux Covariance
+    Eigen::MatrixXd AuxiliarCovarianceMatrix(dimensionErrorState, dimensionErrorState);
+    AuxiliarCovarianceMatrix.setZero();
 
 
-
-    /// Jacobian Reset Error State
-
-    Eigen::MatrixXd JacobianResetErrorState(dimensionErrorState, dimensionErrorState);
-    JacobianResetErrorState.setZero();
-
-
-    // TODO Remove
-    JacobianResetErrorState=Eigen::MatrixXd::Identity(dimensionErrorState, dimensionErrorState);
 
 
     {
-        int dimension=0;
-
-        // TODO
+        unsigned int dimension=0;
 
         // Robot
+        unsigned int dimensionRobotErrorState=this->TheRobotCore->getDimensionErrorState();
+
+        if(dimensionRobotErrorState)
+        {
+
+        }
+        dimension+=dimensionRobotErrorState;
 
 
         // Global Parameters
+        unsigned int dimensionGlobalParametersErrorState=this->TheGlobalParametersCore->getDimensionErrorState();
+
+        if(dimensionGlobalParametersErrorState)
+        {
+
+        }
+        dimension+=dimensionGlobalParametersErrorState;
 
 
         // Sensors
+        for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+            itListSensorState!=UpdatedState->TheListSensorStateCore.end();
+            ++itListSensorState)
+        {
+            unsigned int dimensionSensorErrorState=(*itListSensorState)->getTheSensorCore()->getDimensionErrorState();
+
+            if(dimensionSensorErrorState)
+            {
+
+            }
+            dimension+=dimensionSensorErrorState;
+
+
+        }
 
 
         // Map
+        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+            itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
+            ++itListMapElementState)
+        {
+            unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();
+
+            if(dimensionMapElementErrorState)
+            {
+
+            }
+            dimension+=dimensionMapElementErrorState;
+
+        }
 
 
 
     }
 
 
+    // Update Covariance Matrix
+    UpdatedState->covarianceMatrix=AuxiliarCovarianceMatrix;
 
 
-    /// Reset Covariance
-
-    // Aux Vars
-    Eigen::MatrixXd AuxiliarCovarianceMatrix=UpdatedState->covarianceMatrix;
-
-    // Equation
-    try
-    {
-        UpdatedState->covarianceMatrix=
-                JacobianResetErrorState*AuxiliarCovarianceMatrix*JacobianResetErrorState.transpose();
-    }
-    catch(...)
-    {
-        std::cout<<"Error Reseting Error State Covariance"<<std::endl;
-    }
-
-
+*/
 
 
     ////////////////////////
@@ -3243,6 +3269,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
 
+
+
     ////////////////////////
     //// Iterative EKF - Checks and Reset
     ///////////////////////
@@ -3295,6 +3323,20 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
     }
+
+
+
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::updateCore() UpdatedState->covarianceMatrix for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<UpdatedState->covarianceMatrix<<std::endl;
+            this->log(logString.str());
+        }
+ #endif
+
+
 
     //std::cout<<"update ended"<<std::endl;
 

@@ -1276,7 +1276,10 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     }
 #endif
 
-//return 0;
+#if _DEBUG_MODE
+    return 0;
+#endif
+
     robotPoseRate=new ros::Rate(robotPoseRateVal);
 try
 {
@@ -1490,6 +1493,21 @@ try
                                               this->TheGlobalParametersCore->getWorldName(), this->TheRobotCore->getRobotName()));
 
 
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+
+                        logString<<"Robot"<<std::endl;
+                        logString<<"  - Position: "<<robotPosition.transpose()<<std::endl;
+                        logString<<"  - Attitude: "<<robotAttitude.transpose()<<std::endl;
+
+
+                        this->log(logString.str());
+                    }
+#endif
+
+
         // TF SENSORS
         for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensorState=PredictedState->TheListSensorStateCore.begin();
             itSensorState!=PredictedState->TheListSensorStateCore.end();
@@ -1534,6 +1552,7 @@ try
                         logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
 
                         logString<<"Visual Marker id="<<std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(theCodedVisualMarkersLandamarkState->getTheMapElementCore())->getId()<<std::endl;
+                        logString<<"  - Position: "<<mapElementPosition.transpose()<<std::endl;
                         logString<<"  - Attitude: "<<mapElementAttitude.transpose()<<std::endl;
 
 
@@ -1635,7 +1654,9 @@ int MsfLocalizationROS::predictThreadFunction()
     }
 #endif
 
-//return 0;
+#if _DEBUG_MODE
+    return 0;
+#endif
     ros::Rate predictRate(predictRateValue);
     //ros::Rate predictRate(100);
 
@@ -2038,7 +2059,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #endif
 
         // Purge the buffer ??
-        this->TheMsfStorageCore->purgeRingBuffer(50);
+        this->TheMsfStorageCore->purgeRingBuffer(100);
 
 
         // Display the buffer

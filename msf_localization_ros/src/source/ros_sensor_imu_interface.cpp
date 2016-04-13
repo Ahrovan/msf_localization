@@ -34,7 +34,7 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
         return 0;
 
     // PROVISIONAL! -> Dischart part of the measurements
-    if(msg->header.seq  % 3 != 0)
+    if(msg->header.seq  % 4 != 0)
         return 0;
 
     //std::cout<<"ROS Imu Measured"<<std::endl;
