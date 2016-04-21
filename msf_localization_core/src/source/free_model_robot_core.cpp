@@ -243,7 +243,7 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
 
     /// Position
-    predictedState->position=pastState->position+pastState->linear_speed*dt;
+    predictedState->position=pastState->position+pastState->linear_speed*dt+0.5*pastState->linear_acceleration*dt*dt;
 
 
     /// Linear Speed

@@ -103,6 +103,7 @@
 #define _DEBUG_TIME_MSF_LOCALIZATION_ROS 1
 
 #define _DEBUG_MODE 0
+#define _DEBUG_MSF_LOCALIZATION_ROBOT_POSE_THREAD 0
 
 
 class MsfLocalizationROS : public MsfLocalizationCore

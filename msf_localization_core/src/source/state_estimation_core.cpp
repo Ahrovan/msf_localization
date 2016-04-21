@@ -31,7 +31,8 @@ StateEstimationCore::~StateEstimationCore()
 bool StateEstimationCore::hasState() const
 {
     // TODO check
-    if(TheListSensorStateCore.size()!=0 || TheRobotStateCore)
+    //if(TheListSensorStateCore.size()!=0 || TheRobotStateCore)
+    if(TheRobotStateCore)
         return true;
     else
         return false;

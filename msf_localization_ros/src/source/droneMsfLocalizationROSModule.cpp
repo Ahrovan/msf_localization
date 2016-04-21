@@ -1493,7 +1493,7 @@ try
                                               this->TheGlobalParametersCore->getWorldName(), this->TheRobotCore->getRobotName()));
 
 
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_ROBOT_POSE_THREAD
                     {
                         std::ostringstream logString;
                         logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
@@ -1546,7 +1546,7 @@ try
                     Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitude();
 
 
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_MSF_LOCALIZATION_ROBOT_POSE_THREAD
                     {
                         std::ostringstream logString;
                         logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
@@ -2059,7 +2059,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #endif
 
         // Purge the buffer ??
-        this->TheMsfStorageCore->purgeRingBuffer(100);
+        this->TheMsfStorageCore->purgeRingBuffer(30);
 
 
         // Display the buffer

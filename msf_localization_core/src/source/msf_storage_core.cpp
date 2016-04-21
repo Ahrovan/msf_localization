@@ -160,7 +160,9 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
         itElement!=this->getEnd();
         ++itElement)
     {
-        this->getElementI(BufferElement, itElement);
+        int errorGetElement=this->getElementI(BufferElement, itElement);
+        if(errorGetElement)
+            continue;
         if(BufferElement.object->hasState())
         {
             TheTimeStamp=BufferElement.timeStamp;
@@ -181,7 +183,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp()"<<std::endl;
+        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() TS: sec="<<ThePreviousTimeStamp.sec<<"; nsec="<<ThePreviousTimeStamp.nsec<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -198,8 +200,10 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
         ++itElement)
     {
         // Get the element
-        this->getElementI(BufferElement, itElement);
+        int errorGetElement=this->getElementI(BufferElement, itElement);
 
+        if(errorGetElement)
+            continue;
 
 #if _DEBUG_MSF_STORAGE
         {
@@ -222,6 +226,14 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
             // Check if it has state
             if(BufferElement.object->hasState())
             {
+#if _DEBUG_MSF_STORAGE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+
                 TheTimeStamp=BufferElement.timeStamp;
                 PreviousState=BufferElement.object;
                 //logFile<<"found with state!"<<std::endl;
@@ -229,7 +241,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
 #if _DEBUG_MSF_STORAGE
                 {
                     std::ostringstream logString;
-                    logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
                     this->log(logString.str());
                 }
 #endif
@@ -290,7 +302,10 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStam
         ++itElement)
     {
         // Get the element
-        this->getElementI(BufferElement, itElement);
+        int errorGetElement=this->getElementI(BufferElement, itElement);
+
+        if(errorGetElement)
+            continue;
 
         // Check the time stamp
         if(BufferElement.timeStamp>previousTimeStamp)
