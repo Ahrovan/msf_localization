@@ -13,6 +13,14 @@ CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore():
     return;
 }
 
+CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
+    MapElementCore(the_map_element_core_ptr, TheMsfStorageCore)
+{
+    init();
+
+    return;
+}
+
 CodedVisualMarkerLandmarkCore::~CodedVisualMarkerLandmarkCore()
 {
     return;

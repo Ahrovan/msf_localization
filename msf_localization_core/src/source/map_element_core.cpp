@@ -7,58 +7,47 @@
 
 
 MapElementCore::MapElementCore() :
-    dimensionState(0),
-    dimensionErrorState(0),
-    dimensionParameters(0),
-    dimensionErrorParameters(0),
-    dimensionNoise(0)
+    MsfElementCore()
 {
-    // Default Type
-    map_element_type_=MapElementTypes::undefined;
-
-    // Default name
-    map_element_name_="map_element";
-
-
-
-
-    // LOG
-    const char* env_p = std::getenv("FUSEON_STACK");
-
-    logPath=std::string(env_p)+"/logs/"+"logMapElementCoreFile.txt";
-
-    logFile.open(logPath);
-
-    if(!logFile.is_open())
-    {
-        std::cout<<"unable to open log file"<<std::endl;
-    }
+    init();
 
     return;
 }
 
-MapElementCore::MapElementCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
-    MapElementCore()
+MapElementCore::MapElementCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+    MsfElementCore(msf_element_core_ptr, msf_storage_core_ptr)
 {
-    // set the msf storage core
-    this->setTheMsfStorageCore(TheMsfStorageCore);
-
-    // Set the map element core
-    this->setTheMapElementCore(the_map_element_core_ptr);
+    init();
 
     return;
 }
 
 MapElementCore::~MapElementCore()
 {
-    // Log
-    if(logFile.is_open())
-    {
-        logFile.close();
-    }
-
 
     return;
+}
+
+int MapElementCore::init()
+{
+    // Dimensions
+    dimensionState=0;
+    dimensionErrorState=0;
+    dimensionParameters=0;
+    dimensionErrorParameters=0;
+    dimensionNoise=0;
+
+
+    // Element Type
+    this->setMsfElementCoreType(MsfElementCoreTypes::map);
+
+
+    // Default Type
+    map_element_type_=MapElementTypes::undefined;
+
+    // Default name
+    map_element_name_="map_element";
+
 }
 
 int MapElementCore::setMapElementName(std::string map_element_name)
@@ -138,7 +127,7 @@ MapElementTypes MapElementCore::getMapElementType() const
     return this->map_element_type_;
 }
 
-
+/*
 int MapElementCore::setTheMapElementCore(std::weak_ptr<const MapElementCore> the_map_element_core_ptr)
 {
     this->the_map_element_core_ptr_=the_map_element_core_ptr;
@@ -160,32 +149,4 @@ std::weak_ptr<const MapElementCore> MapElementCore::getTheMapElementCoreWeak() c
 {
     return this->the_map_element_core_ptr_;
 }
-
-
-int MapElementCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore)
-{
-    this->TheMsfStorageCore=TheMsfStorageCore;
-    return 0;
-}
-
-std::shared_ptr<MsfStorageCore> MapElementCore::getTheMsfStorageCore() const
-{
-    std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
-    return TheMsfStorageCoreSharedPtr;
-}
-
-
-int MapElementCore::log(std::string logString)
-{
-    // Lock mutex
-    TheLogFileMutex.lock();
-
-    // Write in file
-    logFile<<logString;
-
-    // Unlock mutex
-    TheLogFileMutex.unlock();
-
-    return 0;
-}
-
+*/

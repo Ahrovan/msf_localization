@@ -5,27 +5,18 @@
 
 SensorMeasurementCore::SensorMeasurementCore()
 {
+    init();
 
-    measurementType=MeasurementTypes::undefined;
 
-//    // LOG
-//    const char* env_p = std::getenv("FUSEON_STACK");
 
-//    logPath=std::string(env_p)+"/logs/"+"logSensorMeasurementCoreFile.txt";
-
-//    logFile.open(logPath);
-
-//    if(!logFile.is_open())
-//    {
-//        std::cout<<"unable to open log file"<<std::endl;
-//    }
 
     return;
 }
 
-SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr) :
-    SensorMeasurementCore()
+SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr)
 {
+    init();
+
     setTheSensorCore(TheSensorCorePtr);
 
 
@@ -41,6 +32,27 @@ SensorMeasurementCore::~SensorMeasurementCore()
 //    }
 
     return;
+}
+
+
+int SensorMeasurementCore::init()
+{
+    measurementType=MeasurementTypes::undefined;
+
+
+    //    // LOG
+    //    const char* env_p = std::getenv("FUSEON_STACK");
+
+    //    logPath=std::string(env_p)+"/logs/"+"logSensorMeasurementCoreFile.txt";
+
+    //    logFile.open(logPath);
+
+    //    if(!logFile.is_open())
+    //    {
+    //        std::cout<<"unable to open log file"<<std::endl;
+    //    }
+
+    return 0;
 }
 
 

@@ -40,6 +40,9 @@
 //#include "msf_localization_core/robot_state_core.h"
 
 
+#include "msf_localization_core/msf_element_core.h"
+
+
 enum class RobotTypes
 {
     undefined=0,
@@ -49,17 +52,20 @@ enum class RobotTypes
 
 
 
-class MsfStorageCore;
 class RobotStateCore;
 
 
 
-class RobotCore
+class RobotCore : public MsfElementCore
 {
 
 public:
     RobotCore();
+    RobotCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     virtual ~RobotCore();
+
+protected:
+    int init();
 
 
 protected:
@@ -113,6 +119,7 @@ public:
     RobotTypes getRobotType() const;
 
 
+/*
     // Pointer to itself
 protected:
 //public:
@@ -128,6 +135,7 @@ protected:
 public:
     int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
     std::shared_ptr<MsfStorageCore> getTheMsfStorageCore() const;
+*/
 
 
     ////// Init error state variances -> Temporal, only for the initial configuration
@@ -153,17 +161,6 @@ public:
     virtual int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState) =0;
 
 
-
-
-    //// Debug log
-protected:
-    std::string logPath;
-    std::ofstream logFile;
-    // mutex to protect the log file
-protected:
-    std::mutex TheLogFileMutex;
-public:
-    int log(std::string logString);
 
 };
 

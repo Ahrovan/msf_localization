@@ -11,6 +11,7 @@ class ImuSensorMeasurementCore : public SensorMeasurementCore
 {
 public:
     ImuSensorMeasurementCore();
+    ImuSensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
     ~ImuSensorMeasurementCore();
 
 protected:

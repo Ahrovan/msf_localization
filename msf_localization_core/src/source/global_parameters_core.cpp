@@ -4,28 +4,18 @@
 
 
 GlobalParametersCore::GlobalParametersCore() :
-    dimensionState(0),
-    dimensionErrorState(0),
-    dimensionParameters(3),
-    dimensionErrorParameters(3)
+    MsfElementCore()
 {
-    // Default name
-    world_name_="world";
-
-    // Flags
-    flagEstimationGravity=false;
-
-    // Noises
-    noiseGravity.setZero();
+    init();
 
     // End
     return;
 }
 
-GlobalParametersCore::GlobalParametersCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
-    GlobalParametersCore()
+GlobalParametersCore::GlobalParametersCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+    MsfElementCore(msf_element_core_ptr, msf_storage_core_ptr)
 {
-    this->setTheMsfStorageCore(TheMsfStorageCore);
+    init();
 
     // End
     return;
@@ -36,6 +26,28 @@ GlobalParametersCore::~GlobalParametersCore()
     return;
 }
 
+int GlobalParametersCore::init()
+{
+    // Dimensions
+    dimensionState=0;
+    dimensionErrorState=0;
+    dimensionParameters=3;
+    dimensionErrorParameters=3;
+
+    // Element Type
+    this->setMsfElementCoreType(MsfElementCoreTypes::world);
+
+    // Default name
+    world_name_="world";
+
+    // Flags
+    flagEstimationGravity=false;
+
+    // Noises
+    noiseGravity.setZero();
+
+    return 0;
+}
 
 std::string GlobalParametersCore::getWorldName() const
 {
@@ -93,7 +105,7 @@ int GlobalParametersCore::setDimensionErrorParameters(unsigned int dimensionErro
 }
 
 
-
+/*
 int GlobalParametersCore::setTheGlobalParametersCore(std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr)
 {
     this->TheGlobalParametersCorePtr=TheGlobalParametersCorePtr;
@@ -117,7 +129,7 @@ std::shared_ptr<MsfStorageCore> GlobalParametersCore::getTheMsfStorageCore() con
     std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
     return TheMsfStorageCoreSharedPtr;
 }
-
+*/
 
 bool GlobalParametersCore::isEstimationGravityEnabled() const
 {

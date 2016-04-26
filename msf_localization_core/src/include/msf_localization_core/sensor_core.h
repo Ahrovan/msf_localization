@@ -31,15 +31,16 @@
 #include "msf_localization_core/time_stamp.h"
 
 
+#include "msf_localization_core/msf_element_core.h"
+
 
 #define _DEBUG_SENSOR_CORE 0
 
 
-class MsfStorageCore;
 class SensorStateCore;
 
 
-class SensorCore : public SensorBasics
+class SensorCore : public SensorBasics, public MsfElementCore
 {
 public:
     SensorCore();
@@ -47,6 +48,11 @@ public:
     virtual ~SensorCore();
 
 
+protected:
+    int init();
+
+
+/*
     // Pointer to itself
 protected:
     std::weak_ptr<SensorCore> TheSensorCorePtr;
@@ -63,6 +69,7 @@ protected:
 public:
     int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
     std::shared_ptr<MsfStorageCore> getTheMsfStorageCore() const;
+*/
 
 
     // Dimension state
@@ -200,17 +207,6 @@ public:
     virtual int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState) =0;
 
 
-
-
-    //// Debug log
-protected:
-    std::string logPath;
-    std::ofstream logFile;
-
-protected:
-    std::mutex TheLogFileMutex;
-public:
-    int log(std::string logString);
 
 };
 

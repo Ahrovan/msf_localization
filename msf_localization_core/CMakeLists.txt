@@ -42,6 +42,12 @@ set(MSF_LOCALIZATION_CORE_INCLUDE_DIR
 	src/include)
 
 set(MSF_LOCALIZATION_CORE_SOURCE_FILES
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/msf_element_core.cpp
+
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/input_core.cpp
+
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_input_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/robot_state_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/free_model_robot_state_core.cpp
 
@@ -84,6 +90,12 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
 )
  
 set(MSF_LOCALIZATION_CORE_HEADER_FILES
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/msf_element_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/input_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_input_core.h
+
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/robot_state_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/free_model_robot_state_core.h
 

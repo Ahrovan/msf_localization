@@ -147,7 +147,7 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
 //    if(!TheMsfStorageCoreAux)
 //        std::cout<<"Unable to lock TheMsfStorageCore"<<std::endl;
 
-    this->getTheMsfStorageCore()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+    this->getMsfStorageCoreSharedPtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
 
     return 0;
 }
@@ -977,7 +977,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 #endif
 
     // Check
-    if(!this->getTheSensorCore())
+    if(!isCorrect())
     {
         std::cout<<"ImuSensorCore::predictMeasurement() error 50"<<std::endl;
         return 50;
@@ -1013,18 +1013,19 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     // TODO check if it must be done here
     if(!predictedMeasurement)
     {
-        predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>();
+        std::weak_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
+        predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>(TheImuSensorCore);
 #if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() pointer created"<<std::endl;
 #endif
     }
 
 
-    // Set the sensor core -> Needed
-    if(predictedMeasurement)
-    {
-        predictedMeasurement->setTheSensorCore(this->getTheSensorCore());
-    }
+//    // Set the sensor core -> Needed
+//    if(predictedMeasurement)
+//    {
+//        predictedMeasurement->setTheSensorCore(this->getMsfElementCoreWeakPtr());
+//    }
 
 
     // Prediction

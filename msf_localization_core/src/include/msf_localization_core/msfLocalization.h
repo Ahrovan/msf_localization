@@ -84,6 +84,8 @@
 
 #include "msf_localization_core/msf_storage_core.h"
 
+#include "msf_localization_core/input_core.h"
+
 
 #include "msf_localization_core/global_parameters_core.h"
 
@@ -144,6 +146,11 @@ public:
 
 public:
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
+
+
+    // Commands
+protected:
+    std::list< std::shared_ptr<InputCore> > TheListOfInputCore;
 
 
     // Global Parameters

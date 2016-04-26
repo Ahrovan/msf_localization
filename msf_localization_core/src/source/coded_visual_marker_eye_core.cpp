@@ -149,7 +149,7 @@ int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp the_time_stamp,
     if(!isSensorEnabled())
         return 0;
 
-    if(this->getTheMsfStorageCore()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
+    if(this->getMsfStorageCoreSharedPtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
     {
         std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
         return 1;
@@ -419,7 +419,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
 #endif
 
     // Check
-    if(!this->getTheSensorCore())
+    if(!this->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 50"<<std::endl;
         return 50;
@@ -490,18 +490,19 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     // TODO check if it must be done here
     if(!predictedMeasurement)
     {
-        predictedMeasurement=std::make_shared<CodedVisualMarkerMeasurementCore>();
+        std::shared_ptr<CodedVisualMarkerEyeCore> TheCodedVisualMarkerEyeCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
+        predictedMeasurement=std::make_shared<CodedVisualMarkerMeasurementCore>(TheCodedVisualMarkerEyeCore);
 #if _DEBUG_SENSOR_CORE
         logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() pointer created"<<std::endl;
 #endif
     }
 
 
-    // Set the sensor core -> Needed
-    if(predictedMeasurement)
-    {
-        predictedMeasurement->setTheSensorCore(this->getTheSensorCore());
-    }
+//    // Set the sensor core -> Needed
+//    if(predictedMeasurement)
+//    {
+//        predictedMeasurement->setTheSensorCore(this->getTheSensorCore());
+//    }
 
 
     // id -> Needed
@@ -603,7 +604,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
 
     // dimension of the measurement
-    int dimension_error_measurement=the_sensor_core->getTheSensorCore()->getDimensionErrorMeasurement();
+    int dimension_error_measurement=std::dynamic_pointer_cast<SensorCore>(the_sensor_core->getMsfElementCoreSharedPtr())->getDimensionErrorMeasurement();
 
 
     // Robot
@@ -627,8 +628,10 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     Eigen::Vector3d tran_inc_wrt_world=TheMapElementStateCore->getPosition()-TheRobotStateCoreAux->getPosition()-Quaternion::cross_sandwich(TheRobotStateCoreAux->getAttitude(), the_sensor_state_core->getPositionSensorWrtRobot(), Quaternion::inv(TheRobotStateCoreAux->getAttitude()));
     Eigen::Vector3d tran_inc2_wrt_world=TheMapElementStateCore->getPosition()-TheRobotStateCoreAux->getPosition();
 
-    //Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
-    Eigen::Vector4d att_visual_marker_wrt_visual_marker_eye=predictedMeasurement->getVisualMarkerAttitude();
+    //Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
+    Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=predictedMeasurement->getVisualMarkerAttitude();
+
+    Eigen::Vector4d att_meas_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
 
     Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(TheRobotStateCoreAux->getAttitude(), the_sensor_state_core->getAttitudeSensorWrtRobot());
     Eigen::Vector4d att_world_wrt_visual_marker_eye=Quaternion::inv(att_visual_marker_eye_wrt_world);
@@ -637,8 +640,11 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
     Eigen::Matrix4d mat_q_minus_att_visual_marker_eye_wrt_world=Quaternion::quatMatMinus(att_visual_marker_eye_wrt_world);
 
-    Eigen::Matrix4d mat_q_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(att_visual_marker_wrt_visual_marker_eye);
-    Eigen::Matrix4d inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye=mat_q_plus_att_visual_marker_wrt_visual_marker_eye.inverse();
+    Eigen::Matrix4d mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(att_pred_visual_marker_wrt_visual_marker_eye);
+    Eigen::Matrix4d inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye=mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye.inverse();
+
+    Eigen::Matrix4d mat_q_plus_att_meas_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(att_meas_visual_marker_wrt_visual_marker_eye);
+    Eigen::Matrix4d inv_mat_q_plus_att_meas_visual_marker_wrt_visual_marker_eye=mat_q_plus_att_meas_visual_marker_wrt_visual_marker_eye.inverse();
 
     Eigen::Matrix4d mat_q_minus_att_visual_marker_wrt_world=Quaternion::quatMatMinus(TheMapElementStateCore->getAttitude());
     Eigen::Matrix4d mat_q_plus_att_visual_marker_wrt_world=Quaternion::quatMatPlus(TheMapElementStateCore->getAttitude());
@@ -731,7 +737,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
             // attit
             predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
-                    mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_minus_att_visual_marker_eye_wrt_robot*mat_q_plus_att_robot_wrt_world*mat_diff_error_quat_wrt_error_theta;
+                    mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_minus_att_visual_marker_eye_wrt_robot*mat_q_plus_att_robot_wrt_world*mat_diff_error_quat_wrt_error_theta;
 
             // ang_vel
             // zeros
@@ -840,13 +846,13 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
             if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
                 predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
-                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
                 predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
-                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_plus_att_robot_wrt_world*mat_q_plus_att_visual_marker_eye_wrt_robot*mat_diff_error_quat_wrt_error_theta;
                 dimension_sensor_error_parameters_i+=3;
             }
 
@@ -931,13 +937,13 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
             if(TheMapElementCore->isEstimationAttitudeVisualMarkerWrtWorldEnabled())
             {
                 predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
-                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye* mat_q_plus_att_world_wrt_visual_marker_eye *mat_q_plus_att_visual_marker_wrt_world*mat_diff_error_quat_wrt_error_theta;
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye* mat_q_plus_att_world_wrt_visual_marker_eye *mat_q_plus_att_visual_marker_wrt_world*mat_diff_error_quat_wrt_error_theta;
                 dimension_map_element_error_state_i+=3;
             }
             else
             {
                 predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
-                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_visual_marker_wrt_visual_marker_eye* mat_q_plus_att_world_wrt_visual_marker_eye *mat_q_plus_att_visual_marker_wrt_world*mat_diff_error_quat_wrt_error_theta;
+                        mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye* mat_q_plus_att_world_wrt_visual_marker_eye *mat_q_plus_att_visual_marker_wrt_world*mat_diff_error_quat_wrt_error_theta;
                 dimension_map_element_error_parameters_i+=3;
             }
 
@@ -957,8 +963,32 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
     // Fill Jacobian -> Identity
     // TODO FIX!
-    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise=Eigen::MatrixXd::Identity(dimensionErrorMeasurement, dimensionErrorMeasurement);
 
+
+    {
+        int dimension_error_measurement_i=0;
+
+        // pos
+        if(this->isMeasurementPositionEnabled())
+        {
+            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+                    Eigen::MatrixXd::Identity(3, 3);
+
+            dimension_error_measurement_i+=3;
+        }
+
+
+        // att
+        if(this->isMeasurementAttitudeEnabled())
+        {
+            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+                    //Eigen::MatrixXd::Identity(3, 3);
+                    mat_diff_error_quat_wrt_error_theta.transpose() *  inv_mat_q_plus_att_meas_visual_marker_wrt_visual_marker_eye*  mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye  *mat_diff_error_quat_wrt_error_theta;
+
+            dimension_error_measurement_i+=3;
+        }
+
+    }
 
 
 

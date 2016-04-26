@@ -1,6 +1,6 @@
+#ifndef _INPUT_CORE_H
+#define _INPUT_CORE_H
 
-#ifndef _MAP_ELEMENT_CORE_H
-#define _MAP_ELEMENT_CORE_H
 
 
 
@@ -26,9 +26,6 @@
 #include <memory>
 
 
-// Mutex
-#include <mutex>
-
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -39,37 +36,39 @@
 #include "msf_localization_core/msf_element_core.h"
 
 
-enum class MapElementTypes
+enum class InputTypes
 {
     undefined=0,
-    coded_visual_marker=1
+    imu=1
 };
 
 
 
 
-class MapElementStateCore;
+//class MapElementStateCore;
 
 
-class MapElementCore : public MsfElementCore
+class InputCore : public MsfElementCore
 {
 
 public:
-    MapElementCore();
-    MapElementCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
-    virtual ~MapElementCore();
+    InputCore();
+    InputCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    virtual ~InputCore();
 
 protected:
     int init();
 
 
+    // InputTypes
 protected:
-    std::string map_element_name_;
+    InputTypes input_type_;
 public:
-    int setMapElementName(std::string map_element_name);
-    std::string getMapElementName() const;
+    int setInputType(InputTypes input_type);
+    InputTypes getInputType() const;
 
 
+/*
     // Dimension state
 protected:
     unsigned int dimensionState;
@@ -105,37 +104,14 @@ protected:
 public:
     unsigned int getDimensionNoise() const;
     int setDimensionNoise(unsigned int dimensionNoise);
+*/
 
 
 
-    // MapElementTypes
-protected:
-    MapElementTypes map_element_type_;
-public:
-    int setMapElementType(MapElementTypes map_element_type);
-    MapElementTypes getMapElementType() const;
 
 
-    /*
-    // Pointer to itself
-protected:
-    std::weak_ptr<const MapElementCore> the_map_element_core_ptr_;
-public:
-    int setTheMapElementCore(std::weak_ptr<const MapElementCore> the_map_element_core_ptr);
-    std::shared_ptr<const MapElementCore> getTheMapElementCore() const;
-    std::shared_ptr<const MapElementCore> getTheMapElementCoreShared() const;
-    std::weak_ptr<const MapElementCore> getTheMapElementCoreWeak() const;
-    */
-
-
+/*
     ////// Init error state variances -> Temporal, only for the initial configuration
-//protected:
-//    Eigen::MatrixXd InitErrorStateVariance;
-//public:
-//    Eigen::MatrixXd getInitErrorStateVariance() const;
-//public:
-//    virtual int prepareInitErrorStateVariance()=0;
-
 public:
     virtual Eigen::MatrixXd getInitCovarianceErrorState()=0;
 
@@ -150,14 +126,14 @@ public:
 
 public:
     virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const=0;
-
+*/
 
 
 
 
 
     ///// Predict functions
-
+/*
     // Prediction state function
 public:
     virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
@@ -165,17 +141,11 @@ public:
     // Jacobian
 public:
     virtual int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
-
+*/
 
 
 
 };
-
-
-
-
-
-
 
 
 

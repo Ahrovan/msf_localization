@@ -266,13 +266,13 @@ int MsfLocalizationROS::readGlobalParametersConfig(pugi::xml_node global_paramet
 {
     // Create the GlobalParameters
     if(!TheGlobalParametersCoreAux)
-        TheGlobalParametersCoreAux=std::make_shared<GlobalParametersCore>(TheMsfStorageCore);
+        TheGlobalParametersCoreAux=std::make_shared<GlobalParametersCore>(TheGlobalParametersCoreAux, TheMsfStorageCore);
 
     // Set the access to the Storage core -> Not needed
-    TheGlobalParametersCoreAux->setTheMsfStorageCore(TheMsfStorageCore);
+    //TheGlobalParametersCoreAux->setTheMsfStorageCore(TheMsfStorageCore);
 
     // Set pointer to the TheGlobalParametersCoreAux
-    TheGlobalParametersCoreAux->setTheGlobalParametersCore(TheGlobalParametersCoreAux);
+    //TheGlobalParametersCoreAux->setTheGlobalParametersCore(TheGlobalParametersCoreAux);
 
 
     // Create a class for the TheGlobalParametersCore
@@ -329,15 +329,15 @@ int MsfLocalizationROS::readFreeModelRobotConfig(pugi::xml_node robot, std::shar
 
     // Create the RobotCoreAux
     if(!TheRobotCoreAux)
-        TheRobotCoreAux=std::make_shared<FreeModelRobotCore>();
+        TheRobotCoreAux=std::make_shared<FreeModelRobotCore>(TheRobotCoreAux, TheMsfStorageCore);
     // Set pointer to the RobotCore
-    TheRobotCoreAux->setTheRobotCore(TheRobotCoreAux);
+    //TheRobotCoreAux->setTheRobotCore(TheRobotCoreAux);
 
     // Set robot type
-    TheRobotCoreAux->setRobotType(RobotTypes::free_model);
+    //TheRobotCoreAux->setRobotType(RobotTypes::free_model);
 
     // Set the access to the Storage core
-    TheRobotCoreAux->setTheMsfStorageCore(TheMsfStorageCore);
+    //TheRobotCoreAux->setTheMsfStorageCore(TheMsfStorageCore);
 
     // Create a class for the RobotStateCore
     if(!RobotInitStateCore)
@@ -539,7 +539,7 @@ int MsfLocalizationROS::readImuConfig(pugi::xml_node sensor, unsigned int sensor
         TheRosSensorImuInterface=std::make_shared<RosSensorImuInterface>(nh);
 
     // Set pointer to the SensorCore
-    TheRosSensorImuInterface->setTheSensorCore(TheRosSensorImuInterface);
+    TheRosSensorImuInterface->setMsfElementCorePtr(TheRosSensorImuInterface);
 
     // Create a class for the SensorStateCore
     if(!SensorInitStateCore)
@@ -557,7 +557,7 @@ int MsfLocalizationROS::readImuConfig(pugi::xml_node sensor, unsigned int sensor
 
     // Set the access to the Storage core
     //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    TheRosSensorImuInterface->setTheMsfStorageCore(TheMsfStorageCore);
+    TheRosSensorImuInterface->setMsfStorageCorePtr(TheMsfStorageCore);
 
 
     // Sensor Topic
@@ -857,7 +857,7 @@ int MsfLocalizationROS::readArucoEyeConfig(pugi::xml_node sensor, unsigned int s
         TheRosArucoEyeInterface=std::make_shared<RosArucoEyeInterface>(nh);
 
     // Set pointer to the SensorCore
-    TheRosArucoEyeInterface->setTheSensorCore(TheRosArucoEyeInterface);
+    TheRosArucoEyeInterface->setMsfElementCorePtr(TheRosArucoEyeInterface);
 
     // Create a class for the SensorStateCore
     if(!SensorInitStateCore)
@@ -875,7 +875,7 @@ int MsfLocalizationROS::readArucoEyeConfig(pugi::xml_node sensor, unsigned int s
 
     // Set the access to the Storage core
     //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    TheRosArucoEyeInterface->setTheMsfStorageCore(TheMsfStorageCore);
+    TheRosArucoEyeInterface->setMsfStorageCorePtr(TheMsfStorageCore);
 
 
     // Sensor Topic
@@ -1036,10 +1036,10 @@ int MsfLocalizationROS::readCodedVisualMarkerConfig(pugi::xml_node map_element, 
 {
     // Create a class for the SensoreCore
     if(!TheMapElementCore)
-        TheMapElementCore=std::make_shared<CodedVisualMarkerLandmarkCore>();
+        TheMapElementCore=std::make_shared<CodedVisualMarkerLandmarkCore>(TheMapElementCore, TheMsfStorageCore);
 
     // Set pointer to the SensorCore
-    TheMapElementCore->setTheMapElementCore(TheMapElementCore);
+    //TheMapElementCore->setMsfElementCore(TheMapElementCore);
 
     // Create a class for the SensorStateCore
     if(!MapElementInitStateCore)
@@ -1051,7 +1051,7 @@ int MsfLocalizationROS::readCodedVisualMarkerConfig(pugi::xml_node map_element, 
 
     // Set the access to the Storage core
     //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    TheMapElementCore->setTheMsfStorageCore(TheMsfStorageCore);
+    //TheMapElementCore->setMsfStorageCore(TheMsfStorageCore);
 
 
     // Visual landmark

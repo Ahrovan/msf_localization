@@ -28,6 +28,8 @@ public:
     SensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
     ~SensorMeasurementCore();
 
+protected:
+    int init();
 
 protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer

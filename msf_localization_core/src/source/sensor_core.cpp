@@ -9,14 +9,42 @@
 
 SensorCore::SensorCore() :
     SensorBasics(),
-    dimensionState(0),
-    dimensionErrorState(0),
-    dimensionParameters(4+3),
-    dimensionErrorParameters(3+3),
-    dimensionMeasurement(0),
-    dimensionErrorMeasurement(0),
-    dimensionNoise(0)
+    MsfElementCore()
 {
+    init();
+
+    return;
+}
+
+SensorCore::SensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
+    SensorBasics(),
+    MsfElementCore(TheSensorCorePtr, TheMsfStorageCore)
+{
+    init();
+
+    // end
+    return;
+}
+
+SensorCore::~SensorCore()
+{
+
+    return;
+}
+
+int SensorCore::init()
+{
+    // Dimensions
+    dimensionState=0;
+    dimensionErrorState=0;
+    dimensionParameters=4+3;
+    dimensionErrorParameters=3+3;
+    dimensionMeasurement=0;
+    dimensionErrorMeasurement=0;
+    dimensionNoise=0;
+
+    // Element Type
+    this->setMsfElementCoreType(MsfElementCoreTypes::sensor);
 
     // Sensor name
     sensor_name_="sensor";
@@ -30,50 +58,10 @@ SensorCore::SensorCore() :
     noiseAttitudeSensorWrtRobot.setZero();
     noisePositionSensorWrtRobot.setZero();
 
-
-
-    // LOG
-    const char* env_p = std::getenv("FUSEON_STACK");
-
-    logPath=std::string(env_p)+"/logs/"+"logSensorCoreFile.txt";
-
-    logFile.open(logPath);
-
-    if(!logFile.is_open())
-    {
-        std::cout<<"unable to open log file"<<std::endl;
-    }
-
-
-    return;
+    return 0;
 }
 
-SensorCore::SensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
-    SensorCore()
-{
-
-    // set the sensor core
-    setTheSensorCore(TheSensorCorePtr);
-
-    // set the msf storage core
-    setTheMsfStorageCore(TheMsfStorageCore);
-
-    // end
-    return;
-}
-
-SensorCore::~SensorCore()
-{
-    // Log
-    if(logFile.is_open())
-    {
-        logFile.close();
-    }
-
-    return;
-}
-
-
+/*
 int SensorCore::setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr)
 {
     this->TheSensorCorePtr=TheSensorCorePtr;
@@ -108,7 +96,7 @@ std::shared_ptr<MsfStorageCore> SensorCore::getTheMsfStorageCore() const
     std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
     return TheMsfStorageCoreSharedPtr;
 }
-
+*/
 
 
 unsigned int SensorCore::getDimensionState() const
@@ -292,18 +280,3 @@ int SensorCore::prepareInitErrorStateVariance()
     return 0;
 }
 
-
-int SensorCore::log(std::string logString)
-{
-
-    // Lock mutex
-    TheLogFileMutex.lock();
-
-    // Write in file
-    logFile<<logString;
-
-    // Unlock mutex
-    TheLogFileMutex.unlock();
-
-    return 0;
-}

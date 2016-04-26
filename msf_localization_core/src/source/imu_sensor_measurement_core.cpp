@@ -4,7 +4,16 @@
 #include "msf_localization_core/imu_sensor_core.h"
 
 
-ImuSensorMeasurementCore::ImuSensorMeasurementCore()
+ImuSensorMeasurementCore::ImuSensorMeasurementCore() :
+    SensorMeasurementCore()
+{
+    init();
+
+    return;
+}
+
+ImuSensorMeasurementCore::ImuSensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr) :
+    SensorMeasurementCore(TheSensorCorePtr)
 {
     init();
 

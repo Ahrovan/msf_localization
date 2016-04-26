@@ -104,6 +104,9 @@ MsfLocalizationCore::~MsfLocalizationCore()
 {
     // Cleaning
 
+    // TheListOfInputCore
+    TheListOfInputCore.clear();
+
     // TheListOfSensorCore
     TheListOfSensorCore.clear();
 
@@ -1683,8 +1686,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             {
 
                 // iterative EKf enabled only with visual marker measurements!
-                iterativeEkfEnabled=true;
-                iterativeEkfEnd=false;
+//                iterativeEkfEnabled=true;
+//                iterativeEkfEnd=false;
 
 
                 // Find the sensor state

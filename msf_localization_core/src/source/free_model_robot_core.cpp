@@ -5,6 +5,26 @@
 FreeModelRobotCore::FreeModelRobotCore():
     RobotCore()
 {
+    init();
+
+    return;
+}
+
+FreeModelRobotCore::FreeModelRobotCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr):
+    RobotCore(msf_element_core_ptr, msf_storage_core_ptr)
+{
+    init();
+
+    return;
+}
+
+FreeModelRobotCore::~FreeModelRobotCore()
+{
+    return;
+}
+
+int FreeModelRobotCore::init()
+{
     dimensionState=9+10;
     dimensionErrorState=9+9;
 
@@ -24,12 +44,12 @@ FreeModelRobotCore::FreeModelRobotCore():
     InitErrorStateVariance.resize(dimensionErrorState, dimensionErrorState);
     InitErrorStateVariance.setZero();
 
-    return;
-}
 
-FreeModelRobotCore::~FreeModelRobotCore()
-{
-    return;
+    // Type
+    setRobotType(RobotTypes::free_model);
+
+
+    return 0;
 }
 
 
@@ -461,7 +481,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
     // att / att [9 non-zero]
-    Eigen::Matrix3d jacobianAttAtt=mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+pow(dt,2)/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
+    Eigen::Matrix3d jacobianAttAtt=
+            mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+pow(dt,2)/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
     //predictedState->errorStateJacobian.angular.block<3,3>(0,0)=jacobianAttAtt;
     //predictedState->errorStateJacobian.angular=jacobianAttAtt.sparseView();
     for(int i=0; i<3; i++)
@@ -471,8 +492,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
     // att / ang_vel [9 non-zero]
-    // TODO fix
-    Eigen::Matrix3d jacobianAttAngVel=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + pow(dt,2)/24*mat_aux_j2);
+    Eigen::Matrix3d jacobianAttAngVel=
+            2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + pow(dt,2)/24*mat_aux_j2);
     //predictedState->errorStateJacobian.angular.block<3,3>(0,3)=jacobianAttAngVel;
     //predictedState->errorStateJacobian.angular=jacobianAttAngVel.sparseView();
     for(int i=0; i<3; i++)
@@ -481,8 +502,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
     // att / ang_accel [9 non-zero]
-    // TODO
-    Eigen::Matrix3d jacobianAttAngAcc=2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*pow(dt,2) + pow(dt,2)/24*mat_aux_j3);
+    Eigen::Matrix3d jacobianAttAngAcc=
+            2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*pow(dt,2) + pow(dt,2)/24*mat_aux_j3);
     //predictedState->errorStateJacobian.angular.block<3,3>(0,6)=jacobianAttAngVel;
     //predictedState->errorStateJacobian.angular=jacobianAttAngAcc.sparseView();
     for(int i=0; i<3; i++)

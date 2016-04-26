@@ -15,21 +15,25 @@
 #include <Eigen/Dense>
 
 
+#include "msf_localization_core/msf_element_core.h"
 
 
 
 
-class MsfStorageCore;
 
 
-class GlobalParametersCore
+class GlobalParametersCore : public MsfElementCore
 {
 
 
 public:
     GlobalParametersCore();
-    GlobalParametersCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+    GlobalParametersCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     virtual ~GlobalParametersCore();
+
+
+protected:
+    int init();
 
 
 protected:
@@ -68,7 +72,7 @@ public:
     int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
 
 
-
+/*
     // Pointer to itself
 protected:
     std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr;
@@ -83,7 +87,7 @@ protected:
 public:
     int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
     std::shared_ptr<MsfStorageCore> getTheMsfStorageCore() const;
-
+*/
 
 
 

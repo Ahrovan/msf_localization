@@ -7,46 +7,47 @@
 
 
 RobotCore::RobotCore() :
-    dimensionState(0),
-    dimensionErrorState(0),
-    dimensionParameters(0),
-    dimensionErrorParameters(0),
-    dimensionNoise(0)
+    MsfElementCore()
 {
-    // Robot Type
-    robotType=RobotTypes::undefined;
+    init();
 
-    // Robot name default
-    robot_name_="robot";
-
+    return;
+}
 
 
-
-    // LOG
-    const char* env_p = std::getenv("FUSEON_STACK");
-
-    logPath=std::string(env_p)+"/logs/"+"logRobotCoreFile.txt";
-
-    logFile.open(logPath);
-
-    if(!logFile.is_open())
-    {
-        std::cout<<"unable to open log file"<<std::endl;
-    }
+RobotCore::RobotCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+    MsfElementCore(msf_element_core_ptr, msf_storage_core_ptr)
+{
+    init();
 
     return;
 }
 
 RobotCore::~RobotCore()
 {
-    // Log
-    if(logFile.is_open())
-    {
-        logFile.close();
-    }
-
 
     return;
+}
+
+int RobotCore::init()
+{
+    // Dimensions
+    dimensionState=0;
+    dimensionErrorState=0;
+    dimensionParameters=0;
+    dimensionErrorParameters=0;
+    dimensionNoise=0;
+
+    // Element Type
+    this->setMsfElementCoreType(MsfElementCoreTypes::robot);
+
+    // Robot Type
+    robotType=RobotTypes::undefined;
+
+    // Robot name default
+    robot_name_="robot";
+
+    return 0;
 }
 
 int RobotCore::setRobotName(std::string robot_name)
@@ -128,6 +129,7 @@ RobotTypes RobotCore::getRobotType() const
 }
 
 
+/*
 int RobotCore::setTheRobotCore(std::weak_ptr<const RobotCore> TheRobotCorePtr)
 {
     this->TheRobotCorePtr=TheRobotCorePtr;
@@ -151,24 +153,10 @@ std::shared_ptr<MsfStorageCore> RobotCore::getTheMsfStorageCore() const
     std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
     return TheMsfStorageCoreSharedPtr;
 }
-
+*/
 
 Eigen::MatrixXd RobotCore::getInitErrorStateVariance() const
 {
     return this->InitErrorStateVariance;
 }
 
-
-int RobotCore::log(std::string logString)
-{
-    // Lock mutex
-    TheLogFileMutex.lock();
-
-    // Write in file
-    logFile<<logString;
-
-    // Unlock mutex
-    TheLogFileMutex.unlock();
-
-    return 0;
-}
