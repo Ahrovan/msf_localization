@@ -1,6 +1,8 @@
 
 #include "msf_localization_core/input_core.h"
 
+#include "msf_localization_core/input_command_core.h"
+
 
 InputCore::InputCore() :
     MsfElementCore()

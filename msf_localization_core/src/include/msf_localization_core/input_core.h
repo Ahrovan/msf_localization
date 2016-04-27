@@ -45,7 +45,7 @@ enum class InputTypes
 
 
 
-//class MapElementStateCore;
+//class InputCommandCore;
 
 
 class InputCore : public MsfElementCore

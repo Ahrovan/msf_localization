@@ -1,29 +1,28 @@
 
-
-#ifndef _IMU_SENSOR_STATE_CORE_H
-#define _IMU_SENSOR_STATE_CORE_H
+#ifndef _IMU_INPUT_COMMAND_CORE_H
+#define _IMU_INPUT_COMMAND_CORE_H
 
 
 #include <Eigen/Dense>
 
 
-#include "msf_localization_core/sensor_state_core.h"
+#include "msf_localization_core/input_command_core.h"
 
 #include "msf_localization_core/quaternion_algebra.h"
 
 
 
-class ImuSensorStateCore : public SensorStateCore
+class ImuInputCommandCore : public InputCommandCore
 {
 public:
-    ImuSensorStateCore();
-    ImuSensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
-    ~ImuSensorStateCore();
-
-protected:
-    int init();
+    ImuInputCommandCore();
+    ImuInputCommandCore(std::weak_ptr<InputCore> input_core_ptr);
+    ~ImuInputCommandCore();
 
 
+
+
+/*
     ///// Imu State if enabled (or Parameters if disabled)
 
     // if enabled
@@ -48,7 +47,7 @@ public:
     int setScaleAngularVelocity(Eigen::Vector3d scaleAngularVelocity);
 
 
-    // Linear Acceleration Biases   
+    // Linear Acceleration Biases
 protected:
 public:
     Eigen::Vector3d biasesLinearAcceleration;
@@ -64,9 +63,9 @@ public:
 public:
     Eigen::Vector3d getScaleLinearAcceleration() const;
     int setScaleLinearAcceleration(Eigen::Vector3d scaleLinearAcceleration);
+*/
 
-
-
+/*
 
     ////// Jacobians
 
@@ -101,7 +100,7 @@ public:
 public:
     int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
 
-
+*/
 
 
 };

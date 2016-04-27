@@ -5,13 +5,18 @@
 #include "msf_localization_core/imu_sensor_core.h"
 
 
-ImuSensorStateCore::ImuSensorStateCore()
+ImuSensorStateCore::ImuSensorStateCore() :
+    SensorStateCore()
 {
-    // Error State Jacobian: Init to zero
-    errorStateJacobian.positionSensorWrtRobot.setZero();
-    errorStateJacobian.attitudeSensorWrtRobot.setZero();
-    errorStateJacobian.biasesLinearAcceleration.setZero();
-    errorStateJacobian.biasesAngularVelocity.setZero();
+    init();
+
+    return;
+}
+
+ImuSensorStateCore::ImuSensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr) :
+    SensorStateCore(TheSensorCorePtr)
+{
+    init();
 
     return;
 }
@@ -19,6 +24,17 @@ ImuSensorStateCore::ImuSensorStateCore()
 ImuSensorStateCore::~ImuSensorStateCore()
 {
     return;
+}
+
+int ImuSensorStateCore::init()
+{
+    // Error State Jacobian: Init to zero
+    errorStateJacobian.positionSensorWrtRobot.setZero();
+    errorStateJacobian.attitudeSensorWrtRobot.setZero();
+    errorStateJacobian.biasesLinearAcceleration.setZero();
+    errorStateJacobian.biasesAngularVelocity.setZero();
+
+    return 0;
 }
 
 
