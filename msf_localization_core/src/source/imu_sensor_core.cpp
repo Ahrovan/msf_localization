@@ -1018,7 +1018,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     }
 
     // Robot core check
-    if(!currentRobotState->getTheRobotCore())
+    if(!currentRobotState->isCorrect())
     {
         std::cout<<"ImuSensorCore::predictMeasurement() error 3"<<std::endl;
         return 3;
@@ -1068,9 +1068,9 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 
         // Switch depending on robot used
-        switch(currentRobotState->getTheRobotCore()->getRobotType())
+        switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
         {
-            case RobotTypes::free_model:
+            case RobotCoreTypes::free_model:
             {
                 // Cast
                 std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
@@ -1183,9 +1183,9 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 
         // Switch depending on robot used
-        switch(currentRobotState->getTheRobotCore()->getRobotType())
+        switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
         {
-            case RobotTypes::free_model:
+            case RobotCoreTypes::free_model:
             {
                 // Cast
                 std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
@@ -1328,13 +1328,13 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Jacobians measurement - state
 
     /// Jacobian measurement - robot state
-    switch(TheRobotStateCore->getTheRobotCore()->getRobotType())
+    switch(std::dynamic_pointer_cast<RobotCore>(TheRobotStateCore->getMsfElementCoreSharedPtr())->getRobotCoreType())
     {
-        case RobotTypes::free_model:
+        case RobotCoreTypes::free_model:
         {
             // Robot
             std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCoreAux=std::static_pointer_cast<FreeModelRobotStateCore>(TheRobotStateCore);
-            std::shared_ptr<const FreeModelRobotCore> TheRobotCoreAux=std::static_pointer_cast<const FreeModelRobotCore>(TheRobotStateCoreAux->getTheRobotCore());
+            std::shared_ptr<FreeModelRobotCore> TheRobotCoreAux=std::static_pointer_cast<FreeModelRobotCore>(TheRobotStateCoreAux->getMsfElementCoreSharedPtr());
 
             // dimension of robot state
             int dimensionRobotErrorState=TheRobotCoreAux->getDimensionErrorState();

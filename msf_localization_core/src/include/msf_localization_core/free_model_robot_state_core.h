@@ -18,7 +18,11 @@ class FreeModelRobotStateCore : public RobotStateCore
 {
 public:
     FreeModelRobotStateCore();
+    FreeModelRobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~FreeModelRobotStateCore();
+
+protected:
+    int init();
 
 
     // State: xR=[pos (3/3), lin_speed (3/3), lin_accel (3/3), attit (4/3), ang_vel (3/3), ang_acc (3/3)]'

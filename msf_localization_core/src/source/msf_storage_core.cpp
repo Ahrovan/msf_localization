@@ -445,16 +445,16 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
         logString<<"\t\t";
         logString<<"Robot ";
 
-        switch(TheStateEstimationCore->TheRobotStateCore->getTheRobotCore()->getRobotType())
+        switch(std::dynamic_pointer_cast<RobotCore>(TheStateEstimationCore->TheRobotStateCore->getMsfElementCoreSharedPtr())->getRobotCoreType())
         {
-            case RobotTypes::undefined:
+            case RobotCoreTypes::undefined:
             {
                 break;
             }
 
-            case RobotTypes::free_model:
+            case RobotCoreTypes::free_model:
             {
-                std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(TheStateEstimationCore->TheRobotStateCore->getTheRobotCore());
+                //std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(TheStateEstimationCore->TheRobotStateCore->getMsfElementCoreSharedPtr());
                 std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(TheStateEstimationCore->TheRobotStateCore);
 
                 // State

@@ -46,7 +46,7 @@ int FreeModelRobotCore::init()
 
 
     // Type
-    setRobotType(RobotTypes::free_model);
+    this->setRobotCoreType(RobotCoreTypes::free_model);
 
 
     return 0;
@@ -234,24 +234,25 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
 
     // Checks in the past state
-    if(!pastState->getTheRobotCore())
+    if(!pastState->isCorrect())
     {
-        return -5;
         std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+        return -5;
     }
 
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<FreeModelRobotStateCore>();
+        predictedState=std::make_shared<FreeModelRobotStateCore>(pastState->getMsfElementCoreWeakPtr());
     }
 
-    // Set The robot core if it doesn't exist
-    if(!predictedState->getTheRobotCore())
-    {
-        predictedState->setTheRobotCore(pastState->getTheRobotCore());
-    }
+//    // Set The robot core if it doesn't exist
+//    if(!predictedState->getTheRobotCore())
+//    {
+//        predictedState->setTheRobotCore(pastState->getTheRobotCore());
+//    }
+
 
 
     // Equations
@@ -634,7 +635,7 @@ int FreeModelRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<FreeMod
 {
     // Map Element Core Pointer
     //std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore(this);
-    std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore=std::dynamic_pointer_cast<FreeModelRobotCore>(this->getMsfElementCoreSharedPtr());
+    //std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore=std::dynamic_pointer_cast<FreeModelRobotCore>(this->getMsfElementCoreSharedPtr());
 
     // Set pointer to the RobotCore
     //this->setTheRobotCore(TheRobotCoreCore);
@@ -647,9 +648,9 @@ int FreeModelRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<FreeMod
 
     // Create a class for the RobotStateCore
     if(!RobotInitStateCore)
-        RobotInitStateCore=std::make_shared<FreeModelRobotStateCore>();
+        RobotInitStateCore=std::make_shared<FreeModelRobotStateCore>(this->getMsfElementCoreWeakPtr());
     // Set pointer to the SensorCore
-    RobotInitStateCore->setTheRobotCore(TheRobotCoreCore);
+    //RobotInitStateCore->setTheRobotCore(TheRobotCoreCore);
 
 
     // Aux vars

@@ -460,7 +460,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     }
 
     // Robot core check
-    if(!currentRobotState->getTheRobotCore())
+    if(!currentRobotState->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 3"<<std::endl;
         return 3;
@@ -516,10 +516,10 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     // Prediction
 
     // Switch depending on robot used
-    switch(currentRobotState->getTheRobotCore()->getRobotType())
+    switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
     {
         // Free model robot
-        case RobotTypes::free_model:
+        case RobotCoreTypes::free_model:
         {
             // Cast
             std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::static_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
@@ -611,7 +611,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
     // Robot
     std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCoreAux=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
-    std::shared_ptr<const FreeModelRobotCore> TheRobotCoreAux=std::dynamic_pointer_cast<const FreeModelRobotCore>(TheRobotStateCoreAux->getTheRobotCore());
+    std::shared_ptr<FreeModelRobotCore> TheRobotCoreAux=std::dynamic_pointer_cast<FreeModelRobotCore>(TheRobotStateCoreAux->getMsfElementCoreSharedPtr());
 
 
     // Map element
@@ -1011,7 +1011,7 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     // Current Robot State
     if(!currentRobotState)
         return -20;
-    if(!currentRobotState->getTheRobotCore())
+    if(!currentRobotState->isCorrect())
         return -21;
     // Cast
     std::shared_ptr<FreeModelRobotStateCore> TheRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
@@ -1119,7 +1119,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     // Current Robot State
     if(!currentRobotState)
         return -20;
-    if(!currentRobotState->getTheRobotCore())
+    if(!currentRobotState->isCorrect())
         return -21;
     // Cast
     std::shared_ptr<FreeModelRobotStateCore> TheRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
@@ -1219,7 +1219,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
 
 
     /// Robot
-    int dimension_robot_error_state_total=TheRobotState->getTheRobotCore()->getDimensionErrorState();
+    int dimension_robot_error_state_total=TheRobotState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.resize(dimension_map_new_element_error_state_total, dimension_robot_error_state_total);
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.setZero();
 

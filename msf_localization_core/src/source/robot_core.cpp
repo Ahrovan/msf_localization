@@ -42,7 +42,7 @@ int RobotCore::init()
     this->setMsfElementCoreType(MsfElementCoreTypes::robot);
 
     // Robot Type
-    robotType=RobotTypes::undefined;
+    robot_core_type_=RobotCoreTypes::undefined;
 
     // Robot name default
     robot_name_="robot";
@@ -61,102 +61,18 @@ std::string RobotCore::getRobotName() const
     return this->robot_name_;
 }
 
-unsigned int RobotCore::getDimensionState() const
-{
-    return this->dimensionState;
-}
 
-int RobotCore::setDimensionState(unsigned int dimensionState)
+
+
+
+int RobotCore::setRobotCoreType(RobotCoreTypes robot_core_type)
 {
-    this->dimensionState=dimensionState;
+    this->robot_core_type_=robot_core_type;
     return 0;
 }
-
-unsigned int RobotCore::getDimensionErrorState() const
+RobotCoreTypes RobotCore::getRobotCoreType() const
 {
-    return this->dimensionErrorState;
+    return robot_core_type_;
 }
 
-int RobotCore::setDimensionErrorState(unsigned int dimensionErrorState)
-{
-    this->dimensionErrorState=dimensionErrorState;
-    return 0;
-}
-
-unsigned int RobotCore::getDimensionParameters() const
-{
-    return this->dimensionParameters;
-}
-
-int RobotCore::setDimensionParameters(unsigned int dimensionParameters)
-{
-    this->dimensionParameters=dimensionParameters;
-    return 0;
-}
-
-unsigned int RobotCore::getDimensionErrorParameters() const
-{
-    return this->dimensionErrorParameters;
-}
-
-int RobotCore::setDimensionErrorParameters(unsigned int dimensionErrorParameters)
-{
-    this->dimensionErrorParameters=dimensionErrorParameters;
-    return 0;
-}
-
-unsigned int RobotCore::getDimensionNoise() const
-{
-    return this->dimensionNoise;
-}
-
-int RobotCore::setDimensionNoise(unsigned int dimensionNoise)
-{
-    this->dimensionNoise=dimensionNoise;
-    return 0;
-}
-
-
-
-int RobotCore::setRobotType(RobotTypes robotType)
-{
-    this->robotType=robotType;
-    return 0;
-}
-RobotTypes RobotCore::getRobotType() const
-{
-    return robotType;
-}
-
-
-/*
-int RobotCore::setTheRobotCore(std::weak_ptr<const RobotCore> TheRobotCorePtr)
-{
-    this->TheRobotCorePtr=TheRobotCorePtr;
-    return 0;
-}
-std::shared_ptr<const RobotCore> RobotCore::getTheRobotCore() const
-{
-    std::shared_ptr<const RobotCore> TheRobotCoreSharedPtr=this->TheRobotCorePtr.lock();
-    return TheRobotCoreSharedPtr;
-}
-
-
-int RobotCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore)
-{
-    this->TheMsfStorageCore=TheMsfStorageCore;
-    return 0;
-}
-
-std::shared_ptr<MsfStorageCore> RobotCore::getTheMsfStorageCore() const
-{
-    std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
-    return TheMsfStorageCoreSharedPtr;
-}
-*/
-
-Eigen::MatrixXd RobotCore::getInitErrorStateVariance() const
-{
-    return this->InitErrorStateVariance;
-}
 

@@ -56,7 +56,7 @@ int StateEstimationCore::getDimensionState() const
     // TODO
 
     // Robot
-    dimensionState+=this->TheRobotStateCore->getTheRobotCore()->getDimensionState();
+    dimensionState+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionState();
 
     // Sensors
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
@@ -88,7 +88,7 @@ int StateEstimationCore::getDimensionErrorState() const
     // TODO
 
     // Robot
-    dimensionErrorState+=this->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
+    dimensionErrorState+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Sensors
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
@@ -133,8 +133,8 @@ int StateEstimationCore::prepareInitErrorStateVariance()
 
 
     // Robot
-    int dimensionRobot=this->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
-    covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionRobot, dimensionRobot)=this->TheRobotStateCore->getTheRobotCore()->getInitErrorStateVariance();
+    int dimensionRobot=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionRobot, dimensionRobot)=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getInitErrorStateVariance();
     pointCovMatrix+=dimensionRobot;
 
 

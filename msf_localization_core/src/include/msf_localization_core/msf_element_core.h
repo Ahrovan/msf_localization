@@ -30,6 +30,9 @@
 #include <mutex>
 
 
+// Eigen
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 
 
@@ -98,6 +101,55 @@ public:
 
 public:
     virtual bool isCorrect();
+
+
+
+
+    /// Dimensions
+    // Dimension state
+protected:
+    unsigned int dimensionState;
+public:
+    unsigned int getDimensionState() const;
+    int setDimensionState(unsigned int dimensionState);
+
+    // Dimension error state
+protected:
+    unsigned int dimensionErrorState;
+public:
+    unsigned int getDimensionErrorState() const;
+    int setDimensionErrorState(unsigned int dimensionErrorState);
+
+    // Dimension parameters
+protected:
+    unsigned int dimensionParameters;
+public:
+    unsigned int getDimensionParameters() const;
+    int setDimensionParameters(unsigned int dimensionParameters);
+
+    // Dimension error parameters
+protected:
+    unsigned int dimensionErrorParameters;
+public:
+    unsigned int getDimensionErrorParameters() const;
+    int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
+
+
+    // Dimension of the noise (error noise)
+protected:
+    unsigned int dimensionNoise;
+public:
+    unsigned int getDimensionNoise() const;
+    int setDimensionNoise(unsigned int dimensionNoise);
+
+
+
+    ////// Init error state variances -> Temporal, only for the initial configuration
+protected:
+    Eigen::MatrixXd InitErrorStateVariance;
+public:
+    Eigen::MatrixXd getInitErrorStateVariance() const;
+
 
 
 

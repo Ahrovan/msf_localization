@@ -4,9 +4,18 @@
 #include "msf_localization_core/free_model_robot_core.h"
 
 
-FreeModelRobotStateCore::FreeModelRobotStateCore()
+FreeModelRobotStateCore::FreeModelRobotStateCore() :
+    RobotStateCore()
 {
-    //this->errorStateJacobian.resize();
+    init();
+
+    return;
+}
+
+FreeModelRobotStateCore::FreeModelRobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    RobotStateCore(msf_element_core_ptr)
+{
+    init();
 
     return;
 }
@@ -15,6 +24,14 @@ FreeModelRobotStateCore::~FreeModelRobotStateCore()
 {
     return;
 }
+
+int FreeModelRobotStateCore::init()
+{
+    this->robot_state_core_type_=RobotStateCoreTypes::free_model;
+
+    return 0;
+}
+
 
 Eigen::Vector3d FreeModelRobotStateCore::getPosition() const
 {

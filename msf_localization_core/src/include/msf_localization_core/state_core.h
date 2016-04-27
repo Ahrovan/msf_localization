@@ -52,6 +52,9 @@ public:
     StateCoreTypes getStateCoreType() const;
 
 
+public:
+    virtual bool isCorrect();
+
 
 /*
 

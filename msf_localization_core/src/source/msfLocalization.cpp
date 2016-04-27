@@ -1823,7 +1823,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     /// Error State
     unsigned int dimensionErrorState=0;
     // Robot
-    dimensionErrorState+=OldState->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
+    dimensionErrorState+=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     // Global Parameters
     dimensionErrorState+=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
     // Sensors
@@ -2998,7 +2998,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         // Dimension Error State
         int dimension_error_state_total=0;
         // Robot
-        dimension_error_state_total+=OldState->TheRobotStateCore->getTheRobotCore()->getDimensionErrorState();
+        dimension_error_state_total+=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         // Global Parameters
         dimension_error_state_total+=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
         // Sensors
