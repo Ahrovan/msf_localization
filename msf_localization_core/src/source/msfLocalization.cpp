@@ -1831,7 +1831,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         itListMatchedMeas!=OldState->TheListSensorStateCore.end();
         ++itListMatchedMeas)
     {
-        dimensionErrorState+=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorState();
+        dimensionErrorState+=(*itListMatchedMeas)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     }
     // Map
     for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMatchedMeas=OldState->TheListMapElementStateCore.begin();
@@ -2601,7 +2601,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListSensorState!=UpdatedState->TheListSensorStateCore.end();
             ++itListSensorState)
         {
-            unsigned int dimensionSensorErrorState=(*itListSensorState)->getTheSensorCore()->getDimensionErrorState();
+            unsigned int dimensionSensorErrorState=(*itListSensorState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
             Eigen::VectorXd incrementErrorStateSensor;
             if(dimensionSensorErrorState)
             {
@@ -3006,7 +3006,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListSensState!=OldState->TheListSensorStateCore.end();
             ++itListSensState)
         {
-            dimension_error_state_total+=(*itListSensState)->getTheSensorCore()->getDimensionErrorState();
+            dimension_error_state_total+=(*itListSensState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         }
         // Map
         for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
@@ -3425,7 +3425,7 @@ int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<S
             return -200;
         }
 
-        if(!(*itSensState)->getTheSensorCore())
+        if(!(*itSensState)->isCorrect())
         {
 #if _DEBUG_MSF_LOCALIZATION_CORE
             std::cout<<"!!Error getting the core"<<std::endl;
@@ -3435,7 +3435,7 @@ int MsfLocalizationCore::findSensorStateCoreFromList(std::list<std::shared_ptr<S
 
 
         //std::cout<<"matching previous sensor state: going to check the type"<<std::endl;
-        if((*itSensState)->getTheSensorCore()->getSensorId() == TheSensorCore->getSensorId())
+        if(std::dynamic_pointer_cast<SensorCore>((*itSensState)->getMsfElementCoreSharedPtr())->getSensorId() == TheSensorCore->getSensorId())
         {
             // Polymorphic
             TheSensorStateCore=(*itSensState);

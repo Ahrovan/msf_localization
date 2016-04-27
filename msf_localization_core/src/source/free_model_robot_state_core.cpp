@@ -27,7 +27,7 @@ FreeModelRobotStateCore::~FreeModelRobotStateCore()
 
 int FreeModelRobotStateCore::init()
 {
-    this->robot_state_core_type_=RobotStateCoreTypes::free_model;
+    this->setRobotStateType(RobotStateCoreTypes::free_model);
 
     return 0;
 }

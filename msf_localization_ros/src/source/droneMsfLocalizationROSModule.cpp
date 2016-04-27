@@ -672,7 +672,7 @@ try
 
 
             tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                                  this->TheRobotCore->getRobotName(), (*itSensorState)->getTheSensorCore()->getSensorName()));
+                                                  this->TheRobotCore->getRobotName(), std::dynamic_pointer_cast<SensorCore>((*itSensorState)->getMsfElementCoreSharedPtr())->getSensorName()));
 
         }
 

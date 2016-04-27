@@ -489,7 +489,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
             itSensorStateCore!=TheStateEstimationCore->TheListSensorStateCore.end();
             ++itSensorStateCore)
         {
-            std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itSensorStateCore)->getTheSensorCore();
+            std::shared_ptr<SensorCore> SensorCorePtrAux=std::dynamic_pointer_cast<SensorCore>((*itSensorStateCore)->getMsfElementCoreSharedPtr());
             logString<<"\t\t";
             logString<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 

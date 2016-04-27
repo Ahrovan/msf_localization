@@ -791,7 +791,7 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
 
 
     // Checks in the past state
-    if(!pastState->getTheSensorCore())
+    if(!pastState->isCorrect())
     {
         return -5;
         std::cout<<"ImuSensorCore::predictState() error !pastState->getTheSensorCore()"<<std::endl;
@@ -801,14 +801,14 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     // Create the predicted state if it doesn't exists
     if(!predictedState)
     {
-        predictedState=std::make_shared<ImuSensorStateCore>();
+        predictedState=std::make_shared<ImuSensorStateCore>(pastState->getMsfElementCoreSharedPtr());
     }
 
-    // Set The sensor core if it doesn't exist
-    if(!predictedState->getTheSensorCore())
-    {
-        predictedState->setTheSensorCore(pastState->getTheSensorCore());
-    }
+//    // Set The sensor core if it doesn't exist
+//    if(!predictedState->getTheSensorCore())
+//    {
+//        predictedState->setTheSensorCore(pastState->getTheSensorCore());
+//    }
 
 
 
@@ -1251,11 +1251,11 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Common Variables
 
     // Imu sensor core
-    std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(TheImuStateCore->getTheSensorCore());
+    std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(TheImuStateCore->getMsfElementCoreSharedPtr());
 
 
     // dimension of the measurement
-    int dimensionErrorMeasurement=TheImuStateCore->getTheSensorCore()->getDimensionErrorMeasurement();
+    int dimensionErrorMeasurement=std::dynamic_pointer_cast<SensorCore>(TheImuStateCore->getMsfElementCoreSharedPtr())->getDimensionErrorMeasurement();
 
 
     // Robot
@@ -1474,7 +1474,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Jacobian measurement - sensor state & Jacobians measurement - sensor parameters
 
     // dimension of the sensor state
-    int dimensionSensorErrorState=TheImuStateCore->getTheSensorCore()->getDimensionErrorState();
+    int dimensionSensorErrorState=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Resize and init Jacobian
     predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimensionErrorMeasurement, dimensionSensorErrorState);
@@ -1482,7 +1482,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
 
     // dimension of the sensor parameters
-    int dimensionSensorParameters=TheImuStateCore->getTheSensorCore()->getDimensionErrorParameters();
+    int dimensionSensorParameters=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Resize and init Jacobian
     predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.resize(dimensionErrorMeasurement, dimensionSensorParameters);
@@ -1903,7 +1903,7 @@ int ImuSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std:
 {
     // Sensor Core Pointer
     //std::shared_ptr<ImuSensorCore> TheImuSensorCore(this);
-    std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
+    //std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
 
     // Set pointer to the SensorCore
     //this->setMsfElementCorePtr(TheRosSensorImuInterface);
@@ -1911,11 +1911,11 @@ int ImuSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std:
 
     // Create a class for the SensorStateCore
     if(!SensorInitStateCore)
-        SensorInitStateCore=std::make_shared<ImuSensorStateCore>();
+        SensorInitStateCore=std::make_shared<ImuSensorStateCore>(this->getMsfElementCoreWeakPtr());
 
     // Set pointer to the SensorCore
     //SensorInitStateCore->setTheSensorCore(TheRosSensorImuInterface);
-    SensorInitStateCore->setTheSensorCore(TheImuSensorCore);
+    //SensorInitStateCore->setTheSensorCore(TheImuSensorCore);
 
 
     // Set sensor type

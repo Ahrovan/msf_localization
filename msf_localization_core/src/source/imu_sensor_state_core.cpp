@@ -13,8 +13,8 @@ ImuSensorStateCore::ImuSensorStateCore() :
     return;
 }
 
-ImuSensorStateCore::ImuSensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr) :
-    SensorStateCore(TheSensorCorePtr)
+ImuSensorStateCore::ImuSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    SensorStateCore(msf_element_core_ptr)
 {
     init();
 
@@ -28,6 +28,8 @@ ImuSensorStateCore::~ImuSensorStateCore()
 
 int ImuSensorStateCore::init()
 {
+    this->setSensorStateCoreType(SensorStateCoreTypes::imu);
+
     // Error State Jacobian: Init to zero
     errorStateJacobian.positionSensorWrtRobot.setZero();
     errorStateJacobian.attitudeSensorWrtRobot.setZero();
@@ -87,7 +89,7 @@ Eigen::MatrixXd ImuSensorStateCore::getJacobianErrorState()
 {
     Eigen::MatrixXd jacobian_error_state;
 
-    std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCoreShared());
+    std::shared_ptr<ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
 
     // Resize the jacobian
     int dimension_error_state=the_imu_sensor_core->getDimensionErrorState();
@@ -228,7 +230,7 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
 {
     unsigned int dimension=0;
 
-    std::shared_ptr<const ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
 
     if(TheImuSensorCore->isEstimationPositionSensorWrtRobotEnabled())
     {

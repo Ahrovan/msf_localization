@@ -13,8 +13,8 @@ CodedVisualMarkerEyeStateCore::CodedVisualMarkerEyeStateCore() :
     return;
 }
 
-CodedVisualMarkerEyeStateCore::CodedVisualMarkerEyeStateCore(std::weak_ptr<const SensorCore> the_sensor_core_ptr) :
-    SensorStateCore(the_sensor_core_ptr)
+CodedVisualMarkerEyeStateCore::CodedVisualMarkerEyeStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    SensorStateCore(msf_element_core_ptr)
 {
     init();
 
@@ -29,6 +29,8 @@ CodedVisualMarkerEyeStateCore::~CodedVisualMarkerEyeStateCore()
 
 int CodedVisualMarkerEyeStateCore::init()
 {
+    this->setSensorStateCoreType(SensorStateCoreTypes::coded_visual_maker_eye);
+
     // Error State Jacobian: Init to zero
     error_state_jacobian_.position_sensor_wrt_robot_.setZero();
     error_state_jacobian_.attitude_sensor_wrt_robot_.setZero();
@@ -41,7 +43,7 @@ Eigen::MatrixXd CodedVisualMarkerEyeStateCore::getJacobianErrorState()
 {
     Eigen::MatrixXd jacobian_error_state;
 
-    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(this->getTheSensorCoreShared());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
 
     // Resize the jacobian
     int dimension_error_state=the_sensor_core->getDimensionErrorState();
@@ -113,7 +115,7 @@ int CodedVisualMarkerEyeStateCore::updateStateFromIncrementErrorState(Eigen::Vec
 
     unsigned int dimension=0;
 
-    std::shared_ptr<const CodedVisualMarkerEyeCore> TheCodedVisualMarkerEyeCore=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(this->getTheSensorCoreShared());
+    std::shared_ptr<CodedVisualMarkerEyeCore> TheCodedVisualMarkerEyeCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
 
     if(TheCodedVisualMarkerEyeCore->isEstimationPositionSensorWrtRobotEnabled())
     {

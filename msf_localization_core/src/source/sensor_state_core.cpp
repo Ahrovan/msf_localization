@@ -3,14 +3,16 @@
 
 
 
-SensorStateCore::SensorStateCore()
+SensorStateCore::SensorStateCore() :
+    StateCore()
 {
     return;
 }
 
-SensorStateCore::SensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr)
+SensorStateCore::SensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    StateCore(msf_element_core_ptr)
 {
-    setTheSensorCore(TheSensorCorePtr);
+
 
     return;
 }
@@ -20,26 +22,25 @@ SensorStateCore::~SensorStateCore()
     return;
 }
 
-int SensorStateCore::setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr)
+int SensorStateCore::init()
 {
-    this->TheSensorCorePtr=TheSensorCorePtr;
+    this->setStateCoreType(StateCoreTypes::sensor);
+    this->sensor_state_core_type_=SensorStateCoreTypes::undefined;
+
+
     return 0;
 }
-std::shared_ptr<const SensorCore> SensorStateCore::getTheSensorCore() const
+
+
+int SensorStateCore::setSensorStateCoreType(SensorStateCoreTypes sensor_state_core_type)
 {
-    std::shared_ptr<const SensorCore> TheSensorCoreSharedPtr=this->TheSensorCorePtr.lock();
-    return TheSensorCoreSharedPtr;
+    this->sensor_state_core_type_=sensor_state_core_type;
+    return 0;
 }
 
-std::shared_ptr<const SensorCore> SensorStateCore::getTheSensorCoreShared() const
+SensorStateCoreTypes SensorStateCore::getSensorStateCoreType()
 {
-    std::shared_ptr<const SensorCore> TheSensorCoreSharedPtr=this->TheSensorCorePtr.lock();
-    return TheSensorCoreSharedPtr;
-}
-
-std::weak_ptr<const SensorCore> SensorStateCore::getTheSensorCoreWeak() const
-{
-    return this->TheSensorCorePtr;
+    return sensor_state_core_type_;
 }
 
 

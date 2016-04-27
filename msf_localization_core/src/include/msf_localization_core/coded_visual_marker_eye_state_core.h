@@ -17,7 +17,7 @@ class CodedVisualMarkerEyeStateCore : public SensorStateCore
 {
 public:
     CodedVisualMarkerEyeStateCore();
-    CodedVisualMarkerEyeStateCore(std::weak_ptr<const SensorCore> the_sensor_core_ptr);
+    CodedVisualMarkerEyeStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~CodedVisualMarkerEyeStateCore();
 
 protected:

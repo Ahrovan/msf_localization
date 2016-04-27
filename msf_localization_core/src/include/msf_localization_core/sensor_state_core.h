@@ -6,40 +6,45 @@
 
 #include <Eigen/Dense>
 
-#include "msf_localization_core/sensor_core.h"
+#include "msf_localization_core/state_core.h"
+
+//#include "msf_localization_core/sensor_core.h"
 
 
 
-class SensorStateCore
+enum class SensorStateCoreTypes
+{
+    undefined=0,
+    imu=1,
+    coded_visual_maker_eye
+};
+
+
+
+class SensorStateCore : public StateCore
 {
 public:
     SensorStateCore();
-    SensorStateCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
+    SensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~SensorStateCore();
 
 
 protected:
-    // TODO SensorState
-    // TODO SensorErrorState
-    // TODO SensorMeasurements
+    int init();
+
+
+
+protected:
+    SensorStateCoreTypes sensor_state_core_type_;
+public:
+    int setSensorStateCoreType(SensorStateCoreTypes sensor_state_core_type);
+    SensorStateCoreTypes getSensorStateCoreType();
 
 
 
 protected:
     // TODO predictState()
     // TODO measurementsPrediction()
-
-
-
-    // Ptr to the sensor core
-protected:
-    // It is not the owner of this Pointer. it doesn't modify the pointer
-    std::weak_ptr<const SensorCore> TheSensorCorePtr;
-public:
-    int setTheSensorCore(std::weak_ptr<const SensorCore> TheSensorCorePtr);
-    std::shared_ptr<const SensorCore> getTheSensorCore() const;
-    std::shared_ptr<const SensorCore> getTheSensorCoreShared() const;
-    std::weak_ptr<const SensorCore> getTheSensorCoreWeak() const;
 
 
 
