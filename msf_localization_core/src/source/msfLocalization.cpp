@@ -612,7 +612,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
     ///// Global Parameters
 
     // TODO Improve
-    std::shared_ptr<GlobalParametersStateCore> predictedStateGlobalParameters=std::make_shared<GlobalParametersStateCore>(ThePreviousState->TheGlobalParametersStateCore->getTheGlobalParametersCore());
+    std::shared_ptr<GlobalParametersStateCore> predictedStateGlobalParameters=std::make_shared<GlobalParametersStateCore>(ThePreviousState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr());
 
 
     // Copy the same values
@@ -760,7 +760,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         ++itMapElement)
     {
         //
-        std::shared_ptr<MapElementCore> theMapElementCore=(*itMapElement)->getTheMapElementCore();
+        std::shared_ptr<MapElementCore> theMapElementCore=std::dynamic_pointer_cast<MapElementCore>((*itMapElement)->getMsfElementCoreSharedPtr());
 
         // Auxiliar
         std::shared_ptr<MapElementStateCore> predictedMapElementState;
@@ -1825,7 +1825,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     // Robot
     dimensionErrorState+=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     // Global Parameters
-    dimensionErrorState+=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
+    dimensionErrorState+=OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     // Sensors
     for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListMatchedMeas=OldState->TheListSensorStateCore.begin();
         itListMatchedMeas!=OldState->TheListSensorStateCore.end();
@@ -1838,7 +1838,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         itListMatchedMeas!=OldState->TheListMapElementStateCore.end();
         ++itListMatchedMeas)
     {
-        dimensionErrorState+=(*itListMatchedMeas)->getTheMapElementCore()->getDimensionErrorState();
+        dimensionErrorState+=(*itListMatchedMeas)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     }
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
@@ -1852,7 +1852,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
     /// Global Parameters
     unsigned int dimensionGlobalParameters=0;
-    dimensionGlobalParameters=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
+    dimensionGlobalParameters=OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     /// Sensor Parameters
     unsigned int dimensionSensorParameters=0;
@@ -1895,7 +1895,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                 // Get dimension
-                dimensionMapErrorParameters+=TheMapElementStateCore->getTheMapElementCore()->getDimensionErrorParameters();
+                dimensionMapErrorParameters+=TheMapElementStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
 
                 // End
@@ -2626,7 +2626,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
             ++itListMapElementState)
         {
-            unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();
+            unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
             Eigen::VectorXd incrementErrorStateMapElement;
             if(dimensionMapElementErrorState)
             {
@@ -3000,7 +3000,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         // Robot
         dimension_error_state_total+=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         // Global Parameters
-        dimension_error_state_total+=OldState->TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
+        dimension_error_state_total+=OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         // Sensors
         for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListSensState=OldState->TheListSensorStateCore.begin();
             itListSensState!=OldState->TheListSensorStateCore.end();
@@ -3013,7 +3013,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListMapElementState!=OldState->TheListMapElementStateCore.end();
             ++itListMapElementState)
         {
-            dimension_error_state_total+=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();
+            dimension_error_state_total+=(*itListMapElementState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         }
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
@@ -3031,7 +3031,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itNewMapElementsState!=TheListNewMapElementsStateCore.end();
             ++itNewMapElementsState)
         {
-            dimension_new_map_elements_error_state_total+=(*itNewMapElementsState)->getTheMapElementCore()->getDimensionErrorState();
+            dimension_new_map_elements_error_state_total+=(*itNewMapElementsState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         }
 
 
@@ -3069,7 +3069,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 itNewMapElementsState!=TheListNewMapElementsStateCore.end() || itUnmatchedMeasurementsWithMapElement!=TheListUnmatchedMeasurementsWithMapElement.end();
                 ++itNewMapElementsState, ++itUnmatchedMeasurementsWithMapElement)
             {
-                int dimension_new_map_element_error_state_i=(*itNewMapElementsState)->getTheMapElementCore()->getDimensionErrorState();
+                int dimension_new_map_element_error_state_i=(*itNewMapElementsState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
                 int dimension_error_state_total_i=0;
                 int dimension_error_state_i=0;
 
@@ -3156,7 +3156,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 itNewMapElementsState!=TheListNewMapElementsStateCore.end() || itUnmatchedMeasurementsWithMapElement!=TheListUnmatchedMeasurementsWithMapElement.end();
                 ++itNewMapElementsState, ++itUnmatchedMeasurementsWithMapElement)
             {
-                int dimension_new_map_element_error_state_i=(*itNewMapElementsState)->getTheMapElementCore()->getDimensionErrorState();
+                int dimension_new_map_element_error_state_i=(*itNewMapElementsState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
                 int dimension_error_measurement_total_i=0;
                 int dimension_error_measurement_i=0;
 
@@ -3468,7 +3468,7 @@ int MsfLocalizationCore::findMapElementStateCoreWithMapCoreFromList(std::list< s
         ++itVisualMarkerLandmark)
     {
 
-        if((*itVisualMarkerLandmark)->getTheMapElementCore() == TheMapElementCore)
+        if(std::dynamic_pointer_cast<MapElementCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr()) == TheMapElementCore)
         {
             TheMapElementStateCore=(*itVisualMarkerLandmark);
             break;
@@ -3496,13 +3496,13 @@ int MsfLocalizationCore::findMapElementStateCoreWithMeasurementFromList(std::lis
         itVisualMarkerLandmark!=TheListMapElementStateCore.end();
         ++itVisualMarkerLandmark)
     {
-        switch((*itVisualMarkerLandmark)->getTheMapElementCore()->getMapElementType())
+        switch(std::dynamic_pointer_cast<MapElementCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr())->getMapElementType())
         {
             // Coded visual markers
             case MapElementTypes::coded_visual_marker:
             {
                 // Cast
-                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark)->getTheMapElementCore());
+                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr());
 
                 // Check ids
                 if(the_coded_visual_marker_landmark_core->getId() == the_coded_visual_marker_measurement->getVisualMarkerId())

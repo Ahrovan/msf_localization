@@ -431,7 +431,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     if(!TheGlobalParametersStateCore)
         return 1;
 
-    if(!TheGlobalParametersStateCore->getTheGlobalParametersCore())
+    if(!TheGlobalParametersStateCore->isCorrect())
         return 1;
 
 
@@ -475,7 +475,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     }
 
     // Map element core
-    if(!currentMapElementStateI->getTheMapElementCore())
+    if(!currentMapElementStateI->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
         return 5;
@@ -508,7 +508,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
 
 
     // id -> Needed
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getTheMapElementCore());
+    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getMsfElementCoreSharedPtr());
     predictedMeasurement->setVisualMarkerId(TheCodedVisualMarkerLandmarkCore->getId());
 
 
@@ -616,7 +616,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
     // Map element
     std::shared_ptr<CodedVisualMarkerLandmarkStateCore> TheMapElementStateCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementState);
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(TheMapElementStateCore->getTheMapElementCore());
+    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(TheMapElementStateCore->getMsfElementCoreSharedPtr());
 
 
     // Matched measurement
@@ -757,8 +757,8 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     /// Jacobian Measurement Error - Global Parameters Error State & Error Parameters
 
     // Dimension
-    int dimension_global_parameters_error_state=currentGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
-    int dimension_global_parameters_error_parameters=currentGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
+    int dimension_global_parameters_error_state=currentGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    int dimension_global_parameters_error_parameters=currentGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Resize and init
     predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.resize(dimension_error_measurement, dimension_global_parameters_error_state);
@@ -1005,7 +1005,7 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     // Global Parameters State
     if(!TheGlobalParametersStateCore)
         return -10;
-    if(!TheGlobalParametersStateCore->getTheGlobalParametersCore())
+    if(!TheGlobalParametersStateCore->isCorrect())
         return -11;
 
     // Current Robot State
@@ -1113,7 +1113,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     // Global Parameters State
     if(!TheGlobalParametersStateCore)
         return -10;
-    if(!TheGlobalParametersStateCore->getTheGlobalParametersCore())
+    if(!TheGlobalParametersStateCore->isCorrect())
         return -11;
 
     // Current Robot State
@@ -1151,9 +1151,9 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
 
 
     // Create Map Element Core
-    if(!newMapElementState->getTheMapElementCore())
+    if(!newMapElementState->isCorrect())
         return -51;
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(newMapElementState->getTheMapElementCore());
+    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(newMapElementState->getMsfElementCoreSharedPtr());
 
 
 
@@ -1272,7 +1272,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
 
 
     /// Global Parameters
-    int dimension_global_parameters_error_state_total=TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorState();
+    int dimension_global_parameters_error_state_total=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_.resize(dimension_map_new_element_error_state_total, dimension_global_parameters_error_state_total);
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_.setZero();
 

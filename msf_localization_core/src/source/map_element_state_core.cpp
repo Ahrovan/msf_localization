@@ -1,16 +1,18 @@
 
 #include "msf_localization_core/map_element_state_core.h"
 
-MapElementStateCore::MapElementStateCore()
+MapElementStateCore::MapElementStateCore() :
+    StateCore()
 {
+    init();
+
     return;
 }
 
-MapElementStateCore::MapElementStateCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr) :
-    MapElementStateCore()
+MapElementStateCore::MapElementStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    StateCore(msf_element_core_ptr)
 {
-    // set the core
-    setTheMapElementCore(the_map_element_core_ptr);
+    init();
 
     return;
 }
@@ -20,26 +22,11 @@ MapElementStateCore::~MapElementStateCore()
     return;
 }
 
-
-int MapElementStateCore::setTheMapElementCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr)
+int MapElementStateCore::init()
 {
-    this->the_map_element_core_ptr_=the_map_element_core_ptr;
+    // State core Type
+    this->setStateCoreType(StateCoreTypes::map);
+
     return 0;
 }
 
-std::shared_ptr<MapElementCore> MapElementStateCore::getTheMapElementCore() const
-{
-    std::shared_ptr<MapElementCore> the_map_element_core_ptr=this->the_map_element_core_ptr_.lock();
-    return the_map_element_core_ptr;
-}
-
-std::shared_ptr<MapElementCore> MapElementStateCore::getTheMapElementCoreShared() const
-{
-    std::shared_ptr<MapElementCore> the_map_element_core_ptr=this->the_map_element_core_ptr_.lock();
-    return the_map_element_core_ptr;
-}
-
-std::weak_ptr<MapElementCore> MapElementStateCore::getTheMapElementCoreWeak() const
-{
-    return this->the_map_element_core_ptr_;
-}

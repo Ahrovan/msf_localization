@@ -136,7 +136,7 @@ int GlobalParametersCore::readConfig(pugi::xml_node global_parameters, std::shar
 {
     // Map Element Core Pointer
     //std::shared_ptr<GlobalParametersCore> TheGlobalParametersCoreAux(this);
-    std::shared_ptr<GlobalParametersCore> TheGlobalParametersCoreAux=std::dynamic_pointer_cast<GlobalParametersCore>(this->getMsfElementCoreSharedPtr());
+    //std::shared_ptr<GlobalParametersCore> TheGlobalParametersCoreAux=std::dynamic_pointer_cast<GlobalParametersCore>();
 
     // Set the access to the Storage core -> Not needed
     //this->setTheMsfStorageCore(TheMsfStorageCore);
@@ -147,7 +147,7 @@ int GlobalParametersCore::readConfig(pugi::xml_node global_parameters, std::shar
 
     // Create a class for the TheGlobalParametersCore
     if(!GlobalParametersInitStateCore)
-        GlobalParametersInitStateCore=std::make_shared<GlobalParametersStateCore>(TheGlobalParametersCoreAux);
+        GlobalParametersInitStateCore=std::make_shared<GlobalParametersStateCore>(this->getMsfElementCoreSharedPtr());
 
     // Set pointer to the Core -> Not needed?
     //GlobalParametersInitStateCore->setTheGlobalParametersCore(TheGlobalParametersCoreAux);

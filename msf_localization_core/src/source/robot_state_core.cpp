@@ -25,7 +25,7 @@ RobotStateCore::~RobotStateCore()
 
 int RobotStateCore::init()
 {
-    this->state_core_type_=StateCoreTypes::robot;
+    this->setStateCoreType(StateCoreTypes::robot);
     this->robot_state_core_type_=RobotStateCoreTypes::undefined;
 
     return 0;

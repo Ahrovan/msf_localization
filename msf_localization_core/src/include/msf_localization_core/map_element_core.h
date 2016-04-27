@@ -87,8 +87,8 @@ public:
 //public:
 //    virtual int prepareInitErrorStateVariance()=0;
 
-public:
-    virtual Eigen::MatrixXd getInitCovarianceErrorState()=0;
+//public:
+//    virtual Eigen::MatrixXd getInitCovarianceErrorState()=0;
 
 
 

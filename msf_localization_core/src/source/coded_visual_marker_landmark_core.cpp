@@ -147,7 +147,7 @@ int CodedVisualMarkerLandmarkCore::setCovarianceAttitudeVisualMarkerWrtWorld(Eig
 
 
 
-Eigen::MatrixXd CodedVisualMarkerLandmarkCore::getInitCovarianceErrorState()
+Eigen::MatrixXd CodedVisualMarkerLandmarkCore::getInitErrorStateCovariance()
 {
     Eigen::MatrixXd covariance;
 
@@ -238,7 +238,7 @@ int CodedVisualMarkerLandmarkCore::predictState(const TimeStamp previousTimeStam
 
 
     // Checks in the past state
-    if(!pastState->getTheMapElementCore())
+    if(!pastState->isCorrect())
     {
         return -5;
         std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
@@ -248,14 +248,14 @@ int CodedVisualMarkerLandmarkCore::predictState(const TimeStamp previousTimeStam
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<CodedVisualMarkerLandmarkStateCore>(pastState->getTheMapElementCoreWeak());
+        predictedState=std::make_shared<CodedVisualMarkerLandmarkStateCore>(pastState->getMsfElementCoreWeakPtr());
     }
 
-    // Set The robot core if it doesn't exist
-    if(predictedState->getTheMapElementCoreWeak().expired())
-    {
-        predictedState->setTheMapElementCore(pastState->getTheMapElementCoreWeak());
-    }
+//    // Set The robot core if it doesn't exist
+//    if(predictedState->getTheMapElementCoreWeak().expired())
+//    {
+//        predictedState->setTheMapElementCore(pastState->getTheMapElementCoreWeak());
+//    }
 
 
     // Equations
@@ -379,14 +379,14 @@ int CodedVisualMarkerLandmarkCore::readConfig(pugi::xml_node map_element, std::s
 {
     // Map Element Core Pointer
     //std::shared_ptr<MapElementCore> TheMapElementCore(this);
-    std::shared_ptr<MapElementCore> TheMapElementCore=std::dynamic_pointer_cast<MapElementCore>(this->getMsfElementCoreSharedPtr());
+    //std::shared_ptr<MapElementCore> TheMapElementCore=std::dynamic_pointer_cast<MapElementCore>(this->getMsfElementCoreSharedPtr());
 
     // Set pointer to the SensorCore
     //TheMapElementCore->setMsfElementCore(TheMapElementCore);
 
     // Create a class for the SensorStateCore
     if(!MapElementInitStateCore)
-        MapElementInitStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(TheMapElementCore);
+        MapElementInitStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(this->getMsfElementCoreSharedPtr());
 
     // Set pointer to the SensorCore
     //MapElementInitStateCore->setTheMapElementCore(TheMapElementCore);

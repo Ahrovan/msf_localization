@@ -22,7 +22,7 @@ class CodedVisualMarkerLandmarkStateCore : public MapElementStateCore
 {
 public:
     CodedVisualMarkerLandmarkStateCore();
-    CodedVisualMarkerLandmarkStateCore(std::weak_ptr<MapElementCore> the_map_element_core_pt);
+    CodedVisualMarkerLandmarkStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~CodedVisualMarkerLandmarkStateCore();
 
 protected:

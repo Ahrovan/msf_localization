@@ -2,18 +2,19 @@
 
 
 
-GlobalParametersStateCore::GlobalParametersStateCore()
+GlobalParametersStateCore::GlobalParametersStateCore() :
+    StateCore()
 {
     // Init
-    gravity.setZero();
+    init();
 
     return;
 }
 
-GlobalParametersStateCore::GlobalParametersStateCore(std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr) :
-    GlobalParametersStateCore()
+GlobalParametersStateCore::GlobalParametersStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    StateCore(msf_element_core_ptr)
 {
-    this->setTheGlobalParametersCore(TheGlobalParametersCorePtr);
+    init();
 
     return;
 }
@@ -23,17 +24,13 @@ GlobalParametersStateCore::~GlobalParametersStateCore()
     return;
 }
 
-
-int GlobalParametersStateCore::setTheGlobalParametersCore(std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr)
+int GlobalParametersStateCore::init()
 {
-    this->TheGlobalParametersCorePtr=TheGlobalParametersCorePtr;
+    this->setStateCoreType(StateCoreTypes::world);
+
+    gravity.setZero();
+
     return 0;
-}
-
-std::shared_ptr<const GlobalParametersCore> GlobalParametersStateCore::getTheGlobalParametersCore() const
-{
-    std::shared_ptr<const GlobalParametersCore> TheGlobalParametersCoreSharedPtr=this->TheGlobalParametersCorePtr.lock();
-    return TheGlobalParametersCoreSharedPtr;
 }
 
 Eigen::Vector3d GlobalParametersStateCore::getGravity() const
@@ -51,7 +48,7 @@ int GlobalParametersStateCore::setGravity(Eigen::Vector3d gravity)
 int GlobalParametersStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
 {
     unsigned int dimension=0;
-    if(this->getTheGlobalParametersCore()->isEstimationGravityEnabled())
+    if(std::dynamic_pointer_cast<GlobalParametersCore>(this->getMsfElementCoreSharedPtr())->isEstimationGravityEnabled())
     {
         this->gravity+=increment_error_state.block<3,1>(dimension, 0);
         dimension+=3;

@@ -1817,7 +1817,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Jacobians measurement - global parameters
 
     // dimension of the global parameters
-    int dimensionGlobalParameters=TheGlobalParametersStateCore->getTheGlobalParametersCore()->getDimensionErrorParameters();
+    int dimensionGlobalParameters=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Resize and init Jacobian
     predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimensionErrorMeasurement, dimensionGlobalParameters);

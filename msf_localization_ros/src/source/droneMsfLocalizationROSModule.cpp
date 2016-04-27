@@ -683,7 +683,7 @@ try
             ++itMapElementState)
         {
 
-            switch((*itMapElementState)->getTheMapElementCore()->getMapElementType())
+            switch(std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementType())
             {
                 case MapElementTypes::coded_visual_marker:
                 {
@@ -717,7 +717,7 @@ try
 
 
                     tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                                          this->TheGlobalParametersCore->getWorldName(), (*itMapElementState)->getTheMapElementCore()->getMapElementName()));
+                                                          this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
                 }
             }

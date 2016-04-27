@@ -10,8 +10,8 @@ CodedVisualMarkerLandmarkStateCore::CodedVisualMarkerLandmarkStateCore() :
     return;
 }
 
-CodedVisualMarkerLandmarkStateCore::CodedVisualMarkerLandmarkStateCore(std::weak_ptr<MapElementCore> the_map_element_core_pt) :
-    MapElementStateCore(the_map_element_core_pt)
+CodedVisualMarkerLandmarkStateCore::CodedVisualMarkerLandmarkStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+    MapElementStateCore(msf_element_core_ptr)
 {
     init();
 

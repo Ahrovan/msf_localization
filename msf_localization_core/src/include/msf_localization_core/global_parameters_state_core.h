@@ -3,26 +3,24 @@
 #define _GLOBAL_PARAMETERS_STATE_CORE_H
 
 
+#include "msf_localization_core/state_core.h"
 #include "msf_localization_core/global_parameters_core.h"
 
 
-class GlobalParametersStateCore
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
+
+class GlobalParametersStateCore : public StateCore
 {
 
 public:
     GlobalParametersStateCore();
-    GlobalParametersStateCore(std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr);
+    GlobalParametersStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~GlobalParametersStateCore();
 
-
-
-    // Ptr to the core
 protected:
-    // It is not the owner of this Pointer. it doesn't modify the pointer
-    std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr;
-public:
-    int setTheGlobalParametersCore(std::weak_ptr<const GlobalParametersCore> TheGlobalParametersCorePtr);
-    std::shared_ptr<const GlobalParametersCore> getTheGlobalParametersCore() const;
+    int init();
 
 
 

@@ -5,7 +5,6 @@
 
 #include "msf_localization_core/state_core.h"
 
-//#include "msf_localization_core/robot_core.h"
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -39,22 +38,6 @@ public:
     int setRobotStateType(RobotStateCoreTypes robot_state_core_type);
     RobotStateCoreTypes getRobotStateType();
 
-
-/*
-    // Ptr to the robot core
-protected:
-    // It is not the owner of this Pointer. it doesn't modify the pointer
-    std::weak_ptr<const RobotCore> TheRobotCorePtr;
-public:
-    int setTheRobotCore(std::weak_ptr<const RobotCore> TheRobotCorePtr);
-    std::shared_ptr<const RobotCore> getTheRobotCore() const;
-*/
-
-
-
-protected:
-    // TODO RobotState
-    // TODO RobotErrorState
 
 
 

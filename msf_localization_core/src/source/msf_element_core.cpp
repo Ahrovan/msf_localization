@@ -182,7 +182,7 @@ int MsfElementCore::setDimensionNoise(unsigned int dimensionNoise)
     return 0;
 }
 
-Eigen::MatrixXd MsfElementCore::getInitErrorStateVariance() const
+Eigen::MatrixXd MsfElementCore::getCovarianceInitErrorState() const
 {
     return this->InitErrorStateVariance;
 }
