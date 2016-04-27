@@ -83,7 +83,7 @@
 
 
 // ROS Sensor Interface
-#include "msf_localization_ros/ros_sensor_interface.h"
+#include "msf_localization_ros/ros_interface.h"
 
 
 // ROS IMU Interface
@@ -106,14 +106,11 @@
 #define _DEBUG_MSF_LOCALIZATION_ROBOT_POSE_THREAD 0
 
 
-class MsfLocalizationROS : public MsfLocalizationCore
+class MsfLocalizationROS : public MsfLocalizationCore, public RosInterface
 {
 public:
     MsfLocalizationROS(int argc,char **argv);
     ~MsfLocalizationROS();
-
-private:
-    ros::NodeHandle* nh;
 
 
 protected:

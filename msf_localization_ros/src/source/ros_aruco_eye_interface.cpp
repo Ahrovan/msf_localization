@@ -2,7 +2,7 @@
 
 
 RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    RosSensorInterface(),
+    RosInterface(),
     CodedVisualMarkerEyeCore(the_msf_storage_core)
 {
     //std::cout<<"RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
@@ -128,176 +128,20 @@ int RosArucoEyeInterface::open()
 
 int RosArucoEyeInterface::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore)
 {
-    // Sensor Core Pointer
-    //std::shared_ptr<SensorCore> TheSensorCore(this);
-    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
+    /// Sensor General Configs
+    int errorReadConfig=this->CodedVisualMarkerEyeCore::readConfig(sensor, sensorId, SensorInitStateCore);
+
+    if(errorReadConfig)
+        return errorReadConfig;
 
 
 
-    // Set pointer to the SensorCore
-    //this->setMsfElementCorePtr(TheSensorCore);
-
-    // Create a class for the SensorStateCore
-    if(!SensorInitStateCore)
-        SensorInitStateCore=std::make_shared<CodedVisualMarkerEyeStateCore>();
-
-    // Set pointer to the SensorCore
-    SensorInitStateCore->setTheSensorCore(TheSensorCore);
-
-
-    // Set sensor type
-    //this->setSensorType(SensorTypes::coded_visual_marker_eye);
-
-    // Set Id
-    this->setSensorId(sensorId);
-
-    // Set the access to the Storage core
-    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    //this->setMsfStorageCorePtr(TheMsfStorageCore);
-
+    /// ROS Configs
 
     // Sensor Topic
     std::string sensorTopic=sensor.child_value("ros_topic");
     this->setMarkerListTopicName(sensorTopic);
 
-
-    // Auxiliar reading value
-    std::string readingValue;
-
-
-    // Name
-    readingValue=sensor.child_value("name");
-    this->setSensorName(readingValue);
-
-
-    //// Sensor configurations
-
-
-    /// Pose of the sensor wrt robot
-    pugi::xml_node pose_in_robot=sensor.child("pose_in_robot");
-
-    // Position of the sensor wrt robot
-    readingValue=pose_in_robot.child("position").child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableEstimationPositionSensorWrtRobot();
-
-    // Attitude of the sensor wrt robot
-    readingValue=pose_in_robot.child("attitude").child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableEstimationAttitudeSensorWrtRobot();
-
-
-    /// Other Parameters
-    pugi::xml_node parameters = sensor.child("parameters");
-
-    // None
-
-
-
-    //// Measurements
-    pugi::xml_node measurements = sensor.child("measurements");
-
-    /// Orientation
-    pugi::xml_node meas_orientation = measurements.child("orientation");
-
-    readingValue=meas_orientation.child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableMeasurementAttitude();
-
-    readingValue=meas_orientation.child_value("var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseMeasurementAttitude(variance.asDiagonal());
-    }
-
-
-    /// Position
-    pugi::xml_node meas_position = measurements.child("position");
-
-    readingValue=meas_position.child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableMeasurementPosition();
-
-    readingValue=meas_position.child_value("var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseMeasurementPosition(variance.asDiagonal());
-    }
-
-
-
-
-    //// Init State
-
-    /// Pose of the sensor wrt robot
-
-    // Position of the sensor wrt robot
-    readingValue=pose_in_robot.child("position").child_value("init_estimation");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setPositionSensorWrtRobot(init_estimation);
-    }
-
-    // Attitude of the sensor wrt robot
-    readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector4d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
-        SensorInitStateCore->setAttitudeSensorWrtRobot(init_estimation);
-    }
-
-
-    /// Parameters
-
-    // None
-
-
-
-    //// Init Variances
-
-
-    /// Pose of the sensor wrt robot
-
-    // Position of the sensor wrt robot
-    readingValue=pose_in_robot.child("position").child_value("init_var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoisePositionSensorWrtRobot(variance.asDiagonal());
-    }
-
-
-    // Attitude of the sensor wrt robot
-    readingValue=pose_in_robot.child("attitude").child_value("init_var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseAttitudeSensorWrtRobot(variance.asDiagonal());
-    }
-
-
-
-    /// Other Parameters
-
-    // None
-
-
-    // Noises in the estimation (if enabled)
-
-    // None
-
-
-    // Prepare covariance matrix
-    this->prepareInitErrorStateVariance();
 
 
     /// Finish

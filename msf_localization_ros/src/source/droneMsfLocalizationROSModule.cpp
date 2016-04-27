@@ -86,7 +86,7 @@ int MsfLocalizationROS::readConfigFile()
         // Reading Robot
         pugi::xml_node global_parameters = msf_localization.child("global_parameters");
 
-        std::cout<<"global parameters; "<<std::endl;
+        std::cout<<"global parameters"<<std::endl;
 
         // Create the CoreAux
         std::shared_ptr<GlobalParametersCore> TheGlobalParametersCoreAux;
@@ -123,34 +123,42 @@ int MsfLocalizationROS::readConfigFile()
         // Reading Robot
         pugi::xml_node robot = msf_localization.child("robot");
 
-        std::cout<<"robot; "<<std::endl;
+        // Robot Type
+        std::string robotType=robot.child_value("type");
 
-        // Create the RobotCoreAux
-        std::shared_ptr<FreeModelRobotCore> TheRobotCoreAux;
-        // Create a class for the RobotStateCore
-        std::shared_ptr<FreeModelRobotStateCore> RobotInitStateCore;
-
-        // Create the RobotCoreAux
-        if(!TheRobotCoreAux)
+        /// Free Model Type
+        if(robotType=="free_model")
         {
-            TheRobotCoreAux=std::make_shared<FreeModelRobotCore>(this->TheMsfStorageCore);
+            std::cout<<"robot = free_model"<<std::endl;
+
+            // Create the RobotCoreAux
+            std::shared_ptr<FreeModelRobotCore> TheRobotCoreAux;
+            // Create a class for the RobotStateCore
+            std::shared_ptr<FreeModelRobotStateCore> RobotInitStateCore;
+
+            // Create the RobotCoreAux
+            if(!TheRobotCoreAux)
+            {
+                TheRobotCoreAux=std::make_shared<FreeModelRobotCore>(this->TheMsfStorageCore);
+            }
+
+            // Set the pointer to itself
+            TheRobotCoreAux->setMsfElementCorePtr(TheRobotCoreAux);
+
+
+            // Read configs
+            if(TheRobotCoreAux->readConfig(robot, RobotInitStateCore))
+                return -2;
+
+            // Finish
+
+            // Push the robot core
+            TheRobotCore=TheRobotCoreAux;
+
+            // Push the init state of the robot
+            InitialState->TheRobotStateCore=RobotInitStateCore;
+
         }
-
-        // Set the pointer to itself
-        TheRobotCoreAux->setMsfElementCorePtr(TheRobotCoreAux);
-
-
-        // Read configs
-        if(TheRobotCoreAux->readConfig(robot, RobotInitStateCore))
-            return -2;
-
-        // Finish
-
-        // Push the robot core
-        TheRobotCore=TheRobotCoreAux;
-
-        // Push the init state of the robot
-        InitialState->TheRobotStateCore=RobotInitStateCore;
 
     }
 
@@ -159,8 +167,6 @@ int MsfLocalizationROS::readConfigFile()
     // Reading sensors
     for(pugi::xml_node sensor = msf_localization.child("sensor"); sensor; sensor = sensor.next_sibling("sensor"))
     {
-        std::cout<<"sensor; "<<std::endl;
-
         // Sensor Type
         std::string sensorType=sensor.child_value("type");
 
@@ -168,6 +174,8 @@ int MsfLocalizationROS::readConfigFile()
         //// IMU Sensor Type
         if(sensorType=="imu")
         {
+            std::cout<<"sensor = imu"<<std::endl;
+
             // Create a class for the SensoreCore
             std::shared_ptr<RosSensorImuInterface> TheRosSensorInterface;
             // Create a class for the SensorStateCore
@@ -202,6 +210,8 @@ int MsfLocalizationROS::readConfigFile()
         //// Aruco Eye Sensor Type
         if(sensorType=="aruco_eye")
         {
+            std::cout<<"sensor = aruco_eye"<<std::endl;
+
             // Create a class for the SensoreCore
             std::shared_ptr<RosArucoEyeInterface> TheRosSensorInterface;
             // Create a class for the SensorStateCore
@@ -242,8 +252,6 @@ int MsfLocalizationROS::readConfigFile()
     // Reading map elements
     for(pugi::xml_node map_element = msf_localization.child("map_element"); map_element; map_element = map_element.next_sibling("map_element"))
     {
-        std::cout<<"map_element; "<<std::endl;
-
         // Sensor Type
         std::string mapElementType=map_element.child_value("type");
 
@@ -251,6 +259,8 @@ int MsfLocalizationROS::readConfigFile()
         // Coded visual marker
         if(mapElementType=="coded_visual_marker")
         {
+            std::cout<<"map element = coded_visual_marker"<<std::endl;
+
             // Create a class for the SensoreCore
             std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore;
             // Create a class for the SensorStateCore
@@ -357,9 +367,6 @@ int MsfLocalizationROS::close()
 
 int MsfLocalizationROS::open()
 {
-    // ROS Node Handle
-    //ros::NodeHandle nh;
-
     // Read parameters
     if(readParameters())
         ROS_ERROR("Error Reading Parameters");

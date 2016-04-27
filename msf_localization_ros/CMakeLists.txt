@@ -41,13 +41,11 @@ set(MSF_LOCALIZATION_ROS_INCLUDE_DIR
 	src/include)
 
 set(MSF_LOCALIZATION_ROS_SOURCE_FILES
-	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_sensor_interface.cpp
+	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_interface.cpp
 
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_sensor_imu_interface.cpp
 
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_aruco_eye_interface.cpp
-
-	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_input_interface.cpp
 
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_imu_input_interface.cpp
 
@@ -56,13 +54,11 @@ set(MSF_LOCALIZATION_ROS_SOURCE_FILES
 )
  
 set(MSF_LOCALIZATION_ROS_HEADER_FILES
-	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_sensor_interface.h
+	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_interface.h
 
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_sensor_imu_interface.h
 
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_aruco_eye_interface.h
-
-	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_input_interface.h
 
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_imu_input_interface.h
 

@@ -4,6 +4,17 @@
 
 
 
+#include "msf_localization_ros/ros_interface.h"
+
+#include "msf_localization_core/imu_input_core.h"
+
+
+class RosImuInputInterface : public RosInterface, public ImuInputCore
+{
+
+
+
+};
 
 
 
