@@ -8,6 +8,28 @@
 ImuSensorCore::ImuSensorCore() :
     SensorCore()
 {
+    init();
+
+    return;
+}
+
+ImuSensorCore::ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+    SensorCore(the_msf_storage_core)
+{
+    //std::cout<<"ImuSensorCore::ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
+
+    init();
+
+    return;
+}
+
+ImuSensorCore::~ImuSensorCore()
+{
+    return;
+}
+
+int ImuSensorCore::init()
+{
     // Sensor Type
     setSensorType(SensorTypes::imu);
 
@@ -55,12 +77,7 @@ ImuSensorCore::ImuSensorCore() :
     noiseEstimationBiasAngularVelocity.setZero();
     noiseEstimationBiasLinearAcceleration.setZero();
 
-    return;
-}
-
-ImuSensorCore::~ImuSensorCore()
-{
-    return;
+    return 0;
 }
 
 bool ImuSensorCore::isMeasurementOrientationEnabled() const
@@ -142,6 +159,9 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
 
     if(!isSensorEnabled())
         return 0;
+
+    if(!this->isCorrect())
+        std::cout<<"ERROR"<<std::endl;
 
     //std::shared_ptr<MsfStorageCore> TheMsfStorageCoreAux=this->TheMsfStorageCore.lock();
 //    if(!TheMsfStorageCoreAux)
@@ -1015,6 +1035,10 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     {
         std::weak_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
         predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>(TheImuSensorCore);
+
+        //std::weak_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
+        //predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>(std::shared_ptr<ImuSensorCore>(this));
+
 #if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurement() pointer created"<<std::endl;
 #endif

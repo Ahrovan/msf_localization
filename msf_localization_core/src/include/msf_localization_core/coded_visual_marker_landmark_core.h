@@ -19,12 +19,15 @@
 #include "msf_localization_core/coded_visual_marker_landmark_state_core.h"
 
 
+#include "pugixml/pugixml.hpp"
+
+
 class CodedVisualMarkerLandmarkCore : public MapElementCore
 {
 
 public:
     CodedVisualMarkerLandmarkCore();
-    CodedVisualMarkerLandmarkCore(std::weak_ptr<MapElementCore> the_map_element_core_ptr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+    CodedVisualMarkerLandmarkCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
     ~CodedVisualMarkerLandmarkCore();
 
 
@@ -128,6 +131,12 @@ public:
     int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 
     */
+
+
+
+public:
+    int readConfig(pugi::xml_node map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore);
+
 
 };
 

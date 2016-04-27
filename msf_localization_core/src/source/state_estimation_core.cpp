@@ -160,7 +160,6 @@ int StateEstimationCore::prepareInitErrorStateVariance()
     }
 
 
-    //std::cout<<"StateEstimationCore::prepareInitErrorStateVariance() ended"<<std::endl;
 
     // End
     return 0;

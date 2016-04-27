@@ -37,11 +37,11 @@
 
 
 
-class CodedVisualMarkerEyeCore : public virtual SensorCore
+class CodedVisualMarkerEyeCore : public SensorCore
 {
 public:
     CodedVisualMarkerEyeCore();
-    CodedVisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_core, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 public:
     ~CodedVisualMarkerEyeCore();
 

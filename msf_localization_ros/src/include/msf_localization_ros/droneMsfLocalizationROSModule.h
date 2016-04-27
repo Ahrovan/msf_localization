@@ -136,19 +136,6 @@ protected:
     int readConfigFile();
 
 
-    // Particular config readings
-protected:
-    int readGlobalParametersConfig(pugi::xml_node global_parameters, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<GlobalParametersCore>& TheGlobalParametersCoreAux, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
-
-protected:
-    int readFreeModelRobotConfig(pugi::xml_node robot, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<FreeModelRobotCore>& TheRobotCoreAux, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
-
-protected:
-    int readImuConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosSensorImuInterface>& TheRosSensorImuInterface, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
-    int readArucoEyeConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<RosArucoEyeInterface>& TheRosArucoEyeInterface, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
-
-protected:
-    int readCodedVisualMarkerConfig(pugi::xml_node map_element, std::shared_ptr<MsfStorageCore> TheMsfStorageCore, std::shared_ptr<CodedVisualMarkerLandmarkCore>& TheMapElementCore, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& InitStateCore);
 
 
 
@@ -195,7 +182,6 @@ protected:
     ros::Rate* robotPoseRate;
 protected:
     std::thread* robotPoseThread;
-//    SyncThreadState robotPoseThreadState;
 protected:
     int robotPoseThreadFunction();
 

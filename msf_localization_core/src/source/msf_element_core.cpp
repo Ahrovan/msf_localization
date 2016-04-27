@@ -10,11 +10,13 @@ MsfElementCore::MsfElementCore()
     return;
 }
 
-MsfElementCore::MsfElementCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
+MsfElementCore::MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
 {
+    //std::cout<<"MsfElementCore::MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
+
     init();
 
-    this->msf_element_core_ptr_=msf_element_core_ptr;
+    //this->msf_element_core_ptr_=msf_element_core_ptr;
     this->msf_storage_core_ptr_=msf_storage_core_ptr;
 
     return;
@@ -103,10 +105,16 @@ std::shared_ptr<MsfStorageCore> MsfElementCore::getMsfStorageCoreSharedPtr() con
 bool MsfElementCore::isCorrect()
 {
     if(this->msf_storage_core_ptr_.expired())
+    {
+        std::cout<<"error in msf_storage_core_ptr_"<<std::endl;
         return false;
+    }
 
     if(this->msf_element_core_ptr_.expired())
+    {
+        std::cout<<"error in msf_element_core_ptr_"<<std::endl;
         return false;
+    }
 
     return true;
 }

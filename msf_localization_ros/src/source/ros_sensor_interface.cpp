@@ -6,6 +6,8 @@
 RosSensorInterface::RosSensorInterface() //:
     //TheSensorCore(nullptr)
 {
+    //std::cout<<"RosSensorInterface::RosSensorInterface()"<<std::endl;
+
     return;
 }
 

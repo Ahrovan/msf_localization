@@ -23,7 +23,7 @@ class SensorBasics
 {
 public:
     SensorBasics();
-    virtual ~SensorBasics();
+    ~SensorBasics();
 
 
 protected:

@@ -19,7 +19,11 @@
 
 
 
+#include "pugixml/pugixml.hpp"
 
+
+
+class GlobalParametersStateCore;
 
 
 class GlobalParametersCore : public MsfElementCore
@@ -28,7 +32,7 @@ class GlobalParametersCore : public MsfElementCore
 
 public:
     GlobalParametersCore();
-    GlobalParametersCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    GlobalParametersCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     virtual ~GlobalParametersCore();
 
 
@@ -121,6 +125,9 @@ public:
 public:
     Eigen::MatrixXd getCovarianceGlobalParameters();
 
+
+public:
+    int readConfig(pugi::xml_node global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
 
 };
 

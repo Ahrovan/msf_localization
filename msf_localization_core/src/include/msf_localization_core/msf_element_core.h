@@ -61,8 +61,8 @@ class MsfElementCore
 
 public:
     MsfElementCore();
-    MsfElementCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
-    virtual ~MsfElementCore();
+    MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    ~MsfElementCore();
 
 protected:
     int init();

@@ -14,8 +14,8 @@ MapElementCore::MapElementCore() :
     return;
 }
 
-MapElementCore::MapElementCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
-    MsfElementCore(msf_element_core_ptr, msf_storage_core_ptr)
+MapElementCore::MapElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+    MsfElementCore(msf_storage_core_ptr)
 {
     init();
 

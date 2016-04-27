@@ -26,13 +26,14 @@
 #include "msf_localization_ros/ros_sensor_interface.h"
 
 
+#include "pugixml/pugixml.hpp"
 
 
 
 class RosArucoEyeInterface : public RosSensorInterface, public CodedVisualMarkerEyeCore
 {
 public:
-    RosArucoEyeInterface(ros::NodeHandle* nh);
+    RosArucoEyeInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 
 
 
@@ -53,6 +54,9 @@ public:
 public:
     int open();
 
+
+public:
+    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
 
 };
 

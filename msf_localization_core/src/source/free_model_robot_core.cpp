@@ -10,8 +10,8 @@ FreeModelRobotCore::FreeModelRobotCore():
     return;
 }
 
-FreeModelRobotCore::FreeModelRobotCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr):
-    RobotCore(msf_element_core_ptr, msf_storage_core_ptr)
+FreeModelRobotCore::FreeModelRobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr):
+    RobotCore(msf_storage_core_ptr)
 {
     init();
 
@@ -626,6 +626,214 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
 
+    return 0;
+}
+
+
+int FreeModelRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore)
+{
+    // Map Element Core Pointer
+    //std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore(this);
+    std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore=std::dynamic_pointer_cast<FreeModelRobotCore>(this->getMsfElementCoreSharedPtr());
+
+    // Set pointer to the RobotCore
+    //this->setTheRobotCore(TheRobotCoreCore);
+
+    // Set robot type
+    //this->setRobotType(RobotTypes::free_model);
+
+    // Set the access to the Storage core
+    //this->setTheMsfStorageCore(TheMsfStorageCore);
+
+    // Create a class for the RobotStateCore
+    if(!RobotInitStateCore)
+        RobotInitStateCore=std::make_shared<FreeModelRobotStateCore>();
+    // Set pointer to the SensorCore
+    RobotInitStateCore->setTheRobotCore(TheRobotCoreCore);
+
+
+    // Aux vars
+    std::string readingValue;
+
+
+    // Name
+    readingValue=robot.child_value("name");
+    this->setRobotName(readingValue);
+
+
+    /// Init State
+
+    // Position
+    readingValue=robot.child("position").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d position;
+        stm>>position[0]>>position[1]>>position[2];
+        RobotInitStateCore->setPosition(position);
+    }
+
+    // Linear Speed
+    readingValue=robot.child("lin_speed").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d lin_speed;
+        stm>>lin_speed[0]>>lin_speed[1]>>lin_speed[2];
+        RobotInitStateCore->setLinearSpeed(lin_speed);
+    }
+
+    // Linear Acceleration
+    readingValue=robot.child("lin_accel").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d lin_accel;
+        stm>>lin_accel[0]>>lin_accel[1]>>lin_accel[2];
+        RobotInitStateCore->setLinearAcceleration(lin_accel);
+    }
+
+    // Attitude
+    readingValue=robot.child("attitude").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector4d attitude;
+        stm>>attitude[0]>>attitude[1]>>attitude[2]>>attitude[3];
+        RobotInitStateCore->setAttitude(attitude);
+    }
+
+    // Angular Velocity
+    readingValue=robot.child("ang_velocity").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d ang_velocity;
+        stm>>ang_velocity[0]>>ang_velocity[1]>>ang_velocity[2];
+        RobotInitStateCore->setAngularVelocity(ang_velocity);
+    }
+
+    // Angular Acceleration
+    readingValue=robot.child("ang_accel").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d auxVec;
+        stm>>auxVec[0]>>auxVec[1]>>auxVec[2];
+        RobotInitStateCore->setAngularAcceleration(auxVec);
+    }
+
+
+    /// Init Variances
+
+    // Position
+    readingValue=robot.child("position").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setInitErrorStateVariancePosition(variance);
+    }
+
+    // Linear Speed
+    readingValue=robot.child("lin_speed").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setInitErrorStateVarianceLinearSpeed(variance);
+    }
+
+    // Linear acceleration
+    readingValue=robot.child("lin_accel").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setInitErrorStateVarianceLinearAcceleration(variance);
+    }
+
+    // Attitude
+    readingValue=robot.child("attitude").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setInitErrorStateVarianceAttitude(variance);
+    }
+
+    // Angular velocity
+    readingValue=robot.child("ang_velocity").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setInitErrorStateVarianceAngularVelocity(variance);
+    }
+
+    // Angular acceleration
+    readingValue=robot.child("ang_accel").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setInitErrorStateVarianceAngularAcceleration(variance);
+    }
+
+
+
+    // Noises Estimation
+
+    // Linear acceleration
+    readingValue=robot.child("position").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoisePosition(variance.asDiagonal());
+    }
+
+    // Linear velocity
+    readingValue=robot.child("lin_speed").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseLinearSpeed(variance.asDiagonal());
+    }
+
+    // Linear acceleration
+    readingValue=robot.child("lin_accel").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseLinearAcceleration(variance.asDiagonal());
+    }
+
+    // Attitude
+    readingValue=robot.child("attitude").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseAttitude(variance.asDiagonal());
+    }
+
+    // Angular velocity
+    readingValue=robot.child("ang_velocity").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseAngularVelocity(variance.asDiagonal());
+    }
+
+    // Angular acceleration
+    readingValue=robot.child("ang_accel").child_value("noise");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseAngularAcceleration(variance.asDiagonal());
+    }
+
+
+    // End
     return 0;
 }
 

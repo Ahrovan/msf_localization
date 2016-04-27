@@ -6,6 +6,8 @@ SensorBasics::SensorBasics() :
     sensorType(SensorTypes::undefined),
     flagSensorEnabled(false)
 {
+    //std::cout<<"SensorBasics::SensorBasics()"<<std::endl;
+
     return;
 }
 

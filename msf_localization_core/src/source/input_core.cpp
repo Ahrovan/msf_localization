@@ -10,8 +10,8 @@ InputCore::InputCore() :
     return;
 }
 
-InputCore::InputCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
-    MsfElementCore(msf_element_core_ptr, msf_storage_core_ptr)
+InputCore::InputCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+    MsfElementCore(msf_storage_core_ptr)
 {
     init();
 

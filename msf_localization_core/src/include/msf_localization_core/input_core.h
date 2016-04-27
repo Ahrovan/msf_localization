@@ -53,8 +53,8 @@ class InputCore : public MsfElementCore
 
 public:
     InputCore();
-    InputCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
-    virtual ~InputCore();
+    InputCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    ~InputCore();
 
 protected:
     int init();

@@ -44,8 +44,8 @@ class SensorCore : public SensorBasics, public MsfElementCore
 {
 public:
     SensorCore();
-    SensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
-    virtual ~SensorCore();
+    SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    ~SensorCore();
 
 
 protected:

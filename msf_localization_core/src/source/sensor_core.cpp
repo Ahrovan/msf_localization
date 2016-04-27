@@ -16,10 +16,12 @@ SensorCore::SensorCore() :
     return;
 }
 
-SensorCore::SensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr, std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
+SensorCore::SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     SensorBasics(),
-    MsfElementCore(TheSensorCorePtr, TheMsfStorageCore)
+    MsfElementCore(msf_storage_core_ptr)
 {
+    //std::cout<<"SensorCore::SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
+
     init();
 
     // end

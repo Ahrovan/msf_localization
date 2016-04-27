@@ -9,7 +9,13 @@
 
 class ImuInputCore : public InputCore
 {
+public:
+    ImuInputCore();
+    ImuInputCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    ~ImuInputCore();
 
+protected:
+    int init();
 
 };
 

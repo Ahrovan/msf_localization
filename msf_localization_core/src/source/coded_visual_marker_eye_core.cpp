@@ -15,9 +15,11 @@ CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
     return;
 }
 
-CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<SensorCore> the_sensor_core, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    SensorCore(the_sensor_core, the_msf_storage_core)
+CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+    SensorCore(the_msf_storage_core)
 {
+    //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
+
     //
     init();
 
@@ -604,7 +606,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
 
 
     // dimension of the measurement
-    int dimension_error_measurement=std::dynamic_pointer_cast<SensorCore>(the_sensor_core->getMsfElementCoreSharedPtr())->getDimensionErrorMeasurement();
+    int dimension_error_measurement=this->getDimensionErrorMeasurement();
 
 
     // Robot

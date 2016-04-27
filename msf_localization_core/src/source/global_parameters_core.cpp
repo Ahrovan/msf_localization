@@ -2,6 +2,8 @@
 
 #include "msf_localization_core/msf_storage_core.h"
 
+#include "msf_localization_core/global_parameters_state_core.h"
+
 
 GlobalParametersCore::GlobalParametersCore() :
     MsfElementCore()
@@ -12,8 +14,8 @@ GlobalParametersCore::GlobalParametersCore() :
     return;
 }
 
-GlobalParametersCore::GlobalParametersCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr, std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
-    MsfElementCore(msf_element_core_ptr, msf_storage_core_ptr)
+GlobalParametersCore::GlobalParametersCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+    MsfElementCore(msf_storage_core_ptr)
 {
     init();
 
@@ -199,4 +201,70 @@ Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
 
 
     return covariance_matrix;
+}
+
+int GlobalParametersCore::readConfig(pugi::xml_node global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore)
+{
+    // Map Element Core Pointer
+    //std::shared_ptr<GlobalParametersCore> TheGlobalParametersCoreAux(this);
+    std::shared_ptr<GlobalParametersCore> TheGlobalParametersCoreAux=std::dynamic_pointer_cast<GlobalParametersCore>(this->getMsfElementCoreSharedPtr());
+
+    // Set the access to the Storage core -> Not needed
+    //this->setTheMsfStorageCore(TheMsfStorageCore);
+
+    // Set pointer to the TheGlobalParametersCoreAux
+    //this->setTheGlobalParametersCore(TheGlobalParametersCoreAux);
+
+
+    // Create a class for the TheGlobalParametersCore
+    if(!GlobalParametersInitStateCore)
+        GlobalParametersInitStateCore=std::make_shared<GlobalParametersStateCore>(TheGlobalParametersCoreAux);
+
+    // Set pointer to the Core -> Not needed?
+    //GlobalParametersInitStateCore->setTheGlobalParametersCore(TheGlobalParametersCoreAux);
+
+
+    //std::cout<<"count TheGlobalParametersCoreAux="<<TheGlobalParametersCoreAux.use_count()<<std::endl;
+
+
+    //TheGlobalParametersCoreAux.reset();
+
+
+    // Aux vars
+    std::string readingValue;
+
+
+    /// World name
+    readingValue=global_parameters.child_value("name");
+    this->setWorldName(readingValue);
+
+
+    /// Init State
+
+    // Gravity
+    readingValue=global_parameters.child("gravity").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d init_state;
+        stm>>init_state[0]>>init_state[1]>>init_state[2];
+        GlobalParametersInitStateCore->setGravity(init_state);
+    }
+
+
+
+    //// Init Variances
+
+
+    // Gravity
+    readingValue=global_parameters.child("gravity").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseGravity(variance.asDiagonal());
+    }
+
+
+    // End
+    return 0;
 }
