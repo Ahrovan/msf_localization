@@ -70,44 +70,6 @@ public:
     std::string getMapElementName() const;
 
 
-    // Dimension state
-protected:
-    unsigned int dimensionState;
-public:
-    unsigned int getDimensionState() const;
-    int setDimensionState(unsigned int dimensionState);
-
-    // Dimension error state
-protected:
-    unsigned int dimensionErrorState;
-public:
-    unsigned int getDimensionErrorState() const;
-    int setDimensionErrorState(unsigned int dimensionErrorState);
-
-    // Dimension parameters
-protected:
-    unsigned int dimensionParameters;
-public:
-    unsigned int getDimensionParameters() const;
-    int setDimensionParameters(unsigned int dimensionParameters);
-
-    // Dimension error parameters
-protected:
-    unsigned int dimensionErrorParameters;
-public:
-    unsigned int getDimensionErrorParameters() const;
-    int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
-
-
-    // Dimension of the map noise
-protected:
-    unsigned int dimensionNoise;
-public:
-    unsigned int getDimensionNoise() const;
-    int setDimensionNoise(unsigned int dimensionNoise);
-
-
-
     // MapElementTypes
 protected:
     MapElementTypes map_element_type_;
@@ -115,17 +77,6 @@ public:
     int setMapElementType(MapElementTypes map_element_type);
     MapElementTypes getMapElementType() const;
 
-
-    /*
-    // Pointer to itself
-protected:
-    std::weak_ptr<const MapElementCore> the_map_element_core_ptr_;
-public:
-    int setTheMapElementCore(std::weak_ptr<const MapElementCore> the_map_element_core_ptr);
-    std::shared_ptr<const MapElementCore> getTheMapElementCore() const;
-    std::shared_ptr<const MapElementCore> getTheMapElementCoreShared() const;
-    std::weak_ptr<const MapElementCore> getTheMapElementCoreWeak() const;
-    */
 
 
     ////// Init error state variances -> Temporal, only for the initial configuration

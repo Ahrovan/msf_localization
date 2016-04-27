@@ -68,43 +68,21 @@ public:
     InputTypes getInputType() const;
 
 
-/*
-    // Dimension state
-protected:
-    unsigned int dimensionState;
-public:
-    unsigned int getDimensionState() const;
-    int setDimensionState(unsigned int dimensionState);
 
-    // Dimension error state
+    // Dimension input
 protected:
-    unsigned int dimensionErrorState;
+    unsigned int dimensionInput;
 public:
-    unsigned int getDimensionErrorState() const;
-    int setDimensionErrorState(unsigned int dimensionErrorState);
+    unsigned int getDimensionInput() const;
+    int setDimensionInput(unsigned int dimensionInput);
 
-    // Dimension parameters
+    // Dimension error input
 protected:
-    unsigned int dimensionParameters;
+    unsigned int dimensionErrorInput;
 public:
-    unsigned int getDimensionParameters() const;
-    int setDimensionParameters(unsigned int dimensionParameters);
+    unsigned int getDimensionErrorInput() const;
+    int setDimensionErrorInput(unsigned int dimensionErrorInput);
 
-    // Dimension error parameters
-protected:
-    unsigned int dimensionErrorParameters;
-public:
-    unsigned int getDimensionErrorParameters() const;
-    int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
-
-
-    // Dimension of the map noise
-protected:
-    unsigned int dimensionNoise;
-public:
-    unsigned int getDimensionNoise() const;
-    int setDimensionNoise(unsigned int dimensionNoise);
-*/
 
 
 

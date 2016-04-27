@@ -52,54 +52,6 @@ protected:
     int init();
 
 
-/*
-    // Pointer to itself
-protected:
-    std::weak_ptr<SensorCore> TheSensorCorePtr;
-public:
-    int setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr);
-    std::shared_ptr<SensorCore> getTheSensorCore() const;
-    std::shared_ptr<SensorCore> getTheSensorCoreShared() const;
-    std::weak_ptr<SensorCore> getTheSensorCoreWeak() const;
-
-
-    // Pointer to the MSF Storage Core
-protected:
-    std::weak_ptr<MsfStorageCore> TheMsfStorageCore;
-public:
-    int setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
-    std::shared_ptr<MsfStorageCore> getTheMsfStorageCore() const;
-*/
-
-
-    // Dimension state
-protected:
-    unsigned int dimensionState;
-public:
-    unsigned int getDimensionState() const;
-    //int setDimensionState(unsigned int dimensionState);
-
-
-    // Dimension error state
-protected:
-    unsigned int dimensionErrorState;
-public:
-    unsigned int getDimensionErrorState() const;
-    //int setDimensionErrorState(unsigned int dimensionErrorState);
-
-
-    // Dimension parameters
-protected:
-    unsigned int dimensionParameters;
-public:
-    unsigned int getDimensionParameters() const;
-
-    // Dimension error parameters
-protected:
-    unsigned int dimensionErrorParameters;
-public:
-    unsigned int getDimensionErrorParameters() const;
-
 
 
     // Dimension of the measurement
@@ -115,12 +67,6 @@ protected:
 public:
     unsigned int getDimensionErrorMeasurement() const;
 
-
-    // Dimension of the sensor noise
-protected:
-    unsigned int dimensionNoise;
-public:
-    unsigned int getDimensionNoise() const;
 
 
 
@@ -176,10 +122,6 @@ public:
 
 
     ////// Init error state variances -> Temporal, only for the initial configuration
-protected:
-    Eigen::MatrixXd InitErrorStateVariance;
-public:
-    Eigen::MatrixXd getInitErrorStateVariance() const;
 
 public:
     virtual int prepareInitErrorStateVariance();

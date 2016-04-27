@@ -32,6 +32,11 @@ int InputCore::init()
     this->setMsfElementCoreType(MsfElementCoreTypes::input);
 
 
+    // Dimensions
+    dimensionInput=0;
+    dimensionErrorInput=0;
+
+
     return 0;
 }
 
@@ -44,4 +49,26 @@ int InputCore::setInputType(InputTypes input_type)
 InputTypes InputCore::getInputType() const
 {
     return this->input_type_;
+}
+
+unsigned int InputCore::getDimensionInput() const
+{
+    return this->dimensionInput;
+}
+
+int InputCore::setDimensionInput(unsigned int dimensionInput)
+{
+    this->dimensionInput=dimensionInput;
+    return 0;
+}
+
+unsigned int InputCore::getDimensionErrorInput() const
+{
+    return this->dimensionErrorInput;
+}
+
+int InputCore::setDimensionErrorInput(unsigned int dimensionErrorInput)
+{
+    this->dimensionErrorInput=dimensionErrorInput;
+    return 0;
 }

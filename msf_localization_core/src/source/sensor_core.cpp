@@ -63,77 +63,6 @@ int SensorCore::init()
     return 0;
 }
 
-/*
-int SensorCore::setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr)
-{
-    this->TheSensorCorePtr=TheSensorCorePtr;
-    return 0;
-}
-std::shared_ptr<SensorCore> SensorCore::getTheSensorCore() const
-{
-    std::shared_ptr<SensorCore> TheSensorCoreSharedPtr=this->TheSensorCorePtr.lock();
-    return TheSensorCoreSharedPtr;
-}
-
-std::shared_ptr<SensorCore> SensorCore::getTheSensorCoreShared() const
-{
-    std::shared_ptr<SensorCore> TheSensorCoreSharedPtr=this->TheSensorCorePtr.lock();
-    return TheSensorCoreSharedPtr;
-}
-
-std::weak_ptr<SensorCore> SensorCore::getTheSensorCoreWeak() const
-{
-    return this->TheSensorCorePtr;
-}
-
-
-int SensorCore::setTheMsfStorageCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore)
-{
-    this->TheMsfStorageCore=TheMsfStorageCore;
-    return 0;
-}
-
-std::shared_ptr<MsfStorageCore> SensorCore::getTheMsfStorageCore() const
-{
-    std::shared_ptr<MsfStorageCore> TheMsfStorageCoreSharedPtr=this->TheMsfStorageCore.lock();
-    return TheMsfStorageCoreSharedPtr;
-}
-*/
-
-
-unsigned int SensorCore::getDimensionState() const
-{
-    return this->dimensionState;
-}
-
-//int SensorCore::setDimensionState(unsigned int dimensionState)
-//{
-//    this->dimensionState=dimensionState;
-//    return 0;
-//}
-
-unsigned int SensorCore::getDimensionErrorState() const
-{
-    return this->dimensionErrorState;
-}
-
-//int SensorCore::setDimensionErrorState(unsigned int dimensionErrorState)
-//{
-//    this->dimensionErrorState=dimensionErrorState;
-//    return 0;
-//}
-
-
-unsigned int SensorCore::getDimensionParameters() const
-{
-    return this->dimensionParameters;
-}
-
-unsigned int SensorCore::getDimensionErrorParameters() const
-{
-    return this->dimensionErrorParameters;
-}
-
 unsigned int SensorCore::getDimensionMeasurement() const
 {
     return this->dimensionMeasurement;
@@ -142,11 +71,6 @@ unsigned int SensorCore::getDimensionMeasurement() const
 unsigned int SensorCore::getDimensionErrorMeasurement() const
 {
     return this->dimensionErrorMeasurement;
-}
-
-unsigned int SensorCore::getDimensionNoise() const
-{
-    return this->dimensionNoise;
 }
 
 int SensorCore::setSensorName(std::string sensor_name)
@@ -267,12 +191,6 @@ int SensorCore::setNoisePositionSensorWrtRobot(Eigen::Matrix3d noisePositionSens
 {
     this->noisePositionSensorWrtRobot=noisePositionSensorWrtRobot;
     return 0;
-}
-
-
-Eigen::MatrixXd SensorCore::getInitErrorStateVariance() const
-{
-    return this->InitErrorStateVariance;
 }
 
 int SensorCore::prepareInitErrorStateVariance()
