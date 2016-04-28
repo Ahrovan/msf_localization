@@ -41,28 +41,51 @@
 #include <condition_variable>
 
 
-
-// Estimator Cores
-
-// Robot
-#include "msf_localization_core/robot_state_core.h"
-#include "msf_localization_core/free_model_robot_core.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
-
-
-// Sensor
-#include "msf_localization_core/sensor_state_core.h"
-#include "msf_localization_core/sensor_measurement_core.h"
-
-// Imu
-#include "msf_localization_core/imu_sensor_core.h"
-#include "msf_localization_core/imu_sensor_measurement_core.h"
-#include "msf_localization_core/imu_sensor_state_core.h"
-
-
 #include "msf_localization_core/stamped_ring_buffer.h"
 
 #include "msf_localization_core/state_estimation_core.h"
+
+
+
+/// Estimator Cores
+// Robot
+#include "msf_localization_core/free_model_robot_core.h"
+// Global Parameters
+#include "msf_localization_core/global_parameters_core.h"
+// Sensor
+#include "msf_localization_core/imu_sensor_core.h"
+// Input
+#include "msf_localization_core/input_core.h"
+#include "msf_localization_core/imu_input_core.h"
+// Map
+
+
+/// State
+// Robot
+#include "msf_localization_core/robot_state_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
+// Global Parameters
+
+// Sensor
+#include "msf_localization_core/sensor_state_core.h"
+#include "msf_localization_core/imu_sensor_state_core.h"
+// Input
+
+// Map
+
+
+/// Measurement
+#include "msf_localization_core/sensor_measurement_core.h"
+// Imu
+#include "msf_localization_core/imu_sensor_measurement_core.h"
+
+
+/// Input Command
+#include "msf_localization_core/input_command_core.h"
+#include "msf_localization_core/imu_input_command_core.h"
+
+
+
 
 
 
@@ -110,6 +133,13 @@ public:
 public:
     int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
     int setMeasurementList(const TimeStamp TheTimeStamp, const std::list< std::shared_ptr<SensorMeasurementCore> > TheListSensorMeasurement);
+
+
+    // Set an input command in the ring buffer with given time stamp (safe)
+public:
+    int setInputCommand(const TimeStamp time_stamp, const std::shared_ptr<InputCommandCore> input_command_core);
+    int setInputCommandList(const TimeStamp time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core);
+
 
 
     // Purge Ring Buffer (safe)

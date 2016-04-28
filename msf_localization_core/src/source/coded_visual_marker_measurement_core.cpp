@@ -48,7 +48,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerId(const int id)
 int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vector3d position)
 {
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getSensorCoreSharedPtr());
 
     if(the_visual_marker_eye_core->isMeasurementPositionEnabled())
     {
@@ -64,7 +64,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vecto
 int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vector4d attitude)
 {
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getSensorCoreSharedPtr());
 
     if(the_visual_marker_eye_core->isMeasurementAttitudeEnabled())
     {
@@ -110,17 +110,17 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<
 {
     // Create the Measurement
     Eigen::VectorXd the_innovation;
-    the_innovation.resize(this->getTheSensorCore()->getDimensionErrorMeasurement(), 1);
+    the_innovation.resize(this->getSensorCoreSharedPtr()->getDimensionErrorMeasurement(), 1);
     the_innovation.setZero();
 
     // Check
-    if(theMatchedMeasurementI->getTheSensorCore() != thePredictedMeasurementI->getTheSensorCore())
+    if(theMatchedMeasurementI->getSensorCoreSharedPtr() != thePredictedMeasurementI->getSensorCoreSharedPtr())
     {
         std::cout<<"CodedVisualMarkerMeasurementCore::getInnovation() error"<<std::endl;
     }
 
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(theMatchedMeasurementI->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(theMatchedMeasurementI->getSensorCoreSharedPtr());
 
     // Cast
     std::shared_ptr<CodedVisualMarkerMeasurementCore> theMatchedMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(theMatchedMeasurementI);
@@ -153,11 +153,11 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getMeasurement()
 {
     // Create the Measurement
     Eigen::VectorXd the_measurement;
-    the_measurement.resize(this->getTheSensorCore()->getDimensionMeasurement(), 1);
+    the_measurement.resize(this->getSensorCoreSharedPtr()->getDimensionMeasurement(), 1);
     the_measurement.setZero();
 
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getTheSensorCore());
+    std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getSensorCoreSharedPtr());
 
     // Fill
     unsigned int dimension=0;

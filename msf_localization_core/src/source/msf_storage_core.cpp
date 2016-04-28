@@ -150,6 +150,95 @@ int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::
     return 0;
 }
 
+int MsfStorageCore::setInputCommand(const TimeStamp time_stamp, const std::shared_ptr<InputCommandCore> input_command_core)
+{
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setInputCommand() TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
+
+    // This is already safe
+    this->getElement(time_stamp, TheStateEstimationCore);
+
+    if(!TheStateEstimationCore)
+    {
+        TheStateEstimationCore=std::make_shared<StateEstimationCore>();
+    }
+
+    // Measure
+    TheStateEstimationCore->TheListInputCommandCore.push_back(input_command_core);
+
+    // This is already safe
+    this->addElement(time_stamp, TheStateEstimationCore);
+
+    // Add TimeStamp to the outdated elements list
+    this->addOutdatedElement(time_stamp);
+
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setInputCommand() ended TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
+    return 0;
+}
+
+int MsfStorageCore::setInputCommandList(const TimeStamp time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core)
+{
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setInputCommandList() TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
+
+    // This is already safe
+    this->getElement(time_stamp, TheStateEstimationCore);
+
+    if(!TheStateEstimationCore)
+    {
+        TheStateEstimationCore=std::make_shared<StateEstimationCore>();
+    }
+
+
+    // Measurements
+    for(std::list<std::shared_ptr<InputCommandCore>>::const_iterator itInputCommand=list_input_command_core.begin();
+        itInputCommand!=list_input_command_core.end();
+        ++itInputCommand)
+    {
+        TheStateEstimationCore->TheListInputCommandCore.push_back((*itInputCommand));
+
+        // This is already safe
+        this->addElement(time_stamp, TheStateEstimationCore);
+
+    }
+
+
+    // Add TimeStamp to the outdated elements list
+    this->addOutdatedElement(time_stamp);
+
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::setInputCommandList() ended TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
+    return 0;
+}
 
 int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
@@ -583,7 +672,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
             logString<<"\t";
             logString<<"+Meas:"<<std::endl;
 
-            std::shared_ptr<const SensorCore> SensorCorePtrAux=(*itMeas)->getTheSensorCore();
+            std::shared_ptr<SensorCore> SensorCorePtrAux=(*itMeas)->getSensorCoreSharedPtr();
             logString<<"\t\t";
             logString<<"Sensor id="<<SensorCorePtrAux->getSensorId();
 
@@ -595,7 +684,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                 }
                 case SensorTypes::imu:
                 {
-                    std::shared_ptr<const ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<const ImuSensorCore>(SensorCorePtrAux);
+                    std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(SensorCorePtrAux);
 
 
                     logString<<" (IMU)";
@@ -609,6 +698,50 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                         logString<<" angularVel=["<<measurePtr->getAngularVelocity().transpose()<<"]'";
                     if(TheImuSensorCore->isMeasurementLinearAccelerationEnabled())
                         logString<<" linearAcc=["<<measurePtr->getLinearAcceleration().transpose()<<"]'";
+                    break;
+                }
+
+            }
+
+
+
+            logString<<std::endl;
+        }
+    }
+
+
+    /////// Input
+    if(TheStateEstimationCore->hasInputCommand())
+    {
+        for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=TheStateEstimationCore->TheListInputCommandCore.begin();
+            itInputCommand!=TheStateEstimationCore->TheListInputCommandCore.end();
+            ++itInputCommand)
+        {
+            logString<<"\t";
+            logString<<"+Input Comm:"<<std::endl;
+
+            std::shared_ptr<InputCore> InputCorePtrAux=(*itInputCommand)->getInputCoreSharedPtr();
+            logString<<"\t\t";
+            logString<<"Input";
+
+            switch(InputCorePtrAux->getInputType())
+            {
+                case InputTypes::undefined:
+                {
+                    break;
+                }
+                case InputTypes::imu:
+                {
+                    std::shared_ptr<ImuInputCore> TheImuInputCore=std::dynamic_pointer_cast<ImuInputCore>(InputCorePtrAux);
+
+                    logString<<" (IMU)";
+                    std::shared_ptr<ImuInputCommandCore> inputCommandPtr=std::static_pointer_cast<ImuInputCommandCore>(*itInputCommand);
+                    if(TheImuInputCore->isInputCommandOrientationEnabled())
+                        logString<<" orientation=["<<inputCommandPtr->getOrientation().transpose()<<"]'";
+                    if(TheImuInputCore->isInputCommandAngularVelocityEnabled())
+                        logString<<" angularVel=["<<inputCommandPtr->getAngularVelocity().transpose()<<"]'";
+                    if(TheImuInputCore->isInputCommandLinearAccelerationEnabled())
+                        logString<<" linearAcc=["<<inputCommandPtr->getLinearAcceleration().transpose()<<"]'";
                     break;
                 }
 

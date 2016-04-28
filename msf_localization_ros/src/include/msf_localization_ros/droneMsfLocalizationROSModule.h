@@ -77,27 +77,38 @@
 #include <msf_localization_ros_srvs/SetBool.h>
 
 
-// Robot
-#include "msf_localization_core/free_model_robot_core.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
 
-
-// ROS Sensor Interface
+// ROS Interface
 #include "msf_localization_ros/ros_interface.h"
 
 
+/// ROS Sensors
 // ROS IMU Interface
 #include "msf_localization_ros/ros_sensor_imu_interface.h"
-
 // ROS Aruco Eye
 #include "msf_localization_ros/ros_aruco_eye_interface.h"
+
+
+/// ROS Inputs
+// ROS IMU Input
+#include "msf_localization_ros/ros_imu_input_interface.h"
+
+
 
 // MSF Core
 #include "msf_localization_core/msfLocalization.h"
 
 
+
+// Global Parameters (World)
 #include "msf_localization_core/global_parameters_core.h"
 #include "msf_localization_core/global_parameters_state_core.h"
+
+// Robot
+#include "msf_localization_core/free_model_robot_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
+
+
 
 
 #define _DEBUG_TIME_MSF_LOCALIZATION_ROS 1

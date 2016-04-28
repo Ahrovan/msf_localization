@@ -80,7 +80,7 @@ int MsfLocalizationROS::readConfigFile()
 
 
 
-    //// Global Parameters
+    //// Global Parameters [world]
 
     {
         // Reading Robot
@@ -245,6 +245,51 @@ int MsfLocalizationROS::readConfigFile()
     }
 
 
+    ///// Inputs
+    // Reading inputs
+    for(pugi::xml_node input = msf_localization.child("input"); input; input = input.next_sibling("input"))
+    {
+        // Input Type
+        std::string inputType=input.child_value("type");
+
+
+        //// IMU Sensor Type
+        if(inputType=="imu")
+        {
+            std::cout<<"input = imu"<<std::endl;
+
+            // Create a class for the SensoreCore
+            std::shared_ptr<RosImuInputInterface> ros_input_interface;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<ImuInputStateCore> input_state_core;
+
+            // Create a class for the SensoreCore
+            if(!ros_input_interface)
+            {
+                ros_input_interface=std::make_shared<RosImuInputInterface>(nh, this->TheMsfStorageCore);
+            }
+
+            // Set the pointer to itself
+            ros_input_interface->setMsfElementCorePtr(ros_input_interface);
+
+            // Read configs
+            if(ros_input_interface->readConfig(input, input_state_core))
+                return -2;
+
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfInputCore.push_back(ros_input_interface);
+
+            // Push the init state of the sensor
+            InitialState->TheListInputStateCore.push_back(input_state_core);
+        }
+
+
+    }
+
+
 
     ///// Map elements
 
@@ -296,7 +341,7 @@ int MsfLocalizationROS::readConfigFile()
     //// Finish
 
     // Initial State Prepare
-    InitialState->prepareInitErrorStateVariance();
+    InitialState->prepareCovarianceInitErrorState();
 
 
     // Display

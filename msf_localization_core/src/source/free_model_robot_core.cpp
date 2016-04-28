@@ -40,10 +40,6 @@ int FreeModelRobotCore::init()
     noiseAttitude.setZero();
     noiseAngularAcceleration.setZero();
 
-    // TODO -> This is not the best moment to do this! The state might change!
-    InitErrorStateVariance.resize(dimensionErrorState, dimensionErrorState);
-    InitErrorStateVariance.setZero();
-
 
     // Type
     this->setRobotCoreType(RobotCoreTypes::free_model);
@@ -186,6 +182,17 @@ Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceNoise(const TimeSta
     return covariance_noise;
 }
 
+int FreeModelRobotCore::prepareCovarianceInitErrorState()
+{
+    int error=MsfElementCore::prepareCovarianceInitErrorState();
+
+    if(error)
+        return error;
+
+    // Do nothing else. The rest is done when setting!
+
+    return 0;
+}
 
 int FreeModelRobotCore::setInitErrorStateVariancePosition(Eigen::Vector3d initVariance)
 {
@@ -720,6 +727,9 @@ int FreeModelRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<FreeMod
 
 
     /// Init Variances
+
+    // Prepare Covariance of init error state -> After preparing, the parameters are read!
+    this->prepareCovarianceInitErrorState();
 
     // Position
     readingValue=robot.child("position").child_value("init_var");

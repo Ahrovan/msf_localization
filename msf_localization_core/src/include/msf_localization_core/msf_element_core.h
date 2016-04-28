@@ -148,6 +148,7 @@ public:
 protected:
     Eigen::MatrixXd InitErrorStateVariance;
 public:
+    virtual int prepareCovarianceInitErrorState();
     Eigen::MatrixXd getCovarianceInitErrorState() const;
 
 

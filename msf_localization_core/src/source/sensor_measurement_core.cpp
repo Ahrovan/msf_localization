@@ -13,11 +13,11 @@ SensorMeasurementCore::SensorMeasurementCore()
     return;
 }
 
-SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr)
+SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> sensor_core_ptr)
 {
     init();
 
-    setTheSensorCore(TheSensorCorePtr);
+    this->setSensorCorePtr(sensor_core_ptr);
 
 
     return;
@@ -56,15 +56,21 @@ int SensorMeasurementCore::init()
 }
 
 
-int SensorMeasurementCore::setTheSensorCore(std::weak_ptr<SensorCore> TheSensorCorePtr)
+int SensorMeasurementCore::setSensorCorePtr(std::weak_ptr<SensorCore> sensor_core_ptr)
 {
-    this->TheSensorCorePtr=TheSensorCorePtr;
+    this->sensor_core_ptr_=sensor_core_ptr;
     return 0;
 }
-std::shared_ptr<SensorCore> SensorMeasurementCore::getTheSensorCore() const
+
+std::weak_ptr<SensorCore> SensorMeasurementCore::getSensorCoreWeakPtr() const
 {
-    std::shared_ptr<SensorCore> TheSensorCore=this->TheSensorCorePtr.lock();
-    return TheSensorCore;
+    return sensor_core_ptr_;
+}
+
+std::shared_ptr<SensorCore> SensorMeasurementCore::getSensorCoreSharedPtr() const
+{
+    std::shared_ptr<SensorCore> sensor_core_ptr=this->sensor_core_ptr_.lock();
+    return sensor_core_ptr;
 }
 
 int SensorMeasurementCore::setMeasurementType(MeasurementTypes measurementType)

@@ -35,12 +35,19 @@ int CodedVisualMarkerLandmarkCore::init()
     dimensionParameters+=3+4;
     dimensionErrorParameters+=3+3;
 
+    // Flags
+    flag_estimation_position_visual_marker_wrt_world=false;
+    flag_estimation_attitude_visual_marker_wrt_world=false;
+
+    // Noises
+    covariancePositionVisualMarkerWrtWorld.setZero();
+    covarianceAttitudeVisualMarkerWrtWorld.setZero();
 
     // Id
     id_=-1;
 
     // Map Type
-    map_element_type_=MapElementTypes::coded_visual_marker;
+    setMapElementType(MapElementTypes::coded_visual_marker);
 
 
     return 0;
@@ -147,28 +154,29 @@ int CodedVisualMarkerLandmarkCore::setCovarianceAttitudeVisualMarkerWrtWorld(Eig
 
 
 
-Eigen::MatrixXd CodedVisualMarkerLandmarkCore::getInitErrorStateCovariance()
+int CodedVisualMarkerLandmarkCore::prepareCovarianceInitErrorState()
 {
-    Eigen::MatrixXd covariance;
+    int error=MsfElementCore::prepareCovarianceInitErrorState();
 
-    covariance.resize(dimensionErrorState, dimensionErrorState);
-    covariance.setZero();
+    if(error)
+        return error;
+
 
     int dimension_i=0;
 
     if(flag_estimation_position_visual_marker_wrt_world)
     {
-        covariance.block<3,3>(dimension_i, dimension_i)=covariancePositionVisualMarkerWrtWorld;
+        this->InitErrorStateVariance.block<3,3>(dimension_i, dimension_i)=covariancePositionVisualMarkerWrtWorld;
         dimension_i+=3;
     }
 
     if(flag_estimation_attitude_visual_marker_wrt_world)
     {
-        covariance.block<3,3>(dimension_i, dimension_i)=covarianceAttitudeVisualMarkerWrtWorld;
+        this->InitErrorStateVariance.block<3,3>(dimension_i, dimension_i)=covarianceAttitudeVisualMarkerWrtWorld;
         dimension_i+=3;
     }
 
-    return covariance;
+    return 0;
 }
 
 /*
@@ -493,6 +501,10 @@ int CodedVisualMarkerLandmarkCore::readConfig(pugi::xml_node map_element, std::s
     // Noises in the estimation (if enabled)
 
     // None
+
+
+    // Prepare covariance matrix
+    this->prepareCovarianceInitErrorState();
 
 
     /// Finish

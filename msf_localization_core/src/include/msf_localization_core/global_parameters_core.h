@@ -72,6 +72,12 @@ public:
 
 
 
+    ////// Init error state variances -> Temporal, only for the initial configuration
+
+public:
+    int prepareCovarianceInitErrorState();
+
+
 
 public:
     Eigen::MatrixXd getCovarianceGlobalParameters();

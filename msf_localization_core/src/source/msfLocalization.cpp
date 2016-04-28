@@ -161,7 +161,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     std::shared_ptr<StateEstimationCore> InitState;
     if(TheMsfStorageCore->getLastElementWithStateEstimate(InitTimeStamp, InitState))
     {
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::setStateEstimationEnabled() error in getLastElementWithStateEstimate"<<std::endl;
 #endif
         return 2;
@@ -169,7 +169,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
 
     if(TheMsfStorageCore->purgeRingBuffer(-1))
     {
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::setStateEstimationEnabled() error in purgeRingBuffer"<<std::endl;
 #endif
         return -2;
@@ -180,7 +180,7 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     InitTimeStamp=getTimeStamp();
     if(TheMsfStorageCore->addElement(InitTimeStamp, InitState))
     {
-#if _DEBUG_MSF_LOCALIZATION_CORE
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         logFile<<"MsfLocalizationCore::setStateEstimationEnabled() error in addElement"<<std::endl;
 #endif
         return -3;
@@ -198,6 +198,14 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
         (*itListOfSensors)->setSensorEnabled(predictEnabled);
     }
 
+    // Change flag in the inputs
+    for(std::list< std::shared_ptr<InputCore> >::iterator itListOfInput=TheListOfInputCore.begin();
+        itListOfInput!=TheListOfInputCore.end();
+        ++itListOfInput)
+    {
+        (*itListOfInput)->setInputEnabled(predictEnabled);
+    }
+
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
@@ -205,7 +213,6 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
         this->log(logString.str());
     }
 #endif
-
 
     return 0;
 }
@@ -1586,7 +1593,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         ++itListMeas)
     {
         // Check
-        if(!(*itListMeas)->getTheSensorCore())
+        if(!(*itListMeas)->getSensorCoreSharedPtr())
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             std::cout<<"MsfLocalizationCore::update() error 2"<<std::endl;
@@ -1595,13 +1602,13 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         }
 
         // Find the type
-        switch((*itListMeas)->getTheSensorCore()->getSensorType())
+        switch((*itListMeas)->getSensorCoreSharedPtr()->getSensorType())
         {
             case SensorTypes::imu:
             {
                 // Find the sensor state
                 std::shared_ptr<SensorStateCore> TheSensorStateCore;
-                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
+                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getSensorCoreSharedPtr(), TheSensorStateCore))
                 {
         #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
@@ -1617,7 +1624,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 }
 
                 // Cast the imu sensor core
-                std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>((*itListMeas)->getTheSensorCore());
+                std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>((*itListMeas)->getSensorCoreSharedPtr());
 
 
                 // Cast the imu sensor state
@@ -1692,7 +1699,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
                 // Find the sensor state
                 std::shared_ptr<SensorStateCore> TheSensorStateCore;
-                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getTheSensorCore(), TheSensorStateCore))
+                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getSensorCoreSharedPtr(), TheSensorStateCore))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
@@ -1718,7 +1725,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                 // Cast the sensor core
-                std::shared_ptr<CodedVisualMarkerEyeCore> TheVisualMarkerSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itListMeas)->getTheSensorCore());
+                std::shared_ptr<CodedVisualMarkerEyeCore> TheVisualMarkerSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itListMeas)->getSensorCoreSharedPtr());
 
                 // Create a pointer for the measurement prediction
                 std::shared_ptr<CodedVisualMarkerMeasurementCore> TheCodedVisualMarkerPredictedMeasurement;
@@ -1802,44 +1809,27 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
     ///////// Get dimensions
 
-    /// Measurements
+    /// Matched Measurements
     unsigned int dimensionMeasurements=0;
     for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
         itListMatchedMeas!=TheListMatchedMeasurements.end();
         ++itListMatchedMeas)
     {
-        dimensionMeasurements+=(*itListMatchedMeas)->getTheSensorCore()->getDimensionMeasurement();
+        dimensionMeasurements+=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionMeasurement();
     }
 
-    /// Error Measurement
+    /// Matched Error Measurement
     unsigned int dimensionErrorMeasurements=0;
     for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
         itListMatchedMeas!=TheListMatchedMeasurements.end();
         ++itListMatchedMeas)
     {
-        dimensionErrorMeasurements+=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+        dimensionErrorMeasurements+=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
     }
 
     /// Error State
-    unsigned int dimensionErrorState=0;
-    // Robot
-    dimensionErrorState+=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    // Global Parameters
-    dimensionErrorState+=OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    // Sensors
-    for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListMatchedMeas=OldState->TheListSensorStateCore.begin();
-        itListMatchedMeas!=OldState->TheListSensorStateCore.end();
-        ++itListMatchedMeas)
-    {
-        dimensionErrorState+=(*itListMatchedMeas)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    }
-    // Map
-    for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMatchedMeas=OldState->TheListMapElementStateCore.begin();
-        itListMatchedMeas!=OldState->TheListMapElementStateCore.end();
-        ++itListMatchedMeas)
-    {
-        dimensionErrorState+=(*itListMatchedMeas)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    }
+    unsigned int dimensionErrorState=OldState->getDimensionErrorState();
+
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
     {
@@ -1860,7 +1850,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         itListMatchedMeas!=TheListMatchedMeasurements.end();
         ++itListMatchedMeas)
     {
-        dimensionSensorParameters+=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorParameters();
+        dimensionSensorParameters+=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorParameters();
     }
 
     /// Map parameters
@@ -1869,7 +1859,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         itListMatchedMeas!=TheListMatchedMeasurements.end();
         ++itListMatchedMeas)
     {
-        switch((*itListMatchedMeas)->getTheSensorCore()->getSensorType())
+        switch((*itListMatchedMeas)->getSensorCoreSharedPtr()->getSensorType())
         {
             case SensorTypes::imu:
             default:
@@ -1922,7 +1912,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListMatchedMeas!=TheListMatchedMeasurements.end() && itListPredictedMeas!=TheListMatchedMeasurements.end();
             ++itListMatchedMeas, ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementSensorI=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            unsigned int dimensionErrorMeasurementSensorI=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
 
 
             innovationVector.block(dimension, 0, dimensionErrorMeasurementSensorI, 1)=(*itListMatchedMeas)->getInnovation((*itListMatchedMeas), (*itListPredictedMeas));
@@ -1963,7 +1953,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListPredictedMeas!=TheListPredictedMeasurements.end();
             ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
             unsigned int dimensionTotalErrorStateI=0;
             unsigned int dimensionErrorStateI=0;
 
@@ -1985,7 +1975,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 ++itListSensorCore)
             {
                 dimensionErrorStateI=(*itListSensorCore)->getDimensionErrorState();
-                if((*itListSensorCore) == (*itListPredictedMeas)->getTheSensorCore())
+                if((*itListSensorCore) == (*itListPredictedMeas)->getSensorCoreSharedPtr())
                 {
                     if(dimensionErrorMeasurementI && dimensionErrorStateI)
                         JacobianMeasurementErrorState.block(dimensionTotalMeasurementI, dimensionTotalErrorStateI, dimensionErrorMeasurementI, dimensionErrorStateI)=(*itListPredictedMeas)->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState;
@@ -1996,6 +1986,9 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 }
                 dimensionTotalErrorStateI+=dimensionErrorStateI;
             }
+
+            // Inputs
+            // TODO
 
 
             // Map
@@ -2084,15 +2077,15 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListPredictedMeas!=TheListPredictedMeasurements.end();
             ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
             unsigned int dimensionTotalMeasurementJ=0;
 
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
                 itListMatchedMeas!=TheListMatchedMeasurements.end();
                 ++itListMatchedMeas)
             {
-                unsigned int dimensionErrorMeasurementJ=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
-                if((*itListMatchedMeas)->getTheSensorCore() == (*itListPredictedMeas)->getTheSensorCore())
+                unsigned int dimensionErrorMeasurementJ=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+                if((*itListMatchedMeas)->getSensorCoreSharedPtr() == (*itListPredictedMeas)->getSensorCoreSharedPtr())
                 {
                     if(dimensionErrorMeasurementI && dimensionErrorMeasurementJ)
                         JacobianMeasurementNoise.block(dimensionTotalMeasurementI, dimensionTotalMeasurementJ, dimensionErrorMeasurementI, dimensionErrorMeasurementJ)=(*itListPredictedMeas)->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise;
@@ -2131,7 +2124,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListPredictedMeas!=TheListPredictedMeasurements.end();
             ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
             unsigned int dimensionGlobalParametersI=this->TheGlobalParametersCore->getDimensionErrorParameters();
 
             if(dimensionErrorMeasurementI && dimensionGlobalParametersI)
@@ -2167,15 +2160,15 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListPredictedMeas!=TheListPredictedMeasurements.end();
             ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
             unsigned int dimensionTotalSensorParametersJ=0;
 
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
                 itListMatchedMeas!=TheListMatchedMeasurements.end();
                 ++itListMatchedMeas)
             {
-                unsigned int dimensionSensorParametersJ=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorParameters();
-                if((*itListMatchedMeas)->getTheSensorCore() == (*itListPredictedMeas)->getTheSensorCore())
+                unsigned int dimensionSensorParametersJ=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorParameters();
+                if((*itListMatchedMeas)->getSensorCoreSharedPtr() == (*itListPredictedMeas)->getSensorCoreSharedPtr())
                 {
                     if(dimensionSensorParametersJ)
                     {
@@ -2254,19 +2247,19 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListPredictedMeas!=TheListPredictedMeasurements.end();
             ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
             unsigned int dimensionTotalMeasurementJ=0;
 
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
                 itListMatchedMeas!=TheListMatchedMeasurements.end();
                 ++itListMatchedMeas)
             {
-                unsigned int dimensionErrorMeasurementJ=(*itListMatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
-                if((*itListMatchedMeas)->getTheSensorCore() == (*itListPredictedMeas)->getTheSensorCore())
+                unsigned int dimensionErrorMeasurementJ=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+                if((*itListMatchedMeas)->getSensorCoreSharedPtr() == (*itListPredictedMeas)->getSensorCoreSharedPtr())
                 {
                     if(dimensionErrorMeasurementJ)
                         CovarianceMeasurement.block(dimensionTotalMeasurementI, dimensionTotalMeasurementJ, dimensionErrorMeasurementI, dimensionErrorMeasurementJ)=
-                                Eigen::MatrixXd((*itListPredictedMeas)->getTheSensorCore()->getCovarianceMeasurement());
+                                Eigen::MatrixXd((*itListPredictedMeas)->getSensorCoreSharedPtr()->getCovarianceMeasurement());
                 }
                 else
                 {
@@ -2330,19 +2323,19 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListMatchedMeasI!=TheListMatchedMeasurements.end();
             ++itListMatchedMeasI)
         {
-            unsigned int dimensionSensorParametersI=(*itListMatchedMeasI)->getTheSensorCore()->getDimensionErrorParameters();
+            unsigned int dimensionSensorParametersI=(*itListMatchedMeasI)->getSensorCoreSharedPtr()->getDimensionErrorParameters();
             unsigned int dimensionTotalSensorParametersJ=0;
 
             for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeasJ=TheListMatchedMeasurements.begin();
                 itListMatchedMeasJ!=TheListMatchedMeasurements.end();
                 ++itListMatchedMeasJ)
             {
-                unsigned int dimensionSensorParametersJ=(*itListMatchedMeasJ)->getTheSensorCore()->getDimensionErrorParameters();
-                if((*itListMatchedMeasI)->getTheSensorCore() == (*itListMatchedMeasJ)->getTheSensorCore())
+                unsigned int dimensionSensorParametersJ=(*itListMatchedMeasJ)->getSensorCoreSharedPtr()->getDimensionErrorParameters();
+                if((*itListMatchedMeasI)->getSensorCoreSharedPtr() == (*itListMatchedMeasJ)->getSensorCoreSharedPtr())
                 {
                     if(dimensionSensorParametersJ)
                         CovarianceSensorParameters.block(dimensionTotalSensorParametersI, dimensionTotalSensorParametersJ, dimensionSensorParametersI, dimensionSensorParametersJ)=
-                                Eigen::MatrixXd((*itListMatchedMeasI)->getTheSensorCore()->getCovarianceParameters());
+                                Eigen::MatrixXd((*itListMatchedMeasI)->getSensorCoreSharedPtr()->getCovarianceParameters());
                 }
                 else
                 {
@@ -2905,7 +2898,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
                     // Get The Sensor State
                     std::shared_ptr<SensorStateCore> TheSensorState;
-                    if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itUnmatchedMeas)->getTheSensorCore(), TheSensorState))
+                    if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itUnmatchedMeas)->getSensorCoreSharedPtr(), TheSensorState))
                     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                         std::cout<<"MsfLocalizationCore::update() error 40"<<std::endl;
@@ -2922,7 +2915,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                     // Sensor Core
-                    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itUnmatchedMeas)->getTheSensorCore());
+                    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itUnmatchedMeas)->getSensorCoreSharedPtr());
 
 
                     // Find Map Element Core -> Might be added before
@@ -3041,7 +3034,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itUnmatchedMeas!=TheListUnmatchedMeasurementsWithMapElement.end();
             ++itUnmatchedMeas)
         {
-            dimension_new_map_elements_noise_measurement_total+=(*itUnmatchedMeas)->getTheSensorCore()->getDimensionErrorMeasurement();
+            dimension_new_map_elements_noise_measurement_total+=(*itUnmatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
         }
 
 
@@ -3097,7 +3090,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 {
                     dimension_error_state_i=(*itListSensorCore)->getDimensionErrorState();
 
-                    if((*itListSensorCore) == (*itUnmatchedMeasurementsWithMapElement)->getTheSensorCore())
+                    if((*itListSensorCore) == (*itUnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr())
                     {
                         if(dimension_new_map_element_error_state_i && dimension_error_state_i)
                             jacobianMapErrorState.block(dimension_new_map_element_error_state_total_i, dimension_error_state_total_i, dimension_new_map_element_error_state_i, dimension_error_state_i)=
@@ -3166,9 +3159,9 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                     it2UnmatchedMeasurementsWithMapElement!=TheListUnmatchedMeasurementsWithMapElement.end();
                     ++it2UnmatchedMeasurementsWithMapElement)
                 {
-                    dimension_error_measurement_i=(*it2UnmatchedMeasurementsWithMapElement)->getTheSensorCore()->getDimensionErrorMeasurement();
+                    dimension_error_measurement_i=(*it2UnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
 
-                    if((*it2UnmatchedMeasurementsWithMapElement)->getTheSensorCore() == (*itUnmatchedMeasurementsWithMapElement)->getTheSensorCore())
+                    if((*it2UnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr() == (*itUnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr())
                     {
                         if(dimension_new_map_element_error_state_i && dimension_error_measurement_i)
                             jacobianMapNoise.block(dimension_new_map_element_error_state_total_i, dimension_error_measurement_total_i, dimension_new_map_element_error_state_i, dimension_error_measurement_i)=
@@ -3210,7 +3203,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itUnmatchedMeasurementsWithMapElement!=TheListUnmatchedMeasurementsWithMapElement.end();
             ++itUnmatchedMeasurementsWithMapElement)
         {
-            int dimension_error_measurement_i=(*itUnmatchedMeasurementsWithMapElement)->getTheSensorCore()->getDimensionErrorMeasurement();
+            int dimension_error_measurement_i=(*itUnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
             int dimension_error_measurement_total_j=0;
             int dimension_error_measurement_j=0;
 
@@ -3220,13 +3213,13 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 it2UnmatchedMeasurementsWithMapElement!=TheListUnmatchedMeasurementsWithMapElement.end();
                 ++it2UnmatchedMeasurementsWithMapElement)
             {
-                dimension_error_measurement_j=(*it2UnmatchedMeasurementsWithMapElement)->getTheSensorCore()->getDimensionErrorMeasurement();
+                dimension_error_measurement_j=(*it2UnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
 
-                if((*it2UnmatchedMeasurementsWithMapElement)->getTheSensorCore() == (*itUnmatchedMeasurementsWithMapElement)->getTheSensorCore())
+                if((*it2UnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr() == (*itUnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr())
                 {
                     if(dimension_error_measurement_i && dimension_error_measurement_j)
                         covarianceMapNewElements.block(dimension_error_measurement_total_i, dimension_error_measurement_total_j, dimension_error_measurement_i, dimension_error_measurement_j)=
-                                (*itUnmatchedMeasurementsWithMapElement)->getTheSensorCore()->getCovarianceMeasurement();
+                                (*itUnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr()->getCovarianceMeasurement();
                 }
                 else
                 {

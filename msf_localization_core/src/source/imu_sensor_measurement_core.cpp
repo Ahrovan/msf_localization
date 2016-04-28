@@ -45,7 +45,7 @@ bool ImuSensorMeasurementCore::isOrientationSet() const
 
 int ImuSensorMeasurementCore::setOrientation(const Eigen::Vector4d Orientation)
 {
-    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getSensorCoreSharedPtr());
     if(TheSensorCorePtrAux->isMeasurementOrientationEnabled())
     {
         this->Orientation=Orientation;
@@ -69,7 +69,7 @@ bool ImuSensorMeasurementCore::isAngularVelocitySet() const
 
 int ImuSensorMeasurementCore::setAngularVelocity(Eigen::Vector3d AngularVelocity)
 {
-    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getSensorCoreSharedPtr());
     if(TheSensorCorePtrAux->isMeasurementAngularVelocityEnabled())
     {
         this->AngularVelocity=AngularVelocity;
@@ -92,7 +92,7 @@ bool ImuSensorMeasurementCore::isLinearAccelerationSet() const
 
 int ImuSensorMeasurementCore::setLinearAcceleration(Eigen::Vector3d LinearAcceleration)
 {
-    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getTheSensorCore());
+    std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getSensorCoreSharedPtr());
     if(TheSensorCorePtrAux->isMeasurementLinearAccelerationEnabled())
     {
         this->LinearAcceleration=LinearAcceleration;
@@ -112,11 +112,11 @@ Eigen::VectorXd ImuSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMe
 {
     // Create the Measurement
     Eigen::VectorXd TheInnovation;
-    TheInnovation.resize(this->getTheSensorCore()->getDimensionErrorMeasurement(), 1);
+    TheInnovation.resize(this->getSensorCoreSharedPtr()->getDimensionErrorMeasurement(), 1);
     TheInnovation.setZero();
 
     // Check
-    if(theMatchedMeasurementI->getTheSensorCore() != thePredictedMeasurementI->getTheSensorCore())
+    if(theMatchedMeasurementI->getSensorCoreSharedPtr() != thePredictedMeasurementI->getSensorCoreSharedPtr())
     {
         std::cout<<"CodedVisualMarkerMeasurementCore::getInnovation() error"<<std::endl;
     }
@@ -135,11 +135,11 @@ Eigen::VectorXd ImuSensorMeasurementCore::getMeasurement()
 {
     // Create the Measurement
     Eigen::VectorXd TheMeasurement;
-    TheMeasurement.resize(this->getTheSensorCore()->getDimensionMeasurement(), 1);
+    TheMeasurement.resize(this->getSensorCoreSharedPtr()->getDimensionMeasurement(), 1);
     TheMeasurement.setZero();
 
     // Sensor Core
-    std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getTheSensorCore());
+    std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getSensorCoreSharedPtr());
 
     // Fill
     unsigned int dimension=0;

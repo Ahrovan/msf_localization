@@ -193,10 +193,3 @@ int SensorCore::setNoisePositionSensorWrtRobot(Eigen::Matrix3d noisePositionSens
     return 0;
 }
 
-int SensorCore::prepareInitErrorStateVariance()
-{
-    this->InitErrorStateVariance.resize(dimensionErrorState, dimensionErrorState);
-    this->InitErrorStateVariance.setZero();
-    return 0;
-}
-

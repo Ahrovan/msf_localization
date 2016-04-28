@@ -79,17 +79,6 @@ public:
 
 
 
-    ////// Init error state variances -> Temporal, only for the initial configuration
-//protected:
-//    Eigen::MatrixXd InitErrorStateVariance;
-//public:
-//    Eigen::MatrixXd getInitErrorStateVariance() const;
-//public:
-//    virtual int prepareInitErrorStateVariance()=0;
-
-//public:
-//    virtual Eigen::MatrixXd getInitCovarianceErrorState()=0;
-
 
 
 

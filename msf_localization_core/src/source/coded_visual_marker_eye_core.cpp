@@ -232,9 +232,9 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceParameters()
     return covariances_matrix;
 }
 
-int CodedVisualMarkerEyeCore::prepareInitErrorStateVariance()
+int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorState()
 {
-    int error=SensorCore::prepareInitErrorStateVariance();
+    int error=MsfElementCore::prepareCovarianceInitErrorState();
 
     if(error)
         return error;
@@ -1340,7 +1340,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
 
     //// Jacobian Mapping Error-State Noise
 
-    int dimension_map_new_element_measurement=TheCodedVisualMarkerMeasurement->getTheSensorCore()->getDimensionErrorMeasurement();
+    int dimension_map_new_element_measurement=TheCodedVisualMarkerMeasurement->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
 
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.resize(dimension_map_new_element_error_state_total, dimension_map_new_element_measurement);
     TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.setZero();
@@ -1570,7 +1570,7 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
 
 
     // Prepare covariance matrix
-    this->prepareInitErrorStateVariance();
+    this->prepareCovarianceInitErrorState();
 
 
     /// Finish

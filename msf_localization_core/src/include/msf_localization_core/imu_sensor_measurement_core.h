@@ -18,6 +18,9 @@ protected:
     int init();
 
 
+    ///// Measurement
+
+    // Orientation
 protected:
     bool flagOrientationSet;
 public:
@@ -29,7 +32,7 @@ public:
     Eigen::Vector4d getOrientation() const;
 
 
-
+    // Angular Velocity
 protected:
     bool flagAngularVelocitySet;
 public:
@@ -41,7 +44,7 @@ public:
     Eigen::Vector3d getAngularVelocity() const;
 
 
-
+    // Linear Acceleration
 protected:
     bool flagLinearAccelerationSet;
 public:

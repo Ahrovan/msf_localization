@@ -115,6 +115,26 @@ int GlobalParametersCore::setNoiseGravity(Eigen::Matrix3d noiseGravity)
 }
 
 
+int GlobalParametersCore::prepareCovarianceInitErrorState()
+{
+    int error=MsfElementCore::prepareCovarianceInitErrorState();
+
+    if(error)
+        return error;
+
+
+    int point=0;
+    if(this->isEstimationGravityEnabled())
+    {
+        this->InitErrorStateVariance.block<3,3>(point,point)=noiseGravity;
+        point+=3;
+    }
+
+
+    return 0;
+}
+
+
 Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
 {
     Eigen::MatrixXd covariance_matrix;
@@ -192,6 +212,11 @@ int GlobalParametersCore::readConfig(pugi::xml_node global_parameters, std::shar
         stm>>variance[0]>>variance[1]>>variance[2];
         this->setNoiseGravity(variance.asDiagonal());
     }
+
+
+
+    // Prepare covariance matrix
+    this->prepareCovarianceInitErrorState();
 
 
     // End

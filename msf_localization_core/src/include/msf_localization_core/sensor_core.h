@@ -121,12 +121,6 @@ public:
 
 
 
-    ////// Init error state variances -> Temporal, only for the initial configuration
-
-public:
-    virtual int prepareInitErrorStateVariance();
-
-
 
     ///// Get Covariances as a Eigen::MatrixXd
 public:

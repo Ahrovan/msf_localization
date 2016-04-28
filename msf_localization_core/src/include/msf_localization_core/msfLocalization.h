@@ -55,28 +55,7 @@
 #include <cmath>        // std::abs
 
 
-// Estimator Cores
 
-// Robot
-#include "msf_localization_core/robot_core.h"
-
-// Sensor
-#include "msf_localization_core/sensor_core.h"
-// IMU
-#include "msf_localization_core/imu_sensor_core.h"
-// Visual Marker Eye
-#include "msf_localization_core/coded_visual_marker_eye_core.h"
-
-
-
-// Robot
-#include "msf_localization_core/robot_state_core.h"
-// Free Model Robot Core
-#include "msf_localization_core/free_model_robot_core.h"
-
-
-#include "msf_localization_core/sensor_state_core.h"
-#include "msf_localization_core/sensor_measurement_core.h"
 
 
 #include "msf_localization_core/state_estimation_core.h"
@@ -84,39 +63,63 @@
 
 #include "msf_localization_core/msf_storage_core.h"
 
-#include "msf_localization_core/input_core.h"
 
 
+
+//// Estimator Cores
+
+/// Robot
+#include "msf_localization_core/robot_core.h"
+// Free Model Robot Core
+#include "msf_localization_core/free_model_robot_core.h"
+
+/// Global Parameters
 #include "msf_localization_core/global_parameters_core.h"
 
+/// Sensor
+#include "msf_localization_core/sensor_core.h"
+// IMU
+#include "msf_localization_core/imu_sensor_core.h"
+// Visual Marker Eye
+#include "msf_localization_core/coded_visual_marker_eye_core.h"
+
+/// Input
+#include "msf_localization_core/input_core.h"
+// IMU
+#include "msf_localization_core/imu_input_core.h"
+
+/// Map
 #include "msf_localization_core/map_element_core.h"
 #include "msf_localization_core/coded_visual_marker_landmark_core.h"
 
+
+//// State
+#include "msf_localization_core/state_core.h"
+// Robot
+#include "msf_localization_core/robot_state_core.h"
+#include "msf_localization_core/free_model_robot_state_core.h"
+// Sensor
+#include "msf_localization_core/sensor_state_core.h"
+#include "msf_localization_core/imu_sensor_state_core.h"
+#include "msf_localization_core/coded_visual_marker_eye_state_core.h"
+// Input
+#include "msf_localization_core/input_state_core.h"
+#include "msf_localization_core/imu_input_state_core.h"
+// Map
 #include "msf_localization_core/coded_visual_marker_landmark_state_core.h"
 
 
+//// Measurement
+#include "msf_localization_core/sensor_measurement_core.h"
+#include "msf_localization_core/imu_sensor_measurement_core.h"
+#include "msf_localization_core/coded_visual_marker_measurement_core.h"
 
-/*
-class SyncThreadState
-{
-protected:
-    std::mutex protectionMutex;
 
-protected:
-    bool flagIsWorking;
-    TimeStamp procesingTimeStamp;
-public:
-    SyncThreadState();
+//// Input Command
+#include "msf_localization_core/input_command_core.h"
+#include "msf_localization_core/imu_input_command_core.h"
 
-public:
-    bool isWorking();
-    TimeStamp getProcessingTimeStamp();
 
-public:
-    int setProcessing(TimeStamp procesingTimeStamp);
-    int setNotProcessing();
-};
-*/
 
 
 #define _DEBUG_MSF_LOCALIZATION_CORE 0

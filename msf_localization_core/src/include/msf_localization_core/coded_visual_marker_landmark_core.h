@@ -88,7 +88,8 @@ public:
 
     ////// Init error state covariances -> Temporal, only for the initial configuration
 public:
-    Eigen::MatrixXd getInitErrorStateCovariance();
+    int prepareCovarianceInitErrorState();
+
 
 
     ///// Get Covariances as a Eigen::MatrixXd

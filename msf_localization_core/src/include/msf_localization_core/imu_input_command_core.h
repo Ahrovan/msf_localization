@@ -19,51 +19,37 @@ public:
     ImuInputCommandCore(std::weak_ptr<InputCore> input_core_ptr);
     ~ImuInputCommandCore();
 
-
-
-
-/*
-    ///// Imu State if enabled (or Parameters if disabled)
-
-    // if enabled
-    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
-
-
-    // Angular Velocity Biases
 protected:
-public:
-    Eigen::Vector3d biasesAngularVelocity;
-public:
-    Eigen::Vector3d getBiasesAngularVelocity() const;
-    int setBiasesAngularVelocity(Eigen::Vector3d biasesAngularVelocity);
+    int init();
 
 
-    // Angular Velocity Scale
+    ///// Imu Input Commands
+
+    // Orientation
 protected:
+    Eigen::Vector4d orientation_;
 public:
-    Eigen::Vector3d scaleAngularVelocity;
-public:
-    Eigen::Vector3d getScaleAngularVelocity() const;
-    int setScaleAngularVelocity(Eigen::Vector3d scaleAngularVelocity);
+    int setOrientation(const Eigen::Vector4d orientation);
+    Eigen::Vector4d getOrientation() const;
 
 
-    // Linear Acceleration Biases
+    // Angular Velocity
 protected:
+    Eigen::Vector3d angular_velocity_;
 public:
-    Eigen::Vector3d biasesLinearAcceleration;
-public:
-    Eigen::Vector3d getBiasesLinearAcceleration() const;
-    int setBiasesLinearAcceleration(Eigen::Vector3d biasesLinearAcceleration);
+    int setAngularVelocity(Eigen::Vector3d angular_velocity);
+    Eigen::Vector3d getAngularVelocity() const;
 
 
-    // Linear Acceleration Scale
+    // Linear Acceleration
 protected:
+    Eigen::Vector3d linear_acceleration_;
 public:
-    Eigen::Vector3d scaleLinearAcceleration;
-public:
-    Eigen::Vector3d getScaleLinearAcceleration() const;
-    int setScaleLinearAcceleration(Eigen::Vector3d scaleLinearAcceleration);
-*/
+    int setLinearAcceleration(Eigen::Vector3d linear_acceleration);
+    Eigen::Vector3d getLinearAcceleration() const;
+
+
+
 
 /*
 

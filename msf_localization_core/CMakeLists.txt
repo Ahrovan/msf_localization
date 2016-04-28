@@ -60,6 +60,9 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_state_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_sensor_state_core.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/input_state_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_input_state_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/global_parameters_core.cpp
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/global_parameters_state_core.cpp
@@ -113,6 +116,9 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_state_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_sensor_state_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/input_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_input_state_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/global_parameters_core.h
 

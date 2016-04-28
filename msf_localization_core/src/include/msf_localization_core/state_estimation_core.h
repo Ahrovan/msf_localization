@@ -35,6 +35,10 @@
 
 #include "msf_localization_core/map_element_state_core.h"
 
+#include "msf_localization_core/input_state_core.h"
+
+#include "msf_localization_core/input_command_core.h"
+
 #include "msf_localization_core/sensor_measurement_core.h"
 
 
@@ -50,8 +54,15 @@ public:
 
 
     /// State
+
+    // Check
 public:
     bool hasState() const;
+
+    // Dimension total of state and error state
+public:
+    int getDimensionState() const;
+    int getDimensionErrorState() const;
 
 
     // Global Parameters State
@@ -66,24 +77,19 @@ public:
 public:
     std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
 
+    // Input State
+public:
+    std::list< std::shared_ptr<InputStateCore> > TheListInputStateCore;
+
     // Map State
 public:
     std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
 
 
 
-
-
-
-    // Dimension total of state and error state
-public:
-    int getDimensionState() const;
-    int getDimensionErrorState() const;
-
-
     // Covariances Matrixes
 public:
-    int prepareInitErrorStateVariance();
+    int prepareCovarianceInitErrorState();
 
 
     // Covariances Matrixes of the error state
@@ -95,8 +101,15 @@ public:
 
     /// Measurements
 
+    // Check
 public:
     bool hasMeasurement() const;
+
+
+    // Dimension total of measurement and error measurement
+public:
+    int getDimensionMeasurement() const;
+    int getDimensionErrorMeasurement() const;
 
 
     // Available Measurements
@@ -105,6 +118,22 @@ public:
 
 
 
+    /// Input Commands
+
+    // Check
+public:
+    bool hasInputCommand() const;
+
+
+    // Dimension total of input and error input
+public:
+    int getDimensionInputCommand() const;
+    int getDimensionErrorInputCommand() const;
+
+
+    // Avaliable Inputs
+public:
+    std::list< std::shared_ptr<InputCommandCore> > TheListInputCommandCore;
 
 
 

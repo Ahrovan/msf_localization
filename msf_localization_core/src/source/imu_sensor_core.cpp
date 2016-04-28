@@ -685,9 +685,9 @@ int ImuSensorCore::setInitErrorStateVarianceBiasAngularVelocity(Eigen::Vector3d 
 */
 
 
-int ImuSensorCore::prepareInitErrorStateVariance()
+int ImuSensorCore::prepareCovarianceInitErrorState()
 {
-    int error=SensorCore::prepareInitErrorStateVariance();
+    int error=MsfElementCore::prepareCovarianceInitErrorState();
 
     if(error)
         return error;
@@ -717,7 +717,6 @@ int ImuSensorCore::prepareInitErrorStateVariance()
     }
     // TODO
     // Add kw
-
 
 
     return 0;
@@ -2201,7 +2200,7 @@ int ImuSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std:
 
 
     // Prepare covariance matrix
-    this->prepareInitErrorStateVariance();
+    this->prepareCovarianceInitErrorState();
 
 
 

@@ -103,12 +103,16 @@ public:
     ////// Init error state variances -> Temporal, only for the initial configuration
 
 public:
+    int prepareCovarianceInitErrorState();
+
+public:
     int setInitErrorStateVariancePosition(Eigen::Vector3d initVariance);
     int setInitErrorStateVarianceLinearSpeed(Eigen::Vector3d initVariance);
     int setInitErrorStateVarianceLinearAcceleration(Eigen::Vector3d initVariance);
     int setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance);
     int setInitErrorStateVarianceAngularVelocity(Eigen::Vector3d initVariance);
     int setInitErrorStateVarianceAngularAcceleration(Eigen::Vector3d initVariance);
+
 
 
 

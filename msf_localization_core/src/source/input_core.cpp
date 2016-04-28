@@ -32,9 +32,15 @@ int InputCore::init()
     this->setMsfElementCoreType(MsfElementCoreTypes::input);
 
 
+    // Name
+    input_name_="";
+
+    // Flags
+    flag_input_enabled_=false;
+
     // Dimensions
-    dimensionInput=0;
-    dimensionErrorInput=0;
+    dimension_input_command_=0;
+    dimension_error_input_command_=0;
 
 
     return 0;
@@ -51,24 +57,48 @@ InputTypes InputCore::getInputType() const
     return this->input_type_;
 }
 
-unsigned int InputCore::getDimensionInput() const
+int InputCore::setInputName(std::string input_name)
 {
-    return this->dimensionInput;
-}
-
-int InputCore::setDimensionInput(unsigned int dimensionInput)
-{
-    this->dimensionInput=dimensionInput;
+    input_name_=input_name;
     return 0;
 }
 
-unsigned int InputCore::getDimensionErrorInput() const
+std::string InputCore::getInputName() const
 {
-    return this->dimensionErrorInput;
+    return this->input_name_;
 }
 
-int InputCore::setDimensionErrorInput(unsigned int dimensionErrorInput)
+bool InputCore::isInputEnabled() const
 {
-    this->dimensionErrorInput=dimensionErrorInput;
+    return this->flag_input_enabled_;
+}
+
+int InputCore::setInputEnabled(bool flag_input_enabled)
+{
+    this->flag_input_enabled_=flag_input_enabled;
     return 0;
 }
+
+unsigned int InputCore::getDimensionInputCommand() const
+{
+    return this->dimension_input_command_;
+}
+
+int InputCore::setDimensionInputCommand(unsigned int dimension_input_command)
+{
+    this->dimension_input_command_=dimension_input_command;
+    return 0;
+}
+
+unsigned int InputCore::getDimensionErrorInputCommand() const
+{
+    return this->dimension_error_input_command_;
+}
+
+int InputCore::setDimensionErrorInputCommand(unsigned int dimension_error_input_command)
+{
+    this->dimension_error_input_command_=dimension_error_input_command;
+    return 0;
+}
+
+

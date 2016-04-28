@@ -68,21 +68,34 @@ public:
     InputTypes getInputType() const;
 
 
+    // Input Name
+protected:
+    std::string input_name_;
+public:
+    int setInputName(std::string input_name);
+    std::string getInputName() const;
+
+
+protected:
+    bool flag_input_enabled_;
+public:
+    bool isInputEnabled() const;
+    int setInputEnabled(bool flag_input_enabled);
+
 
     // Dimension input
 protected:
-    unsigned int dimensionInput;
+    unsigned int dimension_input_command_;
 public:
-    unsigned int getDimensionInput() const;
-    int setDimensionInput(unsigned int dimensionInput);
+    unsigned int getDimensionInputCommand() const;
+    int setDimensionInputCommand(unsigned int dimension_input_command);
 
     // Dimension error input
 protected:
-    unsigned int dimensionErrorInput;
+    unsigned int dimension_error_input_command_;
 public:
-    unsigned int getDimensionErrorInput() const;
-    int setDimensionErrorInput(unsigned int dimensionErrorInput);
-
+    unsigned int getDimensionErrorInputCommand() const;
+    int setDimensionErrorInputCommand(unsigned int dimension_error_input_command);
 
 
 

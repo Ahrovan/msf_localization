@@ -46,7 +46,7 @@ public:
 
 
 public:
-    //int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
+    int readConfig(pugi::xml_node input, std::shared_ptr<ImuInputStateCore>& init_state_core);
 
 
 
