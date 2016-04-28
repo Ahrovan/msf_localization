@@ -201,7 +201,7 @@ int ImuInputCore::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputState
 
 
 
-/*
+
     //// Init State
 
     /// Pose of the sensor wrt robot
@@ -212,7 +212,7 @@ int ImuInputCore::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputState
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setPositionSensorWrtRobot(init_estimation);
+        init_state_core->setPositionInputWrtRobot(init_estimation);
     }
 
     // Attitude of the sensor wrt robot
@@ -221,7 +221,7 @@ int ImuInputCore::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputState
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
-        SensorInitStateCore->setAttitudeSensorWrtRobot(init_estimation);
+        init_state_core->setAttitudeInputWrtRobot(init_estimation);
     }
 
 
@@ -233,16 +233,19 @@ int ImuInputCore::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputState
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setBiasesAngularVelocity(init_estimation);
+        init_state_core->setBiasesAngularVelocity(init_estimation);
     }
 
-    // Scale Angular Velocity
-    readingValue=param_angular_velocity.child("scale").child_value("init_estimation");
+    // Sensitivity Angular Velocity
+    readingValue=param_angular_velocity.child("sensitivity").child_value("init_estimation");
     {
         std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setScaleAngularVelocity(init_estimation);
+        Eigen::Matrix3d init_estimation;
+        init_estimation.setZero();
+        stm>>init_estimation(0,0)>>init_estimation(0,1)>>init_estimation(0,2)
+                >>init_estimation(1,0)>>init_estimation(1,1)>>init_estimation(1,2)
+                >>init_estimation(2,0)>>init_estimation(2,1)>>init_estimation(2,2);
+        init_state_core->setSensitivityAngularVelocity(init_estimation);
     }
 
     // Bias Linear Acceleration
@@ -251,18 +254,21 @@ int ImuInputCore::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputState
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setBiasesLinearAcceleration(init_estimation);
+        init_state_core->setBiasesLinearAcceleration(init_estimation);
     }
 
     // Scale Linear Acceleration
-    readingValue=param_linear_acceleration.child("scale").child_value("init_estimation");
+    readingValue=param_linear_acceleration.child("sensitivity").child_value("init_estimation");
     {
         std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setScaleLinearAcceleration(init_estimation);
+        Eigen::Matrix3d init_estimation;
+        init_estimation.setZero();
+        stm>>init_estimation(0,0)>>init_estimation(0,1)>>init_estimation(0,2)
+                >>init_estimation(1,0)>>init_estimation(1,1)>>init_estimation(1,2)
+                >>init_estimation(2,0)>>init_estimation(2,1)>>init_estimation(2,2);
+        init_state_core->setSensitivityLinearAcceleration(init_estimation);
     }
-*/
+
 
 
 

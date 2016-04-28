@@ -99,74 +99,7 @@ int FreeModelRobotStateCore::setAngularAcceleration(Eigen::Vector3d angular_acce
     return 0;
 }
 
-Eigen::SparseMatrix<double> FreeModelRobotStateCore::getJacobianErrorState()
-{
-    /*
-    Eigen::SparseMatrix<double> jacobian_error_state;
 
-    std::shared_ptr<const FreeModelRobotCore> the_robot_core=std::dynamic_pointer_cast<const FreeModelRobotCore>(this->getTheRobotCore());
-
-    // Resize the jacobian
-    int dimension_error_state=the_robot_core->getDimensionErrorState();
-
-    jacobian_error_state.resize(dimension_error_state, dimension_error_state);
-    //jacobian_error_state.setZero();
-    jacobian_error_state.reserve(54);
-
-
-    // Fill
-    int dimension_error_state_i=0;
-
-    // Linear
-    {
-        // Update jacobian
-        //jacobian_error_state.block<9,9>(dimension_error_state_i, dimension_error_state_i)=errorStateJacobian.linear;
-
-        // Update dimension for next
-        dimension_error_state_i+=9;
-    }
-
-    // Angular
-    {
-        // Update jacobian
-        //jacobian_error_state.block<9,9>(dimension_error_state_i, dimension_error_state_i)=errorStateJacobian.angular;
-
-        // Update dimension for next
-        dimension_error_state_i+=9;
-    }
-    */
-
-
-    // End
-    return errorStateJacobian;
-}
-
-Eigen::SparseMatrix<double> FreeModelRobotStateCore::getJacobianErrorStateNoise()
-{
-    /*
-    Eigen::SparseMatrix<double> jacobian_error_state_noise;
-
-    std::shared_ptr<const FreeModelRobotCore> the_robot_core=std::dynamic_pointer_cast<const FreeModelRobotCore>(this->getTheRobotCore());
-
-    // Resize the jacobian
-    int dimension_error_state=the_robot_core->getDimensionErrorState();
-
-    jacobian_error_state_noise.resize(dimension_error_state, 3+3);
-    //jacobian_error_state_noise.setZero();
-    jacobian_error_state_noise.reserve(6);
-
-
-    // Fill
-
-    jacobian_error_state_noise.block<3,3>(6,0)=Eigen::MatrixXd::Identity(3,3);
-
-
-    jacobian_error_state_noise.block<3,3>(15,3)=Eigen::MatrixXd::Identity(3,3);
-*/
-
-    // End
-    return errorStateNoiseJacobian;
-}
 
 int FreeModelRobotStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
 {

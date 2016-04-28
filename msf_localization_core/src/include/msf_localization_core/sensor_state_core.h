@@ -42,11 +42,6 @@ public:
 
 
 
-protected:
-    // TODO predictState()
-    // TODO measurementsPrediction()
-
-
 
 
     // Common State
@@ -72,13 +67,7 @@ public:
 
 
 
-public:
-    virtual Eigen::MatrixXd getJacobianErrorState()=0;
-    virtual Eigen::SparseMatrix<double> getJacobianErrorStateNoise()=0;
 
-
-public:
-    virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
 
 
 };

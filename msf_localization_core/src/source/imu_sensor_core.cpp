@@ -900,15 +900,91 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
 
 
 
+    /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
+    {
+        predictedState->jacobian_error_state_.resize(dimensionErrorState, dimensionErrorState);
+        predictedState->jacobian_error_state_.reserve(3*dimensionErrorState); //worst case -> Optimize
+
+        std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
+
+
+        // Fill
+        int dimension_error_state_i=0;
+
+        // Position sensor wrt robot
+        if(this->isEstimationPositionSensorWrtRobotEnabled())
+        {
+            // Add to triplet list
+            for(int i=0; i<3; i++)
+                for(int j=0; j<3; j++)
+                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.positionSensorWrtRobot(i,j)));
+
+            // Update dimension for next
+            dimension_error_state_i+=3;
+        }
+
+        // Attitude sensor wrt robot
+        if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+        {
+            // Add to triplet list
+            for(int i=0; i<3; i++)
+                for(int j=0; j<3; j++)
+                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.attitudeSensorWrtRobot(i,j)));
+
+            // Update dimension for next
+            dimension_error_state_i+=3;
+        }
+
+        // bias linear acceleration
+        if(this->isEstimationBiasLinearAccelerationEnabled())
+        {
+            // Add to triplet list
+            for(int i=0; i<3; i++)
+                for(int j=0; j<3; j++)
+                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.biasesLinearAcceleration(i,j)));
+
+            // Update dimension for next
+            dimension_error_state_i+=3;
+        }
+
+        // Ka
+        // TODO
+
+        // bias angular velocity
+        if(this->isEstimationBiasAngularVelocityEnabled())
+        {
+            // Add to triplet list
+            for(int i=0; i<3; i++)
+                for(int j=0; j<3; j++)
+                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.biasesAngularVelocity(i,j)));
+
+
+            // Update dimension for next
+            dimension_error_state_i+=3;
+        }
+
+        // Kw
+        // TODO
+
+
+
+
+        // Set from triplets
+        predictedState->jacobian_error_state_.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+
+    }
+
+
+
 
 
     //// Jacobian Error State Noise
 
     //Eigen::SparseMatrix<double> jacobian_error_state_noise;
 
-    predictedState->jacobianErrorStateNoise.resize(getDimensionErrorState(), getDimensionNoise());
+    predictedState->jacobian_error_state_noise_.resize(getDimensionErrorState(), getDimensionNoise());
     //jacobian_error_state_noise.setZero();
-    predictedState->jacobianErrorStateNoise.reserve(getDimensionNoise());
+    predictedState->jacobian_error_state_noise_.reserve(getDimensionNoise());
 
 //predictedStateI=predictedState;
 //return 0;
@@ -972,7 +1048,7 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
 
 
 
-    predictedState->jacobianErrorStateNoise.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
+    predictedState->jacobian_error_state_noise_.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
 
 
 //    {

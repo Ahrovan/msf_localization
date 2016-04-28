@@ -82,29 +82,13 @@ public:
 
 
 
-    // Error State Jacobians (18 x 18) -> 54 non-zero elements
-public:
-//    struct
-//    {
-//        // Fx_robot linear (9 x 9) -> 18 non-zero elements
-//        Eigen::SparseMatrix<double> linear;
-
-//        // Fx_robot angular (9 x 9) -> 36 non-zero elements
-//        Eigen::SparseMatrix<double> angular;
-//    } errorStateJacobian;
-
-    Eigen::SparseMatrix<double> errorStateJacobian;
+    // Jacobian Error State (18 x 18) -> 54 non-zero elements
+    // Fx_robot linear (9 x 9) -> 18 non-zero elements
+    // Fx_robot angular (9 x 9) -> 36 non-zero elements
 
 
     // Jacobian Error State Noise (18 x 6) -> 6 non-zero elements
-public:
-    Eigen::SparseMatrix<double> errorStateNoiseJacobian;
 
-
-
-public:
-    Eigen::SparseMatrix<double> getJacobianErrorState();
-    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
 public:

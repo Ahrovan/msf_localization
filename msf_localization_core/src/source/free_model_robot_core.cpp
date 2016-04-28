@@ -383,8 +383,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
     // Jacobian Size
 
-    predictedState->errorStateJacobian.resize(18,18);
-    predictedState->errorStateJacobian.reserve(18+36);
+    predictedState->jacobian_error_state_.resize(18,18);
+    predictedState->jacobian_error_state_.reserve(18+36);
 
 //    predictedState->errorStateJacobian.linear.resize(9, 9);
 //    predictedState->errorStateJacobian.linear.reserve(18);
@@ -549,7 +549,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
 
-    predictedState->errorStateJacobian.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+    predictedState->jacobian_error_state_.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
 
 
 
@@ -559,8 +559,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // Jacobian Size
 
 
-    predictedState->errorStateNoiseJacobian.resize(dimensionErrorState, dimensionNoise);
-    predictedState->errorStateNoiseJacobian.reserve(dimensionNoise);
+    predictedState->jacobian_error_state_noise_.resize(dimensionErrorState, dimensionNoise);
+    predictedState->jacobian_error_state_noise_.reserve(dimensionNoise);
 
 
     std::vector<Eigen::Triplet<double> > tripletListNoiseJacobian;
@@ -612,7 +612,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 
 
 
-    predictedState->errorStateNoiseJacobian.setFromTriplets(tripletListNoiseJacobian.begin(), tripletListNoiseJacobian.end());
+    predictedState->jacobian_error_state_noise_.setFromTriplets(tripletListNoiseJacobian.begin(), tripletListNoiseJacobian.end());
 
 
 

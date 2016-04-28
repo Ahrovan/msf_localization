@@ -48,7 +48,7 @@ public:
     int setAttitude(Eigen::Vector4d attitude);
 
 
-
+/*
     // Jacobians Error State (6 x 6) -> 6 non-zero elements
 public:
     Eigen::SparseMatrix<double>  jacobian_error_state_;
@@ -56,11 +56,7 @@ public:
     // Jacobian Error State Noise (0x0)
 public:
     Eigen::SparseMatrix<double> jacobian_error_state_noise_;
-
-
-public:
-    Eigen::SparseMatrix<double> getJacobianErrorState();
-    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
+*/
 
 
     // Jacobians mapping

@@ -42,18 +42,10 @@ public:
         Eigen::Matrix3d attitude_sensor_wrt_robot_;
     } error_state_jacobian_;
 
-    // TODO
+
 //public:
-    //Eigen::SparseMatrix<double> jacobian_error_state_;
+//    Eigen::MatrixXd getJacobianErrorState();
 
-
-
-public:
-    Eigen::SparseMatrix<double> jacobian_error_state_noise_;
-
-public:
-    Eigen::MatrixXd getJacobianErrorState();
-    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
 public:

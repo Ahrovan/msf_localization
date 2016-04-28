@@ -42,18 +42,6 @@ public:
 
 
 
-protected:
-    // TODO predictState()
-
-
-public:
-    virtual Eigen::SparseMatrix<double> getJacobianErrorState()=0;
-    virtual Eigen::SparseMatrix<double> getJacobianErrorStateNoise()=0;
-
-
-public:
-    virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
-
 
 };
 

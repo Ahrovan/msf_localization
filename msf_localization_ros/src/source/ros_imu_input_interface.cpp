@@ -18,8 +18,8 @@ int RosImuInputInterface::setInputRos(const sensor_msgs::ImuConstPtr& msg)
         return 0;
 
     // PROVISIONAL! -> Dischart part of the measurements
-//    if(msg->header.seq  % 4 != 0)
-//        return 0;
+    if(msg->header.seq  % 4 != 0)
+        return 0;
 
 
     // Time Stamp

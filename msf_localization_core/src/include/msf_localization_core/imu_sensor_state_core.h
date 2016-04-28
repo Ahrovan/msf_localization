@@ -84,18 +84,12 @@ public:
     } errorStateJacobian;
 
 
-    // TODO
+
+
+
 //public:
-//    Eigen::SparseMatrix<double> jacobianErrorState;
+//    Eigen::MatrixXd getJacobianErrorState();
 
-
-public:
-    Eigen::SparseMatrix<double> jacobianErrorStateNoise;
-
-
-public:
-    Eigen::MatrixXd getJacobianErrorState();
-    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
 public:

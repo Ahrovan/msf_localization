@@ -56,16 +56,23 @@ public:
     virtual bool isCorrect();
 
 
-/*
-
+protected:
 public:
-    virtual Eigen::MatrixXd getJacobianErrorState()=0;
-    virtual Eigen::SparseMatrix<double> getJacobianErrorStateNoise()=0;
+    Eigen::SparseMatrix<double> jacobian_error_state_;
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorState();
+
+protected:
+public:
+    Eigen::SparseMatrix<double> jacobian_error_state_noise_;
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
+
 
 
 public:
     virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
-*/
+
 
 };
 

@@ -51,16 +51,6 @@ int CodedVisualMarkerLandmarkStateCore::setAttitude(Eigen::Vector4d attitude)
     return 0;
 }
 
-Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkStateCore::getJacobianErrorState()
-{
-    return this->jacobian_error_state_;
-}
-
-Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkStateCore::getJacobianErrorStateNoise()
-{
-    return this->jacobian_error_state_noise_;
-}
-
 Eigen::MatrixXd CodedVisualMarkerLandmarkStateCore::getJacobianMappingRobotErrorState()
 {
     return this->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_;

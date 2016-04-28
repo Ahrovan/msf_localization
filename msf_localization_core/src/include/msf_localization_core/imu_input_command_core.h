@@ -51,42 +51,6 @@ public:
 
 
 
-/*
-
-    ////// Jacobians
-
-    /// Jacobians Error State
-
-public:
-    struct
-    {
-        Eigen::Matrix3d positionSensorWrtRobot;
-        Eigen::Matrix3d attitudeSensorWrtRobot;
-        Eigen::Matrix3d biasesLinearAcceleration;
-        Eigen::Matrix3d scaleLinearAcceleration;
-        Eigen::Matrix3d biasesAngularVelocity;
-        Eigen::Matrix3d scaleAngularVelocity;
-    } errorStateJacobian;
-
-
-    // TODO
-//public:
-//    Eigen::SparseMatrix<double> jacobianErrorState;
-
-
-public:
-    Eigen::SparseMatrix<double> jacobianErrorStateNoise;
-
-
-public:
-    Eigen::MatrixXd getJacobianErrorState();
-    Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
-
-
-public:
-    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
-
-*/
 
 
 };

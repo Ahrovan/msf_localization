@@ -66,3 +66,13 @@ bool StateCore::isCorrect()
 
     return true;
 }
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorState()
+{
+    return this->jacobian_error_state_;
+}
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorStateNoise()
+{
+    return this->jacobian_error_state_noise_;
+}

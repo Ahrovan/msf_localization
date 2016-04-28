@@ -38,7 +38,7 @@ int CodedVisualMarkerEyeStateCore::init()
     return 0;
 }
 
-
+/*
 Eigen::MatrixXd CodedVisualMarkerEyeStateCore::getJacobianErrorState()
 {
     Eigen::MatrixXd jacobian_error_state;
@@ -79,35 +79,7 @@ Eigen::MatrixXd CodedVisualMarkerEyeStateCore::getJacobianErrorState()
     // End
     return jacobian_error_state;
 }
-
-Eigen::SparseMatrix<double> CodedVisualMarkerEyeStateCore::getJacobianErrorStateNoise()
-{
-    return this->jacobian_error_state_noise_;
-
-    /*
-    Eigen::MatrixXd jacobian_error_state_noise;
-
-    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(this->getTheSensorCoreShared());
-
-    // Resize the jacobian
-    int dimension_error_state=the_sensor_core->getDimensionErrorState();
-    int dimension_noise=the_sensor_core->getDimensionNoise();
-
-    jacobian_error_state_noise.resize(dimension_error_state, dimension_noise);
-    jacobian_error_state_noise.setZero();
-
-
-    // Fill
-    int dimension_noise_i=0;
-
-
-    // Nothing to do
-
-
-    // End
-    return jacobian_error_state_noise;
-    */
-}
+*/
 
 
 int CodedVisualMarkerEyeStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
