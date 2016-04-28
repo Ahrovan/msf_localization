@@ -6,21 +6,9 @@
 
 
 RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    RosInterface(),
+    RosSensorInterface(nh),
     ImuSensorCore(the_msf_storage_core)
 {
-    //std::cout<<"RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
-
-    // Node Handle
-    this->nh=nh;
-
-    // Create the variable in the MSF Localization Core
-    //TheSensorCore = new ImuSensorCore;
-
-    //ImuSensorCore TheImuSensorCore;
-    //TheMsfLocalizationCore->TheListOfSensorCore.push_back(TheImuSensorCore);
-
-
 
     return;
 }
@@ -129,15 +117,16 @@ void RosSensorImuInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg
 
 int RosSensorImuInterface::open()
 {
-
-    //std::cout<<"RosSensorImuInterface::open()"<<std::endl;
-
-    // Node handler
-    //ros::NodeHandle nh;
-
     // Subscriber
     ImuTopicSub=nh->subscribe(ImuTopicName, 10, &RosSensorImuInterface::imuTopicCallback, this);
 
+
+    return 0;
+}
+
+int RosSensorImuInterface::publish()
+{
+    // TODO
 
     return 0;
 }

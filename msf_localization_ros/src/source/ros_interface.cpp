@@ -5,7 +5,6 @@
 
 RosInterface::RosInterface()
 {
-
     return;
 }
 

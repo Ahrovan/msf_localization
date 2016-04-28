@@ -2,13 +2,9 @@
 
 
 RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    RosInterface(),
+    RosSensorInterface(nh),
     CodedVisualMarkerEyeCore(the_msf_storage_core)
 {
-    //std::cout<<"RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
-
-    // Node Handle
-    this->nh=nh;
 
 
     return;
@@ -122,6 +118,13 @@ int RosArucoEyeInterface::open()
     // Subscriber
     marker_list_sub_=nh->subscribe(marker_list_topic_name_, 10, &RosArucoEyeInterface::markerListCallback, this);
 
+
+    return 0;
+}
+
+int RosArucoEyeInterface::publish()
+{
+    // TODO
 
     return 0;
 }

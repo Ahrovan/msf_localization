@@ -53,7 +53,7 @@ public:
 
 
 
-    /// State
+    /// State / Parameters
 
     // Check
 public:
@@ -63,6 +63,12 @@ public:
 public:
     int getDimensionState() const;
     int getDimensionErrorState() const;
+
+
+    // Dimension total of parameters and error parameters
+public:
+    int getDimensionParameters() const;
+    int getDimensionErrorParameters() const;
 
 
     // Global Parameters State

@@ -12,7 +12,7 @@
 #include "msf_localization_core/time_stamp.h"
 
 
-#include "msf_localization_ros/ros_interface.h"
+#include "msf_localization_ros/ros_input_interface.h"
 
 #include "msf_localization_core/imu_input_core.h"
 
@@ -20,7 +20,7 @@
 #include "pugixml/pugixml.hpp"
 
 
-class RosImuInputInterface : public RosInterface, public ImuInputCore
+class RosImuInputInterface : public RosInputInterface, public ImuInputCore
 {
 public:
     RosImuInputInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
@@ -44,6 +44,8 @@ public:
 public:
     int open();
 
+public:
+    int publish();
 
 public:
     int readConfig(pugi::xml_node input, std::shared_ptr<ImuInputStateCore>& init_state_core);

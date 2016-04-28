@@ -141,6 +141,83 @@ int StateEstimationCore::getDimensionErrorState() const
     return dimensionErrorState;
 }
 
+int StateEstimationCore::getDimensionParameters() const
+{
+    int dimensionParameters=0;
+
+    // Global Parameters
+    dimensionParameters+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
+
+    // Robot
+    dimensionParameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
+
+    // Sensors
+    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
+        itSensor!=TheListSensorStateCore.end();
+        ++itSensor)
+    {
+        dimensionParameters+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionParameters();
+    }
+
+    // Inputs
+    for(std::list< std::shared_ptr<InputStateCore> >::const_iterator itInput=TheListInputStateCore.begin();
+        itInput!=TheListInputStateCore.end();
+        ++itInput)
+    {
+        dimensionParameters+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionParameters();
+    }
+
+    // Map
+    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+        itMapElement!=TheListMapElementStateCore.end();
+        ++itMapElement)
+    {
+        dimensionParameters+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionParameters();
+    }
+
+
+    // end
+    return dimensionParameters;
+}
+
+int StateEstimationCore::getDimensionErrorParameters() const
+{
+    int dimensionErrorParameters=0;
+
+    // Global Parameters
+    dimensionErrorParameters+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+
+    // Robot
+    dimensionErrorParameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+
+    // Sensors
+    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
+        itSensor!=TheListSensorStateCore.end();
+        ++itSensor)
+    {
+        dimensionErrorParameters+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    }
+
+    // Inputs
+    for(std::list< std::shared_ptr<InputStateCore> >::const_iterator itInput=TheListInputStateCore.begin();
+        itInput!=TheListInputStateCore.end();
+        ++itInput)
+    {
+        dimensionErrorParameters+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    }
+
+    // Map
+    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+        itMapElement!=TheListMapElementStateCore.end();
+        ++itMapElement)
+    {
+        dimensionErrorParameters+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    }
+
+
+    // end
+    return dimensionErrorParameters;
+}
 
 int StateEstimationCore::getDimensionMeasurement() const
 {

@@ -3,7 +3,7 @@
 
 
 RosImuInputInterface::RosImuInputInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    RosInterface(),
+    RosInputInterface(nh),
     ImuInputCore(the_msf_storage_core)
 {
     // Node Handle
@@ -94,6 +94,13 @@ int RosImuInputInterface::open()
 {
     // Subscriber
     imu_topic_subs_=nh->subscribe(imu_topic_name_, 10, &RosImuInputInterface::imuTopicCallback, this);
+
+    return 0;
+}
+
+int RosImuInputInterface::publish()
+{
+    // TODO
 
     return 0;
 }
