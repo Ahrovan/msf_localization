@@ -22,6 +22,7 @@
 #include "pugixml/pugixml.hpp"
 
 
+
 class FreeModelRobotCore : public RobotCore
 {
 
@@ -70,7 +71,7 @@ public:
     int setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration);
 
 
-    // Noise Attitude -> NOT USED!
+    // Noise Attitude
 protected:
 public:
     Eigen::Matrix3d noiseAttitude;
@@ -79,7 +80,7 @@ public:
     int setNoiseAttitude(Eigen::Matrix3d noiseAttitude);
 
 
-    // Noise Angular Velocity -> NOT USED!
+    // Noise Angular Velocity
 protected:
 public:
     Eigen::Matrix3d noiseAngularVelocity;
@@ -99,6 +100,13 @@ public:
 
 
 
+    ///// Covariances Getters
+
+    // Covariance Error Parameters: Rp = Qp
+public:
+    //Eigen::SparseMatrix<double> getCovarianceParameters();
+
+    // Covariance Noise Estimation: Qn
 public:
     Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
 
@@ -122,7 +130,7 @@ public:
 
 
 
-    ///// Predict functions
+    ///// Predict Step functions
 
     // State: xR=[pos, lin_speed, lin_accel, attit, ang_vel, ang_accel]'
 
@@ -136,6 +144,9 @@ public:
 
 
 
+    //// Update Step Functions
+
+    // None
 
 
 

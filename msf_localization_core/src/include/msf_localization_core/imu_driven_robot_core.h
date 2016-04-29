@@ -88,7 +88,14 @@ public:
     // None
 
 
-    // Covariance Noise
+
+    ///// Covariances Getters
+
+    // Covariance Error Parameters: Rp = Qp
+public:
+    //Eigen::SparseMatrix<double> getCovarianceParameters();
+
+    // Covariance Noise Estimation: Qn
 public:
     Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
 
@@ -101,7 +108,7 @@ public:
 
 
 
-    ///// Predict State Functions
+    ///// Predict Step Functions
 
     // State: xR=[pos, lin_speed, attit]'
 
@@ -117,6 +124,9 @@ public:
 
 
 
+    ///// Update Step Functions
+
+    // None
 };
 
 

@@ -113,12 +113,20 @@ public:
 
 
 
-    ///// Get Covariances as a Eigen::MatrixXd
+    ///// Covariances getters
+
+    // Covariance Sensor Error Measurements: Rn
 public:
-    // Covariance Sensor Error Measurements
     Eigen::SparseMatrix<double> getCovarianceMeasurement();
-    // Covariance Sensor Error Parameters
+
+    // Covariance Sensor Error Parameters: Qp = Rp
+public:
     Eigen::SparseMatrix<double> getCovarianceParameters();
+
+    // Covariance Noise Estimation: Qn
+public:
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
+
 
 
 
@@ -126,9 +134,6 @@ public:
 public:
     int prepareCovarianceInitErrorState();
 
-
-public:
-    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
 
 
 

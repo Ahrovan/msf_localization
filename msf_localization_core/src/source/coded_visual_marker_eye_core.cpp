@@ -75,38 +75,16 @@ int CodedVisualMarkerEyeCore::init()
 
 int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore)
 {
-    // Sensor Core Pointer
-    //std::shared_ptr<SensorCore> TheSensorCore(this);
-    //std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
-
-
-
-    // Set pointer to the SensorCore
-    //this->setMsfElementCorePtr(TheSensorCore);
-
     // Create a class for the SensorStateCore
     if(!SensorInitStateCore)
         SensorInitStateCore=std::make_shared<CodedVisualMarkerEyeStateCore>(this->getMsfElementCoreWeakPtr());
 
-    // Set pointer to the SensorCore
-    //SensorInitStateCore->setTheSensorCore(TheSensorCore);
-
-
-    // Set sensor type
-    //this->setSensorType(SensorTypes::coded_visual_marker_eye);
-
     // Set Id
     this->setSensorId(sensorId);
-
-    // Set the access to the Storage core
-    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    //this->setMsfStorageCorePtr(TheMsfStorageCore);
 
 
     // Auxiliar reading value
     std::string readingValue;
-
-
 
 
 
@@ -169,8 +147,6 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
     }
 
 
-
-
     //// Init State
 
     /// Pose of the sensor wrt robot
@@ -213,7 +189,6 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
         stm>>variance[0]>>variance[1]>>variance[2];
         this->setNoisePositionSensorWrtRobot(variance.asDiagonal());
     }
-
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_var");
@@ -424,11 +399,10 @@ int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorState()
     }
 
 
-
     return 0;
 }
 
-Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const TimeStamp deltaTimeStamp) const
+Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance_noise;
 
@@ -473,11 +447,6 @@ int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, co
         predictedState=std::make_shared<CodedVisualMarkerEyeStateCore>(pastState->getMsfElementCoreSharedPtr());
     }
 
-//    // Set The robot core if it doesn't exist
-//    if(predictedState->getTheSensorCoreWeak().expired())
-//    {
-//        predictedState->setTheSensorCore(pastState->getTheSensorCoreWeak());
-//    }
 
 
     // Equations
@@ -1783,10 +1752,6 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
 
 
     //// Jacobian
-
-
-
-
 
 
 

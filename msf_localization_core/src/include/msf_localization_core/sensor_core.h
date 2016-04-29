@@ -113,16 +113,23 @@ public:
 
 
 
-    ///// Get Covariances as a Eigen::MatrixXd
+    ///// Covariances Getters
+
+    // Covariance Sensor Error Measurements: Rn
 public:
     virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
+
+    // Covariance Sensor Error Parameters: Rp = Qp
+public:
     virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
 
-
-
+    // Covariance Noise Estimation: Qn
 public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const =0;
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)=0;
 
+
+
+    ///// Predict Step Functions
 
 
     // Prediction state function
@@ -134,6 +141,10 @@ public:
     virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState) =0;
 
 
+
+    ///// Update Step Functions
+
+    // TODO
 
 };
 

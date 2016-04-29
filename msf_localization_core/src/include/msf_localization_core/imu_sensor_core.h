@@ -44,6 +44,12 @@ protected:
     int init();
 
 
+public:
+    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
+
+
+
+
     ///// Measurements
 
     // z=[z_lin_accel, z_attit, z_ang_vel]'
@@ -220,23 +226,29 @@ public:
 
 
 
-    ///// Get Covariances as a Eigen::MatrixXd
+    ///// Covariances Getters
+
+    // Covariance Sensor Error Measurements: Rn
 public:
-    // Covariance Sensor Error Measurements
     Eigen::SparseMatrix<double> getCovarianceMeasurement();
-    // Covariance Sensor Error Parameters
+
+    // Covariance Sensor Error Parameters: Rp = Qp
+public:
     Eigen::SparseMatrix<double> getCovarianceParameters();
 
+    // Covariance Noise Estimation: Qn
+public:
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
 
 
     ////// Init error state variances -> Temporal, only for the initial configuration
 public:
+    // Covariance init Error State: P(0)
     int prepareCovarianceInitErrorState();
 
 
 
-public:
-    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
+
 
 
 
@@ -244,30 +256,35 @@ public:
 
     // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
 
-    // Prediction state function
+    // Prediction state function: f
 public:
     int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
 
-    // Jacobian of the error state
+    // Jacobian of the error state: F
 public:
     int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
 
 
 
-    // Prediction measurements
+
+    //// Update functions
+
+
+    /// State Correction
+
+    // Prediction measurements: h
 public:
     int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
 
 
-    // Jacobian of the measurements
+    // Jacobian of the measurements: H
 public:
     int jacobiansErrorMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
 
 
+    /// Mapping
 
-
-public:
-    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
+    // None
 
 
 };

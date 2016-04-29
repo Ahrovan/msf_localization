@@ -99,6 +99,7 @@ public:
     std::shared_ptr<MsfStorageCore> getMsfStorageCoreSharedPtr() const;
 
 
+    // Check
 public:
     virtual bool isCorrect();
 
@@ -106,6 +107,7 @@ public:
 
 
     /// Dimensions
+
     // Dimension state
 protected:
     int dimension_state_;
@@ -133,7 +135,6 @@ protected:
 public:
     int getDimensionErrorParameters() const;
     int setDimensionErrorParameters(int dimension_error_parameters);
-
 
     // Dimension of the noise (error noise)
 protected:

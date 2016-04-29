@@ -75,11 +75,21 @@ public:
 
 
 
+    ///// Covariances Getters
 
+    // Covariance Error Parameters: Rp = Qp
 public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) =0;
+    //virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
+
+    // Covariance Noise Estimation: Qn
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)=0;
 
 
+
+
+
+    ///// Predict Step Functions
 
     // Prediction state function
 public:
@@ -90,6 +100,10 @@ public:
     virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState) =0;
 
 
+
+    ///// Update Step Functions
+
+    //
 
 };
 
