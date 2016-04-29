@@ -10,7 +10,7 @@ MsfLocalizationROS::MsfLocalizationROS(int argc,char **argv)
     nh=new ros::NodeHandle();
 
     // tf broadcaster
-    tfTransformBroadcaster=new tf::TransformBroadcaster;
+    tf_transform_broadcaster_=new tf::TransformBroadcaster;
 
     // Init
     init();
@@ -24,7 +24,7 @@ MsfLocalizationROS::~MsfLocalizationROS()
     close();
 
     // Delete
-    delete tfTransformBroadcaster;
+    delete tf_transform_broadcaster_;
 
     delete nh;
 
@@ -132,14 +132,14 @@ int MsfLocalizationROS::readConfigFile()
             std::cout<<"robot = free_model"<<std::endl;
 
             // Create the RobotCoreAux
-            std::shared_ptr<FreeModelRobotCore> TheRobotCoreAux;
+            std::shared_ptr<RosFreeModelRobotInterface> TheRobotCoreAux;
             // Create a class for the RobotStateCore
             std::shared_ptr<FreeModelRobotStateCore> RobotInitStateCore;
 
             // Create the RobotCoreAux
             if(!TheRobotCoreAux)
             {
-                TheRobotCoreAux=std::make_shared<FreeModelRobotCore>(this->TheMsfStorageCore);
+                TheRobotCoreAux=std::make_shared<RosFreeModelRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
             }
 
             // Set the pointer to itself
@@ -184,7 +184,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
             {
-                TheRosSensorInterface=std::make_shared<RosSensorImuInterface>(nh, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosSensorImuInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
             }
 
             // Set the pointer to itself
@@ -219,7 +219,7 @@ int MsfLocalizationROS::readConfigFile()
 
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
-                TheRosSensorInterface=std::make_shared<RosArucoEyeInterface>(nh, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosArucoEyeInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
 
             // Set the pointer to itself
             TheRosSensorInterface->setMsfElementCorePtr(TheRosSensorInterface);
@@ -266,7 +266,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class for the SensoreCore
             if(!ros_input_interface)
             {
-                ros_input_interface=std::make_shared<RosImuInputInterface>(nh, this->TheMsfStorageCore);
+                ros_input_interface=std::make_shared<RosImuInputInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
             }
 
             // Set the pointer to itself
@@ -364,25 +364,6 @@ int MsfLocalizationROS::readParameters()
     ros::param::param<std::string>("~msf_localization_config_file", configFile, "msf_localization_config_file.xml");
     std::cout<<"msf_localization_config_file="<<configFile<<std::endl;
 
-    // Topic names
-    //
-    ros::param::param<std::string>("~robot_pose_with_cov_topic_name", robotPoseWithCovarianceStampedTopicName, "msf_localization/robot_pose_cov");
-    std::cout<<"robot_pose_with_cov_topic_name="<<robotPoseWithCovarianceStampedTopicName<<std::endl;
-    //
-    ros::param::param<std::string>("~robot_pose_topic_name", robotPoseStampedTopicName, "msf_localization/robot_pose");
-    std::cout<<"robot_pose_topic_name="<<robotPoseStampedTopicName<<std::endl;
-    //
-    ros::param::param<std::string>("~robot_linear_speed_topic_name", robotLinearSpeedStampedTopicName, "msf_localization/robot_linear_speed");
-    std::cout<<"robot_linear_speed_topic_name="<<robotLinearSpeedStampedTopicName<<std::endl;
-    //
-    ros::param::param<std::string>("~robot_linear_acceleration_topic_name", robotLinearAccelerationStampedTopicName, "msf_localization/robot_linear_acceleration");
-    std::cout<<"robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;
-    //
-    ros::param::param<std::string>("~robot_angular_velocity_topic_name", robotAngularVelocityStampedTopicName, "msf_localization/robot_angular_velocity");
-    std::cout<<"robot_angular_velocity_topic_name="<<robotAngularVelocityStampedTopicName<<std::endl;
-    //
-    ros::param::param<std::string>("~robot_angular_acceleration_topic_name", robotAngularAccelerationStampedTopicName, "msf_localization/robot_angular_acceleration");
-    std::cout<<"robot_angular_acceleration_topic_name="<<robotAngularAccelerationStampedTopicName<<std::endl;
 
     // Service names
     //
@@ -419,20 +400,6 @@ int MsfLocalizationROS::open()
     // Read config file
     if(readConfigFile())
         ROS_ERROR("Error Reading Config File");
-
-
-    // Robot Pose With Covariance Publisher
-    robotPoseWithCovarianceStampedPub = nh->advertise<geometry_msgs::PoseWithCovarianceStamped>(robotPoseWithCovarianceStampedTopicName, 1, true);
-    //
-    robotPoseStampedPub = nh->advertise<geometry_msgs::PoseStamped>(robotPoseStampedTopicName, 1, true);
-    //
-    robotLinearSpeedStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearSpeedStampedTopicName, 1, true);
-    //
-    robotLinearAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearAccelerationStampedTopicName, 1, true);
-    //
-    robotAngularVelocityStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotAngularVelocityStampedTopicName, 1, true);
-    //
-    robotAngularAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotAngularAccelerationStampedTopicName, 1, true);
 
 
     // Service
@@ -560,165 +527,26 @@ try
 
 
 
-        // Getters
 
-        std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::static_pointer_cast<FreeModelRobotStateCore>(PredictedState->TheRobotStateCore);
-
-        Eigen::Vector3d robotPosition=TheRobotStateCore->getPosition();
-        Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitude();
-        Eigen::Vector3d robotLinearSpeed=TheRobotStateCore->getLinearSpeed();
-        Eigen::Vector3d robotLinearAcceleration=TheRobotStateCore->getLinearAcceleration();
-        Eigen::Vector3d robotAngularVelocity=TheRobotStateCore->getAngularVelocity();
-        Eigen::Vector3d robotAngularAcceleration=TheRobotStateCore->getAngularAcceleration();
-
-
-
-        // Fill msg
-
-
-        // Header
-
-        // ROBOT POSE
-        // Stamp
-        robotPoseWithCovarianceStampedMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
-        // Frame id
-        robotPoseWithCovarianceStampedMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
-
-        //
-        robotPoseStampedMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
-        // Frame id
-        robotPoseStampedMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
-
-        //
-        robotLinearSpeedStampedMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
-        // Frame id
-        robotLinearSpeedStampedMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
-
-        //
-        robotLinearAccelerationStampedMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
-        // Frame id
-        robotLinearAccelerationStampedMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
-
-        //
-        robotAngularVelocityStampedMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
-        // Frame id
-        robotAngularVelocityStampedMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
-
-        //
-        robotAngularAccelerationStampedMsg.header.stamp=ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec);
-        // Frame id
-        robotAngularAccelerationStampedMsg.header.frame_id=this->TheGlobalParametersCore->getWorldName();
+        // Robot
+        int covRobotPointInit=this->TheGlobalParametersCore->getDimensionErrorState();
+        int covRobotSize=this->TheRobotCore->getDimensionErrorState();
+        std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore)->publish(TheTimeStamp,
+                                                                                  this->TheGlobalParametersCore,
+                                                                                  PredictedState->TheRobotStateCore,
+                                                                                  PredictedState->covarianceMatrix.block(covRobotPointInit, covRobotPointInit, covRobotSize, covRobotSize));
 
 
 
 
-
-        // Pose
-        geometry_msgs::Pose RobotPose;
-
-        // Position
-        RobotPose.position.x=robotPosition[0];
-        RobotPose.position.y=robotPosition[1];
-        RobotPose.position.z=robotPosition[2];
-
-        // Attitude
-        RobotPose.orientation.w=robotAttitude[0];
-        RobotPose.orientation.x=robotAttitude[1];
-        RobotPose.orientation.y=robotAttitude[2];
-        RobotPose.orientation.z=robotAttitude[3];
-
-
-        // Fill Message
-
-        //
-        robotPoseWithCovarianceStampedMsg.pose.pose=RobotPose;
-
-
-        // Covariance
-        // TODO fix! Covariance of the attitude is not ok!
-        Eigen::MatrixXd robotPoseCovariance(6,6);
-        robotPoseCovariance.setZero();
-        robotPoseCovariance.block<3,3>(0,0)=PredictedState->covarianceMatrix.block<3,3>(0,0);
-        robotPoseCovariance.block<3,3>(3,3)=PredictedState->covarianceMatrix.block<3,3>(9,9);
-        double robotPoseCovarianceArray[36];
-        Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
-        for(unsigned int i=0; i<36; i++)
-        {
-            robotPoseWithCovarianceStampedMsg.pose.covariance[i]=robotPoseCovarianceArray[i];
-        }
-
-
-        //
-       robotPoseStampedMsg.pose=RobotPose;
-
-
-       //
-       robotLinearSpeedStampedMsg.vector.x=robotLinearSpeed[0];
-       robotLinearSpeedStampedMsg.vector.y=robotLinearSpeed[1];
-       robotLinearSpeedStampedMsg.vector.z=robotLinearSpeed[2];
-
-
-       //
-       robotLinearAccelerationStampedMsg.vector.x=robotLinearAcceleration[0];
-       robotLinearAccelerationStampedMsg.vector.y=robotLinearAcceleration[1];
-       robotLinearAccelerationStampedMsg.vector.z=robotLinearAcceleration[2];
-
-
-       //
-       robotAngularVelocityStampedMsg.vector.x=robotAngularVelocity[0];
-       robotAngularVelocityStampedMsg.vector.y=robotAngularVelocity[1];
-       robotAngularVelocityStampedMsg.vector.z=robotAngularVelocity[2];
-
-
-       //
-       robotAngularAccelerationStampedMsg.vector.x=robotAngularAcceleration[0];
-       robotAngularAccelerationStampedMsg.vector.y=robotAngularAcceleration[1];
-       robotAngularAccelerationStampedMsg.vector.z=robotAngularAcceleration[2];
-
-
-        // TF ROBOT
-        tf::Quaternion tf_rot(robotAttitude[1], robotAttitude[2], robotAttitude[3], robotAttitude[0]);
-        tf::Vector3 tf_tran(robotPosition[0], robotPosition[1], robotPosition[2]);
-
-        tf::Transform transform(tf_rot, tf_tran);
-
-        tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                              this->TheGlobalParametersCore->getWorldName(), this->TheRobotCore->getRobotName()));
-
-
-#if _DEBUG_MSF_LOCALIZATION_ROBOT_POSE_THREAD
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
-
-                        logString<<"Robot"<<std::endl;
-                        logString<<"  - Position: "<<robotPosition.transpose()<<std::endl;
-                        logString<<"  - Attitude: "<<robotAttitude.transpose()<<std::endl;
-
-
-                        this->log(logString.str());
-                    }
-#endif
-
-
-        // TF SENSORS
+        // Sensors
         for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensorState=PredictedState->TheListSensorStateCore.begin();
             itSensorState!=PredictedState->TheListSensorStateCore.end();
             ++itSensorState)
         {
-
-            Eigen::Vector3d sensorPosition=(*itSensorState)->getPositionSensorWrtRobot();
-            Eigen::Vector4d sensorAttitude=(*itSensorState)->getAttitudeSensorWrtRobot();
-
-            tf::Quaternion tf_rot(sensorAttitude[1], sensorAttitude[2], sensorAttitude[3], sensorAttitude[0]);
-            tf::Vector3 tf_tran(sensorPosition[0], sensorPosition[1], sensorPosition[2]);
-
-            tf::Transform transform(tf_rot, tf_tran);
-
-
-            tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                                  this->TheRobotCore->getRobotName(), std::dynamic_pointer_cast<SensorCore>((*itSensorState)->getMsfElementCoreSharedPtr())->getSensorName()));
-
+            std::dynamic_pointer_cast<RosSensorInterface>((*itSensorState)->getMsfElementCoreSharedPtr())->publish(TheTimeStamp,
+                                                                                                                   std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore),
+                                                                                                                   (*itSensorState));
         }
 
 
@@ -761,33 +589,13 @@ try
                     tf::Transform transform(tf_rot, tf_tran);
 
 
-                    tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
+                    tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
                                                           this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
                 }
             }
         }
 
-
-
-        // Publish Robot Pose
-        if(robotPoseWithCovarianceStampedPub.getNumSubscribers()>0)
-            robotPoseWithCovarianceStampedPub.publish(robotPoseWithCovarianceStampedMsg);
-
-        if(robotPoseStampedPub.getNumSubscribers()>0)
-            robotPoseStampedPub.publish(robotPoseStampedMsg);
-
-        if(robotLinearSpeedStampedPub.getNumSubscribers()>0)
-            robotLinearSpeedStampedPub.publish(robotLinearSpeedStampedMsg);
-
-        if(robotLinearAccelerationStampedPub.getNumSubscribers()>0)
-            robotLinearAccelerationStampedPub.publish(robotLinearAccelerationStampedMsg);
-
-        if(robotAngularVelocityStampedPub.getNumSubscribers()>0)
-            robotAngularVelocityStampedPub.publish(robotAngularVelocityStampedMsg);
-
-        if(robotAngularAccelerationStampedPub.getNumSubscribers()>0)
-            robotAngularAccelerationStampedPub.publish(robotAngularAccelerationStampedMsg);
 
 
 
@@ -1130,8 +938,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
         // Run update if there are measurements
         // TODO
         int errorUpdate=0;
-//        try
-//        {
+
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_ROS
         {
@@ -1139,11 +946,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #endif
 
             errorUpdate=this->update(OldestTimeStamp);
-//        }
-//        catch(...)
-//        {
-//            std::cout<<"EXCEPTION ON UPDATE"<<std::endl;
-//        }
+
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_ROS
             std::ostringstream logString;
@@ -1277,18 +1080,8 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #endif
 
 
-
-
     }
-//    }
-//    catch(std::exception &ex)
-//    {
-//        std::cout<<"[ROSNODE] Exception :"<<ex.what()<<std::endl;
-//    }
-//    catch(...)
-//    {
-//        std::cout<<"EXCEPTION ON UPDATE Thread"<<std::endl;
-//    }
+
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
@@ -1311,9 +1104,6 @@ int MsfLocalizationROS::run()
     // Start ROS threads
     robotPoseThread=new std::thread(&MsfLocalizationROS::robotPoseThreadFunction, this);
 
-    // TODO ROS-Service
-    // Enable prediction
-    //setPredictEnabled(true);
 
     // Loop to get measurements
     try

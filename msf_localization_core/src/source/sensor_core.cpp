@@ -37,19 +37,19 @@ SensorCore::~SensorCore()
 int SensorCore::init()
 {
     // Dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
-    dimensionParameters=4+3;
-    dimensionErrorParameters=3+3;
-    dimensionMeasurement=0;
-    dimensionErrorMeasurement=0;
-    dimensionNoise=0;
+    dimension_state_=0;
+    dimension_error_state_=0;
+    dimension_parameters_=4+3;
+    dimension_error_parameters_=3+3;
+    dimension_measurement_=0;
+    dimension_error_measurement_=0;
+    dimension_noise_=0;
 
     // Element Type
     this->setMsfElementCoreType(MsfElementCoreTypes::sensor);
 
     // Sensor name
-    sensor_name_="sensor";
+    //sensor_name_="sensor";
 
     // Flags
     flagEstimationAttitudeSensorWrtRobot=false;
@@ -63,28 +63,15 @@ int SensorCore::init()
     return 0;
 }
 
-unsigned int SensorCore::getDimensionMeasurement() const
+int SensorCore::getDimensionMeasurement() const
 {
-    return this->dimensionMeasurement;
+    return this->dimension_measurement_;
 }
 
-unsigned int SensorCore::getDimensionErrorMeasurement() const
+int SensorCore::getDimensionErrorMeasurement() const
 {
-    return this->dimensionErrorMeasurement;
+    return this->dimension_error_measurement_;
 }
-
-int SensorCore::setSensorName(std::string sensor_name)
-{
-    this->sensor_name_=sensor_name;
-    return 0;
-}
-
-std::string SensorCore::getSensorName() const
-{
-    return this->sensor_name_;
-}
-
-
 
 bool SensorCore::isEstimationAttitudeSensorWrtRobotEnabled() const
 {
@@ -98,13 +85,13 @@ int SensorCore::enableEstimationAttitudeSensorWrtRobot()
         // Enable
         this->flagEstimationAttitudeSensorWrtRobot=true;
         // Update State Dimension
-        this->dimensionState+=4;
+        this->dimension_state_+=4;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         // Update param
-        this->dimensionParameters-=4;
+        this->dimension_parameters_-=4;
         // Update error param
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
     }
     return 0;
 }
@@ -116,13 +103,13 @@ int SensorCore::enableParameterAttitudeSensorWrtRobot()
         // Enable
         this->flagEstimationAttitudeSensorWrtRobot=false;
         // Update State Dimension
-        this->dimensionState-=4;
+        this->dimension_state_-=4;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         // Update param
-        this->dimensionParameters+=4;
+        this->dimension_parameters_+=4;
         // Update error param
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
 
     }
     return 0;
@@ -153,13 +140,13 @@ int SensorCore::enableEstimationPositionSensorWrtRobot()
         // Enable
         this->flagEstimationPositionSensorWrtRobot=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
     }
     return 0;
 }
@@ -171,13 +158,13 @@ int SensorCore::enableParameterPositionSensorWrtRobot()
         // Enable
         this->flagEstimationPositionSensorWrtRobot=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
     }
     return 0;
 }

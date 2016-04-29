@@ -39,7 +39,7 @@ int CodedVisualMarkerEyeCore::init()
 
 
     // Sensor name -> Default
-    sensor_name_="coded_visual_marker_eye";
+    //sensor_name_="coded_visual_marker_eye";
 
     // Flags measurement
     flag_measurement_position_=false;
@@ -49,19 +49,19 @@ int CodedVisualMarkerEyeCore::init()
     // none
 
     // State -> Again just in case
-    dimensionErrorState=0;
-    dimensionState=0;
+    dimension_error_state_=0;
+    dimension_state_=0;
 
     // Parameters
-    dimensionParameters+=0;
-    dimensionErrorParameters+=0;
+    dimension_parameters_+=0;
+    dimension_error_parameters_+=0;
 
     // Dimension measurements -> Again just in case
-    dimensionMeasurement=0;
-    dimensionErrorMeasurement=0;
+    dimension_measurement_=0;
+    dimension_error_measurement_=0;
 
     // Dimension noise -> Again just in case
-    dimensionNoise=0;
+    dimension_noise_=0;
 
     // Noises measurements
     noise_measurement_position_.setZero();
@@ -86,8 +86,8 @@ int CodedVisualMarkerEyeCore::enableMeasurementPosition()
     if(!this->flag_measurement_position_)
     {
         this->flag_measurement_position_=true;
-        this->dimensionMeasurement+=3;
-        dimensionErrorMeasurement+=3;
+        this->dimension_measurement_+=3;
+        dimension_error_measurement_+=3;
     }
     return 0;
 }
@@ -113,8 +113,8 @@ int CodedVisualMarkerEyeCore::enableMeasurementAttitude()
     if(!this->flag_measurement_attitude_)
     {
         this->flag_measurement_attitude_=true;
-        this->dimensionMeasurement+=4;
-        dimensionErrorMeasurement+=3;
+        this->dimension_measurement_+=4;
+        dimension_error_measurement_+=3;
     }
     return 0;
 }
@@ -397,8 +397,8 @@ int CodedVisualMarkerEyeCore::predictStateErrorStateJacobians(const TimeStamp pr
 
     /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
     {
-        predictedState->jacobian_error_state_.resize(dimensionErrorState, dimensionErrorState);
-        predictedState->jacobian_error_state_.reserve(3*dimensionErrorState); //worst case -> Optimize
+        predictedState->jacobian_error_state_.resize(dimension_error_state_, dimension_error_state_);
+        predictedState->jacobian_error_state_.reserve(3*dimension_error_state_); //worst case -> Optimize
 
         std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
@@ -1002,7 +1002,7 @@ int CodedVisualMarkerEyeCore::jacobiansMeasurements(const TimeStamp theTimeStamp
     /// Jacobians error measurement - sensor noise of the measurement
 
     // Resize and init Jacobian
-    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimensionErrorMeasurement, dimensionErrorMeasurement);
+    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimension_error_measurement_, dimension_error_measurement_);
     predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
 
     // Fill Jacobian -> Identity
@@ -1480,9 +1480,7 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
     std::string readingValue;
 
 
-    // Name
-    readingValue=sensor.child_value("name");
-    this->setSensorName(readingValue);
+
 
 
     //// Sensor configurations

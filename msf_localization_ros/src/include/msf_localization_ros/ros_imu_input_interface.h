@@ -23,8 +23,8 @@
 class RosImuInputInterface : public RosInputInterface, public ImuInputCore
 {
 public:
-    RosImuInputInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
-
+    RosImuInputInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    ~RosImuInputInterface();
 
 
 public:

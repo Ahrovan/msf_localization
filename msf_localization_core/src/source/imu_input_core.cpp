@@ -36,11 +36,11 @@ int ImuInputCore::init()
     setInputName("imu_input");
 
     // dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
-    dimensionParameters=6;
-    dimensionErrorParameters=6;
-    dimensionNoise=0;
+    dimension_state_=0;
+    dimension_error_state_=0;
+    dimension_parameters_=6;
+    dimension_error_parameters_=6;
+    dimension_noise_=0;
     dimension_input_command_=0;
     dimension_error_input_command_=0;
 
@@ -481,15 +481,15 @@ int ImuInputCore::enableEstimationPositionInputWrtRobot()
         // Enable
         this->flag_estimation_position_input_wrt_robot_=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
         //
-        this->dimensionNoise+=0;
+        this->dimension_noise_+=0;
     }
     return 0;
 }
@@ -501,15 +501,15 @@ int ImuInputCore::enableParameterPositionInputWrtRobot()
         // Enable
         this->flag_estimation_position_input_wrt_robot_=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
         //
-        this->dimensionNoise-=0;
+        this->dimension_noise_-=0;
     }
     return 0;
 }
@@ -537,15 +537,15 @@ int ImuInputCore::enableEstimationAttitudeInputWrtRobot()
         // Enable
         this->flag_estimation_attitude_input_wrt_robot_=true;
         // Update State Dimension
-        this->dimensionState+=4;
+        this->dimension_state_+=4;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=4;
+        this->dimension_parameters_-=4;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
         //
-        this->dimensionNoise+=0;
+        this->dimension_noise_+=0;
     }
     return 0;
 }
@@ -557,15 +557,15 @@ int ImuInputCore::enableParameterAttitudeInputWrtRobot()
         // Enable
         this->flag_estimation_attitude_input_wrt_robot_=false;
         // Update State Dimension
-        this->dimensionState-=4;
+        this->dimension_state_-=4;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=4;
+        this->dimension_parameters_+=4;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
         //
-        this->dimensionNoise-=0;
+        this->dimension_noise_-=0;
     }
     return 0;
 }
@@ -593,15 +593,15 @@ int ImuInputCore::enableEstimationBiasLinearAcceleration()
         // Enable
         this->flag_estimation_bias_linear_acceleration_=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
         //
-        this->dimensionNoise+=3;
+        this->dimension_noise_+=3;
     }
     return 0;
 }
@@ -613,15 +613,15 @@ int ImuInputCore::enableParameterBiasLinearAcceleration()
         // Enable
         this->flag_estimation_bias_linear_acceleration_=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
         //
-        this->dimensionNoise-=3;
+        this->dimension_noise_-=3;
     }
     return 0;
 }
@@ -660,15 +660,15 @@ int ImuInputCore::enableEstimationBiasAngularVelocity()
         // Enable
         this->flag_estimation_bias_angular_velocity_=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
         //
-        this->dimensionNoise+=3;
+        this->dimension_noise_+=3;
     }
     return 0;
 }
@@ -680,15 +680,15 @@ int ImuInputCore::enableParameterBiasAngularVelocity()
         // Enable
         this->flag_estimation_bias_angular_velocity_=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
         //
-        this->dimensionNoise-=3;
+        this->dimension_noise_-=3;
     }
     return 0;
 }
@@ -728,15 +728,15 @@ int ImuInputCore::enableEstimationSensitivityLinearAcceleration()
         // Enable
         this->flag_estimation_sensitivity_linear_acceleration_=true;
         // Update State Dimension
-        this->dimensionState+=9;
+        this->dimension_state_+=9;
         // Update Error State Dimension
-        this->dimensionErrorState+=9;
+        this->dimension_error_state_+=9;
         //
-        this->dimensionParameters-=9;
+        this->dimension_parameters_-=9;
         //
-        this->dimensionErrorParameters-=9;
+        this->dimension_error_parameters_-=9;
         //
-        this->dimensionNoise+=0;
+        this->dimension_noise_+=0;
     }
     return 0;
 }
@@ -749,15 +749,15 @@ int ImuInputCore::enableParameterSensitivityLinearAcceleration()
         // Enable
         this->flag_estimation_sensitivity_linear_acceleration_=false;
         // Update State Dimension
-        this->dimensionState-=9;
+        this->dimension_state_-=9;
         // Update Error State Dimension
-        this->dimensionErrorState-=9;
+        this->dimension_error_state_-=9;
         //
-        this->dimensionParameters+=9;
+        this->dimension_parameters_+=9;
         //
-        this->dimensionErrorParameters+=9;
+        this->dimension_error_parameters_+=9;
         //
-        this->dimensionNoise-=0;
+        this->dimension_noise_-=0;
     }
     return 0;
 }
@@ -786,15 +786,15 @@ int ImuInputCore::enableEstimationSensitivityAngularVelocity()
         // Enable
         this->flag_estimation_sensitivity_angular_velocity_=true;
         // Update State Dimension
-        this->dimensionState+=9;
+        this->dimension_state_+=9;
         // Update Error State Dimension
-        this->dimensionErrorState+=9;
+        this->dimension_error_state_+=9;
         //
-        this->dimensionParameters-=9;
+        this->dimension_parameters_-=9;
         //
-        this->dimensionErrorParameters-=9;
+        this->dimension_error_parameters_-=9;
         //
-        this->dimensionNoise+=0;
+        this->dimension_noise_+=0;
     }
     return 0;
 }
@@ -807,15 +807,15 @@ int ImuInputCore::enableParameterSensitivityAngularVelocity()
         // Enable
         this->flag_estimation_sensitivity_angular_velocity_=false;
         // Update State Dimension
-        this->dimensionState-=9;
+        this->dimension_state_-=9;
         // Update Error State Dimension
-        this->dimensionErrorState-=9;
+        this->dimension_error_state_-=9;
         //
-        this->dimensionParameters+=9;
+        this->dimension_parameters_+=9;
         //
-        this->dimensionErrorParameters+=9;
+        this->dimension_error_parameters_+=9;
         //
-        this->dimensionNoise-=0;
+        this->dimension_noise_-=0;
     }
     return 0;
 }

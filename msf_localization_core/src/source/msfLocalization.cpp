@@ -1810,7 +1810,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     ///////// Get dimensions
 
     /// Matched Measurements
-    unsigned int dimensionMeasurements=0;
+    int dimensionMeasurements=0;
     for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
         itListMatchedMeas!=TheListMatchedMeasurements.end();
         ++itListMatchedMeas)
@@ -1828,7 +1828,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     }
 
     /// Error State
-    unsigned int dimensionErrorState=OldState->getDimensionErrorState();
+    int dimensionErrorState=OldState->getDimensionErrorState();
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
@@ -1953,9 +1953,9 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itListPredictedMeas!=TheListPredictedMeasurements.end();
             ++itListPredictedMeas)
         {
-            unsigned int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
-            unsigned int dimensionTotalErrorStateI=0;
-            unsigned int dimensionErrorStateI=0;
+            int dimensionErrorMeasurementI=(*itListPredictedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+            int dimensionTotalErrorStateI=0;
+            int dimensionErrorStateI=0;
 
             // Robot
             dimensionErrorStateI=this->TheRobotCore->getDimensionErrorState();

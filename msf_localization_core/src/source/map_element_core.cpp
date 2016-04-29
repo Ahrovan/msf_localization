@@ -31,11 +31,11 @@ MapElementCore::~MapElementCore()
 int MapElementCore::init()
 {
     // Dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
-    dimensionParameters=0;
-    dimensionErrorParameters=0;
-    dimensionNoise=0;
+    dimension_state_=0;
+    dimension_error_state_=0;
+    dimension_parameters_=0;
+    dimension_error_parameters_=0;
+    dimension_noise_=0;
 
 
     // Element Type

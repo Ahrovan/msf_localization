@@ -59,19 +59,10 @@
 #include <ros/ros.h>
 
 
-// ROS msg
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <geometry_msgs/PoseStamped.h>
 
 
-// ROS Msg geometry_msgs::Vector3
-#include <geometry_msgs/Vector3Stamped.h>
-#include <geometry_msgs/Vector3.h>
 
 
-// tf
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
 
 // Ros service
 #include <msf_localization_ros_srvs/SetBool.h>
@@ -105,7 +96,7 @@
 #include "msf_localization_core/global_parameters_state_core.h"
 
 // Robot
-#include "msf_localization_core/free_model_robot_core.h"
+#include "msf_localization_ros/ros_free_model_robot_interface.h"
 #include "msf_localization_core/free_model_robot_state_core.h"
 
 
@@ -144,45 +135,6 @@ protected:
     int readConfigFile();
 
 
-
-
-
-    // Robot Pose Publisher
-protected:
-    // Robot Pose with Covariance Stamped
-    ros::Publisher robotPoseWithCovarianceStampedPub;
-    std::string robotPoseWithCovarianceStampedTopicName;
-    geometry_msgs::PoseWithCovarianceStamped robotPoseWithCovarianceStampedMsg;
-
-    // Robot Pose Stamped
-    ros::Publisher robotPoseStampedPub;
-    std::string robotPoseStampedTopicName;
-    geometry_msgs::PoseStamped robotPoseStampedMsg;
-
-    // Robot Linear Speed
-    ros::Publisher robotLinearSpeedStampedPub;
-    std::string robotLinearSpeedStampedTopicName;
-    geometry_msgs::Vector3Stamped robotLinearSpeedStampedMsg;
-
-    // Robot Linear Acceleration
-    ros::Publisher robotLinearAccelerationStampedPub;
-    std::string robotLinearAccelerationStampedTopicName;
-    geometry_msgs::Vector3Stamped robotLinearAccelerationStampedMsg;
-
-    // Robot Angular Velocity
-    ros::Publisher robotAngularVelocityStampedPub;
-    std::string robotAngularVelocityStampedTopicName;
-    geometry_msgs::Vector3Stamped robotAngularVelocityStampedMsg;
-
-    // Robot Angular Acceleration
-    ros::Publisher robotAngularAccelerationStampedPub;
-    std::string robotAngularAccelerationStampedTopicName;
-    geometry_msgs::Vector3Stamped robotAngularAccelerationStampedMsg;
-
-
-    // Tf
-protected:
-    tf::TransformBroadcaster* tfTransformBroadcaster;
 
 
 protected:

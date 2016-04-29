@@ -56,26 +56,17 @@ protected:
 
     // Dimension of the measurement
 protected:
-    unsigned int dimensionMeasurement;
+    int dimension_measurement_;
 public:
-    unsigned int getDimensionMeasurement() const;
+    int getDimensionMeasurement() const;
 
 
     // Dimension of the error measurement
 protected:
-    unsigned int dimensionErrorMeasurement;
+    int dimension_error_measurement_;
 public:
-    unsigned int getDimensionErrorMeasurement() const;
+    int getDimensionErrorMeasurement() const;
 
-
-
-
-    //// Name
-protected:
-    std::string sensor_name_;
-public:
-    int setSensorName(std::string sensor_name);
-    std::string getSensorName() const;
 
 
 

@@ -108,39 +108,39 @@ public:
     /// Dimensions
     // Dimension state
 protected:
-    unsigned int dimensionState;
+    int dimension_state_;
 public:
-    unsigned int getDimensionState() const;
-    int setDimensionState(unsigned int dimensionState);
+    int getDimensionState() const;
+    int setDimensionState(int dimension_state);
 
     // Dimension error state
 protected:
-    unsigned int dimensionErrorState;
+    int dimension_error_state_;
 public:
-    unsigned int getDimensionErrorState() const;
-    int setDimensionErrorState(unsigned int dimensionErrorState);
+    int getDimensionErrorState() const;
+    int setDimensionErrorState(int dimension_error_state);
 
     // Dimension parameters
 protected:
-    unsigned int dimensionParameters;
+    int dimension_parameters_;
 public:
-    unsigned int getDimensionParameters() const;
-    int setDimensionParameters(unsigned int dimensionParameters);
+    int getDimensionParameters() const;
+    int setDimensionParameters(int dimension_parameters);
 
     // Dimension error parameters
 protected:
-    unsigned int dimensionErrorParameters;
+    int dimension_error_parameters_;
 public:
-    unsigned int getDimensionErrorParameters() const;
-    int setDimensionErrorParameters(unsigned int dimensionErrorParameters);
+    int getDimensionErrorParameters() const;
+    int setDimensionErrorParameters(int dimension_error_parameters);
 
 
     // Dimension of the noise (error noise)
 protected:
-    unsigned int dimensionNoise;
+    int dimension_noise_;
 public:
-    unsigned int getDimensionNoise() const;
-    int setDimensionNoise(unsigned int dimensionNoise);
+    int getDimensionNoise() const;
+    int setDimensionNoise(int dimension_noise);
 
 
 

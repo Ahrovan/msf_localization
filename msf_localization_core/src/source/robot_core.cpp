@@ -32,11 +32,11 @@ RobotCore::~RobotCore()
 int RobotCore::init()
 {
     // Dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
-    dimensionParameters=0;
-    dimensionErrorParameters=0;
-    dimensionNoise=0;
+    dimension_state_=0;
+    dimension_error_state_=0;
+    dimension_parameters_=0;
+    dimension_error_parameters_=0;
+    dimension_noise_=0;
 
     // Element Type
     this->setMsfElementCoreType(MsfElementCoreTypes::robot);
@@ -45,21 +45,21 @@ int RobotCore::init()
     robot_core_type_=RobotCoreTypes::undefined;
 
     // Robot name default
-    robot_name_="robot";
+    //robot_name_="robot";
 
     return 0;
 }
 
-int RobotCore::setRobotName(std::string robot_name)
-{
-    this->robot_name_=robot_name;
-    return 0;
-}
+//int RobotCore::setRobotName(std::string robot_name)
+//{
+//    this->robot_name_=robot_name;
+//    return 0;
+//}
 
-std::string RobotCore::getRobotName() const
-{
-    return this->robot_name_;
-}
+//std::string RobotCore::getRobotName() const
+//{
+//    return this->robot_name_;
+//}
 
 
 

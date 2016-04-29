@@ -35,11 +35,11 @@ int MsfElementCore::init()
     msf_element_core_type_=MsfElementCoreTypes::undefined;
 
     /// Dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
-    dimensionParameters=0;
-    dimensionErrorParameters=0;
-    dimensionNoise=0;
+    dimension_state_=0;
+    dimension_error_state_=0;
+    dimension_parameters_=0;
+    dimension_error_parameters_=0;
+    dimension_noise_=0;
 
     /// LOG
     const char* env_p = std::getenv("FUSEON_STACK");
@@ -127,64 +127,64 @@ bool MsfElementCore::isCorrect()
 }
 
 
-unsigned int MsfElementCore::getDimensionState() const
+int MsfElementCore::getDimensionState() const
 {
-    return this->dimensionState;
+    return this->dimension_state_;
 }
 
-int MsfElementCore::setDimensionState(unsigned int dimensionState)
+int MsfElementCore::setDimensionState(int dimension_state)
 {
-    this->dimensionState=dimensionState;
+    this->dimension_state_=dimension_state;
     return 0;
 }
 
-unsigned int MsfElementCore::getDimensionErrorState() const
+int MsfElementCore::getDimensionErrorState() const
 {
-    return this->dimensionErrorState;
+    return this->dimension_error_state_;
 }
 
-int MsfElementCore::setDimensionErrorState(unsigned int dimensionErrorState)
+int MsfElementCore::setDimensionErrorState(int dimension_error_state)
 {
-    this->dimensionErrorState=dimensionErrorState;
+    this->dimension_error_state_=dimension_error_state;
     return 0;
 }
 
-unsigned int MsfElementCore::getDimensionParameters() const
+int MsfElementCore::getDimensionParameters() const
 {
-    return this->dimensionParameters;
+    return this->dimension_parameters_;
 }
 
-int MsfElementCore::setDimensionParameters(unsigned int dimensionParameters)
+int MsfElementCore::setDimensionParameters(int dimension_parameters)
 {
-    this->dimensionParameters=dimensionParameters;
+    this->dimension_parameters_=dimension_parameters;
     return 0;
 }
 
-unsigned int MsfElementCore::getDimensionErrorParameters() const
+int MsfElementCore::getDimensionErrorParameters() const
 {
-    return this->dimensionErrorParameters;
+    return this->dimension_error_parameters_;
 }
 
-int MsfElementCore::setDimensionErrorParameters(unsigned int dimensionErrorParameters)
+int MsfElementCore::setDimensionErrorParameters(int dimension_error_parameters)
 {
-    this->dimensionErrorParameters=dimensionErrorParameters;
+    this->dimension_error_parameters_=dimension_error_parameters;
     return 0;
 }
 
-unsigned int MsfElementCore::getDimensionNoise() const
+int MsfElementCore::getDimensionNoise() const
 {
-    return this->dimensionNoise;
+    return this->dimension_noise_;
 }
 
-int MsfElementCore::setDimensionNoise(unsigned int dimensionNoise)
+int MsfElementCore::setDimensionNoise(int dimension_noise)
 {
-    this->dimensionNoise=dimensionNoise;
+    this->dimension_noise_=dimension_noise;
     return 0;
 }
 
 int MsfElementCore::prepareCovarianceInitErrorState()
 {
-    this->InitErrorStateVariance.resize(dimensionErrorState, dimensionErrorState);
+    this->InitErrorStateVariance.resize(dimension_error_state_, dimension_error_state_);
     this->InitErrorStateVariance.setZero();
     return 0;
 }

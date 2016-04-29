@@ -64,20 +64,20 @@ bool StateEstimationCore::hasInputCommand() const
 
 int StateEstimationCore::getDimensionState() const
 {
-    int dimensionState=0;
+    int dimension_state=0;
 
     // Global Parameters
-    dimensionState+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionState();
+    dimension_state+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionState();
 
     // Robot
-    dimensionState+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionState();
+    dimension_state+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionState();
 
     // Sensors
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
-        dimensionState+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionState();
+        dimension_state+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionState();
     }
 
     // Inputs
@@ -85,7 +85,7 @@ int StateEstimationCore::getDimensionState() const
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
-        dimensionState+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionState();
+        dimension_state+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionState();
     }
 
     // Map
@@ -93,31 +93,31 @@ int StateEstimationCore::getDimensionState() const
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
-        dimensionState+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionState();
+        dimension_state+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionState();
     }
 
 
     // end
-    return dimensionState;
+    return dimension_state;
 }
 
 
 int StateEstimationCore::getDimensionErrorState() const
 {
-    int dimensionErrorState=0;
+    int dimension_error_state=0;
 
     // Global Parameters
-    dimensionErrorState+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    dimension_error_state+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Robot
-    dimensionErrorState+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    dimension_error_state+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Sensors
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
-        dimensionErrorState+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+        dimension_error_state+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     }
 
     // Inputs
@@ -125,7 +125,7 @@ int StateEstimationCore::getDimensionErrorState() const
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
-        dimensionErrorState+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+        dimension_error_state+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     }
 
     // Map
@@ -133,30 +133,30 @@ int StateEstimationCore::getDimensionErrorState() const
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
-        dimensionErrorState+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+        dimension_error_state+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     }
 
 
     // end
-    return dimensionErrorState;
+    return dimension_error_state;
 }
 
 int StateEstimationCore::getDimensionParameters() const
 {
-    int dimensionParameters=0;
+    int dimension_parameters=0;
 
     // Global Parameters
-    dimensionParameters+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
+    dimension_parameters+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
 
     // Robot
-    dimensionParameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
+    dimension_parameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
 
     // Sensors
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
-        dimensionParameters+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionParameters();
+        dimension_parameters+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionParameters();
     }
 
     // Inputs
@@ -164,7 +164,7 @@ int StateEstimationCore::getDimensionParameters() const
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
-        dimensionParameters+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionParameters();
+        dimension_parameters+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionParameters();
     }
 
     // Map
@@ -172,30 +172,30 @@ int StateEstimationCore::getDimensionParameters() const
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
-        dimensionParameters+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionParameters();
+        dimension_parameters+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionParameters();
     }
 
 
     // end
-    return dimensionParameters;
+    return dimension_parameters;
 }
 
 int StateEstimationCore::getDimensionErrorParameters() const
 {
-    int dimensionErrorParameters=0;
+    int dimension_error_parameters=0;
 
     // Global Parameters
-    dimensionErrorParameters+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    dimension_error_parameters+=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Robot
-    dimensionErrorParameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    dimension_error_parameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Sensors
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
-        dimensionErrorParameters+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+        dimension_error_parameters+=(*itSensor)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
     }
 
     // Inputs
@@ -203,7 +203,7 @@ int StateEstimationCore::getDimensionErrorParameters() const
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
-        dimensionErrorParameters+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+        dimension_error_parameters+=(*itInput)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
     }
 
     // Map
@@ -211,40 +211,40 @@ int StateEstimationCore::getDimensionErrorParameters() const
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
-        dimensionErrorParameters+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+        dimension_error_parameters+=(*itMapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
     }
 
 
     // end
-    return dimensionErrorParameters;
+    return dimension_error_parameters;
 }
 
 int StateEstimationCore::getDimensionMeasurement() const
 {
-    int dimensionMeasurement=0;
+    int dimension_measurement=0;
 
     for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itSensorMeas=TheListMeasurementCore.begin();
         itSensorMeas!=TheListMeasurementCore.end();
         ++itSensorMeas)
     {
-        dimensionMeasurement+=(*itSensorMeas)->getSensorCoreSharedPtr()->getDimensionMeasurement();
+        dimension_measurement+=(*itSensorMeas)->getSensorCoreSharedPtr()->getDimensionMeasurement();
     }
 
-    return dimensionMeasurement;
+    return dimension_measurement;
 }
 
 int StateEstimationCore::getDimensionErrorMeasurement() const
 {
-    int dimensionErrorMeasurement=0;
+    int dimension_error_measurement=0;
 
     for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itSensorMeas=TheListMeasurementCore.begin();
         itSensorMeas!=TheListMeasurementCore.end();
         ++itSensorMeas)
     {
-        dimensionErrorMeasurement+=(*itSensorMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+        dimension_error_measurement+=(*itSensorMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
     }
 
-    return dimensionErrorMeasurement;
+    return dimension_error_measurement;
 }
 
 int StateEstimationCore::getDimensionInputCommand() const
@@ -280,10 +280,10 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
     //std::cout<<"StateEstimationCore::prepareInitErrorStateVariance()"<<std::endl;
 
     // Dimension
-    int dimensionErrorState=this->getDimensionErrorState();
+    int dimension_error_state=this->getDimensionErrorState();
 
     // Init
-    covarianceMatrix.resize(dimensionErrorState, dimensionErrorState);
+    covarianceMatrix.resize(dimension_error_state, dimension_error_state);
     covarianceMatrix.setZero();
 
 

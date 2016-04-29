@@ -31,10 +31,10 @@ GlobalParametersCore::~GlobalParametersCore()
 int GlobalParametersCore::init()
 {
     // Dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
-    dimensionParameters=3;
-    dimensionErrorParameters=3;
+    dimension_state_=0;
+    dimension_error_state_=0;
+    dimension_parameters_=3;
+    dimension_error_parameters_=3;
 
     // Element Type
     this->setMsfElementCoreType(MsfElementCoreTypes::world);
@@ -74,13 +74,13 @@ int GlobalParametersCore::enableEstimationGravity()
         // Enable
         this->flagEstimationGravity=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
     }
     return 0;
 }
@@ -92,13 +92,13 @@ int GlobalParametersCore::enableParameterGravity()
         // Enable
         this->flagEstimationGravity=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
     }
     return 0;
 }

@@ -35,7 +35,7 @@ int ImuSensorCore::init()
 
 
     // Sensor name -> Default
-    sensor_name_="imu_sensor";
+    //sensor_name_="imu_sensor";
 
     // Flags measurement
     flagMeasurementOrientation=false;
@@ -49,19 +49,19 @@ int ImuSensorCore::init()
     flagEstimationScaleLinearAcceleration=false;
 
     // State -> Again just in case
-    dimensionErrorState=0;
-    dimensionState=0;
+    dimension_error_state_=0;
+    dimension_state_=0;
 
     // Parameters
-    dimensionParameters+=12;
-    dimensionErrorParameters+=12;
+    dimension_parameters_+=12;
+    dimension_error_parameters_+=12;
 
     // Dimension measurements -> Again just in case
-    dimensionMeasurement=0;
-    dimensionErrorMeasurement=0;
+    dimension_measurement_=0;
+    dimension_error_measurement_=0;
 
     // Dimension noise -> Again just in case
-    dimensionNoise=0;
+    dimension_noise_=0;
 
     // Noises measurements
     noiseMeasurementAngularVelocity.setZero();
@@ -90,8 +90,8 @@ int ImuSensorCore::enableMeasurementOrientation()
     if(!this->flagMeasurementOrientation)
     {
         this->flagMeasurementOrientation=true;
-        this->dimensionMeasurement+=4;
-        dimensionErrorMeasurement+=3;
+        this->dimension_measurement_+=4;
+        dimension_error_measurement_+=3;
     }
     return 0;
 }
@@ -106,8 +106,8 @@ int ImuSensorCore::enableMeasurementAngularVelocity()
     if(!this->flagMeasurementAngularVelocity)
     {
         this->flagMeasurementAngularVelocity=true;
-        this->dimensionMeasurement+=3;
-        dimensionErrorMeasurement+=3;
+        this->dimension_measurement_+=3;
+        dimension_error_measurement_+=3;
     }
     return 0;
 }
@@ -134,8 +134,8 @@ int ImuSensorCore::enableMeasurementLinearAcceleration()
     if(!this->flagMeasurementLinearAcceleration)
     {
         this->flagMeasurementLinearAcceleration=true;
-        this->dimensionMeasurement+=3;
-        dimensionErrorMeasurement+=3;
+        this->dimension_measurement_+=3;
+        dimension_error_measurement_+=3;
     }
     return 0;
 }
@@ -173,46 +173,6 @@ int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<
 }
 
 
-
-//unsigned int ImuSensorCore::getDimensionState() const
-//{
-//    unsigned int dimensionState=0;
-
-//    if(isEstimationAttitudeSensorWrtRobotEnabled())
-//        dimensionState+=4;
-
-//    if(isEstimationPositionSensorWrtRobotEnabled())
-//        dimensionState+=3;
-
-//    if(isEstimationBiasAngularVelocityEnabled())
-//        dimensionState+=3;
-
-//    if(isEstimationBiasLinearAccelerationEnabled())
-//        dimensionState+=3;
-
-//    return dimensionState;
-//}
-
-//unsigned int ImuSensorCore::getDimensionErrorState() const
-//{
-//    unsigned int dimensionErrorState=0;
-
-//    if(isEstimationAttitudeSensorWrtRobotEnabled())
-//        dimensionState+=3;
-
-//    if(isEstimationPositionSensorWrtRobotEnabled())
-//        dimensionState+=3;
-
-//    if(isEstimationBiasAngularVelocityEnabled())
-//        dimensionState+=3;
-
-//    if(isEstimationBiasLinearAccelerationEnabled())
-//        dimensionState+=3;
-
-//    return dimensionErrorState;
-//}
-
-
 bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const
 {
     return this->flagEstimationBiasAngularVelocity;
@@ -225,15 +185,15 @@ int ImuSensorCore::enableEstimationBiasAngularVelocity()
         // Enable
         this->flagEstimationBiasAngularVelocity=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
         //
-        this->dimensionNoise+=3;
+        this->dimension_noise_+=3;
     }
     return 0;
 }
@@ -245,15 +205,15 @@ int ImuSensorCore::enableParameterBiasAngularVelocity()
         // Enable
         this->flagEstimationBiasAngularVelocity=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
         //
-        this->dimensionNoise-=3;
+        this->dimension_noise_-=3;
     }
     return 0;
 }
@@ -295,13 +255,13 @@ int ImuSensorCore::enableEstimationScaleAngularVelocity()
         // Enable
         this->flagEstimationScaleAngularVelocity=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
     }
     return 0;
 }
@@ -313,13 +273,13 @@ int ImuSensorCore::enableParameterScaleAngularVelocity()
         // Enable
         this->flagEstimationScaleAngularVelocity=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
     }
     return 0;
 }
@@ -348,13 +308,13 @@ int ImuSensorCore::enableEstimationSensitivityAngularVelocity()
         // Enable
         this->flagEstimationSensitivityAngularVelocity=true;
         // Update State Dimension
-        this->dimensionState+=9;
+        this->dimension_state_+=9;
         // Update Error State Dimension
-        this->dimensionErrorState+=9;
+        this->dimension_error_state_+=9;
         //
-        this->dimensionParameters-=9;
+        this->dimension_parameters_-=9;
         //
-        this->dimensionErrorParameters-=9;
+        this->dimension_error_parameters_-=9;
     }
     return 0;
 }
@@ -366,13 +326,13 @@ int ImuSensorCore::enableParameterSensitivityAngularVelocity()
         // Enable
         this->flagEstimationSensitivityAngularVelocity=false;
         // Update State Dimension
-        this->dimensionState-=9;
+        this->dimension_state_-=9;
         // Update Error State Dimension
-        this->dimensionErrorState-=9;
+        this->dimension_error_state_-=9;
         //
-        this->dimensionParameters+=9;
+        this->dimension_parameters_+=9;
         //
-        this->dimensionErrorParameters+=9;
+        this->dimension_error_parameters_+=9;
     }
     return 0;
 }
@@ -392,15 +352,15 @@ int ImuSensorCore::enableEstimationBiasLinearAcceleration()
         // Enable
         this->flagEstimationBiasLinearAcceleration=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
         //
-        this->dimensionNoise+=3;
+        this->dimension_noise_+=3;
     }
     return 0;
 }
@@ -412,15 +372,15 @@ int ImuSensorCore::enableParameterBiasLinearAcceleration()
         // Enable
         this->flagEstimationBiasLinearAcceleration=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
         //
-        this->dimensionNoise-=3;
+        this->dimension_noise_-=3;
     }
     return 0;
 }
@@ -460,13 +420,13 @@ int ImuSensorCore::enableEstimationScaleLinearAcceleration()
         // Enable
         this->flagEstimationScaleLinearAcceleration=true;
         // Update State Dimension
-        this->dimensionState+=3;
+        this->dimension_state_+=3;
         // Update Error State Dimension
-        this->dimensionErrorState+=3;
+        this->dimension_error_state_+=3;
         //
-        this->dimensionParameters-=3;
+        this->dimension_parameters_-=3;
         //
-        this->dimensionErrorParameters-=3;
+        this->dimension_error_parameters_-=3;
     }
     return 0;
 }
@@ -478,13 +438,13 @@ int ImuSensorCore::enableParameterScaleLinearAcceleration()
         // Enable
         this->flagEstimationScaleLinearAcceleration=false;
         // Update State Dimension
-        this->dimensionState-=3;
+        this->dimension_state_-=3;
         // Update Error State Dimension
-        this->dimensionErrorState-=3;
+        this->dimension_error_state_-=3;
         //
-        this->dimensionParameters+=3;
+        this->dimension_parameters_+=3;
         //
-        this->dimensionErrorParameters+=3;
+        this->dimension_error_parameters_+=3;
     }
     return 0;
 }
@@ -902,8 +862,8 @@ int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeS
 
     /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
     {
-        predictedState->jacobian_error_state_.resize(dimensionErrorState, dimensionErrorState);
-        predictedState->jacobian_error_state_.reserve(3*dimensionErrorState); //worst case -> Optimize
+        predictedState->jacobian_error_state_.resize(dimension_error_state_, dimension_error_state_);
+        predictedState->jacobian_error_state_.reserve(3*dimension_error_state_); //worst case -> Optimize
 
         std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
@@ -1330,7 +1290,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
 
 
     // dimension of the measurement
-    int dimensionErrorMeasurement=std::dynamic_pointer_cast<SensorCore>(TheImuStateCore->getMsfElementCoreSharedPtr())->getDimensionErrorMeasurement();
+    int dimension_error_measurement=this->getDimensionErrorMeasurement();
 
 
     // Robot
@@ -1415,7 +1375,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
             int dimensionRobotErrorState=TheRobotCoreAux->getDimensionErrorState();
 
             // Resize and init Jacobian
-            predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimensionErrorMeasurement, dimensionRobotErrorState);
+            predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimension_error_measurement, dimensionRobotErrorState);
             predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.setZero();
 
             // Fill Jacobian
@@ -1552,7 +1512,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     int dimensionSensorErrorState=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Resize and init Jacobian
-    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimensionErrorMeasurement, dimensionSensorErrorState);
+    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimension_error_measurement, dimensionSensorErrorState);
     predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
 
 
@@ -1560,7 +1520,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     int dimensionSensorParameters=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Resize and init Jacobian
-    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.resize(dimensionErrorMeasurement, dimensionSensorParameters);
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.resize(dimension_error_measurement, dimensionSensorParameters);
     predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.setZero();
 
 
@@ -1884,7 +1844,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Jacobian measurement - map element parameters
 
     // Resize and init jacobian
-    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.resize(dimensionErrorMeasurement, 0);
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.resize(dimension_error_measurement, 0);
     predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.setZero();
 
 
@@ -1895,7 +1855,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     int dimensionGlobalParameters=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Resize and init Jacobian
-    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimensionErrorMeasurement, dimensionGlobalParameters);
+    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimension_error_measurement, dimensionGlobalParameters);
     predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.setZero();
 
     // Fill Jacobian
@@ -1937,11 +1897,11 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     /// Jacobians measurement - sensor noise of the measurement
 
     // Resize and init Jacobian
-    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimensionErrorMeasurement, dimensionErrorMeasurement);
+    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimension_error_measurement, dimension_error_measurement);
     predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
 
     // Fill Jacobian
-    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise=Eigen::MatrixXd::Identity(dimensionErrorMeasurement, dimensionErrorMeasurement);
+    predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise=Eigen::MatrixXd::Identity(dimension_error_measurement, dimension_error_measurement);
 
 
     // LOG
@@ -2010,8 +1970,8 @@ int ImuSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std:
 
 
     // Name
-    readingValue=sensor.child_value("name");
-    this->setSensorName(readingValue);
+//    readingValue=sensor.child_value("name");
+//    this->setSensorName(readingValue);
 
 
     //// Sensor configurations

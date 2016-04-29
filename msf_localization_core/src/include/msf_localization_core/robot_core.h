@@ -43,7 +43,8 @@
 enum class RobotCoreTypes
 {
     undefined=0,
-    free_model=1
+    free_model=1,
+    imu_driven
 };
 
 
@@ -73,12 +74,12 @@ public:
     RobotCoreTypes getRobotCoreType() const;
 
 
-    // Robot Name
-protected:
-    std::string robot_name_;
-public:
-    int setRobotName(std::string robot_name);
-    std::string getRobotName() const;
+//    // Robot Name
+//protected:
+//    std::string robot_name_;
+//public:
+//    int setRobotName(std::string robot_name);
+//    std::string getRobotName() const;
 
 
 

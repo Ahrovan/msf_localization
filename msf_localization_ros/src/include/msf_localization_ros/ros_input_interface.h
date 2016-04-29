@@ -9,7 +9,7 @@
 class RosInputInterface : public RosInterface
 {
 protected:
-    RosInputInterface(ros::NodeHandle* nh);
+    RosInputInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster);
 public:
     virtual ~RosInputInterface();
 

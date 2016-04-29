@@ -5,8 +5,8 @@
 
 
 
-RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    RosSensorInterface(nh),
+RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+    RosSensorInterface(nh, tf_transform_broadcaster),
     ImuSensorCore(the_msf_storage_core)
 {
 
@@ -124,10 +124,12 @@ int RosSensorImuInterface::open()
     return 0;
 }
 
-int RosSensorImuInterface::publish()
+int RosSensorImuInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
 {
-    // TODO
+    // tf pose sensor wrt robot
+    this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);
 
+    // end
     return 0;
 }
 
@@ -142,8 +144,12 @@ int RosSensorImuInterface::readConfig(pugi::xml_node sensor, unsigned int sensor
 
     /// Ros Configs
     // Sensor Topic
-    std::string sensorTopic=sensor.child_value("ros_topic");
-    this->setImuTopicName(sensorTopic);
+    std::string sensor_topic=sensor.child_value("ros_topic");
+    this->setImuTopicName(sensor_topic);
+
+    // Name
+    std::string sensor_name=sensor.child_value("name");
+    this->setSensorName(sensor_name);
 
 
     /// Finish

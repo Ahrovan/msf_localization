@@ -29,11 +29,11 @@ CodedVisualMarkerLandmarkCore::~CodedVisualMarkerLandmarkCore()
 int CodedVisualMarkerLandmarkCore::init()
 {
     // Dimensions
-    dimensionState=0;
-    dimensionErrorState=0;
+    dimension_state_=0;
+    dimension_error_state_=0;
 
-    dimensionParameters+=3+4;
-    dimensionErrorParameters+=3+3;
+    dimension_parameters_+=3+4;
+    dimension_error_parameters_+=3+3;
 
     // Flags
     flag_estimation_position_visual_marker_wrt_world=false;
@@ -74,10 +74,10 @@ int CodedVisualMarkerLandmarkCore::enableEstimationPositionVisualMarkerWrtWorld(
     if(!flag_estimation_position_visual_marker_wrt_world)
     {
         flag_estimation_position_visual_marker_wrt_world=true;
-        dimensionState+=3;
-        dimensionErrorState+=3;
-        dimensionParameters-=3;
-        dimensionErrorParameters-=3;
+        dimension_state_+=3;
+        dimension_error_state_+=3;
+        dimension_parameters_-=3;
+        dimension_error_parameters_-=3;
     }
     return 0;
 }
@@ -87,10 +87,10 @@ int CodedVisualMarkerLandmarkCore::enableParameterPositionVisualMarkerWrtWorld()
     if(flag_estimation_position_visual_marker_wrt_world)
     {
         flag_estimation_position_visual_marker_wrt_world=false;
-        dimensionState-=3;
-        dimensionErrorState-=3;
-        dimensionParameters+=3;
-        dimensionErrorParameters+=3;
+        dimension_state_-=3;
+        dimension_error_state_-=3;
+        dimension_parameters_+=3;
+        dimension_error_parameters_+=3;
     }
     return 0;
 }
@@ -117,10 +117,10 @@ int CodedVisualMarkerLandmarkCore::enableEstimationAttitudeVisualMarkerWrtWorld(
     if(!flag_estimation_attitude_visual_marker_wrt_world)
     {
         flag_estimation_attitude_visual_marker_wrt_world=true;
-        dimensionState+=4;
-        dimensionErrorState+=3;
-        dimensionParameters-=4;
-        dimensionErrorParameters-=3;
+        dimension_state_+=4;
+        dimension_error_state_+=3;
+        dimension_parameters_-=4;
+        dimension_error_parameters_-=3;
     }
 
     return 0;
@@ -131,10 +131,10 @@ int CodedVisualMarkerLandmarkCore::enableParameterAttitudeVisualMarkerWrtWorld()
     if(flag_estimation_attitude_visual_marker_wrt_world)
     {
         flag_estimation_attitude_visual_marker_wrt_world=false;
-        dimensionState-=4;
-        dimensionErrorState-=3;
-        dimensionParameters+=4;
-        dimensionErrorParameters+=3;
+        dimension_state_-=4;
+        dimension_error_state_-=3;
+        dimension_parameters_+=4;
+        dimension_error_parameters_+=3;
     }
     return 0;
 }
@@ -331,8 +331,8 @@ int CodedVisualMarkerLandmarkCore::predictStateErrorStateJacobians(const TimeSta
     //// Jacobian Error State
 
     // Jacobian Size
-    predictedState->jacobian_error_state_.resize(dimensionErrorState, dimensionErrorState);
-    predictedState->jacobian_error_state_.reserve(dimensionErrorState);
+    predictedState->jacobian_error_state_.resize(dimension_error_state_, dimension_error_state_);
+    predictedState->jacobian_error_state_.reserve(dimension_error_state_);
 
     std::vector<Eigen::Triplet<double> > tripletJacobianErrorState;
 

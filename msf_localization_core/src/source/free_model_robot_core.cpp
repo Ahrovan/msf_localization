@@ -2,7 +2,7 @@
 #include "msf_localization_core/free_model_robot_core.h"
 
 
-FreeModelRobotCore::FreeModelRobotCore():
+FreeModelRobotCore::FreeModelRobotCore() :
     RobotCore()
 {
     init();
@@ -10,7 +10,7 @@ FreeModelRobotCore::FreeModelRobotCore():
     return;
 }
 
-FreeModelRobotCore::FreeModelRobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr):
+FreeModelRobotCore::FreeModelRobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     RobotCore(msf_storage_core_ptr)
 {
     init();
@@ -25,13 +25,13 @@ FreeModelRobotCore::~FreeModelRobotCore()
 
 int FreeModelRobotCore::init()
 {
-    dimensionState=9+10;
-    dimensionErrorState=9+9;
+    dimension_state_=9+10;
+    dimension_error_state_=9+9;
 
-    dimensionParameters=0;
-    dimensionErrorParameters=0;
+    dimension_parameters_=0;
+    dimension_error_parameters_=0;
 
-    dimensionNoise=9+9;
+    dimension_noise_=9+9;
 
     noisePosition.setZero();
     noiseLinearSpeed.setZero();
@@ -121,9 +121,9 @@ Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceNoise(const TimeSta
     Eigen::SparseMatrix<double> covariance_noise;
 
     // Resize
-    covariance_noise.resize(dimensionNoise, dimensionNoise);
+    covariance_noise.resize(dimension_noise_, dimension_noise_);
     //covariance_noise.setZero();
-    covariance_noise.reserve(dimensionNoise);
+    covariance_noise.reserve(dimension_noise_);
 
     std::vector<Eigen::Triplet<double> > tripletList;
 
@@ -559,8 +559,8 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // Jacobian Size
 
 
-    predictedState->jacobian_error_state_noise_.resize(dimensionErrorState, dimensionNoise);
-    predictedState->jacobian_error_state_noise_.reserve(dimensionNoise);
+    predictedState->jacobian_error_state_noise_.resize(dimension_error_state_, dimension_noise_);
+    predictedState->jacobian_error_state_noise_.reserve(dimension_noise_);
 
 
     std::vector<Eigen::Triplet<double> > tripletListNoiseJacobian;
@@ -664,9 +664,9 @@ int FreeModelRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<FreeMod
     std::string readingValue;
 
 
-    // Name
-    readingValue=robot.child_value("name");
-    this->setRobotName(readingValue);
+//    // Name
+//    readingValue=robot.child_value("name");
+//    this->setRobotName(readingValue);
 
 
     /// Init State

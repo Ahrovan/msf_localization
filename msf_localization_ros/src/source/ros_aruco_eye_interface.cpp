@@ -1,8 +1,8 @@
 #include "msf_localization_ros/ros_aruco_eye_interface.h"
 
 
-RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    RosSensorInterface(nh),
+RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+    RosSensorInterface(nh, tf_transform_broadcaster),
     CodedVisualMarkerEyeCore(the_msf_storage_core)
 {
 
@@ -122,10 +122,12 @@ int RosArucoEyeInterface::open()
     return 0;
 }
 
-int RosArucoEyeInterface::publish()
+int RosArucoEyeInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
 {
-    // TODO
+    // tf pose sensor wrt robot
+    this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);
 
+    // end
     return 0;
 }
 
@@ -142,9 +144,13 @@ int RosArucoEyeInterface::readConfig(pugi::xml_node sensor, unsigned int sensorI
     /// ROS Configs
 
     // Sensor Topic
-    std::string sensorTopic=sensor.child_value("ros_topic");
-    this->setMarkerListTopicName(sensorTopic);
+    std::string sensor_topic=sensor.child_value("ros_topic");
+    this->setMarkerListTopicName(sensor_topic);
 
+
+    // Name
+    std::string sensor_name=sensor.child_value("name");
+    this->setSensorName(sensor_name);
 
 
     /// Finish

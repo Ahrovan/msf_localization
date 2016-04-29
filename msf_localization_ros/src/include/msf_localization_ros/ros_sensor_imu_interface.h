@@ -33,7 +33,7 @@
 class RosSensorImuInterface : public RosSensorInterface, public ImuSensorCore
 {
 public:
-    RosSensorImuInterface(ros::NodeHandle* nh, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosSensorImuInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 
 
 
@@ -56,7 +56,7 @@ public:
 
 
 public:
-    int publish();
+    int publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core);
 
 public:
     int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);

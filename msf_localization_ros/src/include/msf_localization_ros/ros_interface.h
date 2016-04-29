@@ -12,6 +12,11 @@
 #include <ros/ros.h>
 
 
+// tf
+#include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
+
+
 // std_msgs
 #include <std_msgs/Header.h>
 
@@ -31,6 +36,10 @@ public:
 protected:
     ros::NodeHandle* nh;
 
+
+    // Tf
+protected:
+    tf::TransformBroadcaster* tf_transform_broadcaster_;
 
 
     // Open
