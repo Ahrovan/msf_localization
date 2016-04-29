@@ -72,6 +72,16 @@ Eigen::SparseMatrix<double> StateCore::getJacobianErrorState()
     return this->jacobian_error_state_;
 }
 
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorParameters()
+{
+    return this->jacobian_error_parameters_;
+}
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorInputs()
+{
+    return this->jacobian_error_inputs_;
+}
+
 Eigen::SparseMatrix<double> StateCore::getJacobianErrorStateNoise()
 {
     return this->jacobian_error_state_noise_;

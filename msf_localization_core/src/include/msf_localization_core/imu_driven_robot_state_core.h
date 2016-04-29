@@ -29,7 +29,7 @@ protected:
     // State: xR=[pos (3/3), lin_speed (3/3), lin_acc (3/3), attit (4/3), ang_vel (3/3)]'
 
 protected:
-//public:
+public:
     Eigen::Vector3d position_robot_wrt_world_;
 public:
     Eigen::Vector3d getPositionRobotWrtWorld() const;
@@ -37,7 +37,7 @@ public:
 
 
 protected:
-//public:
+public:
     Eigen::Vector3d linear_speed_robot_wrt_world_;
 public:
     Eigen::Vector3d getLinearSpeedRobotWrtWorld() const;
@@ -45,7 +45,7 @@ public:
 
 
 protected:
-//public:
+public:
     Eigen::Vector3d linear_acceleration_robot_wrt_world_;
 public:
     Eigen::Vector3d getLinearAccelerationRobotWrtWorld() const;
@@ -53,7 +53,7 @@ public:
 
 
 protected:
-//public:
+public:
     Eigen::Vector4d attitude_robot_wrt_world_;
 public:
     Eigen::Vector4d getAttitudeRobotWrtWorld() const;
@@ -61,7 +61,7 @@ public:
 
 
 protected:
-//public:
+public:
     Eigen::Vector3d angular_velocity_robot_wrt_world_;
 public:
     Eigen::Vector3d getAngularVelocityRobotWrtWorld() const;

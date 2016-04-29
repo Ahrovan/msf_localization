@@ -274,14 +274,309 @@ int ImuDrivenRobotCore::prepareCovarianceInitErrorState()
     return 0;
 }
 
-int ImuDrivenRobotCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState)
+int ImuDrivenRobotCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
 {
+    //std::cout<<"ImuDrivenRobotCore::predictState"<<std::endl;
+
+    // Polymorph
+    std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
+    std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
+
+
+
+    // Checks in the past state
+    if(!pastState->isCorrect())
+    {
+        std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+        return -5;
+    }
+
+
+    // Create the predicted state if it doesn't exist
+    if(!predictedState)
+    {
+        predictedState=std::make_shared<ImuDrivenRobotStateCore>(pastState->getMsfElementCoreWeakPtr());
+    }
+
+
+
+
+
+    // Equations
+
+
+    //Delta Time
+    TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
+    double dt=DeltaTime.get_double();
+
+
+    /// Position
+    predictedState->position_robot_wrt_world_=pastState->position_robot_wrt_world_+pastState->linear_speed_robot_wrt_world_*dt+0.5*pastState->linear_acceleration_robot_wrt_world_*dt*dt;
+
+
+    /// Linear Speed
+    predictedState->linear_speed_robot_wrt_world_=pastState->linear_speed_robot_wrt_world_+pastState->linear_acceleration_robot_wrt_world_*dt;
+
+
+    /// Linear Acceleration
+    predictedState->linear_acceleration_robot_wrt_world_=pastState->linear_acceleration_robot_wrt_world_;
+
+
+    /// Attitude
+
+    // deltaQw
+
+    Eigen::Vector3d w_mean_dt=(pastState->angular_velocity_robot_wrt_world_)*dt;
+    Eigen::Vector4d rotation_w_mean_dt_to_quat;
+    rotation_w_mean_dt_to_quat=Quaternion::rotationVectorToQuaternion(w_mean_dt);
+    rotation_w_mean_dt_to_quat=rotation_w_mean_dt_to_quat/rotation_w_mean_dt_to_quat.norm();
+
+    //std::cout<<"w_mean_dt="<<w_mean_dt<<std::endl;
+    //std::cout<<"rotation_w_mean_dt_to_quat="<<rotation_w_mean_dt_to_quat<<std::endl;
+
+
+    // prediction
+    //predictedState->attitude=Quaternion::cross(rotation_w_mean_dt_to_quat + pow(dt,2)/24*deltaQalpha, pastState->attitude);
+
+    Eigen::Vector4d quat_perturbation=rotation_w_mean_dt_to_quat;
+
+    //std::cout<<"quat_perturbation="<<quat_perturbation<<std::endl;
+
+    Eigen::Vector4d predictedAttitude=Quaternion::cross(quat_perturbation, pastState->attitude_robot_wrt_world_);
+
+
+    // Unit quaternion -> Very needed!
+
+    //predictedState->attitude=predictedAttitude/predictedAttitude.norm();
+//std::cout<<"predictedState->attitude="<<predictedState->attitude.transpose()<<std::endl;
+
+
+    // Quaternion unit (very needed)
+    predictedState->attitude_robot_wrt_world_=predictedAttitude/predictedAttitude.norm();
+
+
+
+    /// Angular Velocity
+    predictedState->angular_velocity_robot_wrt_world_=pastState->angular_velocity_robot_wrt_world_;
+
+//std::cout<<"predictedState->angular_velocity="<<predictedState->angular_velocity<<std::endl;
+
+
+
+
+    /// Finish
+    predictedStateI=predictedState;
 
     return 0;
 }
 
-int ImuDrivenRobotCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState)
+int ImuDrivenRobotCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
 {
+
+    //std::cout<<"ImuDrivenRobotCore::predictErrorStateJacobians"<<std::endl;
+
+
+    // Polymorph
+    std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::static_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
+    std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::static_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
+
+
+
+
+    // Create the predicted state if it doesn't exist
+    if(!predictedState)
+    {
+        std::cout<<"ImuDrivenRobotCore::predictErrorStateJacobians error en predictedState"<<std::endl;
+        return 1;
+    }
+
+
+    //Delta Time
+    TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
+    // delta time
+    double dt=DeltaTime.get_double();
+
+
+    ///// Jacobian Error State
+
+    // Jacobian Size
+
+    predictedState->jacobian_error_state_.resize(this->getDimensionErrorState(),this->getDimensionErrorState());
+    predictedState->jacobian_error_state_.reserve(18+36);
+
+//    predictedState->errorStateJacobian.linear.resize(9, 9);
+//    predictedState->errorStateJacobian.linear.reserve(18);
+//    //predictedState->errorStateJacobian.linear.setZero();
+
+
+//    predictedState->errorStateJacobian.angular.resize(9, 9);
+//    predictedState->errorStateJacobian.linear.reserve(36);
+//    //predictedState->errorStateJacobian.angular.setZero();
+
+
+
+    /// Jacobian of the error: Linear Part
+    std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
+
+    // posi / posi
+    //predictedState->errorStateJacobian.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i,1));
+
+
+    // posi / vel
+    //predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*dt;
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,3+i,dt));
+
+
+    // posi / acc
+    //predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+    double dt2=pow(dt,2);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,0.5*dt2));
+
+
+
+    // vel / posi
+    // zero
+
+    // vel / vel
+    //predictedState->errorStateJacobian.linear.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,3+i,1));
+
+
+    // vel / acc
+    //predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,6+i,dt));
+
+
+
+    // acc / posi
+    // zero
+
+    // acc / vel
+    // zero
+
+    // acc / acc
+    //predictedState->errorStateJacobian.linear.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(6+i,6+i,1));
+
+
+
+
+
+    /// Jacobian of the error -> Angular Part
+
+
+    // Auxiliar values
+    Eigen::Vector3d w_mean_dt=(pastState->angular_velocity_robot_wrt_world_)*dt;
+    Eigen::Vector4d quat_w_mean_dt=Quaternion::rotationVectorToQuaternion(w_mean_dt);
+
+    // Auxiliar Matrixes
+    Eigen::Matrix4d quat_mat_plus_quat_ref_k1=Quaternion::quatMatPlus(predictedState->attitude_robot_wrt_world_);
+    Eigen::Matrix4d quat_mat_plus_quat_ref_k1_inv=quat_mat_plus_quat_ref_k1.inverse();
+    Eigen::MatrixXd mat_delta_q_delta_theta(4, 3);
+    mat_delta_q_delta_theta.setZero();
+    mat_delta_q_delta_theta(1,0)=1;
+    mat_delta_q_delta_theta(2,1)=1;
+    mat_delta_q_delta_theta(3,2)=1;
+    Eigen::Matrix4d quat_mat_plus_quat_ref_k=Quaternion::quatMatPlus(pastState->attitude_robot_wrt_world_);
+    Eigen::Matrix4d quat_mat_minus_quat_ref_k=Quaternion::quatMatMinus(pastState->attitude_robot_wrt_world_);
+    Eigen::MatrixXd mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
+
+
+
+    //std::cout<<"w_mean_dt="<<w_mean_dt<<std::endl;
+    //std::cout<<"predictedState->angular_velocity="<<predictedState->angular_velocity<<std::endl;
+
+    //std::cout<<"quat_w_mean_dt="<<quat_w_mean_dt<<std::endl;
+    //std::cout<<"quat_for_second_order_correction="<<quat_for_second_order_correction<<std::endl;
+
+
+    // att / att [9 non-zero]
+    Eigen::Matrix3d jacobianAttAtt=
+            mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
+    //predictedState->errorStateJacobian.angular.block<3,3>(0,0)=jacobianAttAtt;
+    //predictedState->errorStateJacobian.angular=jacobianAttAtt.sparseView();
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+            tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+j,jacobianAttAtt(i,j)));
+
+
+
+    // att / ang_vel [9 non-zero]
+    Eigen::Matrix3d jacobianAttAngVel=
+            2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt);
+    //predictedState->errorStateJacobian.angular.block<3,3>(0,3)=jacobianAttAngVel;
+    //predictedState->errorStateJacobian.angular=jacobianAttAngVel.sparseView();
+    for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+            tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+3+j,jacobianAttAngVel(i,j)));
+
+
+
+
+    // ang_vel / att
+    // zero
+
+    // ang_vel / ang_vel [3 non-zero]
+    //predictedState->errorStateJacobian.angular.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+3+i,1));
+
+
+
+
+
+    predictedState->jacobian_error_state_.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+
+
+
+
+    ///// Jacobian Error State Noise
+
+    // Jacobian Size
+
+
+    predictedState->jacobian_error_state_noise_.resize(dimension_error_state_, dimension_noise_);
+    predictedState->jacobian_error_state_noise_.reserve(dimension_noise_);
+
+
+    // Fill
+    std::vector<Eigen::Triplet<double> > tripletListNoiseJacobian;
+
+    int dimension_state_i=0;
+    int dimension_noise_i=0;
+
+
+
+    // Do nothing
+
+
+
+    predictedState->jacobian_error_state_noise_.setFromTriplets(tripletListNoiseJacobian.begin(), tripletListNoiseJacobian.end());
+
+
+
+#if _DEBUG_ROBOT_CORE
+    {
+        std::ostringstream logString;
+        logString<<"ImuDrivenRobotCore::predictErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"Jacobian Error State"<<std::endl;
+        logString<<Eigen::MatrixXd(predictedState->jacobian_error_state_)<<std::endl;
+        logString<<"Jacobian Error State Noise"<<std::endl;
+        logString<<Eigen::MatrixXd(predictedState->jacobian_error_state_noise_)<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
+    // Finish
+    predictedStateI=predictedState;
 
     return 0;
 }

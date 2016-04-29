@@ -748,9 +748,9 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     return 0;
 }
 
-int ImuSensorCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
+int ImuSensorCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
 {
-    //std::cout<<"ImuSensorCore::predictStateErrorStateJacobians"<<std::endl;
+    //std::cout<<"ImuSensorCore::predictErrorStateJacobians"<<std::endl;
 
 
     // Poly
@@ -1207,7 +1207,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 
 
-int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
+int ImuSensorCore::jacobiansErrorMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
 
     // Checks
@@ -1841,7 +1841,7 @@ int ImuSensorCore::jacobiansMeasurements(const TimeStamp theTimeStamp, std::shar
     // LOG
 #if _DEBUG_SENSOR_CORE
     {
-        logFile<<"ImuSensorCore::jacobiansMeasurements() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+        logFile<<"ImuSensorCore::jacobiansErrorMeasurements() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 
         logFile<<"predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState="<<std::endl;
         logFile<<predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState<<std::endl;

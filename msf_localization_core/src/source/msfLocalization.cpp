@@ -660,7 +660,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         }
 
         // Jacobians
-        if(TheRobotCore->predictStateErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateRobot, predictedStateRobot))
+        if(TheRobotCore->predictErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateRobot, predictedStateRobot))
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             std::cout<<"!!Error predicting error state jacobians of the robot"<<std::endl;
@@ -734,7 +734,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         }
 
         // Jacobians
-        if(theSensorCore->predictStateErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateSensor, predictedStateSensor))
+        if(theSensorCore->predictErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateSensor, predictedStateSensor))
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             std::cout<<"!!Error predicting error state jacobians of the sensor"<<std::endl;
@@ -788,7 +788,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         }
 
         // Jacobians
-        if(theMapElementCore->predictStateErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, (*itMapElement), predictedMapElementState))
+        if(theMapElementCore->predictErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, (*itMapElement), predictedMapElementState))
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             std::cout<<"!!Error predicting error state jacobians of the map element"<<std::endl;
@@ -1666,7 +1666,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                 // Compute Jacobians of the Measurement
-                if(TheImuSensorCore->jacobiansMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
+                if(TheImuSensorCore->jacobiansErrorMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
@@ -1762,7 +1762,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
                 // Jacobian Measurement prediction
-                if(TheVisualMarkerSensorCore->jacobiansMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, (*itListMeas), TheCodedVisualMarkerPredictedMeasurement))
+                if(TheVisualMarkerSensorCore->jacobiansErrorMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, (*itListMeas), TheCodedVisualMarkerPredictedMeasurement))
                 {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;

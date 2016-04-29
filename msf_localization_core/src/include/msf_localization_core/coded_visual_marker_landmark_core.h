@@ -118,20 +118,9 @@ public:
 
     // Jacobian
 public:
-    int predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
+    int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
 
 
-    /*
-    // Prediction measurements
-public:
-    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
-
-
-    // Jacobian of the measurements
-public:
-    int jacobiansMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersState, std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
-
-    */
 
 
 

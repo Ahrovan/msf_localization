@@ -19,19 +19,19 @@ int RosImuDrivenRobotInterface::readParameters()
     // Topic names
     //
     ros::param::param<std::string>("~robot_pose_with_cov_topic_name", robotPoseWithCovarianceStampedTopicName, "msf_localization/robot_pose_cov");
-    std::cout<<"robot_pose_with_cov_topic_name="<<robotPoseWithCovarianceStampedTopicName<<std::endl;
+    std::cout<<"\t robot_pose_with_cov_topic_name="<<robotPoseWithCovarianceStampedTopicName<<std::endl;
     //
     ros::param::param<std::string>("~robot_pose_topic_name", robotPoseStampedTopicName, "msf_localization/robot_pose");
-    std::cout<<"robot_pose_topic_name="<<robotPoseStampedTopicName<<std::endl;
+    std::cout<<"\t robot_pose_topic_name="<<robotPoseStampedTopicName<<std::endl;
     //
     ros::param::param<std::string>("~robot_linear_speed_topic_name", robotLinearSpeedStampedTopicName, "msf_localization/robot_linear_speed");
-    std::cout<<"robot_linear_speed_topic_name="<<robotLinearSpeedStampedTopicName<<std::endl;
+    std::cout<<"\t robot_linear_speed_topic_name="<<robotLinearSpeedStampedTopicName<<std::endl;
     //
     ros::param::param<std::string>("~robot_linear_acceleration_topic_name", robotLinearAccelerationStampedTopicName, "msf_localization/robot_linear_acceleration");
-    std::cout<<"robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;
+    std::cout<<"\t robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;
     //
     ros::param::param<std::string>("~robot_angular_velocity_topic_name", robotAngularVelocityStampedTopicName, "msf_localization/robot_angular_velocity");
-    std::cout<<"robot_angular_velocity_topic_name="<<robotAngularVelocityStampedTopicName<<std::endl;
+    std::cout<<"\t robot_angular_velocity_topic_name="<<robotAngularVelocityStampedTopicName<<std::endl;
 
     return 0;
 }

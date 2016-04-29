@@ -47,6 +47,9 @@ public:
     MeasurementTypes getMeasurementType() const;
 
 
+public:
+    virtual bool isCorrect();
+
 
     /// Jacobians Measurement
 

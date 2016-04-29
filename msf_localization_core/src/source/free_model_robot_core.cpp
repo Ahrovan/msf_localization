@@ -353,9 +353,9 @@ int FreeModelRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 }
 
 // Jacobian
-int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
+int FreeModelRobotCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
 {
-    //std::cout<<"FreeModelRobotCore::predictStateErrorStateJacobians"<<std::endl;
+    //std::cout<<"FreeModelRobotCore::predictErrorStateJacobians"<<std::endl;
 
 
     // Polymorph
@@ -368,7 +368,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        std::cout<<"FreeModelRobotCore::predictStateErrorStateJacobians error en predictedState"<<std::endl;
+        std::cout<<"FreeModelRobotCore::predictErrorStateJacobians error en predictedState"<<std::endl;
         return 1;
     }
 
@@ -619,7 +619,7 @@ int FreeModelRobotCore::predictStateErrorStateJacobians(const TimeStamp previous
 #if _DEBUG_ROBOT_CORE
     {
         std::ostringstream logString;
-        logString<<"FreeModelRobotCore::predictStateErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"FreeModelRobotCore::predictErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
         logString<<"Jacobian Error State"<<std::endl;
         logString<<Eigen::MatrixXd(predictedState->errorStateJacobian)<<std::endl;
         logString<<"Jacobian Error State Noise"<<std::endl;

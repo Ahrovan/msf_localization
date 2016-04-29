@@ -307,7 +307,7 @@ int CodedVisualMarkerLandmarkCore::predictState(const TimeStamp previousTimeStam
 }
 
 // Jacobian
-int CodedVisualMarkerLandmarkCore::predictStateErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastStateI, std::shared_ptr<MapElementStateCore>& predictedStateI)
+int CodedVisualMarkerLandmarkCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastStateI, std::shared_ptr<MapElementStateCore>& predictedStateI)
 {
     // Poly
     std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerLandmarkStateCore>(pastStateI);

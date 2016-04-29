@@ -56,12 +56,31 @@ public:
     virtual bool isCorrect();
 
 
+
+    //// Jacobians Prediction
+
+    // Fx
 protected:
 public:
     Eigen::SparseMatrix<double> jacobian_error_state_;
 public:
     Eigen::SparseMatrix<double> getJacobianErrorState();
 
+    // Fp
+protected:
+public:
+    Eigen::SparseMatrix<double> jacobian_error_parameters_;
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorParameters();
+
+    // Fu
+protected:
+public:
+    Eigen::SparseMatrix<double> jacobian_error_inputs_;
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorInputs();
+
+    // Fn
 protected:
 public:
     Eigen::SparseMatrix<double> jacobian_error_state_noise_;
@@ -69,6 +88,8 @@ public:
     Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
 
 
+
+    //// Update State
 
 public:
     virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
