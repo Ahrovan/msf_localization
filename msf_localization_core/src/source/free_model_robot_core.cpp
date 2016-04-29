@@ -196,37 +196,37 @@ int FreeModelRobotCore::prepareCovarianceInitErrorState()
 
 int FreeModelRobotCore::setInitErrorStateVariancePosition(Eigen::Vector3d initVariance)
 {
-    this->InitErrorStateVariance.block<3,3>(0,0)=initVariance.asDiagonal();
+    this->covariance_init_error_state_.block<3,3>(0,0)=initVariance.asDiagonal();
     return 0;
 }
 
 int FreeModelRobotCore::setInitErrorStateVarianceLinearSpeed(Eigen::Vector3d initVariance)
 {
-    this->InitErrorStateVariance.block<3,3>(3,3)=initVariance.asDiagonal();
+    this->covariance_init_error_state_.block<3,3>(3,3)=initVariance.asDiagonal();
     return 0;
 }
 
 int FreeModelRobotCore::setInitErrorStateVarianceLinearAcceleration(Eigen::Vector3d initVariance)
 {
-    this->InitErrorStateVariance.block<3,3>(6,6)=initVariance.asDiagonal();
+    this->covariance_init_error_state_.block<3,3>(6,6)=initVariance.asDiagonal();
     return 0;
 }
 
 int FreeModelRobotCore::setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance)
 {
-    this->InitErrorStateVariance.block<3,3>(9,9)=initVariance.asDiagonal();
+    this->covariance_init_error_state_.block<3,3>(9,9)=initVariance.asDiagonal();
     return 0;
 }
 
 int FreeModelRobotCore::setInitErrorStateVarianceAngularVelocity(Eigen::Vector3d initVariance)
 {
-    this->InitErrorStateVariance.block<3,3>(12,12)=initVariance.asDiagonal();
+    this->covariance_init_error_state_.block<3,3>(12,12)=initVariance.asDiagonal();
     return 0;
 }
 
 int FreeModelRobotCore::setInitErrorStateVarianceAngularAcceleration(Eigen::Vector3d initVariance)
 {
-    this->InitErrorStateVariance.block<3,3>(15,15)=initVariance.asDiagonal();
+    this->covariance_init_error_state_.block<3,3>(15,15)=initVariance.asDiagonal();
     return 0;
 }
 

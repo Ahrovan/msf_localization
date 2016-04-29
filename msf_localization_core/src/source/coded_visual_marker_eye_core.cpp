@@ -243,12 +243,12 @@ int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorState()
     int point=0;
     if(this->isEstimationPositionSensorWrtRobotEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=this->getNoisePositionSensorWrtRobot();
+        this->covariance_init_error_state_.block<3,3>(point,point)=this->getNoisePositionSensorWrtRobot();
         point+=3;
     }
     if(this->isEstimationAttitudeSensorWrtRobotEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=this->getNoiseAttitudeSensorWrtRobot();
+        this->covariance_init_error_state_.block<3,3>(point,point)=this->getNoiseAttitudeSensorWrtRobot();
         point+=3;
     }
 

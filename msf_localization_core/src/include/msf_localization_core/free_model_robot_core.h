@@ -35,6 +35,10 @@ protected:
     int init();
 
 
+public:
+    int readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
+
+
 
     ///// Prediction Noises
 
@@ -133,8 +137,7 @@ public:
 
 
 
-public:
-    int readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
+
 
 };
 

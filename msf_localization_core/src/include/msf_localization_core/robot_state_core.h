@@ -14,7 +14,8 @@
 enum class RobotStateCoreTypes
 {
     undefined=0,
-    free_model=1
+    free_model=1,
+    imu_driven
 };
 
 

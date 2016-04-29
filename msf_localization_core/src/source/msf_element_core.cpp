@@ -184,14 +184,14 @@ int MsfElementCore::setDimensionNoise(int dimension_noise)
 
 int MsfElementCore::prepareCovarianceInitErrorState()
 {
-    this->InitErrorStateVariance.resize(dimension_error_state_, dimension_error_state_);
-    this->InitErrorStateVariance.setZero();
+    this->covariance_init_error_state_.resize(dimension_error_state_, dimension_error_state_);
+    this->covariance_init_error_state_.setZero();
     return 0;
 }
 
 Eigen::MatrixXd MsfElementCore::getCovarianceInitErrorState() const
 {
-    return this->InitErrorStateVariance;
+    return this->covariance_init_error_state_;
 }
 
 int MsfElementCore::log(std::string log_string)

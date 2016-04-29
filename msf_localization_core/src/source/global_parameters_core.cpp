@@ -126,7 +126,7 @@ int GlobalParametersCore::prepareCovarianceInitErrorState()
     int point=0;
     if(this->isEstimationGravityEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noiseGravity;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noiseGravity;
         point+=3;
     }
 

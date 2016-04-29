@@ -842,22 +842,22 @@ int ImuInputCore::prepareCovarianceInitErrorState()
     int point=0;
     if(this->isEstimationPositionInputWrtRobotEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noise_position_input_wrt_robot_;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noise_position_input_wrt_robot_;
         point+=3;
     }
     if(this->isEstimationAttitudeInputWrtRobotEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noise_attitude_input_wrt_robot_;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noise_attitude_input_wrt_robot_;
         point+=3;
     }
     if(this->isEstimationBiasLinearAccelerationEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noise_bias_linear_acceleration_;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noise_bias_linear_acceleration_;
         point+=3;
     }
     if(this->isEstimationBiasAngularVelocityEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noise_bias_angular_velocity_;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noise_bias_angular_velocity_;
         point+=3;
     }
     // TODO

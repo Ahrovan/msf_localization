@@ -44,26 +44,9 @@ int RobotCore::init()
     // Robot Type
     robot_core_type_=RobotCoreTypes::undefined;
 
-    // Robot name default
-    //robot_name_="robot";
 
     return 0;
 }
-
-//int RobotCore::setRobotName(std::string robot_name)
-//{
-//    this->robot_name_=robot_name;
-//    return 0;
-//}
-
-//std::string RobotCore::getRobotName() const
-//{
-//    return this->robot_name_;
-//}
-
-
-
-
 
 int RobotCore::setRobotCoreType(RobotCoreTypes robot_core_type)
 {

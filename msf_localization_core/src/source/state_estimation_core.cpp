@@ -277,7 +277,7 @@ int StateEstimationCore::getDimensionErrorInputCommand() const
 
 int StateEstimationCore::prepareCovarianceInitErrorState()
 {
-    //std::cout<<"StateEstimationCore::prepareInitErrorStateVariance()"<<std::endl;
+    //std::cout<<"StateEstimationCore::prepareCovarianceInitErrorState()"<<std::endl;
 
     // Dimension
     int dimension_error_state=this->getDimensionErrorState();

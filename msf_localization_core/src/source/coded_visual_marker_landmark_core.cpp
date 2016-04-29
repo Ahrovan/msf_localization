@@ -166,13 +166,13 @@ int CodedVisualMarkerLandmarkCore::prepareCovarianceInitErrorState()
 
     if(flag_estimation_position_visual_marker_wrt_world)
     {
-        this->InitErrorStateVariance.block<3,3>(dimension_i, dimension_i)=covariancePositionVisualMarkerWrtWorld;
+        this->covariance_init_error_state_.block<3,3>(dimension_i, dimension_i)=covariancePositionVisualMarkerWrtWorld;
         dimension_i+=3;
     }
 
     if(flag_estimation_attitude_visual_marker_wrt_world)
     {
-        this->InitErrorStateVariance.block<3,3>(dimension_i, dimension_i)=covarianceAttitudeVisualMarkerWrtWorld;
+        this->covariance_init_error_state_.block<3,3>(dimension_i, dimension_i)=covarianceAttitudeVisualMarkerWrtWorld;
         dimension_i+=3;
     }
 

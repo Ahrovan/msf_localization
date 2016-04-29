@@ -41,9 +41,6 @@ int MsfLocalizationROS::setConfigFile(std::string configFile)
 
 int MsfLocalizationROS::readConfigFile()
 {
-    // ROS Node Handle
-    //ros::NodeHandle nh;
-
     // File
     if ( !boost::filesystem::exists( configFile ) )
     {
@@ -119,10 +116,9 @@ int MsfLocalizationROS::readConfigFile()
 
     ///// Robot
 
+    // Reading Robot
+    for(pugi::xml_node robot = msf_localization.child("robot"); robot; robot = robot.next_sibling("robot"))
     {
-        // Reading Robot
-        pugi::xml_node robot = msf_localization.child("robot");
-
         // Robot Type
         std::string robotType=robot.child_value("type");
 
@@ -158,6 +154,44 @@ int MsfLocalizationROS::readConfigFile()
             // Push the init state of the robot
             InitialState->TheRobotStateCore=RobotInitStateCore;
 
+            // break to ensure than only one robot model is read
+            break;
+        }
+
+        /// Free Model Type
+        if(robotType=="imu_driven")
+        {
+            std::cout<<"robot = imu_driven"<<std::endl;
+
+            // Create the RobotCoreAux
+            std::shared_ptr<RosImuDrivenRobotInterface> TheRobotCoreAux;
+            // Create a class for the RobotStateCore
+            std::shared_ptr<ImuDrivenRobotStateCore> RobotInitStateCore;
+
+            // Create the RobotCoreAux
+            if(!TheRobotCoreAux)
+            {
+                TheRobotCoreAux=std::make_shared<RosImuDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+            }
+
+            // Set the pointer to itself
+            TheRobotCoreAux->setMsfElementCorePtr(TheRobotCoreAux);
+
+
+            // Read configs
+            if(TheRobotCoreAux->readConfig(robot, RobotInitStateCore))
+                return -2;
+
+            // Finish
+
+            // Push the robot core
+            TheRobotCore=TheRobotCoreAux;
+
+            // Push the init state of the robot
+            InitialState->TheRobotStateCore=RobotInitStateCore;
+
+            // break to ensure than only one robot model is read
+            break;
         }
 
     }
@@ -293,13 +327,11 @@ int MsfLocalizationROS::readConfigFile()
 
     ///// Map elements
 
-
     // Reading map elements
     for(pugi::xml_node map_element = msf_localization.child("map_element"); map_element; map_element = map_element.next_sibling("map_element"))
     {
         // Sensor Type
         std::string mapElementType=map_element.child_value("type");
-
 
         // Coded visual marker
         if(mapElementType=="coded_visual_marker")
@@ -322,7 +354,6 @@ int MsfLocalizationROS::readConfigFile()
             // Read configs
             if(TheMapElementCore->readConfig(map_element, MapElementInitStateCore))
                 return -2;
-
 
             // Finish
 

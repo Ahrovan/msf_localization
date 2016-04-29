@@ -579,72 +579,6 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
     return CovariancesMatrix;
 }
 
-
-/*
-int ImuSensorCore::setInitErrorStateVariancePositionSensorWrtRobot(Eigen::Vector3d initVariance)
-{
-    int point=0;
-    if(this->isEstimationPositionSensorWrtRobotEnabled())
-    {
-        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
-        return 0;
-    }
-    return -1;
-}
-
-int ImuSensorCore::setInitErrorStateVarianceAttitudeSensorWrtRobot(Eigen::Vector3d initVariance)
-{
-    int point=0;
-    if(this->isEstimationPositionSensorWrtRobotEnabled())
-        point+=3;
-    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
-    {
-        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
-        return 0;
-    }
-    return -1;
-}
-
-int ImuSensorCore::setInitErrorStateVarianceBiasLinearAcceleration(Eigen::Vector3d initVariance)
-{
-    int point=0;
-    if(this->isEstimationPositionSensorWrtRobotEnabled())
-        point+=3;
-    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
-    {
-        point+=3;
-    }
-    if(this->isEstimationBiasLinearAccelerationEnabled())
-    {
-        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
-        return 0;
-    }
-    return -1;
-}
-
-int ImuSensorCore::setInitErrorStateVarianceBiasAngularVelocity(Eigen::Vector3d initVariance)
-{
-    int point=0;
-    if(this->isEstimationPositionSensorWrtRobotEnabled())
-        point+=3;
-    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
-    {
-        point+=3;
-    }
-    if(this->isEstimationBiasLinearAccelerationEnabled())
-    {
-        point+=3;
-    }
-    if(this->isEstimationBiasAngularVelocityEnabled())
-    {
-        this->InitErrorStateVariance.block<3,3>(point,point)=initVariance.asDiagonal();
-        return 0;
-    }
-    return -1;
-}
-*/
-
-
 int ImuSensorCore::prepareCovarianceInitErrorState()
 {
     int error=MsfElementCore::prepareCovarianceInitErrorState();
@@ -656,24 +590,24 @@ int ImuSensorCore::prepareCovarianceInitErrorState()
     int point=0;
     if(this->isEstimationPositionSensorWrtRobotEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noisePositionSensorWrtRobot;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noisePositionSensorWrtRobot;
         point+=3;
     }
     if(this->isEstimationAttitudeSensorWrtRobotEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noiseAttitudeSensorWrtRobot;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noiseAttitudeSensorWrtRobot;
         point+=3;
     }
     if(this->isEstimationBiasLinearAccelerationEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noiseBiasLinearAcceleration;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noiseBiasLinearAcceleration;
         point+=3;
     }
     // TODO
     // Add ka
     if(this->isEstimationBiasAngularVelocityEnabled())
     {
-        this->InitErrorStateVariance.block<3,3>(point,point)=noiseBiasAngularVelocity;
+        this->covariance_init_error_state_.block<3,3>(point,point)=noiseBiasAngularVelocity;
     }
     // TODO
     // Add kw

@@ -32,8 +32,51 @@
 
 
 
-class RosImuDrivenRobotInterface
+class RosImuDrivenRobotInterface : public RosRobotInterface, public ImuDrivenRobotCore
 {
+public:
+    RosImuDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    ~RosImuDrivenRobotInterface();
+
+
+
+    // Output -> Publishers
+protected:
+    // Robot Pose with Covariance Stamped
+    ros::Publisher robotPoseWithCovarianceStampedPub;
+    std::string robotPoseWithCovarianceStampedTopicName;
+    geometry_msgs::PoseWithCovarianceStamped robotPoseWithCovarianceStampedMsg;
+
+    // Robot Pose Stamped
+    ros::Publisher robotPoseStampedPub;
+    std::string robotPoseStampedTopicName;
+    geometry_msgs::PoseStamped robotPoseStampedMsg;
+
+    // Robot Linear Speed
+    ros::Publisher robotLinearSpeedStampedPub;
+    std::string robotLinearSpeedStampedTopicName;
+    geometry_msgs::Vector3Stamped robotLinearSpeedStampedMsg;
+
+
+
+
+protected:
+    int readParameters();
+
+public:
+    int open();
+
+
+public:
+    int publish(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core, Eigen::MatrixXd covariance_robot_matrix);
+
+
+protected:
+    int publishTfPoseRobotWrtWorld(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core);
+
+
+public:
+    int readConfig(pugi::xml_node robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_state_core);
 
 
 
