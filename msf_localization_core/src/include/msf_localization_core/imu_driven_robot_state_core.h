@@ -26,7 +26,7 @@ protected:
     int init();
 
 
-    // State: xR=[pos (3/3), lin_speed (3/3), attit (4/3)]'
+    // State: xR=[pos (3/3), lin_speed (3/3), lin_acc (3/3), attit (4/3), ang_vel (3/3)]'
 
 protected:
 //public:
@@ -34,7 +34,6 @@ protected:
 public:
     Eigen::Vector3d getPositionRobotWrtWorld() const;
     int setPositionRobotWrtWorld(Eigen::Vector3d position_robot_wrt_world);
-
 
 
 protected:
@@ -45,6 +44,13 @@ public:
     int setLinearSpeedRobotWrtWorld(Eigen::Vector3d linear_speed_robot_wrt_world);
 
 
+protected:
+//public:
+    Eigen::Vector3d linear_acceleration_robot_wrt_world_;
+public:
+    Eigen::Vector3d getLinearAccelerationRobotWrtWorld() const;
+    int setLinearAccelerationRobotWrtWorld(Eigen::Vector3d linear_acceleration_robot_wrt_world);
+
 
 protected:
 //public:
@@ -54,6 +60,12 @@ public:
     int setAttitudeRobotWrtWorld(Eigen::Vector4d attitude_robot_wrt_world);
 
 
+protected:
+//public:
+    Eigen::Vector3d angular_velocity_robot_wrt_world_;
+public:
+    Eigen::Vector3d getAngularVelocityRobotWrtWorld() const;
+    int setAngularVelocityRobotWrtWorld(Eigen::Vector3d angular_velocity_robot_wrt_world);
 
 
 

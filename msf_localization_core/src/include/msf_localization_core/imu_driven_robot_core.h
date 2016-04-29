@@ -59,6 +59,13 @@ public:
     Eigen::Matrix3d getNoiseLinearSpeedRobotWrtWorld();
 
 
+    // Linear Acceleration Robot Wrt World
+protected:
+    Eigen::Matrix3d noise_linear_acceleration_robot_wrt_world_;
+public:
+    int setNoiseLinearAccelerationRobotWrtWorld(Eigen::Matrix3d noise_linear_acceleration_robot_wrt_world);
+    Eigen::Matrix3d getNoiseLinearAccelerationRobotWrtWorld();
+
 
     // Attitude Robot Wrt World
 protected:
@@ -67,6 +74,13 @@ public:
     int setNoiseAttitudeRobotWrtWorld(Eigen::Matrix3d noise_attitude_robot_wrt_world);
     Eigen::Matrix3d getNoiseAttitudeRobotWrtWorld();
 
+
+    // Angular Velocity Robot Wrt World
+protected:
+    Eigen::Matrix3d noise_angular_velocity_robot_wrt_world_;
+public:
+    int setNoiseAngularVelocityRobotWrtWorld(Eigen::Matrix3d noise_angular_velocity_robot_wrt_world);
+    Eigen::Matrix3d getNoiseAngularVelocityRobotWrtWorld();
 
 
 

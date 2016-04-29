@@ -26,6 +26,12 @@ int RosImuDrivenRobotInterface::readParameters()
     //
     ros::param::param<std::string>("~robot_linear_speed_topic_name", robotLinearSpeedStampedTopicName, "msf_localization/robot_linear_speed");
     std::cout<<"robot_linear_speed_topic_name="<<robotLinearSpeedStampedTopicName<<std::endl;
+    //
+    ros::param::param<std::string>("~robot_linear_acceleration_topic_name", robotLinearAccelerationStampedTopicName, "msf_localization/robot_linear_acceleration");
+    std::cout<<"robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;
+    //
+    ros::param::param<std::string>("~robot_angular_velocity_topic_name", robotAngularVelocityStampedTopicName, "msf_localization/robot_angular_velocity");
+    std::cout<<"robot_angular_velocity_topic_name="<<robotAngularVelocityStampedTopicName<<std::endl;
 
     return 0;
 }
@@ -43,6 +49,10 @@ int RosImuDrivenRobotInterface::open()
     robotPoseStampedPub = nh->advertise<geometry_msgs::PoseStamped>(robotPoseStampedTopicName, 1, true);
     //
     robotLinearSpeedStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearSpeedStampedTopicName, 1, true);
+    //
+    robotLinearAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearAccelerationStampedTopicName, 1, true);
+    //
+    robotAngularVelocityStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotAngularVelocityStampedTopicName, 1, true);
 
 
     return 0;
@@ -63,6 +73,8 @@ int RosImuDrivenRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
     Eigen::Vector3d robotPosition=TheRobotStateCore->getPositionRobotWrtWorld();
     Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitudeRobotWrtWorld();
     Eigen::Vector3d robotLinearSpeed=TheRobotStateCore->getLinearSpeedRobotWrtWorld();
+    Eigen::Vector3d robotLinearAcceleration=TheRobotStateCore->getLinearAccelerationRobotWrtWorld();
+    Eigen::Vector3d robotAngularVelocity=TheRobotStateCore->getAngularVelocityRobotWrtWorld();
 
 
 
@@ -87,6 +99,15 @@ int RosImuDrivenRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
     // Frame id
     robotLinearSpeedStampedMsg.header.frame_id=world_core->getWorldName();
 
+    //
+    robotLinearAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    // Frame id
+    robotLinearAccelerationStampedMsg.header.frame_id=world_core->getWorldName();
+
+    //
+    robotAngularVelocityStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    // Frame id
+    robotAngularVelocityStampedMsg.header.frame_id=world_core->getWorldName();
 
 
     // Pose
@@ -127,11 +148,20 @@ int RosImuDrivenRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
     //
    robotPoseStampedMsg.pose=RobotPose;
 
-
    //
    robotLinearSpeedStampedMsg.vector.x=robotLinearSpeed[0];
    robotLinearSpeedStampedMsg.vector.y=robotLinearSpeed[1];
    robotLinearSpeedStampedMsg.vector.z=robotLinearSpeed[2];
+
+   //
+   robotLinearAccelerationStampedMsg.vector.x=robotLinearAcceleration[0];
+   robotLinearAccelerationStampedMsg.vector.y=robotLinearAcceleration[1];
+   robotLinearAccelerationStampedMsg.vector.z=robotLinearAcceleration[2];
+
+   //
+   robotAngularVelocityStampedMsg.vector.x=robotAngularVelocity[0];
+   robotAngularVelocityStampedMsg.vector.y=robotAngularVelocity[1];
+   robotAngularVelocityStampedMsg.vector.z=robotAngularVelocity[2];
 
 
 
@@ -145,6 +175,12 @@ int RosImuDrivenRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
 
    if(robotLinearSpeedStampedPub.getNumSubscribers()>0)
        robotLinearSpeedStampedPub.publish(robotLinearSpeedStampedMsg);
+
+   if(robotLinearAccelerationStampedPub.getNumSubscribers()>0)
+       robotLinearAccelerationStampedPub.publish(robotLinearAccelerationStampedMsg);
+
+   if(robotAngularVelocityStampedPub.getNumSubscribers()>0)
+       robotAngularVelocityStampedPub.publish(robotAngularVelocityStampedMsg);
 
 
     // end

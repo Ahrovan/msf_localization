@@ -57,6 +57,15 @@ protected:
     std::string robotLinearSpeedStampedTopicName;
     geometry_msgs::Vector3Stamped robotLinearSpeedStampedMsg;
 
+    // Robot Linear Acceleration
+    ros::Publisher robotLinearAccelerationStampedPub;
+    std::string robotLinearAccelerationStampedTopicName;
+    geometry_msgs::Vector3Stamped robotLinearAccelerationStampedMsg;
+
+    // Robot Angular Velocity
+    ros::Publisher robotAngularVelocityStampedPub;
+    std::string robotAngularVelocityStampedTopicName;
+    geometry_msgs::Vector3Stamped robotAngularVelocityStampedMsg;
 
 
 

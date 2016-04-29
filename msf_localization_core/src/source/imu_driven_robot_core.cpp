@@ -26,8 +26,8 @@ ImuDrivenRobotCore::~ImuDrivenRobotCore()
 int ImuDrivenRobotCore::init()
 {
     // Dimensions
-    dimension_state_=6+4;
-    dimension_error_state_=6+3;
+    dimension_state_=9+7;
+    dimension_error_state_=9+6;
 
     dimension_parameters_=0;
     dimension_error_parameters_=0;
@@ -38,7 +38,9 @@ int ImuDrivenRobotCore::init()
     // Noises
     this->noise_position_robot_wrt_world_.setZero();
     this->noise_linear_speed_robot_wrt_world_.setZero();
+    this->noise_linear_acceleration_robot_wrt_world_.setZero();
     this->noise_attitude_robot_wrt_world_.setZero();
+    this->noise_angular_velocity_robot_wrt_world_.setZero();
 
 
     // Type
@@ -81,6 +83,15 @@ int ImuDrivenRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDriv
         robot_init_state->setLinearSpeedRobotWrtWorld(lin_speed);
     }
 
+    // Linear Acceleration
+    readingValue=robot.child("lin_accel").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d lin_accel;
+        stm>>lin_accel[0]>>lin_accel[1]>>lin_accel[2];
+        robot_init_state->setLinearAccelerationRobotWrtWorld(lin_accel);
+    }
+
     // Attitude
     readingValue=robot.child("attitude").child_value("init_estimation");
     {
@@ -88,6 +99,15 @@ int ImuDrivenRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDriv
         Eigen::Vector4d attitude;
         stm>>attitude[0]>>attitude[1]>>attitude[2]>>attitude[3];
         robot_init_state->setAttitudeRobotWrtWorld(attitude);
+    }
+
+    // Angular Velocity
+    readingValue=robot.child("ang_velocity").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d ang_velocity;
+        stm>>ang_velocity[0]>>ang_velocity[1]>>ang_velocity[2];
+        robot_init_state->setAngularVelocityRobotWrtWorld(ang_velocity);
     }
 
 
@@ -112,6 +132,15 @@ int ImuDrivenRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDriv
         this->setNoiseLinearSpeedRobotWrtWorld(variance.asDiagonal());
     }
 
+    // Linear Acceleration
+    readingValue=robot.child("lin_accel").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseLinearAccelerationRobotWrtWorld(variance.asDiagonal());
+    }
+
     // Attitude
     readingValue=robot.child("attitude").child_value("init_var");
     {
@@ -119,6 +148,15 @@ int ImuDrivenRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDriv
         Eigen::Vector3d variance;
         stm>>variance[0]>>variance[1]>>variance[2];
         this->setNoiseAttitudeRobotWrtWorld(variance.asDiagonal());
+    }
+
+    // Angular Velocity
+    readingValue=robot.child("ang_velocity").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setNoiseAngularVelocityRobotWrtWorld(variance.asDiagonal());
     }
 
 
@@ -159,6 +197,17 @@ Eigen::Matrix3d ImuDrivenRobotCore::getNoiseLinearSpeedRobotWrtWorld()
     return this->noise_linear_speed_robot_wrt_world_;
 }
 
+int ImuDrivenRobotCore::setNoiseLinearAccelerationRobotWrtWorld(Eigen::Matrix3d noise_linear_acceleration_robot_wrt_world)
+{
+    this->noise_linear_acceleration_robot_wrt_world_=noise_linear_acceleration_robot_wrt_world;
+    return 0;
+}
+
+Eigen::Matrix3d ImuDrivenRobotCore::getNoiseLinearAccelerationRobotWrtWorld()
+{
+    return this->noise_linear_acceleration_robot_wrt_world_;
+}
+
 int ImuDrivenRobotCore::setNoiseAttitudeRobotWrtWorld(Eigen::Matrix3d noise_attitude_robot_wrt_world)
 {
     this->noise_attitude_robot_wrt_world_=noise_attitude_robot_wrt_world;
@@ -168,6 +217,17 @@ int ImuDrivenRobotCore::setNoiseAttitudeRobotWrtWorld(Eigen::Matrix3d noise_atti
 Eigen::Matrix3d ImuDrivenRobotCore::getNoiseAttitudeRobotWrtWorld()
 {
     return this->noise_attitude_robot_wrt_world_;
+}
+
+int ImuDrivenRobotCore::setNoiseAngularVelocityRobotWrtWorld(Eigen::Matrix3d noise_angular_velocity_robot_wrt_world)
+{
+    this->noise_angular_velocity_robot_wrt_world_=noise_angular_velocity_robot_wrt_world;
+    return 0;
+}
+
+Eigen::Matrix3d ImuDrivenRobotCore::getNoiseAngularVelocityRobotWrtWorld()
+{
+    return this->noise_angular_velocity_robot_wrt_world_;
 }
 
 Eigen::SparseMatrix<double> ImuDrivenRobotCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
@@ -207,7 +267,9 @@ int ImuDrivenRobotCore::prepareCovarianceInitErrorState()
 
     this->covariance_init_error_state_.block<3,3>(0,0)=this->getNoisePositionRobotWrtWorld();
     this->covariance_init_error_state_.block<3,3>(3,3)=this->getNoiseLinearSpeedRobotWrtWorld();
-    this->covariance_init_error_state_.block<3,3>(6,6)=this->getNoiseAttitudeRobotWrtWorld();
+    this->covariance_init_error_state_.block<3,3>(6,6)=this->getNoiseLinearAccelerationRobotWrtWorld();
+    this->covariance_init_error_state_.block<3,3>(9,9)=this->getNoiseAttitudeRobotWrtWorld();
+    this->covariance_init_error_state_.block<3,3>(12,12)=this->getNoiseAngularVelocityRobotWrtWorld();
 
     return 0;
 }
