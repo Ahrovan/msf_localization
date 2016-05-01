@@ -565,7 +565,7 @@ try
         std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore)->publish(TheTimeStamp,
                                                                                   this->TheGlobalParametersCore,
                                                                                   PredictedState->TheRobotStateCore,
-                                                                                  PredictedState->covarianceMatrix.block(covRobotPointInit, covRobotPointInit, covRobotSize, covRobotSize));
+                                                                                  PredictedState->covarianceMatrix->block(covRobotPointInit, covRobotPointInit, covRobotSize, covRobotSize));
 
 
 

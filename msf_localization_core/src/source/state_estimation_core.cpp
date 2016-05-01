@@ -7,6 +7,9 @@
 
 StateEstimationCore::StateEstimationCore()
 {
+    if(!covarianceMatrix)
+        covarianceMatrix=std::make_shared<Eigen::MatrixXd>();
+
     return;
 }
 
@@ -283,8 +286,8 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
     int dimension_error_state=this->getDimensionErrorState();
 
     // Init
-    covarianceMatrix.resize(dimension_error_state, dimension_error_state);
-    covarianceMatrix.setZero();
+    covarianceMatrix->resize(dimension_error_state, dimension_error_state);
+    covarianceMatrix->setZero();
 
 
     // Add matrix
@@ -293,13 +296,13 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
 
     // Global Parameters
     int dimensionWorld=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionWorld, dimensionWorld)=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
+    covarianceMatrix->block(pointCovMatrix, pointCovMatrix, dimensionWorld, dimensionWorld)=this->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
     pointCovMatrix+=dimensionWorld;
 
 
     // Robot
     int dimensionRobot=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionRobot, dimensionRobot)=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
+    covarianceMatrix->block(pointCovMatrix, pointCovMatrix, dimensionRobot, dimensionRobot)=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
     pointCovMatrix+=dimensionRobot;
 
 
@@ -309,7 +312,7 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
         ++itLisSensorState)
     {
         int dimensionSensor=(*itLisSensorState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionSensor, dimensionSensor)=(*itLisSensorState)->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
+        covarianceMatrix->block(pointCovMatrix, pointCovMatrix, dimensionSensor, dimensionSensor)=(*itLisSensorState)->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
         pointCovMatrix+=dimensionSensor;
     }
 
@@ -319,7 +322,7 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
         ++itListInputState)
     {
         int dimensionInput=(*itListInputState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionInput, dimensionInput)=(*itListInputState)->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
+        covarianceMatrix->block(pointCovMatrix, pointCovMatrix, dimensionInput, dimensionInput)=(*itListInputState)->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
         pointCovMatrix+=dimensionInput;
     }
 
@@ -330,7 +333,7 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
         ++itLisMapElementState)
     {
         int dimensionMapElement=(*itLisMapElementState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        covarianceMatrix.block(pointCovMatrix, pointCovMatrix, dimensionMapElement, dimensionMapElement)=(*itLisMapElementState)->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
+        covarianceMatrix->block(pointCovMatrix, pointCovMatrix, dimensionMapElement, dimensionMapElement)=(*itLisMapElementState)->getMsfElementCoreSharedPtr()->getCovarianceInitErrorState();
         pointCovMatrix+=dimensionMapElement;
     }
 

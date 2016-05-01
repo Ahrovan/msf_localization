@@ -100,7 +100,7 @@ public:
 
     // Covariances Matrixes of the error state
 public:
-    Eigen::MatrixXd covarianceMatrix;
+    std::shared_ptr<Eigen::MatrixXd> covarianceMatrix;
 
 
 
