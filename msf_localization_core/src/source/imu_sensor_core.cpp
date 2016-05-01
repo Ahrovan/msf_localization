@@ -853,14 +853,8 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
     return CovariancesMatrix;
 }
 
-int ImuSensorCore::prepareCovarianceInitErrorState()
+int ImuSensorCore::prepareCovarianceInitErrorStateSpecific()
 {
-    int error=MsfElementCore::prepareCovarianceInitErrorState();
-
-    if(error)
-        return error;
-
-
     int point=0;
     if(this->isEstimationPositionSensorWrtRobotEnabled())
     {

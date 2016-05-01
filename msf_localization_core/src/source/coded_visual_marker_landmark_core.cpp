@@ -64,6 +64,137 @@ int CodedVisualMarkerLandmarkCore::setId(int id)
     return 0;
 }
 
+int CodedVisualMarkerLandmarkCore::readConfig(pugi::xml_node map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore)
+{
+    // Map Element Core Pointer
+    //std::shared_ptr<MapElementCore> TheMapElementCore(this);
+    //std::shared_ptr<MapElementCore> TheMapElementCore=std::dynamic_pointer_cast<MapElementCore>(this->getMsfElementCoreSharedPtr());
+
+    // Set pointer to the SensorCore
+    //TheMapElementCore->setMsfElementCore(TheMapElementCore);
+
+    // Create a class for the SensorStateCore
+    if(!MapElementInitStateCore)
+        MapElementInitStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(this->getMsfElementCoreSharedPtr());
+
+    // Set pointer to the SensorCore
+    //MapElementInitStateCore->setTheMapElementCore(TheMapElementCore);
+
+
+    // Set the access to the Storage core
+    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
+    //TheMapElementCore->setMsfStorageCore(TheMsfStorageCore);
+
+
+    // Visual landmark
+    pugi::xml_node visual_landmark=map_element.child("visual_landmark");
+
+
+    // Auxiliar reading value
+    std::string readingValue;
+
+
+    /// id
+    std::string idString=visual_landmark.child_value("id");
+    this->setId(std::stoi(idString));
+
+
+    /// Name
+    this->setMapElementName("visual_marker_"+idString);
+
+
+    //// Configs
+
+    /// Pose of the map element wrt worl
+    pugi::xml_node pose_in_world=visual_landmark.child("pose_in_world");
+
+    // Position of the sensor wrt robot
+    readingValue=pose_in_world.child("position").child_value("enabled");
+    if(std::stoi(readingValue))
+        this->enableEstimationPositionVisualMarkerWrtWorld();
+
+    // Attitude of the sensor wrt robot
+    readingValue=pose_in_world.child("attitude").child_value("enabled");
+    if(std::stoi(readingValue))
+        this->enableEstimationAttitudeVisualMarkerWrtWorld();
+
+
+
+    //// Init State
+
+    /// Pose of the visual marker wrt world
+
+    // Position of the visual marker wrt world
+    readingValue=pose_in_world.child("position").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d init_estimation;
+        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
+        MapElementInitStateCore->setPosition(init_estimation);
+    }
+
+    // Attitude of the visual marker wrt world
+    readingValue=pose_in_world.child("attitude").child_value("init_estimation");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector4d init_estimation;
+        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
+        MapElementInitStateCore->setAttitude(init_estimation);
+    }
+
+
+    /// Parameters
+
+    // None
+
+
+    //// Init Variances
+
+
+    /// Pose of the visual marker wrt world
+
+    // Position of the visual marker wrt world
+    readingValue=pose_in_world.child("position").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setCovariancePositionVisualMarkerWrtWorld(variance.asDiagonal());
+    }
+
+
+    // Attitude of the visual marker wrt world
+    readingValue=pose_in_world.child("attitude").child_value("init_var");
+    {
+        std::istringstream stm(readingValue);
+        Eigen::Vector3d variance;
+        stm>>variance[0]>>variance[1]>>variance[2];
+        this->setCovarianceAttitudeVisualMarkerWrtWorld(variance.asDiagonal());
+    }
+
+
+
+    /// Other Parameters
+
+    // None
+
+
+    // Noises in the estimation (if enabled)
+
+    // None
+
+
+    // Prepare covariance matrix
+    this->prepareCovarianceInitErrorState();
+
+
+    /// Finish
+
+
+    // End
+    return 0;
+}
+
 bool CodedVisualMarkerLandmarkCore::isEstimationPositionVisualMarkerWrtWorldEnabled()
 {
     return flag_estimation_position_visual_marker_wrt_world;
@@ -154,14 +285,8 @@ int CodedVisualMarkerLandmarkCore::setCovarianceAttitudeVisualMarkerWrtWorld(Eig
 
 
 
-int CodedVisualMarkerLandmarkCore::prepareCovarianceInitErrorState()
+int CodedVisualMarkerLandmarkCore::prepareCovarianceInitErrorStateSpecific()
 {
-    int error=MsfElementCore::prepareCovarianceInitErrorState();
-
-    if(error)
-        return error;
-
-
     int dimension_i=0;
 
     if(flag_estimation_position_visual_marker_wrt_world)
@@ -224,7 +349,7 @@ Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceParamete
 }
 
 
-Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceNoise(const TimeStamp deltaTimeStamp) const
+Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance;
 
@@ -383,133 +508,3 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobians(const TimeStamp pr
     return 0;
 }
 
-int CodedVisualMarkerLandmarkCore::readConfig(pugi::xml_node map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore)
-{
-    // Map Element Core Pointer
-    //std::shared_ptr<MapElementCore> TheMapElementCore(this);
-    //std::shared_ptr<MapElementCore> TheMapElementCore=std::dynamic_pointer_cast<MapElementCore>(this->getMsfElementCoreSharedPtr());
-
-    // Set pointer to the SensorCore
-    //TheMapElementCore->setMsfElementCore(TheMapElementCore);
-
-    // Create a class for the SensorStateCore
-    if(!MapElementInitStateCore)
-        MapElementInitStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(this->getMsfElementCoreSharedPtr());
-
-    // Set pointer to the SensorCore
-    //MapElementInitStateCore->setTheMapElementCore(TheMapElementCore);
-
-
-    // Set the access to the Storage core
-    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    //TheMapElementCore->setMsfStorageCore(TheMsfStorageCore);
-
-
-    // Visual landmark
-    pugi::xml_node visual_landmark=map_element.child("visual_landmark");
-
-
-    // Auxiliar reading value
-    std::string readingValue;
-
-
-    /// id
-    std::string idString=visual_landmark.child_value("id");
-    this->setId(std::stoi(idString));
-
-
-    /// Name
-    this->setMapElementName("visual_marker_"+idString);
-
-
-    //// Configs
-
-    /// Pose of the map element wrt worl
-    pugi::xml_node pose_in_world=visual_landmark.child("pose_in_world");
-
-    // Position of the sensor wrt robot
-    readingValue=pose_in_world.child("position").child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableEstimationPositionVisualMarkerWrtWorld();
-
-    // Attitude of the sensor wrt robot
-    readingValue=pose_in_world.child("attitude").child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableEstimationAttitudeVisualMarkerWrtWorld();
-
-
-
-    //// Init State
-
-    /// Pose of the visual marker wrt world
-
-    // Position of the visual marker wrt world
-    readingValue=pose_in_world.child("position").child_value("init_estimation");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        MapElementInitStateCore->setPosition(init_estimation);
-    }
-
-    // Attitude of the visual marker wrt world
-    readingValue=pose_in_world.child("attitude").child_value("init_estimation");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector4d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
-        MapElementInitStateCore->setAttitude(init_estimation);
-    }
-
-
-    /// Parameters
-
-    // None
-
-
-    //// Init Variances
-
-
-    /// Pose of the visual marker wrt world
-
-    // Position of the visual marker wrt world
-    readingValue=pose_in_world.child("position").child_value("init_var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setCovariancePositionVisualMarkerWrtWorld(variance.asDiagonal());
-    }
-
-
-    // Attitude of the visual marker wrt world
-    readingValue=pose_in_world.child("attitude").child_value("init_var");
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setCovarianceAttitudeVisualMarkerWrtWorld(variance.asDiagonal());
-    }
-
-
-
-    /// Other Parameters
-
-    // None
-
-
-    // Noises in the estimation (if enabled)
-
-    // None
-
-
-    // Prepare covariance matrix
-    this->prepareCovarianceInitErrorState();
-
-
-    /// Finish
-
-
-    // End
-    return 0;
-}

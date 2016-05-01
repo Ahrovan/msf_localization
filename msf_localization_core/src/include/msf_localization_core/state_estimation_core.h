@@ -71,7 +71,7 @@ public:
     int getDimensionErrorParameters() const;
 
 
-    // Global Parameters State
+    // Global Parameters (World) State
 public:
     std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore;
 
@@ -79,13 +79,13 @@ public:
 public:
     std::shared_ptr<RobotStateCore> TheRobotStateCore;
 
+    // Inputs State
+public:
+    std::list< std::shared_ptr<InputStateCore> > TheListInputStateCore;
+
     // Sensors State
 public:
     std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
-
-    // Input State
-public:
-    std::list< std::shared_ptr<InputStateCore> > TheListInputStateCore;
 
     // Map State
 public:
@@ -102,6 +102,24 @@ public:
 public:
     Eigen::MatrixXd covarianceMatrix;
 
+
+
+    /// Input Commands
+
+    // Check
+public:
+    bool hasInputCommand() const;
+
+
+    // Dimension total of input and error input
+public:
+    int getDimensionInputCommand() const;
+    int getDimensionErrorInputCommand() const;
+
+
+    // Avaliable Inputs
+public:
+    std::list< std::shared_ptr<InputCommandCore> > TheListInputCommandCore;
 
 
 
@@ -124,22 +142,7 @@ public:
 
 
 
-    /// Input Commands
 
-    // Check
-public:
-    bool hasInputCommand() const;
-
-
-    // Dimension total of input and error input
-public:
-    int getDimensionInputCommand() const;
-    int getDimensionErrorInputCommand() const;
-
-
-    // Avaliable Inputs
-public:
-    std::list< std::shared_ptr<InputCommandCore> > TheListInputCommandCore;
 
 
 

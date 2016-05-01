@@ -44,6 +44,12 @@ public:
     int setId(int id);
 
 
+    /// Configs
+public:
+    int readConfig(pugi::xml_node map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore);
+
+
+
     ///// State if enabled (or Parameters if disabled)
 
     // State: x_map=[t_land_wrt_world, q_land_wrt_world]'
@@ -88,44 +94,43 @@ public:
 
     ////// Init error state covariances -> Temporal, only for the initial configuration
 public:
-    int prepareCovarianceInitErrorState();
+    int prepareCovarianceInitErrorStateSpecific();
 
 
 
-    ///// Get Covariances as a Eigen::MatrixXd
+
+    ///// Covariances Getters
+
+    // Covariance Error Parameters: Rp = Qp
 public:
-    // Covariance Map Element Error Measurements
-    //Eigen::SparseMatrix<double> getCovarianceMeasurement();
-    // Covariance Map Element Error Parameters
     Eigen::SparseMatrix<double> getCovarianceParameters();
 
+    // Covariance Noise Estimation: Qn
 public:
-    // Covariance Map Element Error Noise
-    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
 
 
 
 
 
-
-    ///// Predict functions
+    ///// Predict step functions
 
     // State: xL=[pos, attit]'
 
-    // Prediction state function
+    // Prediction state function: f()
 public:
     int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
 
-    // Jacobian
+    // Jacobian: F
 public:
     int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
 
 
 
+    //// Update step functions
 
+    // NONE
 
-public:
-    int readConfig(pugi::xml_node map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore);
 
 
 };

@@ -831,14 +831,8 @@ int ImuInputCore::setNoiseSensitivityAngularVelocity(Eigen::Matrix3d noise_sensi
     return 0;
 }
 
-int ImuInputCore::prepareCovarianceInitErrorState()
+int ImuInputCore::prepareCovarianceInitErrorStateSpecific()
 {
-    int error=MsfElementCore::prepareCovarianceInitErrorState();
-
-    if(error)
-        return error;
-
-
     int point=0;
     if(this->isEstimationPositionInputWrtRobotEnabled())
     {

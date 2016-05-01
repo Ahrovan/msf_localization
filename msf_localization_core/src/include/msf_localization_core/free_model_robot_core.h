@@ -115,7 +115,7 @@ public:
     ////// Init error state variances -> Temporal, only for the initial configuration
 
 public:
-    int prepareCovarianceInitErrorState();
+    int prepareCovarianceInitErrorStateSpecific();
 
 public:
     int setInitErrorStateVariancePosition(Eigen::Vector3d initVariance);

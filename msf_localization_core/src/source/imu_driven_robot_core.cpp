@@ -258,12 +258,8 @@ Eigen::SparseMatrix<double> ImuDrivenRobotCore::getCovarianceNoise(const TimeSta
     return covariance_noise;
 }
 
-int ImuDrivenRobotCore::prepareCovarianceInitErrorState()
+int ImuDrivenRobotCore::prepareCovarianceInitErrorStateSpecific()
 {
-    int error=MsfElementCore::prepareCovarianceInitErrorState();
-
-    if(error)
-        return error;
 
     this->covariance_init_error_state_.block<3,3>(0,0)=this->getNoisePositionRobotWrtWorld();
     this->covariance_init_error_state_.block<3,3>(3,3)=this->getNoiseLinearSpeedRobotWrtWorld();

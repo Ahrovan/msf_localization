@@ -182,12 +182,8 @@ Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceNoise(const TimeSta
     return covariance_noise;
 }
 
-int FreeModelRobotCore::prepareCovarianceInitErrorState()
+int FreeModelRobotCore::prepareCovarianceInitErrorStateSpecific()
 {
-    int error=MsfElementCore::prepareCovarianceInitErrorState();
-
-    if(error)
-        return error;
 
     // Do nothing else. The rest is done when setting!
 

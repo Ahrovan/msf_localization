@@ -378,14 +378,8 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceParameters()
     return covariances_matrix;
 }
 
-int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorState()
+int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorStateSpecific()
 {
-    int error=MsfElementCore::prepareCovarianceInitErrorState();
-
-    if(error)
-        return error;
-
-
     int point=0;
     if(this->isEstimationPositionSensorWrtRobotEnabled())
     {
@@ -427,6 +421,7 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const T
 int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
 {
 
+
     // Poly
     std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
     std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
@@ -448,8 +443,17 @@ int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, co
     }
 
 
+    /// Aux values
+    Eigen::Vector3d position_sensor_wrt_robot;
+    Eigen::Vector4d attitude_sensor_wrt_robot;
+    // State k+1: Sensor
+    Eigen::Vector3d pred_position_sensor_wrt_robot;
+    Eigen::Vector4d pred_attitude_sensor_wrt_robot;
 
-    // Equations
+
+    /// Fill
+    position_sensor_wrt_robot=pastState->positionSensorWrtRobot;
+    attitude_sensor_wrt_robot=pastState->attitudeSensorWrtRobot;;
 
 
     //Delta Time
@@ -457,27 +461,40 @@ int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, co
     double dt=DeltaTime.get_double();
 
 
+    //// Core
+
+    int error_predict_state_core=this->predictStateCore(position_sensor_wrt_robot, attitude_sensor_wrt_robot,
+                                                        pred_position_sensor_wrt_robot, pred_attitude_sensor_wrt_robot);
+
+    if(error_predict_state_core)
+        return error_predict_state_core;
+
+
+
+    /// Fill
+
+
     /// Position
     if(this->isEstimationPositionSensorWrtRobotEnabled())
     {
         // Estimation
-        predictedState->positionSensorWrtRobot=pastState->positionSensorWrtRobot;
+        predictedState->positionSensorWrtRobot=pred_position_sensor_wrt_robot;
     }
     else
     {
         // Parameter
-        predictedState->positionSensorWrtRobot=pastState->positionSensorWrtRobot;
+        predictedState->positionSensorWrtRobot=pred_position_sensor_wrt_robot;
     }
 
 
     /// Attitude
     if(this->isEstimationAttitudeSensorWrtRobotEnabled())
     {
-        predictedState->attitudeSensorWrtRobot=pastState->attitudeSensorWrtRobot;
+        predictedState->attitudeSensorWrtRobot=pred_attitude_sensor_wrt_robot;
     }
     else
     {
-        predictedState->attitudeSensorWrtRobot=pastState->attitudeSensorWrtRobot;
+        predictedState->attitudeSensorWrtRobot=pred_attitude_sensor_wrt_robot;
     }
 
 
@@ -485,6 +502,21 @@ int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, co
 
     return 0;
 }
+
+int CodedVisualMarkerEyeCore::predictStateCore(// State k: Sensor
+                                                 Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                 // State k+1: Sensor
+                                                 Eigen::Vector3d& pred_position_sensor_wrt_robot, Eigen::Vector4d& pred_attitude_sensor_wrt_robot)
+{
+    // Position
+    pred_position_sensor_wrt_robot=position_sensor_wrt_robot;
+
+    // Attitude
+    pred_attitude_sensor_wrt_robot=attitude_sensor_wrt_robot;
+
+    return 0;
+}
+
 
 // Jacobian
 int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
@@ -501,11 +533,50 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
         return 1;
     }
 
+    // Variables
+    // State k: Sensor
+    Eigen::Vector3d position_sensor_wrt_robot;
+    Eigen::Vector4d attitude_sensor_wrt_robot;
+    // State k+1: Sensor
+    Eigen::Vector3d pred_position_sensor_wrt_robot;
+    Eigen::Vector4d pred_attitude_sensor_wrt_robot;
+
+    // Jacobian: State
+    Eigen::Matrix3d jacobian_error_sens_pos_wrt_error_state_sens_pos;
+    Eigen::Matrix3d jacobian_error_sens_att_wrt_error_state_sens_att;
+
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
     double dt=DeltaTime.get_double();
+
+
+    /// Fill variables
+    // State k: Sensor
+    position_sensor_wrt_robot=pastState->getPositionSensorWrtRobot();
+    attitude_sensor_wrt_robot=pastState->getAttitudeSensorWrtRobot();
+
+    // State k+1: Sensor
+    pred_position_sensor_wrt_robot=predictedState->getPositionSensorWrtRobot();
+    pred_attitude_sensor_wrt_robot=predictedState->getAttitudeSensorWrtRobot();
+
+
+    //// Core
+
+    int error_predict_error_state_jacobians_core=predictErrorStateJacobiansCore(// State k: Sensor
+                                                                                position_sensor_wrt_robot,
+                                                                                attitude_sensor_wrt_robot,
+                                                                                // State k+1: Sensor
+                                                                                pred_position_sensor_wrt_robot,
+                                                                                pred_attitude_sensor_wrt_robot,
+                                                                                // Jacobians
+                                                                                jacobian_error_sens_pos_wrt_error_state_sens_pos,
+                                                                                jacobian_error_sens_att_wrt_error_state_sens_att);
+
+    if(error_predict_error_state_jacobians_core)
+        return error_predict_error_state_jacobians_core;
+
 
 
     ///// Jacobian Error State
@@ -518,7 +589,7 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
         predictedState->error_state_jacobian_.position_sensor_wrt_robot_.resize(3, 3);
         predictedState->error_state_jacobian_.position_sensor_wrt_robot_.setZero();
 
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.block<3,3>(0,0)=jacobian_error_sens_pos_wrt_error_state_sens_pos;
     }
 
 
@@ -531,7 +602,7 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
         predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.resize(3, 3);
         predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.setZero();
 
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.block<3,3>(0,0)=jacobian_error_sens_att_wrt_error_state_sens_att;
     }
 
 
@@ -595,6 +666,26 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
     return 0;
 }
 
+int CodedVisualMarkerEyeCore::predictErrorStateJacobiansCore(// State k: Sensor
+                                                           Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                           // State k+1: Sensor
+                                                           Eigen::Vector3d pred_position_sensor_wrt_robot, Eigen::Vector4d pred_attitude_sensor_wrt_robot,
+                                                           // Jacobian: State
+                                                           Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att)
+{
+
+    /// Position
+    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::MatrixXd::Identity(3,3);
+
+
+    /// Attitude
+    // TODO FIX!
+    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::MatrixXd::Identity(3,3);
+
+
+    // End
+    return 0;
+}
 
 int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorStateI, const std::shared_ptr<MapElementStateCore> currentMapElementStateI, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
 {
@@ -696,6 +787,10 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     Eigen::Vector3d position_map_element_wrt_world;
     Eigen::Vector4d attitude_map_element_wrt_world;
 
+    // Predicted Measurement
+    Eigen::Vector3d position_map_element_wrt_sensor;
+    Eigen::Vector4d attitude_map_element_wrt_sensor;
+
 
     // Switch depending on robot used
     switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
@@ -744,10 +839,26 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
 
 
     /// Prediction Core
-    int error_predict_measurement_core=this->predictMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world, position_sensor_wrt_robot, attitude_sensor_wrt_robot, position_map_element_wrt_world, attitude_map_element_wrt_world, predictedMeasurement);
+    int error_predict_measurement_core=this->predictMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world,
+                                                                    position_sensor_wrt_robot, attitude_sensor_wrt_robot,
+                                                                    position_map_element_wrt_world, attitude_map_element_wrt_world,
+                                                                    position_map_element_wrt_sensor, attitude_map_element_wrt_sensor);
 
     if(error_predict_measurement_core)
         return error_predict_measurement_core;
+
+
+    /// Set
+    // Position
+    if(this->isMeasurementPositionEnabled())
+    {
+        predictedMeasurement->setVisualMarkerPosition(position_map_element_wrt_sensor);
+    }
+    // Attitude
+    if(this->isMeasurementAttitudeEnabled())
+    {
+        predictedMeasurement->setVisualMarkerAttitude(attitude_map_element_wrt_sensor);
+    }
 
 
 
@@ -760,7 +871,14 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictMeasurementCore(Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world, Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot, Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
+                                                     Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                     // State: Sensor
+                                                     Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                     // State: Map
+                                                     Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                     // Predicted Measurement
+                                                     Eigen::Vector3d& position_map_element_wrt_sensor, Eigen::Vector4d& attitude_map_element_wrt_sensor)
 {
     // Aux vars
     Eigen::Vector4d attitude_visual_marker_eye_wrt_world=
@@ -771,8 +889,8 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(Eigen::Vector3d position_ro
     if(this->isMeasurementPositionEnabled())
     {
         // Aux Variable
-        Eigen::Vector3d position_visual_marker_wrt_visual_marker_eye;
-        position_visual_marker_wrt_visual_marker_eye.setZero();
+        //Eigen::Vector3d position_visual_marker_wrt_visual_marker_eye;
+        //position_visual_marker_wrt_visual_marker_eye.setZero();
 
 
         Eigen::Vector3d position_visual_marker_eye_wrt_world=
@@ -780,11 +898,12 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(Eigen::Vector3d position_ro
 
 
         // Equation
-        position_visual_marker_wrt_visual_marker_eye=
+        //position_visual_marker_wrt_visual_marker_eye=
+        position_map_element_wrt_sensor=
                 Quaternion::cross_sandwich(Quaternion::inv(attitude_visual_marker_eye_wrt_world), position_map_element_wrt_world-position_visual_marker_eye_wrt_world-position_robot_wrt_world, attitude_visual_marker_eye_wrt_world);
 
         // Set
-        predictedMeasurement->setVisualMarkerPosition(position_visual_marker_wrt_visual_marker_eye);
+        //predictedMeasurement->setVisualMarkerPosition(position_visual_marker_wrt_visual_marker_eye);
     }
 
 
@@ -793,16 +912,18 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(Eigen::Vector3d position_ro
     if(this->isMeasurementAttitudeEnabled())
     {
         // Aux Variable
-        Eigen::Vector4d attitude_visual_marker_wrt_visual_marker_eye;
-        attitude_visual_marker_wrt_visual_marker_eye.setZero();
+        //Eigen::Vector4d attitude_visual_marker_wrt_visual_marker_eye;
+        //attitude_visual_marker_wrt_visual_marker_eye.setZero();
 
         // Equation
-        attitude_visual_marker_wrt_visual_marker_eye=
+        //attitude_visual_marker_wrt_visual_marker_eye=
+        attitude_map_element_wrt_sensor=
                 Quaternion::cross(Quaternion::inv(attitude_visual_marker_eye_wrt_world), attitude_map_element_wrt_world);
 
 
         // Set
-        predictedMeasurement->setVisualMarkerAttitude(attitude_visual_marker_wrt_visual_marker_eye);
+        //predictedMeasurement->setVisualMarkerAttitude(attitude_visual_marker_wrt_visual_marker_eye);
+
     }
 
     return 0;
@@ -822,6 +943,13 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
     // Map Element
     Eigen::Vector3d position_map_element_wrt_world;
     Eigen::Vector4d attitude_map_element_wrt_world;
+
+    // Measurement
+    Eigen::Vector3d meas_position_map_element_wrt_sensor;
+    Eigen::Vector4d meas_attitude_map_element_wrt_sensor;
+    // Predicted Measurement
+    Eigen::Vector3d position_map_element_wrt_sensor;
+    Eigen::Vector4d attitude_map_element_wrt_sensor;
 
 
     // Switch depending on robot used
@@ -880,6 +1008,49 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
     // Matched measurement
     std::shared_ptr<CodedVisualMarkerMeasurementCore> TheMatchedMeasurementCore=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
 
+    meas_position_map_element_wrt_sensor=TheMatchedMeasurementCore->getVisualMarkerPosition();
+    meas_attitude_map_element_wrt_sensor=TheMatchedMeasurementCore->getVisualMarkerAttitude();
+
+
+    // Predicted Measurement
+    position_map_element_wrt_sensor=predictedMeasurement->getVisualMarkerPosition();
+    attitude_map_element_wrt_sensor=predictedMeasurement->getVisualMarkerAttitude();
+
+
+
+    /// Core
+
+    // State and Params
+    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_robot_pos;
+    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_robot_att;
+    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_state_robot_att;
+    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_sens_pos;
+    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_sens_att;
+    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_state_sens_att;
+    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
+    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_state_map_elem_att;
+    // Noise
+    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_meas_pos;
+    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_meas_att;
+
+
+    int error_jacobians_error_measurements_core=jacobiansErrorMeasurementsCore(position_robot_wrt_world, attitude_robot_wrt_world,
+                                                                               position_sensor_wrt_robot, attitude_sensor_wrt_robot,
+                                                                               position_map_element_wrt_world, attitude_map_element_wrt_world,
+                                                                               meas_position_map_element_wrt_sensor, meas_attitude_map_element_wrt_sensor,
+                                                                               position_map_element_wrt_sensor, attitude_map_element_wrt_sensor,
+                                           // Jacobians: State and Params
+                                           jacobian_error_meas_pos_wrt_error_state_robot_pos, jacobian_error_meas_pos_wrt_error_state_robot_att, jacobian_error_meas_att_wrt_error_state_robot_att,
+                                           jacobian_error_meas_pos_wrt_error_state_sens_pos, jacobian_error_meas_pos_wrt_error_state_sens_att, jacobian_error_meas_att_wrt_error_state_sens_att,
+                                           jacobian_error_meas_pos_wrt_error_state_map_elem_pos, jacobian_error_meas_att_wrt_error_state_map_elem_att,
+                                           // Jacobians: Noise
+                                           jacobian_error_meas_pos_wrt_error_meas_pos, jacobian_error_meas_att_wrt_error_meas_att);
+
+
+    if(error_jacobians_error_measurements_core)
+        return error_jacobians_error_measurements_core;
+
+
 
 
     // dimensions
@@ -900,34 +1071,6 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
     int dimension_map_element_error_parameters=currentMapElementStateI->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
 
-
-    /// Core
-
-    // State and Params
-    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_robot_pos;
-    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_robot_att;
-    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_state_robot_att;
-    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_sens_pos;
-    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_sens_att;
-    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_state_sens_att;
-    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
-    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_state_map_elem_att;
-    // Noise
-    Eigen::Matrix3d jacobian_error_meas_pos_wrt_error_meas_pos;
-    Eigen::Matrix3d jacobian_error_meas_att_wrt_error_meas_att;
-
-
-    int error_jacobians_error_measurements_core=jacobiansErrorMeasurementsCore(position_robot_wrt_world, attitude_robot_wrt_world, position_sensor_wrt_robot, attitude_sensor_wrt_robot, position_map_element_wrt_world, attitude_map_element_wrt_world, TheMatchedMeasurementCore, predictedMeasurement,
-                                           // State and Params
-                                           jacobian_error_meas_pos_wrt_error_state_robot_pos, jacobian_error_meas_pos_wrt_error_state_robot_att, jacobian_error_meas_att_wrt_error_state_robot_att,
-                                           jacobian_error_meas_pos_wrt_error_state_sens_pos, jacobian_error_meas_pos_wrt_error_state_sens_att, jacobian_error_meas_att_wrt_error_state_sens_att,
-                                           jacobian_error_meas_pos_wrt_error_state_map_elem_pos, jacobian_error_meas_att_wrt_error_state_map_elem_att,
-                                           // Noise
-                                           jacobian_error_meas_pos_wrt_error_meas_pos, jacobian_error_meas_att_wrt_error_meas_att);
-
-
-    if(error_jacobians_error_measurements_core)
-        return error_jacobians_error_measurements_core;
 
 
     /// All jacobians
@@ -1297,12 +1440,21 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world, Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot, Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world, std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement, std::shared_ptr<CodedVisualMarkerMeasurementCore> predictedMeasurement,
-                                                             // State and Params
+int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
+                                                             Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                             // State: Sensor
+                                                             Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                             // State: Map
+                                                             Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                             // Measurement
+                                                             Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                             // Predicted Measurement
+                                                             Eigen::Vector3d position_map_element_wrt_sensor, Eigen::Vector4d attitude_map_element_wrt_sensor,
+                                                             // Jacobians: State and Params
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_robot_att,
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_sens_att,
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_map_elem_pos, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_map_elem_att,
-                                                             // Noise
+                                                             // Jacobians: Noise
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_meas_pos, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att)
 {
 
@@ -1311,9 +1463,9 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(Eigen::Vector3d pos
     Eigen::Vector3d tran_inc2_wrt_world=position_map_element_wrt_world-position_robot_wrt_world;
 
     //Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
-    Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=predictedMeasurement->getVisualMarkerAttitude();
+    Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=attitude_map_element_wrt_sensor;
 
-    Eigen::Vector4d att_meas_visual_marker_wrt_visual_marker_eye=matchedMeasurement->getVisualMarkerAttitude();
+    Eigen::Vector4d att_meas_visual_marker_wrt_visual_marker_eye=meas_attitude_map_element_wrt_sensor;
 
     Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
     Eigen::Vector4d att_world_wrt_visual_marker_eye=Quaternion::inv(att_visual_marker_eye_wrt_world);
@@ -1447,6 +1599,9 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     Eigen::Vector3d position_map_element_wrt_sensor;
     Eigen::Vector4d attitude_map_element_wrt_sensor;
 
+    // New state
+    Eigen::Vector3d position_map_element_wrt_world;
+    Eigen::Vector4d attitude_map_element_wrt_world;
 
 
     // Robot
@@ -1561,10 +1716,16 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
 
     /// Core
 
-    int error_map_measurement_core=this->mapMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world, position_sensor_wrt_robot, attitude_sensor_wrt_robot, position_map_element_wrt_sensor, attitude_map_element_wrt_sensor, TheCodedVisualMarkerLandmarkStateCore);
+    int error_map_measurement_core=this->mapMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world, position_sensor_wrt_robot, attitude_sensor_wrt_robot, position_map_element_wrt_sensor, attitude_map_element_wrt_sensor, position_map_element_wrt_world, attitude_map_element_wrt_world);
 
     if(error_map_measurement_core)
         return error_map_measurement_core;
+
+
+    /// Set values
+
+    TheCodedVisualMarkerLandmarkStateCore->position_=position_map_element_wrt_world;
+    TheCodedVisualMarkerLandmarkStateCore->attitude_=attitude_map_element_wrt_world;
 
 
     /// Polymorph
@@ -1575,21 +1736,28 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::mapMeasurementCore(Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world, Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot, Eigen::Vector3d position_map_element_wrt_sensor, Eigen::Vector4d attitude_map_element_wrt_sensor, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState)
+int CodedVisualMarkerEyeCore::mapMeasurementCore(// robot wrt world (state)
+                                                 Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                 // sensor wrt world (state)
+                                                 Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                 // Map element wrt sensor (measurement)
+                                                 Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                 // Map element wrt world (state new)
+                                                 Eigen::Vector3d& position_map_element_wrt_world, Eigen::Vector4d& attitude_map_element_wrt_world)
 {
 
     // Position
     if(this->isMeasurementPositionEnabled())
     {
-        Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, position_map_element_wrt_sensor, Quaternion::inv(attitude_sensor_wrt_robot)) + position_sensor_wrt_robot;
-        newMapElementState->position_=Quaternion::cross_sandwich(attitude_robot_wrt_world, tran_visual_marker_wrt_robot, Quaternion::inv(attitude_robot_wrt_world)) + position_robot_wrt_world;
+        Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, meas_position_map_element_wrt_sensor, Quaternion::inv(attitude_sensor_wrt_robot)) + position_sensor_wrt_robot;
+        position_map_element_wrt_world=Quaternion::cross_sandwich(attitude_robot_wrt_world, tran_visual_marker_wrt_robot, Quaternion::inv(attitude_robot_wrt_world)) + position_robot_wrt_world;
     }
 
 
     // Attitude
     if(this->isMeasurementAttitudeEnabled())
     {
-        newMapElementState->attitude_=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot, attitude_map_element_wrt_sensor);
+        attitude_map_element_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot, meas_attitude_map_element_wrt_sensor);
     }
 
 
@@ -1632,12 +1800,15 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
 
 
     /// Variables needed
-    // Robot
+    // state: Robot
     Eigen::Vector3d position_robot_wrt_world;
     Eigen::Vector4d attitude_robot_wrt_world;
-    // Sensor
+    // state: Sensor
     Eigen::Vector3d position_sensor_wrt_robot;
     Eigen::Vector4d attitude_sensor_wrt_robot;
+    // state: Map element wrt world
+    Eigen::Vector3d position_map_element_wrt_world;
+    Eigen::Vector4d attitude_map_element_wrt_world;
     // Measurement: Map Element
     Eigen::Vector3d position_map_element_wrt_sensor;
     Eigen::Vector4d attitude_map_element_wrt_sensor;
@@ -1705,6 +1876,10 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(newMapElementState->getMsfElementCoreSharedPtr());
 
 
+    position_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getPosition();
+    attitude_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getAttitude();
+
+
     //// Core
 
 
@@ -1720,12 +1895,15 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     Eigen::Matrix3d jacobian_error_map_att_wrt_error_meas_att;
 
 
-    int error_jacobians_map_measurement_core=this->jacobiansMapMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world, position_sensor_wrt_robot, attitude_sensor_wrt_robot, position_map_element_wrt_sensor, attitude_map_element_wrt_sensor, TheCodedVisualMarkerLandmarkStateCore,
-                                                              // State and Params
-                                                              jacobian_error_map_pos_wrt_error_state_robot_pos, jacobian_error_map_pos_wrt_error_state_robot_att, jacobian_error_map_att_wrt_error_state_robot_att,
-                                                              jacobian_error_map_pos_wrt_error_state_sens_pos, jacobian_error_map_pos_wrt_error_state_sens_att, jacobian_error_map_att_wrt_error_state_sens_att,
-                                                              // Measurement
-                                                              jacobian_error_map_pos_wrt_error_meas_pos, jacobian_error_map_att_wrt_error_meas_att);
+    int error_jacobians_map_measurement_core=this->jacobiansMapMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world,
+                                                                               position_sensor_wrt_robot, attitude_sensor_wrt_robot,
+                                                                               position_map_element_wrt_world, attitude_map_element_wrt_world,
+                                                                               position_map_element_wrt_sensor, attitude_map_element_wrt_sensor,
+                                                                              // Jacobians State and Params
+                                                                              jacobian_error_map_pos_wrt_error_state_robot_pos, jacobian_error_map_pos_wrt_error_state_robot_att, jacobian_error_map_att_wrt_error_state_robot_att,
+                                                                              jacobian_error_map_pos_wrt_error_state_sens_pos, jacobian_error_map_pos_wrt_error_state_sens_att, jacobian_error_map_att_wrt_error_state_sens_att,
+                                                                              // Jacobians Measurement
+                                                                              jacobian_error_map_pos_wrt_error_meas_pos, jacobian_error_map_att_wrt_error_meas_att);
 
     if(error_jacobians_map_measurement_core)
         return error_jacobians_map_measurement_core;
@@ -2011,7 +2189,15 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(const TimeStamp theTimeSta
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world, Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot, Eigen::Vector3d position_map_element_wrt_sensor, Eigen::Vector4d attitude_map_element_wrt_sensor, std::shared_ptr<CodedVisualMarkerLandmarkStateCore> newMapElementState,
+int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (state)
+                                                          Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                          // sensor wrt world (state)
+                                                          Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                          // Map element wrt world (state new)
+                                                          Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                          // Map element wrt sensor (measurement)
+                                                          Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                          // Jacobians
                                                           // State and Params
                                                           Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_robot_att,
                                                           Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_sens_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_sens_att,
@@ -2020,16 +2206,16 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(Eigen::Vector3d positi
 {
 
     // Aux vars
-    Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, position_map_element_wrt_sensor, Quaternion::inv(attitude_sensor_wrt_robot))+position_sensor_wrt_robot;
+    Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, meas_position_map_element_wrt_sensor, Quaternion::inv(attitude_sensor_wrt_robot))+position_sensor_wrt_robot;
 
     Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
 
 
-    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_world=Quaternion::quatMatPlus(newMapElementState->getAttitude());
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_world=Quaternion::quatMatPlus(attitude_map_element_wrt_world);
     Eigen::Matrix4d mat_inv_quat_plus_att_visual_marker_wrt_world=mat_quat_plus_att_visual_marker_wrt_world.inverse();
 
-    Eigen::Matrix4d mat_quat_minus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatMinus(attitude_map_element_wrt_sensor);
-    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(attitude_map_element_wrt_sensor);
+    Eigen::Matrix4d mat_quat_minus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatMinus(meas_attitude_map_element_wrt_sensor);
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(meas_attitude_map_element_wrt_sensor);
 
     Eigen::Matrix4d mat_quat_minus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatMinus(attitude_sensor_wrt_robot);
     Eigen::Matrix4d mat_quat_plus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatPlus(attitude_sensor_wrt_robot);
@@ -2044,10 +2230,10 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(Eigen::Vector3d positi
 
     Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_robot=Quaternion::quatMatPlus(tran_visual_marker_wrt_robot);
 
-    Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(position_map_element_wrt_sensor);
+    Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(meas_position_map_element_wrt_sensor);
 
     Eigen::Matrix4d mat_quat_minus_aux1=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(tran_visual_marker_wrt_robot, attitude_robot_wrt_world));
-    Eigen::Matrix4d mat_quat_minus_aux2=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(position_map_element_wrt_sensor, att_visual_marker_eye_wrt_world));
+    Eigen::Matrix4d mat_quat_minus_aux2=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(meas_position_map_element_wrt_sensor, att_visual_marker_eye_wrt_world));
 
 
     Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;

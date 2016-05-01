@@ -186,6 +186,12 @@ int MsfElementCore::prepareCovarianceInitErrorState()
 {
     this->covariance_init_error_state_.resize(dimension_error_state_, dimension_error_state_);
     this->covariance_init_error_state_.setZero();
+
+    int error_prepare_covariance_init_error_state_specific=this->prepareCovarianceInitErrorStateSpecific();
+
+    if(error_prepare_covariance_init_error_state_specific)
+        return error_prepare_covariance_init_error_state_specific;
+
     return 0;
 }
 

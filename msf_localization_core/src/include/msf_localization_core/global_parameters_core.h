@@ -47,6 +47,10 @@ public:
     int setWorldName(std::string world_name);
 
 
+public:
+    int readConfig(pugi::xml_node global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
+
+
 
     ///// State estimation and parameters
 
@@ -75,22 +79,40 @@ public:
     ////// Init error state variances -> Temporal, only for the initial configuration
 
 public:
-    int prepareCovarianceInitErrorState();
+    int prepareCovarianceInitErrorStateSpecific();
 
 
 
+    ///// Covariances Getters
+
+    // Covariance Error Parameters: Rp = Qp
 public:
+    //Eigen::SparseMatrix<double> getCovarianceParameters();
     Eigen::MatrixXd getCovarianceGlobalParameters();
 
+    // Covariance Noise Estimation: Qn
+public:
+    //Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
+
+
+
+
+
+    //// Predict Step Functions
 
 public:
-    int readConfig(pugi::xml_node global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
+    // TODO
+protected:
+    // TODO
+
+
+
+    //// Update Step Functions
+
+    // NONE
+
 
 };
-
-
-
-
 
 
 

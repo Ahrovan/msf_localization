@@ -82,31 +82,35 @@ public:
 
 
 
-    ///// Get Covariances as a Eigen::MatrixXd
+    ///// Covariances Getters
+
+    // Covariance Error Parameters: Rp = Qp
 public:
-    //virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
     virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
 
-
+    // Covariance Noise Estimation: Qn
 public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)=0;
 
 
 
 
 
 
-    ///// Predict functions
+    ///// Predict Step functions
 
-    // Prediction state function
+    // Prediction state function: f()
 public:
     virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
 
-    // Jacobian
+    // Jacobian: F
 public:
     virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
 
 
+    //// Update Step functions
+
+    // None
 
 
 };

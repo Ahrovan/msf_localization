@@ -244,7 +244,7 @@ public:
     ////// Init error state variances -> Temporal, only for the initial configuration
 public:
     // Covariance init Error State: P(0)
-    int prepareCovarianceInitErrorState();
+    int prepareCovarianceInitErrorStateSpecific();
 
 
 
