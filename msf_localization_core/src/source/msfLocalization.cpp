@@ -618,18 +618,31 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
     ///// Global Parameters
 
-    // TODO Improve
-    std::shared_ptr<GlobalParametersStateCore> predictedStateGlobalParameters=std::make_shared<GlobalParametersStateCore>(ThePreviousState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr());
+    {
+        // State
+        int error_predict_state=TheGlobalParametersCore->predictState(//Time
+                                                                 ThePreviousTimeStamp,
+                                                                 ThePredictedTimeStamp,
+                                                                 // Previous State
+                                                                 ThePreviousState,
+                                                                 // Predicted State
+                                                                 ThePredictedState);
+        if(error_predict_state)
+            return error_predict_state;
 
 
-    // Copy the same values
-    predictedStateGlobalParameters->setGravity(ThePreviousState->TheGlobalParametersStateCore->getGravity());
+        // Jacobian Error State
+        int error_predict_error_state_jacobian=TheGlobalParametersCore->predictErrorStateJacobian(//Time
+                                                                                         ThePreviousTimeStamp,
+                                                                                         ThePredictedTimeStamp,
+                                                                                         // Previous State
+                                                                                         ThePreviousState,
+                                                                                         // Predicted State
+                                                                                         ThePredictedState);
+        if(error_predict_error_state_jacobian)
+            return error_predict_error_state_jacobian;
 
-
-    // Add
-    ThePredictedState->TheGlobalParametersStateCore=predictedStateGlobalParameters;
-
-
+    }
 
 
     ///// Robot
@@ -639,50 +652,30 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 #endif
     {
         // State
-        std::shared_ptr<RobotStateCore> predictedStateRobot;
-        std::shared_ptr<RobotStateCore> pastStateRobot=ThePreviousState->TheRobotStateCore;
-
-        if(!pastStateRobot)
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!previous state for robot not found!"<<std::endl;
-#endif
-            return -2;
-        }
-
-        // State
-        if(TheRobotCore->predictState(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateRobot, predictedStateRobot))
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!Error predicting state of the robot"<<std::endl;
-#endif
-            return 1;
-        }
-
-        // Jacobians
-        if(TheRobotCore->predictErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateRobot, predictedStateRobot))
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!Error predicting error state jacobians of the robot"<<std::endl;
-#endif
-            return 1;
-        }
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() robot Jacobian error state TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-            logString<<Eigen::MatrixXd(predictedStateRobot->getJacobianErrorState())<<std::endl;
-            logString<<"MsfLocalizationCore::predictCore() robot Jacobian error state noise TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-            logString<<Eigen::MatrixXd(predictedStateRobot->getJacobianErrorStateNoise())<<std::endl;
-            this->log(logString.str());
-        }
-#endif
+        int error_predict_state=TheRobotCore->predictState(//Time
+                                                         ThePreviousTimeStamp,
+                                                         ThePredictedTimeStamp,
+                                                         // Previous State
+                                                         ThePreviousState,
+                                                         // Predicted State
+                                                         ThePredictedState);
+        if(error_predict_state)
+            return error_predict_state;
 
 
-        // Add
-        ThePredictedState->TheRobotStateCore=predictedStateRobot;
+        // Jacobian Error State
+        int error_predict_error_state_jacobian=TheRobotCore->predictErrorStateJacobian(//Time
+                                                                                     ThePreviousTimeStamp,
+                                                                                     ThePredictedTimeStamp,
+                                                                                     // Previous State
+                                                                                     ThePreviousState,
+                                                                                     // Predicted State
+                                                                                     ThePredictedState);
+        if(error_predict_error_state_jacobian)
+            return error_predict_error_state_jacobian;
+
     }
+
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
@@ -691,6 +684,37 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
     }
 #endif
 
+
+    ///// Inputs
+
+    for(std::list< std::shared_ptr<InputCore> >::iterator itInput=TheListOfInputCore.begin();
+        itInput!=TheListOfInputCore.end();
+        ++itInput)
+    {
+        // State
+        int error_predict_state=(*itInput)->predictState(//Time
+                                                         ThePreviousTimeStamp,
+                                                         ThePredictedTimeStamp,
+                                                         // Previous State
+                                                         ThePreviousState,
+                                                         // Predicted State
+                                                         ThePredictedState);
+        if(error_predict_state)
+            return error_predict_state;
+
+
+        // Jacobian Error State
+        int error_predict_error_state_jacobian=(*itInput)->predictErrorStateJacobian(//Time
+                                                                                     ThePreviousTimeStamp,
+                                                                                     ThePredictedTimeStamp,
+                                                                                     // Previous State
+                                                                                     ThePreviousState,
+                                                                                     // Predicted State
+                                                                                     ThePredictedState);
+        if(error_predict_error_state_jacobian)
+            return error_predict_error_state_jacobian;
+
+    }
 
 
     ///// Sensors

@@ -147,14 +147,13 @@ public:
     int run();
 
 
+    // Storage
 public:
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
 
 
-    // Commands
-protected:
-    std::list< std::shared_ptr<InputCore> > TheListOfInputCore;
 
+    /// Components
 
     // Global Parameters
 protected:
@@ -166,10 +165,13 @@ protected:
     std::shared_ptr<RobotCore> TheRobotCore;
 
 
+    // Inputs
+protected:
+    std::list< std::shared_ptr<InputCore> > TheListOfInputCore;
+
 
     // Sensors Components
 protected:
-//public:
     std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
 protected:
     unsigned int firstAvailableSensorId;

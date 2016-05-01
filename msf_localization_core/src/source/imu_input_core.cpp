@@ -862,3 +862,87 @@ int ImuInputCore::prepareCovarianceInitErrorStateSpecific()
     // End
     return 0;
 }
+
+int ImuInputCore::predictState(//Time
+                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                 // Previous State
+                 const std::shared_ptr<StateEstimationCore> pastState,
+                 // Predicted State
+                 std::shared_ptr<StateEstimationCore>& predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+    // Predicted State
+    if(!predictedState)
+        return -1;
+
+
+    // Search for the past Input State Core
+    std::shared_ptr<ImuInputStateCore> pastInputState;
+    // TODO
+
+
+    // Search for the predicted Input Predicted State
+    std::shared_ptr<ImuInputStateCore> predictedInputState;
+    // TODO
+
+    // Create the prediction if it does not exist
+    // TODO
+//    if(!predictedState->TheRobotStateCore)
+//        predictedInputState=std::make_shared<ImuInputStateCore>(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
+//    else
+//        predictedInputState=std::dynamic_pointer_cast<ImuInputStateCore>(predictedState->TheRobotStateCore);
+
+
+    // Predict State
+    int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
+                                         pastInputState,
+                                         predictedInputState);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    // TODO
+    //predictedState->TheRobotStateCore=predictedRobotState;
+
+
+    // End
+    return 0;
+}
+
+int ImuInputCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                         const std::shared_ptr<ImuInputStateCore> pastState,
+                         std::shared_ptr<ImuInputStateCore>& predictedState)
+{
+
+    return 0;
+}
+
+int ImuInputCore::predictErrorStateJacobian(//Time
+                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             // Previous State
+                             const std::shared_ptr<StateEstimationCore> pastState,
+                             // Predicted State
+                             std::shared_ptr<StateEstimationCore>& predictedState)
+{
+
+    return 0;
+}
+
+int ImuInputCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                      const std::shared_ptr<ImuInputStateCore> pastState,
+                                      std::shared_ptr<ImuInputStateCore>& predictedState)
+{
+
+
+    return 0;
+}

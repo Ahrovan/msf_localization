@@ -22,26 +22,45 @@
 #include <list>
 
 
-
-
 #include <memory>
 
 
-#include "msf_localization_core/global_parameters_state_core.h"
-
-#include "msf_localization_core/robot_state_core.h"
-
-#include "msf_localization_core/sensor_state_core.h"
-
-#include "msf_localization_core/map_element_state_core.h"
-
-#include "msf_localization_core/input_state_core.h"
-
-#include "msf_localization_core/input_command_core.h"
-
-#include "msf_localization_core/sensor_measurement_core.h"
+#include <Eigen/Dense>
 
 
+//#include "msf_localization_core/global_parameters_state_core.h"
+
+//#include "msf_localization_core/robot_state_core.h"
+
+//#include "msf_localization_core/sensor_state_core.h"
+
+//#include "msf_localization_core/map_element_state_core.h"
+
+//#include "msf_localization_core/input_state_core.h"
+
+//#include "msf_localization_core/input_command_core.h"
+
+//#include "msf_localization_core/sensor_measurement_core.h"
+
+
+/// Forward declarations
+
+// Global Parameters (World) State
+class GlobalParametersStateCore;
+// Robot State
+class RobotStateCore;
+// Inputs State
+class InputStateCore;
+// Sensors State
+class SensorStateCore;
+// Map State
+class MapElementStateCore;
+
+// Inputs
+class InputCommandCore;
+
+// Measurement
+class SensorMeasurementCore;
 
 
 // Class that stores the information for every time instant

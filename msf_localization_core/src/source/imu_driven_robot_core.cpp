@@ -270,13 +270,69 @@ int ImuDrivenRobotCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
-int ImuDrivenRobotCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
+int ImuDrivenRobotCore::predictState(//Time
+                                     const TimeStamp previousTimeStamp,
+                                     const TimeStamp currentTimeStamp,
+                                     // Previous State
+                                     const std::shared_ptr<StateEstimationCore> pastState,
+                                     // Predicted State
+                                     std::shared_ptr<StateEstimationCore>& predictedState)
 {
-    //std::cout<<"ImuDrivenRobotCore::predictState"<<std::endl;
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+    // Predicted State
+    if(!predictedState)
+        return -1;
+
+
+    // Search for the command
+    std::shared_ptr<ImuInputCommandCore> imu_input_command;
+    // TODO
+
+
+    // Robot Predicted State
+    std::shared_ptr<ImuDrivenRobotStateCore> predictedRobotState;
+    if(!predictedState->TheRobotStateCore)
+        predictedRobotState=std::make_shared<ImuDrivenRobotStateCore>(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
+    else
+        predictedRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedState->TheRobotStateCore);
+
+
+    // Predict State
+    int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
+                                                std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastState->TheRobotStateCore),
+                                                imu_input_command,
+                                                predictedRobotState);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState->TheRobotStateCore=predictedRobotState;
+
+
+    // End
+    return 0;
+}
+
+int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                             const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
+                                             const std::shared_ptr<ImuInputCommandCore> input,
+                                             std::shared_ptr<ImuDrivenRobotStateCore>& predictedState)
+{
+    //std::cout<<"ImuDrivenRobotCore::predictStateSpecific"<<std::endl;
 
     // Polymorph
-    std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
-    std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
+    //std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
+    //std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
 
 
 
@@ -361,20 +417,74 @@ int ImuDrivenRobotCore::predictState(const TimeStamp previousTimeStamp, const Ti
 
 
     /// Finish
-    predictedStateI=predictedState;
+    //predictedStateI=predictedState;
 
     return 0;
 }
 
-int ImuDrivenRobotCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastStateI, std::shared_ptr<RobotStateCore>& predictedStateI)
+int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
+                                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                 // Previous State
+                                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                                 // Predicted State
+                                                 std::shared_ptr<StateEstimationCore>& predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+
+    // Predicted State
+    if(!predictedState)
+        return -1;
+
+    // TODO
+
+
+    // Search for the command
+    std::shared_ptr<ImuInputCommandCore> imu_input_command;
+    // TODO
+
+
+    // Robot Predicted State
+    std::shared_ptr<ImuDrivenRobotStateCore> predictedRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedState->TheRobotStateCore);
+
+
+    // Predict State
+    int error_predict_state=predictErrorStateJacobianSpecific(previousTimeStamp, currentTimeStamp,
+                                                            std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastState->TheRobotStateCore),
+                                                            imu_input_command,
+                                                            predictedRobotState);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState->TheRobotStateCore=predictedRobotState;
+
+
+    // End
+    return 0;
+}
+
+int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                   const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
+                                                   const std::shared_ptr<ImuInputCommandCore> input,
+                                                   std::shared_ptr<ImuDrivenRobotStateCore>& predictedState)
 {
 
     //std::cout<<"ImuDrivenRobotCore::predictErrorStateJacobians"<<std::endl;
 
 
     // Polymorph
-    std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::static_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
-    std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::static_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
+    //std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::static_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
+    //std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::static_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
 
 
 
@@ -572,7 +682,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobians(const TimeStamp previousTimeS
 
 
     // Finish
-    predictedStateI=predictedState;
+    //predictedStateI=predictedState;
 
     return 0;
 }

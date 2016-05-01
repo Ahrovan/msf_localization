@@ -19,6 +19,10 @@
 #include "msf_localization_core/imu_driven_robot_state_core.h"
 
 
+// Input
+#include "msf_localization_core/imu_input_command_core.h"
+
+
 #include "pugixml/pugixml.hpp"
 
 
@@ -114,19 +118,49 @@ public:
 
     // TODO
 
-    // Prediction state function
+    // Prediction state function: f()
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState);
+    int predictState(//Time
+                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     // Previous State
+                     const std::shared_ptr<StateEstimationCore> pastState,
+                     // Predicted State
+                     std::shared_ptr<StateEstimationCore>& predictedState);
 
-    // Jacobian
+
+protected:
+    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
+                             const std::shared_ptr<ImuInputCommandCore> input,
+                             std::shared_ptr<ImuDrivenRobotStateCore>& predictedState);
+    // int predictStateSpecificCore();
+
+
+
+    // Jacobian: F
 public:
-    int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState);
+    int predictErrorStateJacobian(//Time
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Predicted State
+                                 std::shared_ptr<StateEstimationCore>& predictedState);
+
+protected:
+    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                           const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
+                                           const std::shared_ptr<ImuInputCommandCore> input,
+                                           std::shared_ptr<ImuDrivenRobotStateCore>& predictedState);
+
+// int predictErrorStateJacobianSpecificCore();
 
 
 
     ///// Update Step Functions
 
     // None
+
+
 };
 
 

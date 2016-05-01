@@ -43,13 +43,7 @@
 #include "msf_localization_core/time_stamp.h"
 
 
-// NO -> Circular dependency
-//#include "msf_localization_core/state_core.h"
-//#include "msf_localization_core/global_parameters_state_core.h"
-//#include "msf_localization_core/robot_state_core.h"
-//#include "msf_localization_core/input_state_core.h"
-//#include "msf_localization_core/sensor_state_core.h"
-//#include "msf_localization_core/map_element_state_core.h"
+#include "msf_localization_core/state_estimation_core.h"
 
 
 
@@ -68,19 +62,20 @@ enum class MsfElementCoreTypes
 
 class MsfStorageCore;
 
-// Global Parameters (World) State
-class GlobalParametersStateCore;
-// Robot State
-class RobotStateCore;
-// Inputs State
-class InputStateCore;
-// Sensors State
-class SensorStateCore;
-// Map State
-class MapElementStateCore;
- // Predicted State
-class StateCore;
+//// Global Parameters (World) State
+//class GlobalParametersStateCore;
+//// Robot State
+//class RobotStateCore;
+//// Inputs State
+//class InputStateCore;
+//// Sensors State
+//class SensorStateCore;
+//// Map State
+//class MapElementStateCore;
+// // Predicted State
+//class StateCore;
 
+//class StateEstimationCore;
 
 
 class MsfElementCore
@@ -193,21 +188,30 @@ public:
 
 public:
     virtual int predictState(//Time
-                             const TimeStamp previousTimeStamp,
-                             const TimeStamp currentTimeStamp,
+                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
-                            // Global Parameters (World) State
-                            std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
-                            // Robot State
-                            std::shared_ptr<RobotStateCore> TheRobotStateCore,
-                            // Inputs State
-                            std::list< std::shared_ptr<InputStateCore> > TheListInputStateCore,
-                            // Sensors State
-                            std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore,
-                            // Map State
-                            std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore,
+                             const std::shared_ptr<StateEstimationCore> pastState,
                              // Predicted State
-                             std::shared_ptr<StateCore> predictedState) {return 1;};
+                             std::shared_ptr<StateEstimationCore>& predictedState)
+    {
+        std::cout<<"yie"<<std::endl;
+        return 1;
+    };
+
+
+public:
+    virtual int predictErrorStateJacobian(//Time
+                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             // Previous State
+                             const std::shared_ptr<StateEstimationCore> pastState,
+                             // Predicted State
+                             std::shared_ptr<StateEstimationCore>& predictedState)
+    {
+        std::cout<<"yie"<<std::endl;
+        return 1;
+    };
+
+
 
 
 

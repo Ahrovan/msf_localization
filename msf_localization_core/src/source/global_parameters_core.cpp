@@ -196,4 +196,170 @@ Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
     return covariance_matrix;
 }
 
+int GlobalParametersCore::predictState(//Time
+                                     const TimeStamp previousTimeStamp,
+                                     const TimeStamp currentTimeStamp,
+                                     // Previous State
+                                     const std::shared_ptr<StateEstimationCore> pastState,
+                                     // Predicted State
+                                     std::shared_ptr<StateEstimationCore>& predictedState)
+{
+
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+
+    // Predicted State
+    if(!predictedState)
+        return -1;
+
+
+
+    // World Predicted State
+    std::shared_ptr<GlobalParametersStateCore> predictedWorldState;
+    if(!predictedState->TheGlobalParametersStateCore)
+        predictedWorldState=std::make_shared<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore->getMsfElementCoreWeakPtr());
+    else
+        predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState->TheGlobalParametersStateCore);
+
+
+    // Predict State
+    int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
+                                         std::dynamic_pointer_cast<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore),
+                                         predictedWorldState);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState->TheGlobalParametersStateCore=predictedWorldState;
+
+
+    // End
+    return 0;
+}
+
+int GlobalParametersCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<GlobalParametersStateCore> pastState, std::shared_ptr<GlobalParametersStateCore>& predictedState)
+{
+
+    // Checks in the past state
+    if(!pastState->isCorrect())
+    {
+        std::cout<<"GlobalParametersCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+        return -5;
+    }
+
+
+    // Create the predicted state if it doesn't exist
+    if(!predictedState)
+    {
+        predictedState=std::make_shared<GlobalParametersStateCore>(pastState->getMsfElementCoreWeakPtr());
+    }
+
+
+
+
+
+    // Equations
+
+
+    //Delta Time
+    TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
+    double dt=DeltaTime.get_double();
+
+
+    /// Gravity
+    predictedState->setGravity(pastState->getGravity());
+
+
+
+    // End
+    return 0;
+}
+
+int GlobalParametersCore::predictErrorStateJacobian(//Time
+                                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                 // Previous State
+                                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                                 // Predicted State
+                                                 std::shared_ptr<StateEstimationCore>& predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+
+    // Predicted State
+    if(!predictedState)
+        return -1;
+
+    // TODO
+
+
+
+    // World Predicted State
+    std::shared_ptr<GlobalParametersStateCore> predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState->TheGlobalParametersStateCore);
+
+
+    // Predict State
+    int error_predict_state=predictErrorStateJacobianSpecific(previousTimeStamp, currentTimeStamp,
+                                                            std::dynamic_pointer_cast<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore),
+                                                            predictedWorldState);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState->TheGlobalParametersStateCore=predictedWorldState;
+
+
+    // End
+    return 0;
+}
+
+int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                            std::shared_ptr<GlobalParametersStateCore> pastState,
+                                                            std::shared_ptr<GlobalParametersStateCore>& predictedState)
+{
+    // Check
+    if(!predictedState)
+    {
+        std::cout<<"GlobalParametersCore::predictErrorStateJacobians error en predictedState"<<std::endl;
+        return 1;
+    }
+
+
+    //Delta Time
+    TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
+    // delta time
+    double dt=DeltaTime.get_double();
+
+
+    ///// Jacobian Error State
+
+    // TODO
+
+
+
+    ///// Jacobian Error State Noise
+
+    // TODO
+
+
+
+    return 0;
+}
 

@@ -243,7 +243,49 @@ public:
 
 
 
-    // TODO
+
+    //// Predict Step Functions
+
+
+    // Prediction state function: f()
+public:
+    int predictState(//Time
+                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     // Previous State
+                     const std::shared_ptr<StateEstimationCore> pastState,
+                     // Predicted State
+                     std::shared_ptr<StateEstimationCore>& predictedState);
+
+protected:
+    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const std::shared_ptr<ImuInputStateCore> pastState,
+                             std::shared_ptr<ImuInputStateCore>& predictedState);
+
+    // int predictStateSpecificCore();
+
+
+
+    // Jacobian: F
+public:
+    int predictErrorStateJacobian(//Time
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Predicted State
+                                 std::shared_ptr<StateEstimationCore>& predictedState);
+
+protected:
+    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                          const std::shared_ptr<ImuInputStateCore> pastState,
+                                          std::shared_ptr<ImuInputStateCore>& predictedState);
+
+    // int predictErrorStateJacobianSpecificCore();
+
+
+
+    //// Update Step Functions
+
+    // NONE
 
 
 };

@@ -91,13 +91,7 @@ public:
 
     ///// Predict Step Functions
 
-    // Prediction state function
-public:
-    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState) =0;
-
-    // Jacobian
-public:
-    virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<RobotStateCore> pastState, std::shared_ptr<RobotStateCore>& predictedState) =0;
+    //
 
 
 

@@ -100,10 +100,40 @@ public:
 
     //// Predict Step Functions
 
+
+    // Prediction state function: f()
 public:
-    // TODO
+    int predictState(//Time
+                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     // Previous State
+                     const std::shared_ptr<StateEstimationCore> pastState,
+                     // Predicted State
+                     std::shared_ptr<StateEstimationCore>& predictedState);
+
 protected:
-    // TODO
+    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const std::shared_ptr<GlobalParametersStateCore> pastState,
+                             std::shared_ptr<GlobalParametersStateCore>& predictedState);
+
+    // int predictStateSpecificCore();
+
+
+
+    // Jacobian: F
+public:
+    int predictErrorStateJacobian(//Time
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Predicted State
+                                 std::shared_ptr<StateEstimationCore>& predictedState);
+
+protected:
+    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                          const std::shared_ptr<GlobalParametersStateCore> pastState,
+                                          std::shared_ptr<GlobalParametersStateCore>& predictedState);
+
+    // int predictErrorStateJacobianSpecificCore();
 
 
 
