@@ -45,6 +45,7 @@
 
 #include "msf_localization_core/state_estimation_core.h"
 
+#include "msf_localization_core/input_command_component.h"
 
 
 enum class MsfElementCoreTypes
@@ -191,10 +192,12 @@ public:
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
                              const std::shared_ptr<StateEstimationCore> pastState,
+                             // Inputs
+                             const std::shared_ptr<InputCommandComponent> inputCommand,
                              // Predicted State
                              std::shared_ptr<StateEstimationCore>& predictedState)
     {
-        std::cout<<"yie"<<std::endl;
+        std::cout<<"MsfElementCore::predictState()"<<std::endl;
         return 1;
     };
 
@@ -204,10 +207,12 @@ public:
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
                              const std::shared_ptr<StateEstimationCore> pastState,
+                             // Inputs
+                             const std::shared_ptr<InputCommandComponent> inputCommand,
                              // Predicted State
                              std::shared_ptr<StateEstimationCore>& predictedState)
     {
-        std::cout<<"yie"<<std::endl;
+        std::cout<<"MsfElementCore::predictErrorStateJacobian()"<<std::endl;
         return 1;
     };
 

@@ -208,20 +208,35 @@ public:
 protected:
     int getPreviousState(TimeStamp TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState);
 
+    // Fill inputs
+protected:
+    int findInputCommands(const TimeStamp TheTimeStamp,
+                          //const std::shared_ptr<StateEstimationCore> ThePreviousState,
+                          std::shared_ptr<InputCommandComponent>& input_command);
 
-    // Predict Functions
+
+
+    /// Predict Step Functions
 protected:
     int predict(TimeStamp TheTimeStamp);
 
     int predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
 private:
-    int predictSemiCore(TimeStamp ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState);
-    int predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore> ThePreviousState, std::shared_ptr<StateEstimationCore>& ThePredictedState);
+    int predictSemiCore(TimeStamp ThePredictedTimeStamp,
+                        std::shared_ptr<StateEstimationCore>& ThePredictedState);
+
+    int predictCore(const TimeStamp ThePreviousTimeStamp, const TimeStamp ThePredictedTimeStamp,
+                    // Previous State
+                    const std::shared_ptr<StateEstimationCore> ThePreviousState,
+                    // Inputs
+                    const std::shared_ptr<InputCommandComponent> inputCommand,
+                    // Predicted State
+                    std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
 
 
-    // Update functions
+    /// Update Step functions
 protected:
     int update(TimeStamp TheTimeStamp);
 

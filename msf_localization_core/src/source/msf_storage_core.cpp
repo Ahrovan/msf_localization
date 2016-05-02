@@ -125,14 +125,10 @@ int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::
         ++itSensorMeasurements)
     {
         TheStateEstimationCore->TheListMeasurementCore.push_back((*itSensorMeasurements));
-
-
-        // This is already safe
-        this->addElement(TheTimeStamp, TheStateEstimationCore);
-
     }
 
-
+    // This is already safe
+    this->addElement(TheTimeStamp, TheStateEstimationCore);
 
 
     // Add TimeStamp to the outdated elements list
@@ -170,8 +166,29 @@ int MsfStorageCore::setInputCommand(const TimeStamp time_stamp, const std::share
         TheStateEstimationCore=std::make_shared<StateEstimationCore>();
     }
 
-    // Measure
-    TheStateEstimationCore->TheListInputCommandCore.push_back(input_command_core);
+    // Avoid duplicates
+    bool flag_input_command_found=false;
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itComm=TheStateEstimationCore->TheListInputCommandCore.begin();
+        itComm!=TheStateEstimationCore->TheListInputCommandCore.end();
+        ++itComm)
+    {
+        if((*itComm)->getInputCoreSharedPtr()==input_command_core->getInputCoreSharedPtr())
+        {
+            flag_input_command_found=true;
+            // Found, replace
+            *itComm=input_command_core;
+            break;
+        }
+
+    }
+
+    // Input
+    if(!flag_input_command_found)
+    {
+        // Not found, add new one
+        TheStateEstimationCore->TheListInputCommandCore.push_back(input_command_core);
+    }
+
 
     // This is already safe
     this->addElement(time_stamp, TheStateEstimationCore);
@@ -212,17 +229,39 @@ int MsfStorageCore::setInputCommandList(const TimeStamp time_stamp, const std::l
     }
 
 
-    // Measurements
+    // Inputs
     for(std::list<std::shared_ptr<InputCommandCore>>::const_iterator itInputCommand=list_input_command_core.begin();
         itInputCommand!=list_input_command_core.end();
         ++itInputCommand)
     {
-        TheStateEstimationCore->TheListInputCommandCore.push_back((*itInputCommand));
 
-        // This is already safe
-        this->addElement(time_stamp, TheStateEstimationCore);
+        // Avoid duplicates
+        bool flag_input_command_found=false;
+        for(std::list< std::shared_ptr<InputCommandCore> >::iterator itComm=TheStateEstimationCore->TheListInputCommandCore.begin();
+            itComm!=TheStateEstimationCore->TheListInputCommandCore.end();
+            ++itComm)
+        {
+            if((*itComm)->getInputCoreSharedPtr()==(*itInputCommand)->getInputCoreSharedPtr())
+            {
+                flag_input_command_found=true;
+                // Found, replace
+                *itComm=(*itInputCommand);
+                break;
+            }
+
+        }
+
+        // Input
+        if(!flag_input_command_found)
+        {
+            // Not found, add new one
+            TheStateEstimationCore->TheListInputCommandCore.push_back((*itInputCommand));
+        }
 
     }
+
+    // This is already safe
+    this->addElement(time_stamp, TheStateEstimationCore);
 
 
     // Add TimeStamp to the outdated elements list
@@ -427,7 +466,114 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStam
     return 0;
 }
 
+int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core)
+{
+#if _DEBUG_MSF_STORAGE
+        {
+            std::ostringstream logString;
+            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() finding TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
 
+            this->displayRingBuffer();
+        }
+#endif
+
+    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
+
+    // Find
+    TheRingBufferMutex.lock();
+    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+        itElement!=this->getEnd();
+        ++itElement)
+    {
+        // Get the element
+        int errorGetElement=this->getElementI(BufferElement, itElement);
+
+        if(errorGetElement)
+            continue;
+
+#if _DEBUG_MSF_STORAGE
+        {
+            std::ostringstream logString;
+            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+
+        // Check the time stamp
+        if(BufferElement.timeStamp>time_stamp)
+        {
+            continue;
+        }
+        else
+        {
+            //logFile<<"found by time stamp!"<<std::endl;
+
+            // Check if it has input commands
+            if(BufferElement.object->hasInputCommand())
+            {
+
+                //TheTimeStamp=BufferElement.timeStamp;
+                //PreviousState=BufferElement.object;
+
+
+                // Check
+                bool flag_input_command_found=false;
+                for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=BufferElement.object->TheListInputCommandCore.begin();
+                    itInputCommand!=BufferElement.object->TheListInputCommandCore.end();
+                    ++itInputCommand)
+                {
+                    if((*itInputCommand)->getInputCoreSharedPtr() == input_core)
+                    {
+#if _DEBUG_MSF_STORAGE
+                        {
+                            std::ostringstream logString;
+                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found pre assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+                            this->log(logString.str());
+                        }
+#endif
+
+                        flag_input_command_found=true;
+                        input_command_core=(*itInputCommand);
+                        break;
+                    }
+                }
+
+                // Check and break
+                if(flag_input_command_found)
+                {
+
+#if _DEBUG_MSF_STORAGE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found post assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+                        logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() the assigned TS is: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                        this->log(logString.str());
+                        this->displayStateEstimationElement(BufferElement.timeStamp, BufferElement.object);
+                    }
+#endif
+
+                    break;
+                }
+            }
+        }
+    }
+    TheRingBufferMutex.unlock();
+
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() ended"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    if(!input_command_core)
+        return 1;
+
+    return 0;
+}
 
 int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
 {

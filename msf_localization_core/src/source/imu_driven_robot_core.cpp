@@ -275,6 +275,8 @@ int ImuDrivenRobotCore::predictState(//Time
                                      const TimeStamp currentTimeStamp,
                                      // Previous State
                                      const std::shared_ptr<StateEstimationCore> pastState,
+                                     // Inputs
+                                     const std::shared_ptr<InputCommandComponent> inputCommand,
                                      // Predicted State
                                      std::shared_ptr<StateEstimationCore>& predictedState)
 {
@@ -293,7 +295,21 @@ int ImuDrivenRobotCore::predictState(//Time
 
     // Search for the command
     std::shared_ptr<ImuInputCommandCore> imu_input_command;
-    // TODO
+    // TODO Improve
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=inputCommand->TheListInputCommandCore.begin();
+        itInputCommand != inputCommand->TheListInputCommandCore.end();
+        ++itInputCommand)
+    {
+        if((*itInputCommand)->getInputCommandType()==InputCommandTypes::imu)
+        {
+            // Iterators cannot be dynamic cast!
+            imu_input_command=std::static_pointer_cast<ImuInputCommandCore>(*itInputCommand);
+            break;
+        }
+    }
+
+    if(!imu_input_command)
+        return -10;
 
 
     // Robot Predicted State
@@ -334,7 +350,9 @@ int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp previousTimeStamp, 
     //std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
     //std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
 
-
+//std::cout<<"Input TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns."<<std::endl;
+//std::cout<<"\t + a: "<<input->getLinearAcceleration().transpose()<<std::endl;
+//std::cout<<"\t + w: "<<input->getAngularVelocity().transpose()<<std::endl;
 
     // Checks in the past state
     if(!pastState->isCorrect())
@@ -426,6 +444,8 @@ int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
                                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                                  // Previous State
                                                  const std::shared_ptr<StateEstimationCore> pastState,
+                                                  // Inputs
+                                                  const std::shared_ptr<InputCommandComponent> inputCommand,
                                                  // Predicted State
                                                  std::shared_ptr<StateEstimationCore>& predictedState)
 {

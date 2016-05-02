@@ -122,6 +122,9 @@ public:
 public:
     int getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp);
 
+    // Get the previous input by stamp using the input core
+public:
+    int getPreviousInputCommandByStampAndInputCore(const TimeStamp time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core);
 
 
 

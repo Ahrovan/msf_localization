@@ -101,6 +101,10 @@ add_dependencies(${PROJECT_NAME}_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_lib ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES})
 
+add_executable(${PROJECT_NAME}_test ${MSF_LOCALIZATION_ROS_SOURCE_DIR}/test.cpp)
+add_dependencies(${PROJECT_NAME}_test ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME}_lib)
+target_link_libraries(${PROJECT_NAME}_test ${catkin_LIBRARIES})
 
 add_executable(${PROJECT_NAME} ${MSF_LOCALIZATION_ROS_SOURCE_DIR}/droneMsfLocalizationROSModuleNode.cpp)
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})

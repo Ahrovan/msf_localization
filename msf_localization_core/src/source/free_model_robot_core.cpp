@@ -441,6 +441,8 @@ int FreeModelRobotCore::predictState(//Time
                                      const TimeStamp currentTimeStamp,
                                      // Previous State
                                      const std::shared_ptr<StateEstimationCore> pastState,
+                                     // Inputs
+                                     const std::shared_ptr<InputCommandComponent> inputCommand,
                                      // Predicted State
                                      std::shared_ptr<StateEstimationCore>& predictedState)
 {
@@ -600,6 +602,8 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
                                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                                  // Previous State
                                                  const std::shared_ptr<StateEstimationCore> pastState,
+                                                  // Inputs
+                                                  const std::shared_ptr<InputCommandComponent> inputCommand,
                                                  // Predicted State
                                                  std::shared_ptr<StateEstimationCore>& predictedState)
 {

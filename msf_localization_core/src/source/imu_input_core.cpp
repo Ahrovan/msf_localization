@@ -867,6 +867,8 @@ int ImuInputCore::predictState(//Time
                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                  // Previous State
                  const std::shared_ptr<StateEstimationCore> pastState,
+                 // Inputs
+                 const std::shared_ptr<InputCommandComponent> inputCommand,
                  // Predicted State
                  std::shared_ptr<StateEstimationCore>& predictedState)
 {
@@ -885,19 +887,42 @@ int ImuInputCore::predictState(//Time
 
     // Search for the past Input State Core
     std::shared_ptr<ImuInputStateCore> pastInputState;
-    // TODO
+
+    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=pastState->TheListInputStateCore.begin();
+        itInputState!=pastState->TheListInputStateCore.end();
+        ++itInputState)
+    {
+        if((*itInputState)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            pastInputState=std::dynamic_pointer_cast<ImuInputStateCore>(*itInputState);
+            break;
+        }
+    }
+    if(!pastInputState)
+        return -10;
 
 
     // Search for the predicted Input Predicted State
     std::shared_ptr<ImuInputStateCore> predictedInputState;
-    // TODO
+    std::list< std::shared_ptr<InputStateCore> >::iterator itInputState;
+    bool flag_predicted_input_state_found=false;
+    for(itInputState=predictedState->TheListInputStateCore.begin();
+        itInputState!=predictedState->TheListInputStateCore.end();
+        ++itInputState)
+    {
+        if((*itInputState)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            pastInputState=std::dynamic_pointer_cast<ImuInputStateCore>(*itInputState);
+            flag_predicted_input_state_found=true;
+            break;
+        }
+    }
+
 
     // Create the prediction if it does not exist
-    // TODO
-//    if(!predictedState->TheRobotStateCore)
-//        predictedInputState=std::make_shared<ImuInputStateCore>(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
-//    else
-//        predictedInputState=std::dynamic_pointer_cast<ImuInputStateCore>(predictedState->TheRobotStateCore);
+    if(!predictedInputState)
+        predictedInputState=std::make_shared<ImuInputStateCore>(pastInputState->getMsfElementCoreWeakPtr());
+
 
 
     // Predict State
@@ -911,8 +936,14 @@ int ImuInputCore::predictState(//Time
 
 
     // Set predicted state
-    // TODO
-    //predictedState->TheRobotStateCore=predictedRobotState;
+    if(flag_predicted_input_state_found)
+    {
+        *itInputState=predictedInputState;
+    }
+    else
+    {
+        predictedState->TheListInputStateCore.push_back(predictedInputState);
+    }
 
 
     // End
@@ -924,6 +955,9 @@ int ImuInputCore::predictStateSpecific(const TimeStamp previousTimeStamp, const 
                          std::shared_ptr<ImuInputStateCore>& predictedState)
 {
 
+    predictedState=pastState;
+
+
     return 0;
 }
 
@@ -931,6 +965,8 @@ int ImuInputCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
                              const std::shared_ptr<StateEstimationCore> pastState,
+                            // Inputs
+                            const std::shared_ptr<InputCommandComponent> inputCommand,
                              // Predicted State
                              std::shared_ptr<StateEstimationCore>& predictedState)
 {

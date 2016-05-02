@@ -31,6 +31,9 @@ int ImuInputCommandCore::init()
     orientation_.setZero();
     angular_velocity_.setZero();
 
+    // Type
+    setInputCommandType(InputCommandTypes::imu);
+
     return 0;
 }
 

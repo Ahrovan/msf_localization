@@ -289,6 +289,68 @@ int MsfLocalizationCore::getPreviousState(TimeStamp TheTimeStamp, TimeStamp& The
     return 0;
 }
 
+int MsfLocalizationCore::findInputCommands(const TimeStamp TheTimeStamp,
+                                           //const std::shared_ptr<StateEstimationCore> ThePreviousState,
+                                           std::shared_ptr<InputCommandComponent>& input_command)
+{
+    // Checks
+//    if(!ThePreviousState)
+//        return -1;
+
+    // Create Pointer
+    if(!input_command)
+        input_command=std::make_shared<InputCommandComponent>();
+
+    // Clear the list -> Just in case
+    input_command->TheListInputCommandCore.clear();
+
+    // Iterate over the input cores
+    for(std::list<std::shared_ptr<InputCore>>::iterator itInputCore=this->TheListOfInputCore.begin();
+        itInputCore!=this->TheListOfInputCore.end();
+        ++itInputCore)
+    {
+        /*
+        // Find the input command in ThePreviousState if exist
+        bool flag_input_command_already_set=false;
+        for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=ThePreviousState->TheListInputCommandCore.begin();
+            itInputCommand!=ThePreviousState->TheListInputCommandCore.end();
+            ++itInputCommand)
+        {
+            if((*itInputCommand)->getInputCoreSharedPtr() == (*itInputCore))
+            {
+                flag_input_command_already_set=true;
+                input_command->TheListInputCommandCore.push_back((*itInputCommand));
+                break;
+            }
+        }
+
+        // Input Command Already Set
+        if(flag_input_command_already_set)
+            continue;
+        */
+
+        // Search the last input command in the buffer
+        std::shared_ptr<InputCommandCore> input_command_core;
+        int error_get_previous_input_command=TheMsfStorageCore->getPreviousInputCommandByStampAndInputCore(TheTimeStamp, *itInputCore, input_command_core);
+
+        if(error_get_previous_input_command)
+        {
+            //std::cout<<"MsfLocalizationCore::findInputCommands error_get_previous_input_command"<<std::endl;
+            return error_get_previous_input_command;
+        }
+
+        if(!input_command_core)
+            return -1;
+
+        // Set in the variable ThePreviousState
+        input_command->TheListInputCommandCore.push_back(input_command_core);
+
+    }
+
+
+    return 0;
+}
+
 
 int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 {
@@ -303,9 +365,8 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
     }
 #endif
 
-    // The predicted state
+    // The predicted state -> New element to be added to the buffer
     std::shared_ptr<StateEstimationCore> PredictedState;
-    // New element to be added to the buffer
     PredictedState=std::make_shared<StateEstimationCore>();
 
 
@@ -337,6 +398,9 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
         // Measurements
         // std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
         PredictedState->TheListMeasurementCore=OldPredictedState->TheListMeasurementCore;
+
+        // Inputs
+        PredictedState->TheListInputCommandCore=OldPredictedState->TheListInputCommandCore;
 
         // Nothing else needed
     }
@@ -464,6 +528,9 @@ int MsfLocalizationCore::predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_
         // std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
         ThePredictedState->TheListMeasurementCore=OldPredictedState->TheListMeasurementCore;
 
+        // Inputs
+        ThePredictedState->TheListInputCommandCore=OldPredictedState->TheListInputCommandCore;
+
         // Nothing else needed
     }
 
@@ -533,7 +600,7 @@ int MsfLocalizationCore::predictSemiCore(TimeStamp ThePredictedTimeStamp, std::s
 {
 
 
-    // Get the last state from the buffer
+    // Get the last predicted state from the buffer
     TimeStamp PreviousTimeStamp;
     std::shared_ptr<StateEstimationCore> PreviousState;
 
@@ -581,21 +648,49 @@ int MsfLocalizationCore::predictSemiCore(TimeStamp ThePredictedTimeStamp, std::s
 #endif
 
 
+    // Set inputs
+    std::shared_ptr<InputCommandComponent> inputs;
 
-    int error=predictCore(PreviousTimeStamp, ThePredictedTimeStamp, PreviousState, ThePredictedState);
+
+    int error_find_input_commands = findInputCommands(ThePredictedTimeStamp,
+                                                      //PreviousState,
+                                                      inputs);
+
+    if(error_find_input_commands)
+    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+        logFile<<"MsfLocalizationCore::predictSemiCore() error find_input_commands"<<std::endl;
+#endif
+        return error_find_input_commands;
+    }
+
+
+
+
+    // Predict Core
+    int error=predictCore(PreviousTimeStamp, ThePredictedTimeStamp,
+                          PreviousState,
+                          inputs,
+                          ThePredictedState);
 
     if(error)
         return error;
 
 
-
+    // End
     return 0;
 }
 
 
 
 
-int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore> ThePreviousState, std::shared_ptr<StateEstimationCore>& ThePredictedState)
+int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const TimeStamp ThePredictedTimeStamp,
+                                     // Previous State
+                                     const std::shared_ptr<StateEstimationCore> ThePreviousState,
+                                     // Inputs
+                                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                                     // Predicted State
+                                     std::shared_ptr<StateEstimationCore>& ThePredictedState)
 {
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -611,36 +706,45 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
     }
 #endif
 
-    // Dimension of the state
-    //unsigned int dimensionOfState=0;
-    //unsigned int dimensionOfErrorState=0;
 
 
     ///// Global Parameters
 
     {
         // State
-        int error_predict_state=TheGlobalParametersCore->predictState(//Time
-                                                                 ThePreviousTimeStamp,
-                                                                 ThePredictedTimeStamp,
-                                                                 // Previous State
-                                                                 ThePreviousState,
-                                                                 // Predicted State
-                                                                 ThePredictedState);
+        int error_predict_state=ThePreviousState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->
+                predictState(//Time
+                             ThePreviousTimeStamp,
+                             ThePredictedTimeStamp,
+                             // Previous State
+                             ThePreviousState,
+                             // Input
+                             inputCommand,
+                             // Predicted State
+                             ThePredictedState);
         if(error_predict_state)
+        {
+            std::cout<<"error_predict_state"<<std::endl;
             return error_predict_state;
+        }
 
 
         // Jacobian Error State
-        int error_predict_error_state_jacobian=TheGlobalParametersCore->predictErrorStateJacobian(//Time
-                                                                                         ThePreviousTimeStamp,
-                                                                                         ThePredictedTimeStamp,
-                                                                                         // Previous State
-                                                                                         ThePreviousState,
-                                                                                         // Predicted State
-                                                                                         ThePredictedState);
+        int error_predict_error_state_jacobian=ThePreviousState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->
+                predictErrorStateJacobian(//Time
+                                         ThePreviousTimeStamp,
+                                         ThePredictedTimeStamp,
+                                         // Previous State
+                                         ThePreviousState,
+                                          // Input
+                                          inputCommand,
+                                         // Predicted State
+                                         ThePredictedState);
         if(error_predict_error_state_jacobian)
+        {
+            std::cout<<"error_predict_error_state_jacobian"<<std::endl;
             return error_predict_error_state_jacobian;
+        }
 
     }
 
@@ -652,27 +756,39 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 #endif
     {
         // State
-        int error_predict_state=TheRobotCore->predictState(//Time
-                                                         ThePreviousTimeStamp,
-                                                         ThePredictedTimeStamp,
-                                                         // Previous State
-                                                         ThePreviousState,
-                                                         // Predicted State
-                                                         ThePredictedState);
+        int error_predict_state=ThePreviousState->TheRobotStateCore->getMsfElementCoreSharedPtr()->
+                predictState(//Time
+                             ThePreviousTimeStamp,
+                             ThePredictedTimeStamp,
+                             // Previous State
+                             ThePreviousState,
+                             // Input
+                             inputCommand,
+                             // Predicted State
+                             ThePredictedState);
         if(error_predict_state)
+        {
+            std::cout<<"error_predict_state"<<std::endl;
             return error_predict_state;
+        }
 
 
         // Jacobian Error State
-        int error_predict_error_state_jacobian=TheRobotCore->predictErrorStateJacobian(//Time
-                                                                                     ThePreviousTimeStamp,
-                                                                                     ThePredictedTimeStamp,
-                                                                                     // Previous State
-                                                                                     ThePreviousState,
-                                                                                     // Predicted State
-                                                                                     ThePredictedState);
+        int error_predict_error_state_jacobian=ThePreviousState->TheRobotStateCore->getMsfElementCoreSharedPtr()->
+                predictErrorStateJacobian(//Time
+                                         ThePreviousTimeStamp,
+                                         ThePredictedTimeStamp,
+                                         // Previous State
+                                         ThePreviousState,
+                                          // Input
+                                          inputCommand,
+                                         // Predicted State
+                                         ThePredictedState);
         if(error_predict_error_state_jacobian)
+        {
+            std::cout<<"error_predict_error_state_jacobian"<<std::endl;
             return error_predict_error_state_jacobian;
+        }
 
     }
 
@@ -687,32 +803,49 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
 
     ///// Inputs
 
-    for(std::list< std::shared_ptr<InputCore> >::iterator itInput=TheListOfInputCore.begin();
-        itInput!=TheListOfInputCore.end();
+    // Clean the list
+    ThePredictedState->TheListInputStateCore.clear();
+
+    // Iterate
+    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInput=ThePreviousState->TheListInputStateCore.begin();
+        itInput!=ThePreviousState->TheListInputStateCore.end();
         ++itInput)
     {
+
         // State
-        int error_predict_state=(*itInput)->predictState(//Time
-                                                         ThePreviousTimeStamp,
-                                                         ThePredictedTimeStamp,
-                                                         // Previous State
-                                                         ThePreviousState,
-                                                         // Predicted State
-                                                         ThePredictedState);
+        int error_predict_state=(*itInput)->getMsfElementCoreSharedPtr()->
+                predictState(//Time
+                             ThePreviousTimeStamp,
+                             ThePredictedTimeStamp,
+                             // Previous State
+                             ThePreviousState,
+                             // Input
+                             inputCommand,
+                             // Predicted State
+                             ThePredictedState);
         if(error_predict_state)
+        {
+            std::cout<<"error_predict_state"<<std::endl;
             return error_predict_state;
+        }
 
 
         // Jacobian Error State
-        int error_predict_error_state_jacobian=(*itInput)->predictErrorStateJacobian(//Time
-                                                                                     ThePreviousTimeStamp,
-                                                                                     ThePredictedTimeStamp,
-                                                                                     // Previous State
-                                                                                     ThePreviousState,
-                                                                                     // Predicted State
-                                                                                     ThePredictedState);
+        int error_predict_error_state_jacobian=(*itInput)->getMsfElementCoreSharedPtr()->
+                predictErrorStateJacobian(//Time
+                                         ThePreviousTimeStamp,
+                                         ThePredictedTimeStamp,
+                                         // Previous State
+                                         ThePreviousState,
+                                         // Input
+                                         inputCommand,
+                                         // Predicted State
+                                         ThePredictedState);
         if(error_predict_error_state_jacobian)
+        {
+            std::cout<<"error_predict_error_state_jacobian"<<std::endl;
             return error_predict_error_state_jacobian;
+        }
 
     }
 
@@ -726,6 +859,8 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
     ThePredictedState->TheListSensorStateCore.clear();
 
     // Iterate
+
+    // TODO fix: iterate on the state no on the core
     for(std::list< std::shared_ptr<SensorCore> >::iterator itSens=TheListOfSensorCore.begin();
         itSens!=TheListOfSensorCore.end();
         ++itSens)
@@ -906,6 +1041,7 @@ int MsfLocalizationCore::predictCore(TimeStamp ThePreviousTimeStamp, TimeStamp T
         {
             //Eigen::SparseMatrix<double> jacobianErrorStateNoise=ThePredictedState->TheRobotStateCore->getJacobianErrorStateNoise();
 
+            // Fn * Qn * Fnt
             Eigen::SparseMatrix<double> covarianceErrorStateNoise=ThePredictedState->TheRobotStateCore->getJacobianErrorStateNoise()*TheRobotCore->getCovarianceNoise(DeltaTime)*ThePredictedState->TheRobotStateCore->getJacobianErrorStateNoise().transpose();
 
             ThePredictedState->covarianceMatrix->block(0,0,dimensionRobotErrorState,dimensionRobotErrorState)=
@@ -1495,6 +1631,9 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     // Measurements
     UpdatedState->TheListMeasurementCore=OldState->TheListMeasurementCore;
 
+    // Inputs
+    UpdatedState->TheListInputCommandCore=OldState->TheListInputCommandCore;
+
 
     // Covariance: Copy constructor
     UpdatedState->covarianceMatrix=std::make_shared<Eigen::MatrixXd>();
@@ -1512,6 +1651,9 @@ int MsfLocalizationCore::update(TimeStamp TheTimeStamp)
     UpdatedState->TheRobotStateCore=OldState->TheRobotStateCore;
 //    UpdatedState->TheRobotStateCore=std::make_shared<RobotStateCore>();
 //    *UpdatedState->TheRobotStateCore=*OldState->TheRobotStateCore;
+
+    // Input State
+    UpdatedState->TheListInputStateCore=OldState->TheListInputStateCore;
 
     // Sensors State
     //std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
@@ -3369,6 +3511,9 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         // Measurements
         OldState->TheListMeasurementCore=UpdatedState->TheListMeasurementCore;
 
+        // Inputs
+        OldState->TheListInputCommandCore=UpdatedState->TheListInputCommandCore;
+
 
         // Covariance
         OldState->covarianceMatrix=UpdatedState->covarianceMatrix;
@@ -3380,11 +3525,14 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         //UpdatedState->TheGlobalParametersStateCore=std::make_shared<GlobalParametersStateCore>();
         //*UpdatedState->TheGlobalParametersStateCore=*OldState->TheGlobalParametersStateCore;
 
-        // Robot Stat
+        // Robot State
         //std::shared_ptr<RobotStateCore> TheRobotStateCore;
         OldState->TheRobotStateCore=UpdatedState->TheRobotStateCore;
     //    UpdatedState->TheRobotStateCore=std::make_shared<RobotStateCore>();
     //    *UpdatedState->TheRobotStateCore=*OldState->TheRobotStateCore;
+
+        // Input State
+        OldState->TheListInputStateCore=UpdatedState->TheListInputStateCore;
 
         // Sensors State
         //std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
