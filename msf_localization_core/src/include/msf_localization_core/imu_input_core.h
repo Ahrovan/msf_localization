@@ -256,7 +256,7 @@ public:
                      // Inputs
                      const std::shared_ptr<InputCommandComponent> inputCommand,
                      // Predicted State
-                     std::shared_ptr<StateEstimationCore>& predictedState);
+                     std::shared_ptr<StateCore>& predictedState);
 
 protected:
     int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
@@ -269,6 +269,7 @@ protected:
 
     // Jacobian: F
 public:
+    // TODO
     int predictErrorStateJacobian(//Time
                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                  // Previous State
@@ -276,7 +277,7 @@ public:
                                   // Inputs
                                   const std::shared_ptr<InputCommandComponent> inputCommand,
                                  // Predicted State
-                                 std::shared_ptr<StateEstimationCore>& predictedState);
+                                 std::shared_ptr<StateCore>& predictedState);
 
 protected:
     int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,

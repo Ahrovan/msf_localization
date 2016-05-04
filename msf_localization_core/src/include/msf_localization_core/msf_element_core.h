@@ -47,6 +47,8 @@
 
 #include "msf_localization_core/input_command_component.h"
 
+#include "msf_localization_core/sensor_measurement_component.h"
+
 
 enum class MsfElementCoreTypes
 {
@@ -62,6 +64,9 @@ enum class MsfElementCoreTypes
 // Forward declarations!
 
 class MsfStorageCore;
+
+class StateCore;
+
 
 //// Global Parameters (World) State
 //class GlobalParametersStateCore;
@@ -195,7 +200,7 @@ public:
                              // Inputs
                              const std::shared_ptr<InputCommandComponent> inputCommand,
                              // Predicted State
-                             std::shared_ptr<StateEstimationCore>& predictedState)
+                             std::shared_ptr<StateCore>& predictedState)
     {
         std::cout<<"MsfElementCore::predictState()"<<std::endl;
         return 1;
@@ -210,7 +215,7 @@ public:
                              // Inputs
                              const std::shared_ptr<InputCommandComponent> inputCommand,
                              // Predicted State
-                             std::shared_ptr<StateEstimationCore>& predictedState)
+                             std::shared_ptr<StateCore>& predictedState)
     {
         std::cout<<"MsfElementCore::predictErrorStateJacobian()"<<std::endl;
         return 1;

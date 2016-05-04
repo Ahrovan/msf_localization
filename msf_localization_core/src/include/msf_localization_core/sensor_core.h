@@ -131,18 +131,49 @@ public:
 
     ///// Predict Step Functions
 
-
-    // Prediction state function
-public:
-    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState) =0;
-
-    // Jacobian of the error state
-public:
-    virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState) =0;
+    // Nothing new
 
 
 
     ///// Update Step Functions
+
+
+    /// Correct State
+
+    // TODO
+
+public:
+    virtual int predictMeasurement(// Time
+                                   const TimeStamp current_time_stamp,
+                                   // Current State
+                                   const std::shared_ptr<StateEstimationCore> current_state,
+                                   // Measurements
+                                   const std::shared_ptr<SensorMeasurementCore> measurement,
+                                   // Predicted Measurements
+                                   std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+    {
+        std::cout<<"SensorCore::predictMeasurement()"<<std::endl;
+        return 1;
+    }
+
+
+public:
+    virtual int predictErrorMeasurementJacobian(// Time
+                                                const TimeStamp current_time_stamp,
+                                               // Current State
+                                               const std::shared_ptr<StateEstimationCore> current_state,
+                                               // Measurements
+                                               const std::shared_ptr<SensorMeasurementCore> measurement,
+                                               // Predicted Measurements
+                                               std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+    {
+        std::cout<<"SensorCore::predictErrorMeasurementJacobian()"<<std::endl;
+        return 1;
+    }
+
+
+
+    /// Mapping
 
     // TODO
 

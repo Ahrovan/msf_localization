@@ -144,7 +144,19 @@ public:
 
     // Prediction state function: f()
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
+    int predictState(//Time
+                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     // Previous State
+                     const std::shared_ptr<StateEstimationCore> pastState,
+                     // Inputs
+                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                     // Predicted State
+                     std::shared_ptr<StateCore> &predictedState);
+
+public:
+    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
+                             std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 protected:
     int predictStateCore(// State k: Sensor
                          Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
@@ -154,7 +166,19 @@ protected:
 
     // Jacobian of the error state: F
 public:
-    int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
+    int predictErrorStateJacobian(//Time
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Inputs
+                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 // Predicted State
+                                 std::shared_ptr<StateCore>& predictedState);
+
+protected:
+    int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                   const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
+                                   std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 protected:
     // TODO Fix!!
     int predictErrorStateJacobiansCore(// State k: Sensor
@@ -174,7 +198,22 @@ protected:
 
     // Prediction measurements: h()
 public:
-    int predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<MapElementStateCore> currentMapElementState, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+    int predictMeasurement(// Time
+                           const TimeStamp current_time_stamp,
+                           // Current State
+                           const std::shared_ptr<StateEstimationCore> current_state,
+                           // Measurement to match
+                           const std::shared_ptr<SensorMeasurementCore> measurement,
+                           // Predicted Measurements
+                           std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
+
+public:    
+    int predictMeasurementSpecific(const TimeStamp theTimeStamp,
+                           const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                           const std::shared_ptr<RobotStateCore> currentRobotState,
+                           const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
+                           const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
+                           std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 protected:
     int predictMeasurementCore(// State: Robot
                                Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
@@ -188,7 +227,23 @@ protected:
 
     // Jacobian of the measurements: H
 public:
-    int jacobiansErrorMeasurements(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<MapElementStateCore> currentMapElementState, std::shared_ptr<SensorMeasurementCore> matchedMeasurement, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
+    int predictErrorMeasurementJacobian(// Time
+                                        const TimeStamp current_time_stamp,
+                                        // Current State
+                                        const std::shared_ptr<StateEstimationCore> current_state,
+                                        // Measurement to match
+                                        const std::shared_ptr<SensorMeasurementCore> measurement,
+                                        // Predicted Measurements
+                                        std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
+
+public:
+    int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+                                   const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                   const std::shared_ptr<RobotStateCore> currentRobotState,
+                                   const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
+                                   const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
+                                   const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
+                                   std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 protected:
     int jacobiansErrorMeasurementsCore(// State: Robot
                                        Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
@@ -212,7 +267,13 @@ protected:
 
     // Mapping: g()
 public:
-    int mapMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<SensorMeasurementCore> matchedMeasurement, std::shared_ptr<MapElementCore>& newMapElementCore, std::shared_ptr<MapElementStateCore>& newMapElementState);
+    int mapMeasurement(const TimeStamp theTimeStamp,
+                       const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                       const std::shared_ptr<RobotStateCore> currentRobotState,
+                       const std::shared_ptr<SensorStateCore> currentSensorState,
+                       const std::shared_ptr<SensorMeasurementCore> matchedMeasurement,
+                       std::shared_ptr<MapElementCore>& newMapElementCore,
+                       std::shared_ptr<MapElementStateCore>& newMapElementState);
 protected:
     int mapMeasurementCore(// robot wrt world (state)
                            Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
@@ -226,7 +287,12 @@ protected:
 
     // Jacobian Mapping: G
 public:
-    int jacobiansMapMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<SensorMeasurementCore> matchedMeasurement, std::shared_ptr<MapElementStateCore>& newMapElementState);
+    int jacobiansMapMeasurement(const TimeStamp theTimeStamp,
+                                const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                const std::shared_ptr<RobotStateCore> currentRobotState,
+                                const std::shared_ptr<SensorStateCore> currentSensorState,
+                                const std::shared_ptr<SensorMeasurementCore> matchedMeasurement,
+                                std::shared_ptr<MapElementStateCore>& newMapElementState);
 protected:
     int jacobiansMapMeasurementCore(// robot wrt world (state)
                                     Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,

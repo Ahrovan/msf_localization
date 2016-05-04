@@ -99,13 +99,7 @@ public:
 
     ///// Predict Step functions
 
-    // Prediction state function: f()
-public:
-    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
-
-    // Jacobian: F
-public:
-    virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
+    //
 
 
     //// Update Step functions

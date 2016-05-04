@@ -252,34 +252,88 @@ public:
 
 
 
-    ///// Predict functions
+    ///// Predict Step functions
 
     // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel, ka, bias_ang_veloc, kw]'
 
     // Prediction state function: f
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
+    int predictState(//Time
+                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     // Previous State
+                     const std::shared_ptr<StateEstimationCore> pastState,
+                     // Inputs
+                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                     // Predicted State
+                     std::shared_ptr<StateCore>& predictedState);
+
+protected:
+
+    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     const std::shared_ptr<ImuSensorStateCore> pastState,
+                     std::shared_ptr<ImuSensorStateCore>& predictedState);
 
     // Jacobian of the error state: F
+
 public:
-    int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastState, std::shared_ptr<SensorStateCore>& predictedState);
+    int predictErrorStateJacobian(//Time
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Inputs
+                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 // Predicted State
+                                 std::shared_ptr<StateCore>& predictedState);
+
+protected:
+    int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                   const std::shared_ptr<ImuSensorStateCore> pastState,
+                                   std::shared_ptr<ImuSensorStateCore>& predictedState);
 
 
 
 
-    //// Update functions
+    //// Update Step functions
 
 
     /// State Correction
 
     // Prediction measurements: h
 public:
-    int predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
+    int predictMeasurement(// Time
+                           const TimeStamp current_time_stamp,
+                           // Current State
+                           const std::shared_ptr<StateEstimationCore> current_state,
+                           // Measurement to match
+                           const std::shared_ptr<SensorMeasurementCore> measurement,
+                           // Predicted Measurements
+                           std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
+
+public:
+    int predictMeasurementSpecific(const TimeStamp theTimeStamp,
+                           const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                           const std::shared_ptr<RobotStateCore> currentRobotState,
+                           const std::shared_ptr<ImuSensorStateCore> currentImuState,
+                           std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
 
 
     // Jacobian of the measurements: H
 public:
-    int jacobiansErrorMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
+    int predictErrorMeasurementJacobian(// Time
+                                        const TimeStamp current_time_stamp,
+                                        // Current State
+                                        const std::shared_ptr<StateEstimationCore> current_state,
+                                        // Measurements
+                                        const std::shared_ptr<SensorMeasurementCore> measurement,
+                                        // Predicted Measurements
+                                        std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
+
+public:
+    int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+                                   const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                   const std::shared_ptr<RobotStateCore> TheRobotStateCore,
+                                   const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
+                                   std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
 
 
     /// Mapping

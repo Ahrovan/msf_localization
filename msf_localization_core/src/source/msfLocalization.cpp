@@ -697,6 +697,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     TimeStamp beginTimePredictCore=getTimeStamp();
 #endif
 
+
     /////// State
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
@@ -708,9 +709,12 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-    ///// Global Parameters
+    ///// World -> Global Parameters
 
     {
+        //
+        std::shared_ptr<StateCore> predicted_state;
+
         // State
         int error_predict_state=ThePreviousState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->
                 predictState(//Time
@@ -721,10 +725,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                              // Input
                              inputCommand,
                              // Predicted State
-                             ThePredictedState);
+                             predicted_state);
         if(error_predict_state)
         {
-            std::cout<<"error_predict_state"<<std::endl;
+            std::cout<<"world: error_predict_state"<<std::endl;
             return error_predict_state;
         }
 
@@ -739,13 +743,15 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                                           // Input
                                           inputCommand,
                                          // Predicted State
-                                         ThePredictedState);
+                                         predicted_state);
         if(error_predict_error_state_jacobian)
         {
-            std::cout<<"error_predict_error_state_jacobian"<<std::endl;
+            std::cout<<"world: error_predict_error_state_jacobian"<<std::endl;
             return error_predict_error_state_jacobian;
         }
 
+        // Set
+        ThePredictedState->TheGlobalParametersStateCore=std::dynamic_pointer_cast<GlobalParametersStateCore>(predicted_state);
     }
 
 
@@ -755,6 +761,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     TimeStamp beginTimePredictRobot=getTimeStamp();
 #endif
     {
+        //
+        std::shared_ptr<StateCore> predicted_state;
+
         // State
         int error_predict_state=ThePreviousState->TheRobotStateCore->getMsfElementCoreSharedPtr()->
                 predictState(//Time
@@ -765,10 +774,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                              // Input
                              inputCommand,
                              // Predicted State
-                             ThePredictedState);
+                             predicted_state);
         if(error_predict_state)
         {
-            std::cout<<"error_predict_state"<<std::endl;
+            std::cout<<"robot: error_predict_state"<<std::endl;
             return error_predict_state;
         }
 
@@ -783,13 +792,15 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                                           // Input
                                           inputCommand,
                                          // Predicted State
-                                         ThePredictedState);
+                                         predicted_state);
         if(error_predict_error_state_jacobian)
         {
-            std::cout<<"error_predict_error_state_jacobian"<<std::endl;
+            std::cout<<"robot: error_predict_error_state_jacobian"<<std::endl;
             return error_predict_error_state_jacobian;
         }
 
+        // Set
+        ThePredictedState->TheRobotStateCore=std::dynamic_pointer_cast<RobotStateCore>(predicted_state);
     }
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -811,6 +822,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         itInput!=ThePreviousState->TheListInputStateCore.end();
         ++itInput)
     {
+        //
+        std::shared_ptr<StateCore> predicted_state;
 
         // State
         int error_predict_state=(*itInput)->getMsfElementCoreSharedPtr()->
@@ -822,10 +835,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                              // Input
                              inputCommand,
                              // Predicted State
-                             ThePredictedState);
+                             predicted_state);
         if(error_predict_state)
         {
-            std::cout<<"error_predict_state"<<std::endl;
+            std::cout<<"input: error_predict_state"<<std::endl;
             return error_predict_state;
         }
 
@@ -840,13 +853,15 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                                          // Input
                                          inputCommand,
                                          // Predicted State
-                                         ThePredictedState);
+                                         predicted_state);
         if(error_predict_error_state_jacobian)
         {
-            std::cout<<"error_predict_error_state_jacobian"<<std::endl;
+            std::cout<<"input: error_predict_error_state_jacobian"<<std::endl;
             return error_predict_error_state_jacobian;
         }
 
+        // Set
+        ThePredictedState->TheListInputStateCore.push_back(std::dynamic_pointer_cast<InputStateCore>(predicted_state));
     }
 
 
@@ -858,53 +873,54 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     // Clean the list
     ThePredictedState->TheListSensorStateCore.clear();
 
+
     // Iterate
-
-    // TODO fix: iterate on the state no on the core
-    for(std::list< std::shared_ptr<SensorCore> >::iterator itSens=TheListOfSensorCore.begin();
-        itSens!=TheListOfSensorCore.end();
-        ++itSens)
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorElement=ThePreviousState->TheListSensorStateCore.begin();
+        itSensorElement!=ThePreviousState->TheListSensorStateCore.end();
+        ++itSensorElement)
     {
-
-        // Sensor Core
-        std::shared_ptr<SensorCore> theSensorCore=(*itSens);
-
-        // Auxiliar
-        std::shared_ptr<SensorStateCore> pastStateSensor;
-        std::shared_ptr<SensorStateCore> predictedStateSensor;
-
-        // Find
-        if(findSensorStateCoreFromList(ThePreviousState->TheListSensorStateCore, (*itSens), pastStateSensor))
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            logFile<<"MsfLocalizationCore::predictCore() error predict state sensors findSensorStateCoreFromList"<<std::endl;
-#endif
-            return -2;
-        }
-
+        //
+        std::shared_ptr<StateCore> predicted_state;
 
         // State
-        if(theSensorCore->predictState(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateSensor, predictedStateSensor))
+        int error_predict_state=(*itSensorElement)->getMsfElementCoreSharedPtr()->
+                predictState(//Time
+                             ThePreviousTimeStamp,
+                             ThePredictedTimeStamp,
+                             // Previous State
+                             ThePreviousState,
+                             // Input
+                             inputCommand,
+                             // Predicted State
+                             predicted_state);
+        if(error_predict_state)
         {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!Error predicting state of sensor"<<std::endl;
-#endif
-            return 1;
+            std::cout<<"sensor: error_predict_state"<<std::endl;
+            return error_predict_state;
         }
 
-        // Jacobians
-        if(theSensorCore->predictErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, pastStateSensor, predictedStateSensor))
+
+        // Jacobian Error State
+        int error_predict_error_state_jacobian=(*itSensorElement)->getMsfElementCoreSharedPtr()->
+                predictErrorStateJacobian(//Time
+                                         ThePreviousTimeStamp,
+                                         ThePredictedTimeStamp,
+                                         // Previous State
+                                         ThePreviousState,
+                                         // Input
+                                         inputCommand,
+                                         // Predicted State
+                                         predicted_state);
+        if(error_predict_error_state_jacobian)
         {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!Error predicting error state jacobians of the sensor"<<std::endl;
-#endif
-            return 1;
+            std::cout<<"sensor: error_predict_error_state_jacobian"<<std::endl;
+            return error_predict_error_state_jacobian;
         }
 
-        // Add
-        ThePredictedState->TheListSensorStateCore.push_back(predictedStateSensor);
-
+        // Set
+        ThePredictedState->TheListSensorStateCore.push_back(std::dynamic_pointer_cast<SensorStateCore>(predicted_state));
     }
+
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
     {
@@ -926,39 +942,45 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         ++itMapElement)
     {
         //
-        std::shared_ptr<MapElementCore> theMapElementCore=std::dynamic_pointer_cast<MapElementCore>((*itMapElement)->getMsfElementCoreSharedPtr());
-
-        // Auxiliar
-        std::shared_ptr<MapElementStateCore> predictedMapElementState;
-
-
-
-        // Find
-        // Not needed
-
+        std::shared_ptr<StateCore> predicted_state;
 
         // State
-        if(theMapElementCore->predictState(ThePreviousTimeStamp, ThePredictedTimeStamp, (*itMapElement), predictedMapElementState))
+        int error_predict_state=(*itMapElement)->getMsfElementCoreSharedPtr()->
+                predictState(//Time
+                             ThePreviousTimeStamp,
+                             ThePredictedTimeStamp,
+                             // Previous State
+                             ThePreviousState,
+                             // Input
+                             inputCommand,
+                             // Predicted State
+                             predicted_state);
+        if(error_predict_state)
         {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!Error predicting state of map element"<<std::endl;
-#endif
-            return 1;
+            std::cout<<"map: error_predict_state"<<std::endl;
+            return error_predict_state;
         }
 
-        // Jacobians
-        if(theMapElementCore->predictErrorStateJacobians(ThePreviousTimeStamp, ThePredictedTimeStamp, (*itMapElement), predictedMapElementState))
+
+        // Jacobian Error State
+        int error_predict_error_state_jacobian=(*itMapElement)->getMsfElementCoreSharedPtr()->
+                predictErrorStateJacobian(//Time
+                                         ThePreviousTimeStamp,
+                                         ThePredictedTimeStamp,
+                                         // Previous State
+                                         ThePreviousState,
+                                         // Input
+                                         inputCommand,
+                                         // Predicted State
+                                         predicted_state);
+        if(error_predict_error_state_jacobian)
         {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"!!Error predicting error state jacobians of the map element"<<std::endl;
-#endif
-            return 1;
+            std::cout<<"map: error_predict_error_state_jacobian"<<std::endl;
+            return error_predict_error_state_jacobian;
         }
 
-
-
-        // Add
-        ThePredictedState->TheListMapElementStateCore.push_back(predictedMapElementState);
+        // Set
+        ThePredictedState->TheListMapElementStateCore.push_back(std::dynamic_pointer_cast<MapElementStateCore>(predicted_state));
     }
 
 
@@ -1005,7 +1027,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     // Aux Vars
-    Eigen::SparseMatrix<double> jacobianRobotErrorState=ThePredictedState->TheRobotStateCore->getJacobianErrorState();
+    Eigen::SparseMatrix<double> jacobianRobotErrorState=ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -1100,7 +1122,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     }
 
 
-
     /// Robot-Sensors
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
@@ -1145,7 +1166,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
         // Calculate
         ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)=
-                jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)*predictedStateSensor->getJacobianErrorState().transpose();
+                jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)*predictedStateSensor->getJacobianErrorStateSensor(0).transpose();
 
 
 //        logFile<<"ThePredictedState->covarianceMatrix.block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)"<<std::endl;
@@ -1219,7 +1240,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
         // Aux vars -> Jacobians
-        Eigen::MatrixXd jacobianSensor1ErrorState=predictedStateSensor1->getJacobianErrorState();
+        Eigen::MatrixXd jacobianSensor1ErrorState=predictedStateSensor1->getJacobianErrorStateSensor(0);
 
 
         // Iterate again
@@ -1244,7 +1265,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
             // Calculate
-            Eigen::MatrixXd CovarianceAuxMatrix=jacobianSensor1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)*predictedStateSensor2->getJacobianErrorState().transpose();
+            Eigen::MatrixXd CovarianceAuxMatrix=
+                    jacobianSensor1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)*predictedStateSensor2->getJacobianErrorStateSensor(0).transpose();
 
 
 
@@ -1333,7 +1355,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
             // Calculate
             ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionMapElementErrorState)=
-                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionMapElementErrorState)*predictedStateMapElement->getJacobianErrorState().transpose();
+                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionMapElementErrorState)*predictedStateMapElement->getJacobianErrorStateMapElement(0).transpose();
 
 
 
@@ -1397,7 +1419,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
             // Aux vars -> Jacobians
-            Eigen::MatrixXd jacobianMapElement1ErrorState=predictedStateMapElement1->getJacobianErrorState();
+            Eigen::MatrixXd jacobianMapElement1ErrorState=predictedStateMapElement1->getJacobianErrorStateMapElement(0);
 
 
             // Iterate again
@@ -1426,7 +1448,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
                 // Calculate
                 Eigen::MatrixXd CovarianceAuxMatrix=
-                        jacobianMapElement1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionMapElement1ErrorState,dimensionMapElement2ErrorState)*predictedStateMapElement2->getJacobianErrorState().transpose();
+                        jacobianMapElement1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionMapElement1ErrorState,dimensionMapElement2ErrorState)*predictedStateMapElement2->getJacobianErrorStateMapElement(0).transpose();
 
 
 
@@ -1749,6 +1771,18 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 #endif
 
 
+    // Predicted measurements
+    std::shared_ptr<SensorMeasurementComponent> predicted_sensor_measurements=std::make_shared<SensorMeasurementComponent>();
+    // Matched measurements
+    std::shared_ptr<SensorMeasurementComponent> matched_sensor_measurements=std::make_shared<SensorMeasurementComponent>();
+
+    // Unmatched measurements
+    std::shared_ptr<SensorMeasurementComponent> unmatched_sensor_measurements=std::make_shared<SensorMeasurementComponent>();
+
+
+
+    // Lists
+    // TODO REMOVE!
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListPredictedMeasurements;
     TheListPredictedMeasurements.resize(0); // Not needed, just in case
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListMatchedMeasurements;
@@ -1757,214 +1791,71 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     std::list<std::shared_ptr<SensorMeasurementCore> > TheListUnmatchedMeasurements;
     TheListUnmatchedMeasurements.resize(0); // Not needed, just in case
 
+
+
+    // Predict Measurements and Jacobians
     for(std::list<std::shared_ptr<SensorMeasurementCore> >::iterator itListMeas=UpdatedState->TheListMeasurementCore.begin();
         itListMeas!=UpdatedState->TheListMeasurementCore.end();
         ++itListMeas)
     {
-        // Check
-        if(!(*itListMeas)->getSensorCoreSharedPtr())
+        // Predicted Measurement
+        std::shared_ptr<SensorMeasurementCore> predicted_sensor_measurement;
+
+        // Predict Measurements
+        int error_predict_measurement=(*itListMeas)->getSensorCoreSharedPtr()->
+                predictMeasurement(// Time
+                                   TheTimeStamp,
+                                   // Current State
+                                   OldState,
+                                   // Measurement to match
+                                   (*itListMeas),
+                                   // Predicted Measurements
+                                   predicted_sensor_measurement);
+
+        if(error_predict_measurement<0)
         {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-            std::cout<<"MsfLocalizationCore::update() error 2"<<std::endl;
-#endif
-            return 2;
+            // Error
+            std::cout<<"error_predict_measurement"<<std::endl;
+            return error_predict_measurement;
+        }
+        else if(error_predict_measurement>0)
+        {
+            // Need to be mapped
+            // Add to the list of unmatched
+            unmatched_sensor_measurements->list_sensor_measurement_core_.push_back((*itListMeas));
+            TheListUnmatchedMeasurements.push_back((*itListMeas));
+            // Continue
+            continue;
         }
 
-        // Find the type
-        switch((*itListMeas)->getSensorCoreSharedPtr()->getSensorType())
+
+        // Predict Jacobians
+        int error_predict_error_measurement_jacobian=(*itListMeas)->getSensorCoreSharedPtr()->
+                predictErrorMeasurementJacobian(// Time
+                                               TheTimeStamp,
+                                               // Current State
+                                               OldState,
+                                               // Measurement to match
+                                               (*itListMeas),
+                                               // Predicted Measurements
+                                               predicted_sensor_measurement);
+
+        if(error_predict_error_measurement_jacobian)
         {
-            case SensorTypes::imu:
-            {
-                // Find the sensor state
-                std::shared_ptr<SensorStateCore> TheSensorStateCore;
-                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getSensorCoreSharedPtr(), TheSensorStateCore))
-                {
-        #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
-        #endif
-                    return 4;
-                }
-                if(!TheSensorStateCore)
-                {
-        #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 5"<<std::endl;
-        #endif
-                    return 5;
-                }
-
-                // Cast the imu sensor core
-                std::shared_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>((*itListMeas)->getSensorCoreSharedPtr());
-
-
-                // Cast the imu sensor state
-                std::shared_ptr<ImuSensorStateCore> TheImuSensorStateCore=std::static_pointer_cast<ImuSensorStateCore>(TheSensorStateCore);
-
-
-                // Create a pointer for the measurement prediction
-                std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorPredictedMeasurement;
-
-                // Call measurement prediction
-                if(TheImuSensorCore->predictMeasurement(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
-                {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
-#endif
-                    return 3;
-                }
-
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-                {
-                    std::shared_ptr<ImuSensorMeasurementCore> imuMeasurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>((*itListMeas));
-
-                    std::ostringstream logString;
-
-                    logString<<"MsfLocalizationCore::update() matched Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    logString<<" a: "<<imuMeasurement->getLinearAcceleration().transpose()<<std::endl;
-                    logString<<" w: "<<imuMeasurement->getAngularVelocity().transpose()<<std::endl;
-
-                    logString<<"MsfLocalizationCore::update() predicted Measurements IMU for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    logString<<" a: "<<TheImuSensorPredictedMeasurement->getLinearAcceleration().transpose()<<std::endl;
-                    logString<<" w: "<<TheImuSensorPredictedMeasurement->getAngularVelocity().transpose()<<std::endl;
-
-                    this->log(logString.str());
-                }
-#endif
-
-
-
-
-                // Compute Jacobians of the Measurement
-                if(TheImuSensorCore->jacobiansErrorMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheImuSensorStateCore, TheImuSensorPredictedMeasurement))
-                {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
-#endif
-                    return 3;
-                }
-
-
-                // Push to the predicted measurements
-                TheListPredictedMeasurements.push_back(TheImuSensorPredictedMeasurement);
-
-
-                // Push to the Matched Measurements -> The imu measurement is always matched
-                TheListMatchedMeasurements.push_back((*itListMeas));
-
-
-
-                // End
-                continue;
-            }
-
-            /// Coded Visual Marker
-            case SensorTypes::coded_visual_marker_eye:
-            {
-
-                // iterative EKf enabled only with visual marker measurements!
-//                iterativeEkfEnabled=true;
-//                iterativeEkfEnd=false;
-
-
-                // Find the sensor state
-                std::shared_ptr<SensorStateCore> TheSensorStateCore;
-                if(findSensorStateCoreFromList(OldState->TheListSensorStateCore, (*itListMeas)->getSensorCoreSharedPtr(), TheSensorStateCore))
-                {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 4"<<std::endl;
-#endif
-                    return 4;
-                }
-                if(!TheSensorStateCore)
-                {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 5"<<std::endl;
-#endif
-                    return 5;
-                }
-
-                // Find the map element state
-                std::shared_ptr<MapElementStateCore> TheMapElementStateCore;
-                if(findMapElementStateCoreWithMeasurementFromList(OldState->TheListMapElementStateCore, (*itListMeas), TheMapElementStateCore))
-                {
-                    break;
-                }
-                if(!TheMapElementStateCore)
-                    break;
-
-
-                // Cast the sensor core
-                std::shared_ptr<CodedVisualMarkerEyeCore> TheVisualMarkerSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itListMeas)->getSensorCoreSharedPtr());
-
-                // Create a pointer for the measurement prediction
-                std::shared_ptr<CodedVisualMarkerMeasurementCore> TheCodedVisualMarkerPredictedMeasurement;
-
-
-                // Measurement prediction
-                if(TheVisualMarkerSensorCore->predictMeasurement(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, TheCodedVisualMarkerPredictedMeasurement))
-                {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
-#endif
-                    return 3;
-                }
-
-
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-                {
-                    std::shared_ptr<CodedVisualMarkerMeasurementCore> visualMarkerMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>((*itListMeas));
-
-                    std::ostringstream logString;
-
-                    logString<<"MsfLocalizationCore::update() matched Measurements VM "<<visualMarkerMeasurement->getVisualMarkerId()<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    logString<<" t: "<<visualMarkerMeasurement->getVisualMarkerPosition().transpose()<<std::endl;
-                    logString<<" q: "<<visualMarkerMeasurement->getVisualMarkerAttitude().transpose()<<std::endl;
-
-                    logString<<"MsfLocalizationCore::update() predicted Measurements VM "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerId()<<" for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    logString<<" t: "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerPosition().transpose()<<std::endl;
-                    logString<<" q: "<<TheCodedVisualMarkerPredictedMeasurement->getVisualMarkerAttitude().transpose()<<std::endl;
-
-                    this->log(logString.str());
-                }
-#endif
-
-
-                // Jacobian Measurement prediction
-                if(TheVisualMarkerSensorCore->jacobiansErrorMeasurements(TheTimeStamp, OldState->TheGlobalParametersStateCore, OldState->TheRobotStateCore, TheSensorStateCore, TheMapElementStateCore, (*itListMeas), TheCodedVisualMarkerPredictedMeasurement))
-                {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    std::cout<<"MsfLocalizationCore::update() error 3"<<std::endl;
-#endif
-                    return 3;
-                }
-
-
-                // Push to the predicted measurements
-                TheListPredictedMeasurements.push_back(TheCodedVisualMarkerPredictedMeasurement);
-
-                // Push to the Matched Measurements
-                TheListMatchedMeasurements.push_back((*itListMeas));
-
-
-                // End
-                continue;
-            }
-
-            /// Default
-            default:
-            {
-                break;
-            }
-
+            std::cout<<"error_predict_error_measurement_jacobian"<<std::endl;
+            return error_predict_error_measurement_jacobian;
         }
 
-        // If no matched add to the unmatched
 
-        // Push to the Matched Measurements -> The imu measurement is always matched
-        TheListUnmatchedMeasurements.push_back((*itListMeas));
+        // Add to the list of matched Measurements
+        matched_sensor_measurements->list_sensor_measurement_core_.push_back((*itListMeas));
+        TheListMatchedMeasurements.push_back((*itListMeas));
+        // Add to the list of predicted measurements
+        predicted_sensor_measurements->list_sensor_measurement_core_.push_back(predicted_sensor_measurement);
+        TheListPredictedMeasurements.push_back(predicted_sensor_measurement);
 
     }
+
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
     {
@@ -3109,6 +3000,11 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                         continue;
                     }
 
+//                    if(TheNewMapElementStateCore->getMsfElementCoreSharedPtr() != TheNewMapElementCore)
+//                    {
+//                        std::cout<<"algo raro ha pasado!"<<std::endl;
+//                    }
+
 
                     // Predict jacobian state of the new element based on measurement and old state
                     // TODO
@@ -3117,6 +3013,11 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                         std::cout<<"error TheSensorCore->jacobiansMapMeasurement()"<<std::endl;
                         continue;
                     }
+
+//                    if(TheNewMapElementStateCore->getMsfElementCoreSharedPtr() != TheNewMapElementCore)
+//                    {
+//                        std::cout<<"algo raro ha pasado!"<<std::endl;
+//                    }
 
 
                     // End
@@ -3140,6 +3041,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             }
 
 
+
             // Push into the lists
             TheListUnmatchedMeasurementsWithMapElement.push_back((*itUnmatchedMeas));
             //TheListNewMapElementsCore.push_back(TheNewMapElementCore);
@@ -3150,6 +3052,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
                 this->TheListOfMapElementCore.push_back(TheNewMapElementCore);
 
         }
+
+
 
 
         /// New Map Elements Covariance Prediction
@@ -3436,8 +3340,11 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itNewMapElementsStateCore!=TheListNewMapElementsStateCore.end();
             ++itNewMapElementsStateCore)
         {
+
             UpdatedState->TheListMapElementStateCore.push_back((*itNewMapElementsStateCore));
         }
+
+
 
 
 

@@ -278,7 +278,7 @@ int ImuDrivenRobotCore::predictState(//Time
                                      // Inputs
                                      const std::shared_ptr<InputCommandComponent> inputCommand,
                                      // Predicted State
-                                     std::shared_ptr<StateEstimationCore>& predictedState)
+                                     std::shared_ptr<StateCore> &predictedState)
 {
     // Checks
 
@@ -288,9 +288,13 @@ int ImuDrivenRobotCore::predictState(//Time
 
     // TODO
 
-    // Predicted State
+    // Robot Predicted State
+    std::shared_ptr<ImuDrivenRobotStateCore> predictedRobotState;
     if(!predictedState)
-        return -1;
+        predictedRobotState=std::make_shared<ImuDrivenRobotStateCore>(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
+    else
+        predictedRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedState);
+
 
 
     // Search for the command
@@ -312,12 +316,6 @@ int ImuDrivenRobotCore::predictState(//Time
         return -10;
 
 
-    // Robot Predicted State
-    std::shared_ptr<ImuDrivenRobotStateCore> predictedRobotState;
-    if(!predictedState->TheRobotStateCore)
-        predictedRobotState=std::make_shared<ImuDrivenRobotStateCore>(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
-    else
-        predictedRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedState->TheRobotStateCore);
 
 
     // Predict State
@@ -332,7 +330,7 @@ int ImuDrivenRobotCore::predictState(//Time
 
 
     // Set predicted state
-    predictedState->TheRobotStateCore=predictedRobotState;
+    predictedState=predictedRobotState;
 
 
     // End
@@ -447,7 +445,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
                                                   // Inputs
                                                   const std::shared_ptr<InputCommandComponent> inputCommand,
                                                  // Predicted State
-                                                 std::shared_ptr<StateEstimationCore>& predictedState)
+                                                 std::shared_ptr<StateCore> &predictedState)
 {
     // Checks
 
@@ -462,6 +460,11 @@ int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
     if(!predictedState)
         return -1;
 
+    // Robot Predicted State
+    std::shared_ptr<ImuDrivenRobotStateCore> predictedRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedState);
+
+
+
     // TODO
 
 
@@ -470,8 +473,6 @@ int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
     // TODO
 
 
-    // Robot Predicted State
-    std::shared_ptr<ImuDrivenRobotStateCore> predictedRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedState->TheRobotStateCore);
 
 
     // Predict State
@@ -486,7 +487,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
 
 
     // Set predicted state
-    predictedState->TheRobotStateCore=predictedRobotState;
+    predictedState=predictedRobotState;
 
 
     // End
@@ -527,8 +528,10 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
 
     // Jacobian Size
 
-    predictedState->jacobian_error_state_.resize(this->getDimensionErrorState(),this->getDimensionErrorState());
-    predictedState->jacobian_error_state_.reserve(18+36);
+
+    Eigen::SparseMatrix<double> jacobian_error_state;
+    jacobian_error_state.resize(this->getDimensionErrorState(),this->getDimensionErrorState());
+    jacobian_error_state.reserve(18+36);
 
 //    predictedState->errorStateJacobian.linear.resize(9, 9);
 //    predictedState->errorStateJacobian.linear.reserve(18);
@@ -658,8 +661,10 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
 
 
 
-    predictedState->jacobian_error_state_.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+    jacobian_error_state.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
 
+
+    predictedState->setJacobianErrorStateRobot(jacobian_error_state);
 
 
 

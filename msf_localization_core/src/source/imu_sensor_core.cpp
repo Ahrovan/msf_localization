@@ -939,16 +939,80 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp de
     return covariance_noise;
 }
 
+int ImuSensorCore::predictState(//Time
+                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                 // Previous State
+                 const std::shared_ptr<StateEstimationCore> pastState,
+                 // Inputs
+                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                 // Predicted State
+                 std::shared_ptr<StateCore> &predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+    // Search for the past sensor State Core
+    std::shared_ptr<ImuSensorStateCore> past_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
+        it_sensor_state!=pastState->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            past_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!past_sensor_state)
+        return -10;
 
 
-int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
+    // Predicted State
+    std::shared_ptr<ImuSensorStateCore> predicted_sensor_state;
+    // Create the prediction if it does not exist
+    if(!predicted_sensor_state)
+        predicted_sensor_state=std::make_shared<ImuSensorStateCore>(past_sensor_state->getMsfElementCoreWeakPtr());
+    else
+        predicted_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(predictedState);
+
+
+
+    // Predict State
+    int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
+                                         past_sensor_state,
+                                         predicted_sensor_state);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState=predicted_sensor_state;
+
+
+    // End
+    return 0;
+}
+
+
+
+int ImuSensorCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                        const std::shared_ptr<ImuSensorStateCore> pastState,
+                                        std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
     //std::cout<<"ImuSensorCore::predictState()"<<std::endl;
 
 
     // Poly
-    std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
-    std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
+    //std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
+    //std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
 
 
     // Checks in the past state
@@ -1008,7 +1072,7 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
 
 
 
-    predictedStateI=predictedState;
+    //predictedStateI=predictedState;
 
 
     //std::cout<<"ImuSensorCore::predictState() end"<<std::endl;
@@ -1016,14 +1080,77 @@ int ImuSensorCore::predictState(const TimeStamp previousTimeStamp, const TimeSta
     return 0;
 }
 
-int ImuSensorCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
+int ImuSensorCore::predictErrorStateJacobian(//Time
+                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             // Previous State
+                             const std::shared_ptr<StateEstimationCore> pastState,
+                            // Inputs
+                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                             // Predicted State
+                             std::shared_ptr<StateCore> &predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+
+    // Search for the past sensor State Core
+    std::shared_ptr<ImuSensorStateCore> past_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
+        it_sensor_state!=pastState->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            past_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!past_sensor_state)
+        return -10;
+
+
+    // Predicted State
+    if(!predictedState)
+        return -10;
+    std::shared_ptr<ImuSensorStateCore> predicted_sensor_state;
+    predicted_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(predictedState);
+
+
+
+    // Predict State
+    int error_predict_state=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
+                                         past_sensor_state,
+                                         predicted_sensor_state);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState=predicted_sensor_state;
+
+
+    // End
+    return 0;
+}
+
+int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                              const std::shared_ptr<ImuSensorStateCore> pastState,
+                                              std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
     //std::cout<<"ImuSensorCore::predictErrorStateJacobians"<<std::endl;
 
 
     // Poly
-    std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
-    std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
+    //std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
+    //std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
 
 
     // Create the predicted state if it doesn't exist
@@ -1034,6 +1161,8 @@ int ImuSensorCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp,
 
 
     //// Jacobians Error State
+
+
     // posi / posi
     if(flagEstimationPositionSensorWrtRobot)
         predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
@@ -1064,8 +1193,10 @@ int ImuSensorCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp,
 
     /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
     {
-        predictedState->jacobian_error_state_.resize(dimension_error_state_, dimension_error_state_);
-        predictedState->jacobian_error_state_.reserve(3*dimension_error_state_); //worst case -> Optimize
+        Eigen::SparseMatrix<double> jacobian_error_state;
+
+        jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state.reserve(3*dimension_error_state_); //worst case -> Optimize
 
         std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
@@ -1132,8 +1263,11 @@ int ImuSensorCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp,
 
 
         // Set from triplets
-        predictedState->jacobian_error_state_.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+        jacobian_error_state.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
 
+
+        // TODO FIX!!!!!
+        predictedState->setJacobianErrorStateSensor(jacobian_error_state, 0);
     }
 
 
@@ -1221,44 +1355,124 @@ int ImuSensorCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp,
 //    }
 
 
-    predictedStateI=predictedState;
+    //predictedStateI=predictedState;
 
 
     return 0;
 }
 
-int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, std::shared_ptr<ImuSensorStateCore> currentImuState, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
+
+int ImuSensorCore::predictMeasurement(// Time
+                                       const TimeStamp current_time_stamp,
+                                       // Current State
+                                       const std::shared_ptr<StateEstimationCore> current_state,
+                                      // Measurements
+                                      const std::shared_ptr<SensorMeasurementCore> measurement,
+                                       // Predicted Measurements
+                                       std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+{
+    // State
+    if(!current_state)
+        return -1;
+
+    // TODO
+
+    // Measurement -> Matching
+    if(!measurement)
+        return -2;
+
+    if(measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
+        return -10;
+
+    // Nothing else needed
+
+
+    // Predicted Measurement
+    std::shared_ptr<ImuSensorMeasurementCore> predicted_sensor_measurement;
+    if(!predicted_measurement)
+        predicted_sensor_measurement=std::make_shared<ImuSensorMeasurementCore>(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
+    else
+    {
+        if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
+            return -3;
+        predicted_sensor_measurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>(predicted_measurement);
+    }
+
+
+
+    // Search for the current sensor State Core
+    std::shared_ptr<ImuSensorStateCore> current_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
+        it_sensor_state!=current_state->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            current_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!current_sensor_state)
+        return -10;
+
+
+    // Predict State
+    int error_predict_measurement=predictMeasurementSpecific(current_time_stamp,
+                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
+                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                             current_sensor_state,
+                                                             predicted_sensor_measurement);
+
+    // Check error
+    if(error_predict_measurement)
+        return error_predict_measurement;
+
+
+    // Set prediction
+    predicted_measurement=predicted_sensor_measurement;
+
+
+    // End
+    return 0;
+}
+
+int ImuSensorCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
+                                      const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                      const std::shared_ptr<RobotStateCore> currentRobotState,
+                                      const std::shared_ptr<ImuSensorStateCore> currentImuState,
+                                      std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
 #if _DEBUG_SENSOR_CORE
-    logFile<<"ImuSensorCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"ImuSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
 
     // Check
     if(!isCorrect())
     {
-        std::cout<<"ImuSensorCore::predictMeasurement() error 50"<<std::endl;
-        return 50;
+        std::cout<<"ImuSensorCore::predictMeasurementSpecific() error 50"<<std::endl;
+        return -50;
     }
 
     // Check imu
     if(!currentImuState)
     {
-        std::cout<<"ImuSensorCore::predictMeasurement() error 1"<<std::endl;
-        return 1;
+        std::cout<<"ImuSensorCore::predictMeasurementSpecific() error 1"<<std::endl;
+        return -1;
     }
 
     // Robot check
     if(!currentRobotState)
     {
-        std::cout<<"ImuSensorCore::predictMeasurement() error 2"<<std::endl;
-        return 2;
+        std::cout<<"ImuSensorCore::predictMeasurementSpecific() error 2"<<std::endl;
+        return -2;
     }
 
     // Robot core check
     if(!currentRobotState->isCorrect())
     {
-        std::cout<<"ImuSensorCore::predictMeasurement() error 3"<<std::endl;
-        return 3;
+        std::cout<<"ImuSensorCore::predictMeasurementSpecific() error 3"<<std::endl;
+        return -3;
     }
 
 
@@ -1277,7 +1491,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
         //predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>(std::shared_ptr<ImuSensorCore>(this));
 
 #if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurement() pointer created"<<std::endl;
+        logFile<<"ImuSensorCore::predictMeasurementSpecific() pointer created"<<std::endl;
 #endif
     }
 
@@ -1297,7 +1511,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     if(isMeasurementLinearAccelerationEnabled())
     {
 #if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurement() linear acceleration"<<std::endl;
+        logFile<<"ImuSensorCore::predictMeasurementSpecific() linear acceleration"<<std::endl;
 #endif
 
 
@@ -1347,36 +1561,36 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 #if _DEBUG_SENSOR_CORE
 
-                logFile<<"ImuSensorCore::predictMeasurement()"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific()"<<std::endl;
 
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted quat_angular_speed_r_w_w="<<quat_angular_speed_r_w_w.transpose()<<std::endl;
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted quat_robot_w="<<currentFreeModelRobotState->getAttitude().transpose()<<std::endl;
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted quat_angular_speed_r_w_r="<<quat_angular_speed_r_w_r.transpose()<<std::endl;
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted p_s_r="<<currentImuState->getPositionSensorWrtRobot().transpose()<<std::endl;
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted quaternion_tangencial_acceleration="<<quaternion_tangencial_acceleration.transpose()<<std::endl;
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted quaternion_normal_acceleration="<<quaternion_normal_acceleration.transpose()<<std::endl;
-                //logFile<<"ImuSensorCore::predictMeasurement() predicted ficticious_acceleration="<<ficticious_acceleration.transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quat_angular_speed_r_w_w="<<quat_angular_speed_r_w_w.transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quat_robot_w="<<currentFreeModelRobotState->getAttitude().transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quat_angular_speed_r_w_r="<<quat_angular_speed_r_w_r.transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted p_s_r="<<currentImuState->getPositionSensorWrtRobot().transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quaternion_tangencial_acceleration="<<quaternion_tangencial_acceleration.transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quaternion_normal_acceleration="<<quaternion_normal_acceleration.transpose()<<std::endl;
+                //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted ficticious_acceleration="<<ficticious_acceleration.transpose()<<std::endl;
 
 
-                logFile<<"ImuSensorCore::predictMeasurement() currentFreeModelRobotState->getLinearAcceleration()"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() currentFreeModelRobotState->getLinearAcceleration()"<<std::endl;
                 logFile<<currentFreeModelRobotState->getLinearAcceleration().transpose()<<std::endl;
 
-                logFile<<"ImuSensorCore::predictMeasurement() currentFreeModelRobotState->getAttitude()"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() currentFreeModelRobotState->getAttitude()"<<std::endl;
                 logFile<<currentFreeModelRobotState->getAttitude().transpose()<<std::endl;
 
-                logFile<<"ImuSensorCore::predictMeasurement() gravity_sensor"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() gravity_sensor"<<std::endl;
                 logFile<<gravity_sensor.transpose()<<std::endl;
 
-                logFile<<"ImuSensorCore::predictMeasurement() ficticious_acceleration"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() ficticious_acceleration"<<std::endl;
                 logFile<<ficticious_acceleration.transpose()<<std::endl;
 
-                logFile<<"ImuSensorCore::predictMeasurement() accel_sensor_wrt_sensor"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() accel_sensor_wrt_sensor"<<std::endl;
                 logFile<<accel_sensor_wrt_sensor.transpose()<<std::endl;
 
-                logFile<<"ImuSensorCore::predictMeasurement() currentImuState->getBiasesLinearAcceleration()"<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() currentImuState->getBiasesLinearAcceleration()"<<std::endl;
                 logFile<<currentImuState->getBiasesLinearAcceleration().transpose()<<std::endl;
 
-                logFile<<"ImuSensorCore::predictMeasurement() predicted a="<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted a="<<std::endl;
                 logFile<<ThePredictedLinearAcceleration.transpose()<<std::endl;
 #endif
 
@@ -1401,7 +1615,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     if(this->isMeasurementOrientationEnabled())
     {
 #if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurement() orientation"<<std::endl;
+        logFile<<"ImuSensorCore::predictMeasurementSpecific() orientation"<<std::endl;
 #endif
 
         // TODO
@@ -1412,7 +1626,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
     if(isMeasurementAngularVelocityEnabled())
     {
 #if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurement() angular velocity"<<std::endl;
+        logFile<<"ImuSensorCore::predictMeasurementSpecific() angular velocity"<<std::endl;
 #endif
 
 
@@ -1441,7 +1655,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
                 ThePredictedAngularVelocity=currentImuState->getScaleAngularVelocity().asDiagonal()*predicted_angular_velocity_in_imu+currentImuState->getBiasesAngularVelocity();
 
 #if _DEBUG_SENSOR_CORE
-                logFile<<"ImuSensorCore::predictMeasurement() predicted w="<<ThePredictedAngularVelocity.transpose()<<std::endl;
+                logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted w="<<ThePredictedAngularVelocity.transpose()<<std::endl;
 #endif
 
                 // End
@@ -1465,7 +1679,7 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 
 
 #if _DEBUG_SENSOR_CORE
-    logFile<<"ImuSensorCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"ImuSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
 
     // End
@@ -1473,9 +1687,89 @@ int ImuSensorCore::predictMeasurement(const TimeStamp theTimeStamp, std::shared_
 }
 
 
+int ImuSensorCore::predictErrorMeasurementJacobian(// Time
+                                                const TimeStamp current_time_stamp,
+                                                // Current State
+                                                const std::shared_ptr<StateEstimationCore> current_state,
+                                                // Measurements
+                                                const std::shared_ptr<SensorMeasurementCore> measurement,
+                                                // Predicted Measurement
+                                                std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+{
+    // State
+    if(!current_state)
+        return -1;
+
+    // TODO
 
 
-int ImuSensorCore::jacobiansErrorMeasurements(const TimeStamp theTimeStamp, std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, std::shared_ptr<RobotStateCore> TheRobotStateCore, std::shared_ptr<ImuSensorStateCore> TheImuStateCore, std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
+    // Measurement -> Matching
+    if(!measurement)
+        return -2;
+
+    if(measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
+        return -10;
+
+    // Nothing else needed
+
+
+    // Predicted Measurement
+    std::shared_ptr<ImuSensorMeasurementCore> predicted_sensor_measurement;
+    if(!predicted_measurement)
+        return -1;
+    else
+    {
+        if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
+            return -3;
+        predicted_sensor_measurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>(predicted_measurement);
+    }
+
+
+
+    // Search for the current sensor State Core
+    std::shared_ptr<ImuSensorStateCore> current_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
+        it_sensor_state!=current_state->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            current_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!current_sensor_state)
+        return -10;
+
+
+
+    // Predict State
+    int error_predict_measurement=predictErrorMeasurementJacobianSpecific(current_time_stamp,
+                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
+                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                             current_sensor_state,
+                                                             predicted_sensor_measurement);
+
+    // Check error
+    if(error_predict_measurement)
+        return error_predict_measurement;
+
+
+    // Set predicted state
+    predicted_measurement=predicted_sensor_measurement;
+
+
+    // End
+    return 0;
+}
+
+
+int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+                                              const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                              const std::shared_ptr<RobotStateCore> TheRobotStateCore,
+                                              const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
+                                              std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
 {
 
     // Checks

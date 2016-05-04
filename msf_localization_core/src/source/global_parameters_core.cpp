@@ -204,7 +204,7 @@ int GlobalParametersCore::predictState(//Time
                                      // Inputs
                                      const std::shared_ptr<InputCommandComponent> inputCommand,
                                      // Predicted State
-                                     std::shared_ptr<StateEstimationCore>& predictedState)
+                                     std::shared_ptr<StateCore> &predictedState)
 {
 
     // Checks
@@ -216,18 +216,12 @@ int GlobalParametersCore::predictState(//Time
     // TODO
 
 
-    // Predicted State
-    if(!predictedState)
-        return -1;
-
-
-
     // World Predicted State
     std::shared_ptr<GlobalParametersStateCore> predictedWorldState;
-    if(!predictedState->TheGlobalParametersStateCore)
+    if(!predictedState)
         predictedWorldState=std::make_shared<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore->getMsfElementCoreWeakPtr());
     else
-        predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState->TheGlobalParametersStateCore);
+        predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState);
 
 
     // Predict State
@@ -241,7 +235,7 @@ int GlobalParametersCore::predictState(//Time
 
 
     // Set predicted state
-    predictedState->TheGlobalParametersStateCore=predictedWorldState;
+    predictedState=predictedWorldState;
 
 
     // End
@@ -293,7 +287,7 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
                                                     // Inputs
                                                     const std::shared_ptr<InputCommandComponent> inputCommand,
                                                  // Predicted State
-                                                 std::shared_ptr<StateEstimationCore>& predictedState)
+                                                 std::shared_ptr<StateCore> &predictedState)
 {
     // Checks
 
@@ -307,13 +301,8 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
     // Predicted State
     if(!predictedState)
         return -1;
-
-    // TODO
-
-
-
     // World Predicted State
-    std::shared_ptr<GlobalParametersStateCore> predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState->TheGlobalParametersStateCore);
+    std::shared_ptr<GlobalParametersStateCore> predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState);
 
 
     // Predict State
@@ -327,7 +316,7 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
 
 
     // Set predicted state
-    predictedState->TheGlobalParametersStateCore=predictedWorldState;
+    predictedState=predictedWorldState;
 
 
     // End

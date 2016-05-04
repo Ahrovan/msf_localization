@@ -870,7 +870,7 @@ int ImuInputCore::predictState(//Time
                  // Inputs
                  const std::shared_ptr<InputCommandComponent> inputCommand,
                  // Predicted State
-                 std::shared_ptr<StateEstimationCore>& predictedState)
+                 std::shared_ptr<StateCore> &predictedState)
 {
     // Checks
 
@@ -879,10 +879,6 @@ int ImuInputCore::predictState(//Time
         return -1;
 
     // TODO
-
-    // Predicted State
-    if(!predictedState)
-        return -1;
 
 
     // Search for the past Input State Core
@@ -901,28 +897,12 @@ int ImuInputCore::predictState(//Time
     if(!pastInputState)
         return -10;
 
-
-    // Search for the predicted Input Predicted State
+    // Predicted State
     std::shared_ptr<ImuInputStateCore> predictedInputState;
-    std::list< std::shared_ptr<InputStateCore> >::iterator itInputState;
-    bool flag_predicted_input_state_found=false;
-    for(itInputState=predictedState->TheListInputStateCore.begin();
-        itInputState!=predictedState->TheListInputStateCore.end();
-        ++itInputState)
-    {
-        if((*itInputState)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
-        {
-            pastInputState=std::dynamic_pointer_cast<ImuInputStateCore>(*itInputState);
-            flag_predicted_input_state_found=true;
-            break;
-        }
-    }
-
-
-    // Create the prediction if it does not exist
-    if(!predictedInputState)
+    if(!predictedState)
         predictedInputState=std::make_shared<ImuInputStateCore>(pastInputState->getMsfElementCoreWeakPtr());
-
+    else
+        predictedInputState=std::dynamic_pointer_cast<ImuInputStateCore>(predictedState);
 
 
     // Predict State
@@ -936,14 +916,7 @@ int ImuInputCore::predictState(//Time
 
 
     // Set predicted state
-    if(flag_predicted_input_state_found)
-    {
-        *itInputState=predictedInputState;
-    }
-    else
-    {
-        predictedState->TheListInputStateCore.push_back(predictedInputState);
-    }
+    predictedState=predictedInputState;
 
 
     // End
@@ -968,7 +941,7 @@ int ImuInputCore::predictErrorStateJacobian(//Time
                             // Inputs
                             const std::shared_ptr<InputCommandComponent> inputCommand,
                              // Predicted State
-                             std::shared_ptr<StateEstimationCore>& predictedState)
+                             std::shared_ptr<StateCore> &predictedState)
 {
 
     return 0;

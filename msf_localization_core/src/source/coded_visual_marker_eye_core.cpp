@@ -418,13 +418,77 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const T
     return covariance_noise;
 }
 
-int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
+int CodedVisualMarkerEyeCore::predictState(//Time
+                                         const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                         // Previous State
+                                         const std::shared_ptr<StateEstimationCore> pastState,
+                                         // Inputs
+                                         const std::shared_ptr<InputCommandComponent> inputCommand,
+                                         // Predicted State
+                                         std::shared_ptr<StateCore>& predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+    // Search for the past sensor State Core
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> past_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
+        it_sensor_state!=pastState->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            past_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!past_sensor_state)
+        return -10;
+
+
+    // Predicted State
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> predicted_sensor_state;
+    if(!predictedState)
+        predicted_sensor_state=std::make_shared<CodedVisualMarkerEyeStateCore>(past_sensor_state->getMsfElementCoreWeakPtr());
+    else
+        predicted_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedState);
+
+
+
+
+    // Predict State
+    int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
+                                         past_sensor_state,
+                                         predicted_sensor_state);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState=predicted_sensor_state;
+
+
+    // End
+    return 0;
+}
+
+int CodedVisualMarkerEyeCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                   const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
+                                                   std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState)
 {
 
 
     // Poly
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
+    //std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
+    //std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
 
 
 
@@ -498,7 +562,7 @@ int CodedVisualMarkerEyeCore::predictState(const TimeStamp previousTimeStamp, co
     }
 
 
-    predictedStateI=predictedState;
+    //predictedStateI=predictedState;
 
     return 0;
 }
@@ -519,12 +583,84 @@ int CodedVisualMarkerEyeCore::predictStateCore(// State k: Sensor
 
 
 // Jacobian
-int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<SensorStateCore> pastStateI, std::shared_ptr<SensorStateCore>& predictedStateI)
+
+int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
+                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             // Previous State
+                             const std::shared_ptr<StateEstimationCore> pastState,
+                            // Inputs
+                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                             // Predicted State
+                             std::shared_ptr<StateCore> &predictedState)
+{
+    // Checks
+
+    // Past State
+    if(!pastState)
+        return -1;
+
+    // TODO
+
+    // Predicted State
+    if(!predictedState)
+        return -1;
+    // Cast
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> predicted_sensor_state;
+    predicted_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedState);
+
+
+
+
+    // Search for the past sensor State Core
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> past_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
+        it_sensor_state!=pastState->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            past_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!past_sensor_state)
+        return -10;
+
+
+
+    // Create the prediction if it does not exist
+    if(!predicted_sensor_state)
+        return -10;
+
+
+
+    // Predict State
+    int error_predict_state=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
+                                         past_sensor_state,
+                                         predicted_sensor_state);
+
+    // Check error
+    if(error_predict_state)
+        return error_predict_state;
+
+
+    // Set predicted state
+    predictedState=predicted_sensor_state;
+
+
+    // End
+    return 0;
+}
+
+int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                                 const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
+                                                                 std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState)
 {
 
     // Poly
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
+    //std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
+    //std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
 
 
     // Create the predicted state if it doesn't exist
@@ -608,8 +744,9 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
 
     /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
     {
-        predictedState->jacobian_error_state_.resize(dimension_error_state_, dimension_error_state_);
-        predictedState->jacobian_error_state_.reserve(3*dimension_error_state_); //worst case -> Optimize
+        Eigen::SparseMatrix<double> jacobian_error_state;
+        jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state.reserve(3*dimension_error_state_); //worst case -> Optimize
 
         std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
@@ -641,8 +778,10 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
 
 
         // Set from triplets
-        predictedState->jacobian_error_state_.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+        jacobian_error_state.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
 
+        // TODO FIX!!!
+        predictedState->setJacobianErrorStateSensor(jacobian_error_state, 0);
     }
 
 
@@ -660,7 +799,7 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobians(const TimeStamp previou
 
 
     //// Finish
-    predictedStateI=predictedState;
+    //predictedStateI=predictedState;
 
     // End
     return 0;
@@ -687,7 +826,132 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansCore(// State k: Sensor
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorStateI, const std::shared_ptr<MapElementStateCore> currentMapElementStateI, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+int CodedVisualMarkerEyeCore::predictMeasurement(// Time
+                                               const TimeStamp current_time_stamp,
+                                               // Current State
+                                               const std::shared_ptr<StateEstimationCore> current_state,
+                                                 // Measurements
+                                                 const std::shared_ptr<SensorMeasurementCore> measurement,
+                                               // Predicted Measurements
+                                               std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+{
+    // State
+    if(!current_state)
+        return -1;
+
+    // TODO
+
+    // Measurement -> Matching
+    if(!measurement)
+        return -2;
+
+    if(measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
+        return -10;
+
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(measurement);
+
+    // Nothing else needed
+
+
+    // Predicted Measurement
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> predicted_sensor_measurement;
+    if(!predicted_measurement)
+        predicted_sensor_measurement=std::make_shared<CodedVisualMarkerMeasurementCore>(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
+    else
+    {
+        if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
+            return -3;
+        predicted_sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(predicted_measurement);
+    }
+
+
+    // Search for the past sensor State Core
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
+        it_sensor_state!=current_state->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            current_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!current_sensor_state)
+        return -10;
+
+
+    // Search for the associated map element
+    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> current_map_element_state;
+    // Match with the map element
+    for(std::list<std::shared_ptr<MapElementStateCore>>::iterator itVisualMarkerLandmark=current_state->TheListMapElementStateCore.begin();
+        itVisualMarkerLandmark!=current_state->TheListMapElementStateCore.end();
+        ++itVisualMarkerLandmark)
+    {
+        bool flag_association_found=false;
+        switch(std::dynamic_pointer_cast<MapElementCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr())->getMapElementType())
+        {
+            // Coded visual markers
+            case MapElementTypes::coded_visual_marker:
+            {
+                // Cast
+                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr());
+
+                // Check ids
+                if(the_coded_visual_marker_landmark_core->getId() == sensor_measurement->getVisualMarkerId())
+                {
+                    current_map_element_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*itVisualMarkerLandmark);
+                    flag_association_found=true;
+                    break;
+                }
+
+                // End
+                break;
+            }
+            // Default
+            case MapElementTypes::undefined:
+            default:
+                break;
+        }
+        if(flag_association_found)
+            break;
+    }
+
+    // If does not exist, need to be mapped!
+    if(!current_map_element_state)
+        return 1;
+
+
+
+    // Predict State
+    int error_predict_measurement=predictMeasurementSpecific(current_time_stamp,
+                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
+                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                             current_sensor_state,
+                                                             current_map_element_state,
+                                                             predicted_sensor_measurement);
+
+    // Check error
+    if(error_predict_measurement)
+        return error_predict_measurement;
+
+
+    // Set predicted state
+    predicted_measurement=predicted_sensor_measurement;
+
+
+
+    // End
+    return 0;
+}
+
+int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
+                                                 const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                                 const std::shared_ptr<RobotStateCore> currentRobotState,
+                                                 const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
+                                                 const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
+                                                 std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
 {
 #if _DEBUG_SENSOR_CORE
     logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
@@ -697,61 +961,61 @@ int CodedVisualMarkerEyeCore::predictMeasurement(const TimeStamp theTimeStamp, c
     if(!this->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 50"<<std::endl;
-        return 50;
+        return -50;
     }
 
     /// Check global parameters
     if(!TheGlobalParametersStateCore)
-        return 1;
+        return -1;
 
     if(!TheGlobalParametersStateCore->isCorrect())
-        return 1;
+        return -1;
 
     /// check Robot
     if(!currentRobotState)
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
-        return 2;
+        return -2;
     }
 
     if(!currentRobotState->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 3"<<std::endl;
-        return 3;
+        return -3;
     }
 
     /// Check sensor
-    if(!currentSensorStateI)
+    if(!currentSensorState)
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 1"<<std::endl;
-        return 1;
+        return -1;
     }
 
-    if(!currentSensorStateI->isCorrect())
+    if(!currentSensorState->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 1"<<std::endl;
-        return 1;
+        return -1;
     }
 
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorStateI);
+    //std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorStateI);
 
 
     /// Check Map element
-    if(!currentMapElementStateI)
+    if(!currentMapElementState)
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
-        return 4;
+        return -4;
     }
 
-    if(!currentMapElementStateI->isCorrect())
+    if(!currentMapElementState->isCorrect())
     {
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
-        return 5;
+        return -5;
     }
 
     // Cast
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
+    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
 
     // Checks
     // TODO
@@ -930,7 +1194,136 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
 }
 
 
-int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<MapElementStateCore> currentMapElementStateI, std::shared_ptr<SensorMeasurementCore> matchedMeasurement, std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
+                                    const TimeStamp current_time_stamp,
+                                    // Current State
+                                    const std::shared_ptr<StateEstimationCore> current_state,
+                                    // Measurements
+                                    const std::shared_ptr<SensorMeasurementCore> measurement,
+                                    // Predicted Measurements
+                                    std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+{
+
+    // State
+    if(!current_state)
+        return -1;
+
+    // TODO
+
+    // Measurement -> Matching
+    if(!measurement)
+        return -2;
+
+    if(measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
+        return -10;
+
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(measurement);
+
+    // Nothing else needed
+
+
+    // Predicted Measurement
+    std::shared_ptr<CodedVisualMarkerMeasurementCore> predicted_sensor_measurement;
+    if(!predicted_measurement)
+        return -3;
+    else
+    {
+        if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
+            return -3;
+        predicted_sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(predicted_measurement);
+    }
+
+
+    // Search for the past sensor State Core
+    std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
+        it_sensor_state!=current_state->TheListSensorStateCore.end();
+        ++it_sensor_state)
+    {
+        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        {
+            current_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(*it_sensor_state);
+            break;
+        }
+    }
+    if(!current_sensor_state)
+        return -10;
+
+
+    // Search for the associated map element
+    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> current_map_element_state;
+    // Match with the map element
+    for(std::list<std::shared_ptr<MapElementStateCore>>::iterator itVisualMarkerLandmark=current_state->TheListMapElementStateCore.begin();
+        itVisualMarkerLandmark!=current_state->TheListMapElementStateCore.end();
+        ++itVisualMarkerLandmark)
+    {
+        bool flag_association_found=false;
+        switch(std::dynamic_pointer_cast<MapElementCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr())->getMapElementType())
+        {
+            // Coded visual markers
+            case MapElementTypes::coded_visual_marker:
+            {
+                // Cast
+                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr());
+
+                // Check ids
+                if(the_coded_visual_marker_landmark_core->getId() == sensor_measurement->getVisualMarkerId())
+                {
+                    current_map_element_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*itVisualMarkerLandmark);
+                    flag_association_found=true;
+                    break;
+                }
+
+                // End
+                break;
+            }
+            // Default
+            case MapElementTypes::undefined:
+            default:
+                break;
+        }
+        if(flag_association_found)
+            break;
+    }
+
+    // If does not exist, need to be mapped!
+    if(!current_map_element_state)
+        return 1;
+
+
+
+    // Predict State
+    int error_predict_measurement=predictErrorMeasurementJacobianSpecific(current_time_stamp,
+                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
+                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                             current_sensor_state,
+                                                             current_map_element_state,
+                                                             sensor_measurement,
+                                                             predicted_sensor_measurement);
+
+    // Check error
+    if(error_predict_measurement)
+        return error_predict_measurement;
+
+
+    // Set predicted state
+    predicted_measurement=predicted_sensor_measurement;
+
+
+
+    // End
+    return 0;
+}
+
+
+int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+                                                         const std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersStateCore,
+                                                         const std::shared_ptr<RobotStateCore> currentRobotState,
+                                                         const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
+                                                         const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
+                                                         const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
+                                                         std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
 {
     /// Variables needed
     // State
@@ -998,7 +1391,7 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
 
     // Map Element
     // Cast
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
+    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
     std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getMsfElementCoreSharedPtr());
 
     position_map_element_wrt_world=currentMapElementState->getPosition();
@@ -1006,10 +1399,10 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
 
 
     // Matched measurement
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> TheMatchedMeasurementCore=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
+    //std::shared_ptr<CodedVisualMarkerMeasurementCore> TheMatchedMeasurementCore=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
 
-    meas_position_map_element_wrt_sensor=TheMatchedMeasurementCore->getVisualMarkerPosition();
-    meas_attitude_map_element_wrt_sensor=TheMatchedMeasurementCore->getVisualMarkerAttitude();
+    meas_position_map_element_wrt_sensor=matchedMeasurement->getVisualMarkerPosition();
+    meas_attitude_map_element_wrt_sensor=matchedMeasurement->getVisualMarkerAttitude();
 
 
     // Predicted Measurement
@@ -1067,8 +1460,8 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurements(const TimeStamp theTime
     int dimension_sensor_error_parameters=the_sensor_core->getDimensionErrorParameters();
 
     // Dimension
-    int dimension_map_element_error_state=currentMapElementStateI->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    int dimension_map_element_error_parameters=currentMapElementStateI->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    int dimension_map_element_error_state=currentMapElementState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    int dimension_map_element_error_parameters=currentMapElementState->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
 
 
@@ -1559,7 +1952,13 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
 }
 
 
-int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore, const std::shared_ptr<RobotStateCore> currentRobotState, const std::shared_ptr<SensorStateCore> currentSensorState, const std::shared_ptr<SensorMeasurementCore> matchedMeasurement, std::shared_ptr<MapElementCore>& newMapElementCore, std::shared_ptr<MapElementStateCore>& newMapElementState)
+int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp,
+                                             const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                             const std::shared_ptr<RobotStateCore> currentRobotState,
+                                             const std::shared_ptr<SensorStateCore> currentSensorState,
+                                             const std::shared_ptr<SensorMeasurementCore> matchedMeasurement,
+                                             std::shared_ptr<MapElementCore>& newMapElementCore,
+                                             std::shared_ptr<MapElementStateCore>& newMapElementState)
 {
     /// Checks
 
@@ -1670,6 +2069,8 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
         // Map element core
         TheCodeCodedVisualMarkerLandmarkCore=std::make_shared<CodedVisualMarkerLandmarkCore>(this->getMsfStorageCoreWeakPtr());
 
+        // Set the map core
+        TheCodeCodedVisualMarkerLandmarkCore->setMsfElementCorePtr(TheCodeCodedVisualMarkerLandmarkCore);
 
 
         // Configurations of the map element core. Only needed if was not previously set. Can be done anycase.
@@ -1708,7 +2109,9 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     // Create Map Element State Core With Map Element Core
     std::shared_ptr<CodedVisualMarkerLandmarkStateCore> TheCodedVisualMarkerLandmarkStateCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(newMapElementState);
     if(!TheCodedVisualMarkerLandmarkStateCore)
+    {
         TheCodedVisualMarkerLandmarkStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(TheCodeCodedVisualMarkerLandmarkCore);
+    }
 
 
 
@@ -1731,6 +2134,8 @@ int CodedVisualMarkerEyeCore::mapMeasurement(const TimeStamp theTimeStamp, const
     /// Polymorph
     newMapElementCore=TheCodeCodedVisualMarkerLandmarkCore;
     newMapElementState=TheCodedVisualMarkerLandmarkStateCore;
+
+
 
     // End
     return 0;

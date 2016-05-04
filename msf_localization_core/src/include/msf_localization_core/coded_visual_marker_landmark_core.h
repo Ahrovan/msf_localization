@@ -119,11 +119,36 @@ public:
 
     // Prediction state function: f()
 public:
-    int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
+    int predictState(//Time
+                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     // Previous State
+                     const std::shared_ptr<StateEstimationCore> pastState,
+                     // Inputs
+                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                     // Predicted State
+                     std::shared_ptr<StateCore>& predictedState);
+
+protected:
+    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
+                             std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState);
+
 
     // Jacobian: F
 public:
-    int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState);
+    int predictErrorStateJacobian(//Time
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Inputs
+                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 // Predicted State
+                                 std::shared_ptr<StateCore>& predictedState);
+
+protected:
+    int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                   const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
+                                   std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState);
 
 
 
