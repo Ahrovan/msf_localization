@@ -37,7 +37,8 @@
 #define _DEBUG_SENSOR_CORE 0
 
 
-class SensorStateCore;
+//class SensorStateCore;
+class MapElementCore;
 
 
 class SensorCore : public SensorBasics, public MsfElementCore
@@ -176,6 +177,39 @@ public:
     /// Mapping
 
     // TODO
+public:
+    virtual int mapMeasurement(// Time
+                       const TimeStamp current_time_stamp,
+                       // Current State
+                       const std::shared_ptr<StateEstimationCore> current_state,
+                       // Current Measurement
+                       const std::shared_ptr<SensorMeasurementCore> current_measurement,
+                       // List Map Element Core -> New will be added if not available
+                       std::list< std::shared_ptr<MapElementCore> >& list_map_element_core,
+                       // New Map Element State Core
+                       std::shared_ptr<MapElementStateCore> &new_map_element_state)
+    {
+        std::cout<<"SensorCore::mapMeasurement()"<<std::endl;
+        return 1;
+    }
+
+
+public:
+    virtual int jacobiansMapMeasurement(// Time
+                       const TimeStamp current_time_stamp,
+                       // Current State
+                       const std::shared_ptr<StateEstimationCore> current_state,
+                       // Current Measurement
+                       const std::shared_ptr<SensorMeasurementCore> current_measurement,
+                       // New Map Element State Core
+                       std::shared_ptr<MapElementStateCore> &new_map_element_state)
+    {
+        std::cout<<"SensorCore::jacobiansMapMeasurement()"<<std::endl;
+        return 1;
+    }
+
+
+
 
 };
 

@@ -268,7 +268,6 @@ public:
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
-
     int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                      const std::shared_ptr<ImuSensorStateCore> pastState,
                      std::shared_ptr<ImuSensorStateCore>& predictedState);
@@ -309,7 +308,7 @@ public:
                            // Predicted Measurements
                            std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
-public:
+protected:
     int predictMeasurementSpecific(const TimeStamp theTimeStamp,
                            const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                            const std::shared_ptr<RobotStateCore> currentRobotState,
@@ -328,7 +327,7 @@ public:
                                         // Predicted Measurements
                                         std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
-public:
+protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
                                    const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                    const std::shared_ptr<RobotStateCore> TheRobotStateCore,

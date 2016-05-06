@@ -16,7 +16,8 @@ enum class SensorStateCoreTypes
 {
     undefined=0,
     imu=1,
-    coded_visual_maker_eye
+    coded_visual_maker_eye,
+    mocap
 };
 
 

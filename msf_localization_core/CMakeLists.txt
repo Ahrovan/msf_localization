@@ -48,6 +48,13 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_measurement_component.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/mocap_world_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/mocap_world_state_core.cpp
+
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/mocap_sensor_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/mocap_sensor_state_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/mocap_sensor_measurement_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/input_core.cpp
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_input_core.cpp
@@ -110,6 +117,13 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/input_command_component.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_measurement_component.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/mocap_world_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/mocap_world_state_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/mocap_sensor_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/mocap_sensor_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/mocap_sensor_measurement_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/input_core.h
 

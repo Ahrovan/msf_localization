@@ -17,7 +17,8 @@ enum class MeasurementTypes
 {
     undefined=0,
     imu=1,
-    coded_visual_marker=2
+    coded_visual_marker=2,
+    mocap
 };
 
 

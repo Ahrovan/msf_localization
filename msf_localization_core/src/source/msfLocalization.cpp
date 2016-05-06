@@ -1899,6 +1899,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
     }
 #endif
 
+    /// Error Parameters
+    int dimensionErrorParameters=OldState->getDimensionErrorParameters();
 
     /// Global Parameters
     unsigned int dimensionGlobalParameters=0;
@@ -2819,6 +2821,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
     // Robot
+    // TODO FIX!
     UpdatedState->covarianceMatrix->block<3,9>(9,0)=
             G_update_theta_robot*AuxiliarCovarianceMatrix.block<3,9>(9,0);
 
@@ -2837,6 +2840,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             G_update_theta_robot*AuxiliarCovarianceMatrix.block<3,3>(9,9)*G_update_theta_robot.transpose();
 
 
+    // Map
+    // TODO
 
 
 
@@ -2928,8 +2933,6 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
         // Aux lists
-        std::list< std::shared_ptr<MapElementCore> > TheListNewMapElementsCore;
-        TheListNewMapElementsCore.resize(0); // Not needed but just in case
         std::list< std::shared_ptr<MapElementStateCore> > TheListNewMapElementsStateCore;
         TheListNewMapElementsStateCore.resize(0); // Not needed but just in case
 
@@ -2943,113 +2946,43 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
             itUnmatchedMeas!=TheListUnmatchedMeasurements.end();
             ++itUnmatchedMeas)
         {
-            // Aux Vars
-            std::shared_ptr<MapElementCore> TheNewMapElementCore;
-            bool flagNewMapElementCore;
+            // Aux vars
             std::shared_ptr<MapElementStateCore> TheNewMapElementStateCore;
 
+            // Map measurement
+            int error_map_measurement=(*itUnmatchedMeas)->getSensorCoreSharedPtr()->
+                    mapMeasurement(// Time
+                                   TheTimeStamp,
+                                   // Current State
+                                   UpdatedState,
+                                   // Current Measurement
+                                   (*itUnmatchedMeas),
+                                   // List Map Element Core -> New will be added if not available
+                                   this->TheListOfMapElementCore,
+                                   // New Map Element State Core
+                                   TheNewMapElementStateCore);
 
-            // Switch depending on measurement type
-            switch((*itUnmatchedMeas)->getMeasurementType())
-            {
-                case MeasurementTypes::coded_visual_marker:
-                {
-                    //std::cout<<"Meas type: coded_visual_marker"<<std::endl;
+            if(error_map_measurement)
+                return -1;
 
-                    // Get The Sensor State
-                    std::shared_ptr<SensorStateCore> TheSensorState;
-                    if(findSensorStateCoreFromList(UpdatedState->TheListSensorStateCore, (*itUnmatchedMeas)->getSensorCoreSharedPtr(), TheSensorState))
-                    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                        std::cout<<"MsfLocalizationCore::update() error 40"<<std::endl;
-#endif
-                        return 40;
-                    }
-                    if(!TheSensorState)
-                    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                        std::cout<<"MsfLocalizationCore::update() error 50"<<std::endl;
-#endif
-                        return 50;
-                    }
+            // Jacobians map measurements
+            int error_jacobians_map_measurement=(*itUnmatchedMeas)->getSensorCoreSharedPtr()->
+                    jacobiansMapMeasurement(// Time
+                                   TheTimeStamp,
+                                   // Current State
+                                   UpdatedState,
+                                   // Current Measurement
+                                   (*itUnmatchedMeas),
+                                   // New Map Element State Core
+                                   TheNewMapElementStateCore);
 
-
-                    // Sensor Core
-                    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>((*itUnmatchedMeas)->getSensorCoreSharedPtr());
-
-
-                    // Find Map Element Core -> Might be added before
-                    if(findMapElementCoreWithMeasurementFromList(this->TheListOfMapElementCore, (*itUnmatchedMeas), TheNewMapElementCore))
-                    {
-                        // Not found
-                        flagNewMapElementCore=true;
-                    }
-                    else
-                    {
-                        // Found
-                        flagNewMapElementCore=false;
-                        // Do nothing
-                    }
-
-
-                    // Predict state of the new element based on measurement and old state
-                    // TODO Check!
-                    if(TheSensorCore->mapMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheSensorState, (*itUnmatchedMeas), TheNewMapElementCore, TheNewMapElementStateCore) )
-                    {
-                        std::cout<<"error TheSensorCore->mapMeasurement()"<<std::endl;
-                        continue;
-                    }
-
-//                    if(TheNewMapElementStateCore->getMsfElementCoreSharedPtr() != TheNewMapElementCore)
-//                    {
-//                        std::cout<<"algo raro ha pasado!"<<std::endl;
-//                    }
-
-
-                    // Predict jacobian state of the new element based on measurement and old state
-                    // TODO
-                    if(TheSensorCore->jacobiansMapMeasurement(TheTimeStamp, UpdatedState->TheGlobalParametersStateCore, UpdatedState->TheRobotStateCore, TheSensorState, (*itUnmatchedMeas), TheNewMapElementStateCore))
-                    {
-                        std::cout<<"error TheSensorCore->jacobiansMapMeasurement()"<<std::endl;
-                        continue;
-                    }
-
-//                    if(TheNewMapElementStateCore->getMsfElementCoreSharedPtr() != TheNewMapElementCore)
-//                    {
-//                        std::cout<<"algo raro ha pasado!"<<std::endl;
-//                    }
-
-
-                    // End
-                    break;
-                }
-                case MeasurementTypes::imu:
-                {
-                    //std::cout<<"Meas type: imu"<<std::endl;
-                    continue;
-                }
-                case MeasurementTypes::undefined:
-                {
-                    //std::cout<<"Meas type: undef"<<std::endl;
-                    continue;
-                }
-                default:
-                {
-                    //std::cout<<"Meas type: default"<<std::endl;
-                    continue;
-                }
-            }
-
+            if(error_jacobians_map_measurement)
+                return -1;
 
 
             // Push into the lists
             TheListUnmatchedMeasurementsWithMapElement.push_back((*itUnmatchedMeas));
-            //TheListNewMapElementsCore.push_back(TheNewMapElementCore);
             TheListNewMapElementsStateCore.push_back(TheNewMapElementStateCore);
-
-            // Push into the list if new
-            if(flagNewMapElementCore)
-                this->TheListOfMapElementCore.push_back(TheNewMapElementCore);
 
         }
 
@@ -3062,25 +2995,8 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         // Dimensions
 
         // Dimension Error State
-        int dimension_error_state_total=0;
-        // Robot
-        dimension_error_state_total+=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        // Global Parameters
-        dimension_error_state_total+=OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        // Sensors
-        for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListSensState=OldState->TheListSensorStateCore.begin();
-            itListSensState!=OldState->TheListSensorStateCore.end();
-            ++itListSensState)
-        {
-            dimension_error_state_total+=(*itListSensState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        }
-        // Map
-        for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
-            itListMapElementState!=OldState->TheListMapElementStateCore.end();
-            ++itListMapElementState)
-        {
-            dimension_error_state_total+=(*itListMapElementState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        }
+        int dimension_error_state_total=OldState->getDimensionErrorState();
+
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
         {
@@ -3317,22 +3233,10 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
 
 
 
-        /// Add State of new map elements and cores
+        /// Add State of new map elements
 
         // New Map Cores.
         // Already Added!
-        /*
-        for(std::list<std::shared_ptr<MapElementCore>>::iterator itNewMapElementsCore=TheListNewMapElementsCore.begin();
-            itNewMapElementsCore!=TheListNewMapElementsCore.end();
-            ++itNewMapElementsCore)
-        {
-            // Check if it is already in the list to avoid duplication
-            // TODO
-
-            this->TheListOfMapElementCore.push_back((*itNewMapElementsCore));
-        }
-        */
-
 
 
         // New Map State
@@ -3356,7 +3260,7 @@ int MsfLocalizationCore::updateCore(TimeStamp TheTimeStamp, std::shared_ptr<Stat
         //
         covarianceUpdated.block(0, 0, dimension_error_state_total, dimension_error_state_total)=*UpdatedState->covarianceMatrix;
 
-        // OJO! He puesto una ganancia!
+        //
         //
         covarianceUpdated.block(dimension_error_state_total, dimension_error_state_total, dimension_new_map_elements_error_state_total, dimension_new_map_elements_error_state_total)=
                 jacobianMapErrorState*(*UpdatedState->covarianceMatrix)*jacobianMapErrorState.transpose()+

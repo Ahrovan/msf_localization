@@ -1,7 +1,7 @@
 
+#ifndef _MOCAP_STATE_SENSOR_CORE_H
+#define _MOCAP_STATE_SENSOR_CORE_H
 
-#ifndef _CODED_VISUAL_MARKER_EYE_STATE_CORE_H
-#define _CODED_VISUAL_MARKER_EYE_STATE_CORE_H
 
 
 #include <Eigen/Dense>
@@ -13,12 +13,12 @@
 
 
 
-class CodedVisualMarkerEyeStateCore : public SensorStateCore
+class MocapSensorStateCore : public SensorStateCore
 {
 public:
-    CodedVisualMarkerEyeStateCore();
-    CodedVisualMarkerEyeStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
-    ~CodedVisualMarkerEyeStateCore();
+    MocapSensorStateCore();
+    MocapSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    ~MocapSensorStateCore();
 
 protected:
     int init();
@@ -44,18 +44,12 @@ public:
 
 
 
-
 public:
     int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
 
 
 
-
 };
-
-
-
-
 
 
 

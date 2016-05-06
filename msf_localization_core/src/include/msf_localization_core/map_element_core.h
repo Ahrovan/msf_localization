@@ -42,7 +42,8 @@
 enum class MapElementTypes
 {
     undefined=0,
-    coded_visual_marker=1
+    coded_visual_marker=1,
+    mocap_world
 };
 
 

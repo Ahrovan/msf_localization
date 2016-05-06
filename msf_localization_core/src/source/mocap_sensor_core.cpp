@@ -1,11 +1,12 @@
 
-#include "msf_localization_core/coded_visual_marker_eye_core.h"
+#include "msf_localization_core/mocap_sensor_core.h"
+
 
 // Circular Dependency
 #include "msf_localization_core/msf_storage_core.h"
 
 
-CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
+MocapSensorCore::MocapSensorCore() :
     SensorCore()
 {
     //
@@ -15,7 +16,7 @@ CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
     return;
 }
 
-CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+MocapSensorCore::MocapSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     SensorCore(the_msf_storage_core)
 {
     //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
@@ -26,21 +27,21 @@ CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore>
     return;
 }
 
-CodedVisualMarkerEyeCore::~CodedVisualMarkerEyeCore()
+MocapSensorCore::~MocapSensorCore()
 {
 
     return;
 }
 
-int CodedVisualMarkerEyeCore::init()
+int MocapSensorCore::init()
 {
     // Sensor Type
-    setSensorType(SensorTypes::coded_visual_marker_eye);
+    setSensorType(SensorTypes::mocap);
 
 
     // Flags measurement
-    flag_measurement_position_=false;
-    flag_measurement_attitude_=false;
+    flag_measurement_position_mocap_sensor_wrt_mocap_world_=false;
+    flag_measurement_attitude_mocap_sensor_wrt_mocap_world_=false;
 
     // Flags estimation -> By default are considered parameters
     // none
@@ -61,8 +62,8 @@ int CodedVisualMarkerEyeCore::init()
     dimension_noise_=0;
 
     // Noises measurements
-    noise_measurement_position_.setZero();
-    noise_measurement_attitude_.setZero();
+    noise_measurement_position_mocap_sensor_wrt_mocap_world_.setZero();
+    noise_measurement_attitude_mocap_sensor_wrt_mocap_world_.setZero();
 
     // Noises parameters
     // None
@@ -73,11 +74,11 @@ int CodedVisualMarkerEyeCore::init()
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore)
+int MocapSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MocapSensorStateCore>& SensorInitStateCore)
 {
     // Create a class for the SensorStateCore
     if(!SensorInitStateCore)
-        SensorInitStateCore=std::make_shared<CodedVisualMarkerEyeStateCore>(this->getMsfElementCoreWeakPtr());
+        SensorInitStateCore=std::make_shared<MocapSensorStateCore>(this->getMsfElementCoreWeakPtr());
 
     // Set Id
     this->setSensorId(sensorId);
@@ -120,14 +121,14 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
 
     readingValue=meas_orientation.child_value("enabled");
     if(std::stoi(readingValue))
-        this->enableMeasurementAttitude();
+        this->enableMeasurementAttitudeMocapSensorWrtMocapWorld();
 
     readingValue=meas_orientation.child_value("var");
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
         stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseMeasurementAttitude(variance.asDiagonal());
+        this->setNoiseMeasurementAttitudeMocapSensorWrtMocapWorld(variance.asDiagonal());
     }
 
 
@@ -136,14 +137,14 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
 
     readingValue=meas_position.child_value("enabled");
     if(std::stoi(readingValue))
-        this->enableMeasurementPosition();
+        this->enableMeasurementPositionMocapSensorWrtMocapWorld();
 
     readingValue=meas_position.child_value("var");
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
         stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseMeasurementPosition(variance.asDiagonal());
+        this->setNoiseMeasurementPositionMocapSensorWrtMocapWorld(variance.asDiagonal());
     }
 
 
@@ -222,67 +223,83 @@ int CodedVisualMarkerEyeCore::readConfig(pugi::xml_node sensor, unsigned int sen
     return 0;
 }
 
-bool CodedVisualMarkerEyeCore::isMeasurementPositionEnabled() const
+bool MocapSensorCore::isMeasurementPositionMocapSensorWrtMocapWorldEnabled() const
 {
-    return this->flag_measurement_position_;
+    return this->flag_measurement_position_mocap_sensor_wrt_mocap_world_;
 }
 
-int CodedVisualMarkerEyeCore::enableMeasurementPosition()
+int MocapSensorCore::enableMeasurementPositionMocapSensorWrtMocapWorld()
 {
-    if(!this->flag_measurement_position_)
+    if(!this->flag_measurement_position_mocap_sensor_wrt_mocap_world_)
     {
-        this->flag_measurement_position_=true;
+        this->flag_measurement_position_mocap_sensor_wrt_mocap_world_=true;
         this->dimension_measurement_+=3;
         dimension_error_measurement_+=3;
     }
     return 0;
 }
 
-Eigen::Matrix3d CodedVisualMarkerEyeCore::getNoiseMeasurementPosition() const
+Eigen::Matrix3d MocapSensorCore::getNoiseMeasurementPositionMocapSensorWrtMocapWorld() const
 {
-    return this->noise_measurement_position_;
+    return this->noise_measurement_position_mocap_sensor_wrt_mocap_world_;
 }
 
-int CodedVisualMarkerEyeCore::setNoiseMeasurementPosition(Eigen::Matrix3d noise_measurement_position)
+int MocapSensorCore::setNoiseMeasurementPositionMocapSensorWrtMocapWorld(Eigen::Matrix3d noise_measurement_position_mocap_sensor_wrt_mocap_world)
 {
-    this->noise_measurement_position_=noise_measurement_position;
+    this->noise_measurement_position_mocap_sensor_wrt_mocap_world_=noise_measurement_position_mocap_sensor_wrt_mocap_world;
     return 0;
 }
 
-bool CodedVisualMarkerEyeCore::isMeasurementAttitudeEnabled() const
+bool MocapSensorCore::isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled() const
 {
-    return this->flag_measurement_attitude_;
+    return this->flag_measurement_attitude_mocap_sensor_wrt_mocap_world_;
 }
 
-int CodedVisualMarkerEyeCore::enableMeasurementAttitude()
+int MocapSensorCore::enableMeasurementAttitudeMocapSensorWrtMocapWorld()
 {
-    if(!this->flag_measurement_attitude_)
+    if(!this->flag_measurement_attitude_mocap_sensor_wrt_mocap_world_)
     {
-        this->flag_measurement_attitude_=true;
+        this->flag_measurement_attitude_mocap_sensor_wrt_mocap_world_=true;
         this->dimension_measurement_+=4;
         dimension_error_measurement_+=3;
     }
     return 0;
 }
 
-Eigen::Matrix3d CodedVisualMarkerEyeCore::getNoiseMeasurementAttitude() const
+Eigen::Matrix3d MocapSensorCore::getNoiseMeasurementAttitudeMocapSensorWrtMocapWorld() const
 {
-    return this->noise_measurement_attitude_;
+    return this->noise_measurement_attitude_mocap_sensor_wrt_mocap_world_;
 }
 
-int CodedVisualMarkerEyeCore::setNoiseMeasurementAttitude(Eigen::Matrix3d noise_measurement_attitude)
+int MocapSensorCore::setNoiseMeasurementAttitudeMocapSensorWrtMocapWorld(Eigen::Matrix3d noise_measurement_attitude_mocap_sensor_wrt_mocap_world)
 {
-    this->noise_measurement_attitude_=noise_measurement_attitude;
+    this->noise_measurement_attitude_mocap_sensor_wrt_mocap_world_=noise_measurement_attitude_mocap_sensor_wrt_mocap_world;
     return 0;
 }
 
-/*
-int CodedVisualMarkerEyeCore::setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement)
+
+int MocapSensorCore::setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement)
 {
     if(!isSensorEnabled())
         return 0;
 
-    if(this->getMsfStorageCoreSharedPtr()->setMeasurement(the_time_stamp, the_visual_marker_measurement))
+    if(this->getMsfStorageCoreSharedPtr()->setMeasurement(the_time_stamp, sensor_measurement))
+    {
+        std::cout<<"MocapSensorCore::setMeasurement() error"<<std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+
+/*
+int MocapSensorCore::setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > sensor_measurement_list)
+{
+    if(!isSensorEnabled())
+        return 0;
+
+    if(this->getMsfStorageCoreSharedPtr()->setMeasurementList(the_time_stamp, sensor_measurement_list))
     {
         std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
         return 1;
@@ -292,21 +309,7 @@ int CodedVisualMarkerEyeCore::setMeasurement(const TimeStamp the_time_stamp, std
 }
 */
 
-int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > the_visual_marker_measurement_list)
-{
-    if(!isSensorEnabled())
-        return 0;
-
-    if(this->getMsfStorageCoreSharedPtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
-    {
-        std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
-        return 1;
-    }
-
-    return 0;
-}
-
-Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceMeasurement()
+Eigen::SparseMatrix<double> MocapSensorCore::getCovarianceMeasurement()
 {
     Eigen::SparseMatrix<double> covariances_matrix;
 
@@ -317,22 +320,22 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceMeasurement()
     std::vector<Eigen::Triplet<double> > tripletCovarianceMeasurement;
 
     unsigned int dimension=0;
-    if(this->isMeasurementPositionEnabled())
+    if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
     {
         //covariances_matrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementPosition();
 
         for(int i=0; i<3; i++)
-            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noise_measurement_position_(i,i)));
+            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noise_measurement_position_mocap_sensor_wrt_mocap_world_(i,i)));
 
 
         dimension+=3;
     }
-    if(this->isMeasurementAttitudeEnabled())
+    if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
     {
         //covariances_matrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementAttitude();
 
         for(int i=0; i<3; i++)
-            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noise_measurement_attitude_(i,i)));
+            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noise_measurement_attitude_mocap_sensor_wrt_mocap_world_(i,i)));
 
 
         dimension+=3;
@@ -343,7 +346,7 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceMeasurement()
     return covariances_matrix;
 }
 
-Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceParameters()
+Eigen::SparseMatrix<double> MocapSensorCore::getCovarianceParameters()
 {
     Eigen::SparseMatrix<double> covariances_matrix;
     covariances_matrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
@@ -378,7 +381,7 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceParameters()
     return covariances_matrix;
 }
 
-int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorStateSpecific()
+int MocapSensorCore::prepareCovarianceInitErrorStateSpecific()
 {
     int point=0;
     if(this->isEstimationPositionSensorWrtRobotEnabled())
@@ -396,7 +399,7 @@ int CodedVisualMarkerEyeCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
-Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
+Eigen::SparseMatrix<double> MocapSensorCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance_noise;
 
@@ -418,7 +421,7 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const T
     return covariance_noise;
 }
 
-int CodedVisualMarkerEyeCore::predictState(//Time
+int MocapSensorCore::predictState(//Time
                                          const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                          // Previous State
                                          const std::shared_ptr<StateEstimationCore> pastState,
@@ -436,7 +439,7 @@ int CodedVisualMarkerEyeCore::predictState(//Time
     // TODO
 
     // Search for the past sensor State Core
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> past_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> past_sensor_state;
     if(findSensorState(pastState->TheListSensorStateCore, past_sensor_state))
         return -2;
     if(!past_sensor_state)
@@ -444,11 +447,11 @@ int CodedVisualMarkerEyeCore::predictState(//Time
 
 
     // Predicted State
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> predicted_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> predicted_sensor_state;
     if(!predictedState)
-        predicted_sensor_state=std::make_shared<CodedVisualMarkerEyeStateCore>(past_sensor_state->getMsfElementCoreWeakPtr());
+        predicted_sensor_state=std::make_shared<MocapSensorStateCore>(past_sensor_state->getMsfElementCoreWeakPtr());
     else
-        predicted_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedState);
+        predicted_sensor_state=std::dynamic_pointer_cast<MocapSensorStateCore>(predictedState);
 
 
 
@@ -471,14 +474,14 @@ int CodedVisualMarkerEyeCore::predictState(//Time
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                   const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
-                                                   std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState)
+int MocapSensorCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                   const std::shared_ptr<MocapSensorStateCore> pastState,
+                                                   std::shared_ptr<MocapSensorStateCore>& predictedState)
 {
     // Checks in the past state
     if(!pastState->isCorrect())
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictStateSpecific() error"<<std::endl;
+        std::cout<<"MocapSensorCore::predictStateSpecific() error"<<std::endl;
         return -5;
     }
 
@@ -486,7 +489,7 @@ int CodedVisualMarkerEyeCore::predictStateSpecific(const TimeStamp previousTimeS
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<CodedVisualMarkerEyeStateCore>(pastState->getMsfElementCoreSharedPtr());
+        predictedState=std::make_shared<MocapSensorStateCore>(pastState->getMsfElementCoreSharedPtr());
     }
 
 
@@ -545,11 +548,10 @@ int CodedVisualMarkerEyeCore::predictStateSpecific(const TimeStamp previousTimeS
     }
 
 
-
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictStateCore(// State k: Sensor
+int MocapSensorCore::predictStateCore(// State k: Sensor
                                                  Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
                                                  // State k+1: Sensor
                                                  Eigen::Vector3d& pred_position_sensor_wrt_robot, Eigen::Vector4d& pred_attitude_sensor_wrt_robot)
@@ -566,7 +568,7 @@ int CodedVisualMarkerEyeCore::predictStateCore(// State k: Sensor
 
 // Jacobian
 
-int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
+int MocapSensorCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
                              const std::shared_ptr<StateEstimationCore> pastState,
@@ -585,18 +587,20 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
 
 
     // Search for the past sensor State Core
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> past_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> past_sensor_state;
     if(findSensorState(pastState->TheListSensorStateCore, past_sensor_state))
         return -2;
     if(!past_sensor_state)
         return -10;
 
+
+
     // Predicted State
     if(!predictedState)
         return -1;
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> predicted_sensor_state;
-    predicted_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedState);
+    std::shared_ptr<MocapSensorStateCore> predicted_sensor_state;
+    predicted_sensor_state=std::dynamic_pointer_cast<MocapSensorStateCore>(predictedState);
 
 
 
@@ -618,16 +622,10 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                                 const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
-                                                                 std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState)
+int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                                 const std::shared_ptr<MocapSensorStateCore> pastState,
+                                                                 std::shared_ptr<MocapSensorStateCore> &predictedState)
 {
-
-    // Poly
-    //std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
-    //std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
-
-
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
@@ -763,14 +761,11 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
 
 
 
-    //// Finish
-    //predictedStateI=predictedState;
-
     // End
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictErrorStateJacobiansCore(// State k: Sensor
+int MocapSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
                                                            Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
                                                            // State k+1: Sensor
                                                            Eigen::Vector3d pred_position_sensor_wrt_robot, Eigen::Vector4d pred_attitude_sensor_wrt_robot,
@@ -791,7 +786,7 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansCore(// State k: Sensor
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictMeasurement(// Time
+int MocapSensorCore::predictMeasurement(// Time
                                                const TimeStamp current_time_stamp,
                                                // Current State
                                                const std::shared_ptr<StateEstimationCore> current_state,
@@ -813,25 +808,25 @@ int CodedVisualMarkerEyeCore::predictMeasurement(// Time
     if(measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
         return -10;
 
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(measurement);
+    std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(measurement);
 
     // Nothing else needed
 
 
     // Predicted Measurement
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> predicted_sensor_measurement;
+    std::shared_ptr<MocapSensorMeasurementCore> predicted_sensor_measurement;
     if(!predicted_measurement)
-        predicted_sensor_measurement=std::make_shared<CodedVisualMarkerMeasurementCore>(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
+        predicted_sensor_measurement=std::make_shared<MocapSensorMeasurementCore>(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
     else
     {
         if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
             return -3;
-        predicted_sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(predicted_measurement);
+        predicted_sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(predicted_measurement);
     }
 
 
     // Search for the past sensor State Core
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> current_sensor_state;
     if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
@@ -839,7 +834,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(// Time
 
 
     // Search for the associated map element -> If does not exist, need to be mapped!
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> current_map_element_state;
+    std::shared_ptr<MocapWorldStateCore> current_map_element_state;
     if(findMapElementState(current_state->TheListMapElementStateCore, sensor_measurement, current_map_element_state))
         return 1;
     if(!current_map_element_state)
@@ -848,8 +843,7 @@ int CodedVisualMarkerEyeCore::predictMeasurement(// Time
 
     // Predict State
     int error_predict_measurement=predictMeasurementSpecific(current_time_stamp,
-                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
-                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                             current_state->TheRobotStateCore,
                                                              current_sensor_state,
                                                              current_map_element_state,
                                                              predicted_sensor_measurement);
@@ -868,76 +862,63 @@ int CodedVisualMarkerEyeCore::predictMeasurement(// Time
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
-                                                 const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+int MocapSensorCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
                                                  const std::shared_ptr<RobotStateCore> currentRobotState,
-                                                 const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
-                                                 const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
-                                                 std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+                                                 const std::shared_ptr<MocapSensorStateCore> currentSensorState,
+                                                 const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
+                                                 std::shared_ptr<MocapSensorMeasurementCore> &predictedMeasurement)
 {
 #if _DEBUG_SENSOR_CORE
-    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"MocapSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
 
     /// Check
     if(!this->isCorrect())
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 50"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 50"<<std::endl;
         return -50;
     }
-
-    /// Check global parameters
-    if(!TheGlobalParametersStateCore)
-        return -1;
-
-    if(!TheGlobalParametersStateCore->isCorrect())
-        return -1;
 
     /// check Robot
     if(!currentRobotState)
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 2"<<std::endl;
         return -2;
     }
 
     if(!currentRobotState->isCorrect())
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 3"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 3"<<std::endl;
         return -3;
     }
 
     /// Check sensor
     if(!currentSensorState)
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 1"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 1"<<std::endl;
         return -1;
     }
 
     if(!currentSensorState->isCorrect())
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 1"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 1"<<std::endl;
         return -1;
     }
-
-    // Cast
-    //std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorStateI);
 
 
     /// Check Map element
     if(!currentMapElementState)
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 2"<<std::endl;
         return -4;
     }
 
     if(!currentMapElementState->isCorrect())
     {
-        std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 2"<<std::endl;
+        std::cout<<"MocapSensorCore::predictMeasurementSpecific() error 2"<<std::endl;
         return -5;
     }
 
-    // Cast
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
 
     // Checks
     // TODO
@@ -946,18 +927,13 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
     /// Create pointer
     if(!predictedMeasurement)
     {
-        std::shared_ptr<CodedVisualMarkerEyeCore> TheCodedVisualMarkerEyeCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
-        predictedMeasurement=std::make_shared<CodedVisualMarkerMeasurementCore>(TheCodedVisualMarkerEyeCore);
+        std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getMsfElementCoreSharedPtr());
+        predictedMeasurement=std::make_shared<MocapSensorMeasurementCore>(sensor_core);
 #if _DEBUG_SENSOR_CORE
         logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() pointer created"<<std::endl;
 #endif
     }
 
-
-
-    /// id -> Needed
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getMsfElementCoreSharedPtr());
-    predictedMeasurement->setVisualMarkerId(TheCodedVisualMarkerLandmarkCore->getId());
 
 
 
@@ -974,8 +950,8 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
     Eigen::Vector4d attitude_map_element_wrt_world;
 
     // Predicted Measurement
-    Eigen::Vector3d position_map_element_wrt_sensor;
-    Eigen::Vector4d attitude_map_element_wrt_sensor;
+    Eigen::Vector3d position_sensor_wrt_map_element;
+    Eigen::Vector4d attitude_sensor_wrt_map_element;
 
 
     // Switch depending on robot used
@@ -1019,8 +995,8 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
 
 
     // Map Element
-    position_map_element_wrt_world=currentMapElementState->getPosition();
-    attitude_map_element_wrt_world=currentMapElementState->getAttitude();
+    position_map_element_wrt_world=currentMapElementState->getPositionMocapWorldWrtWorld();
+    attitude_map_element_wrt_world=currentMapElementState->getAttitudeMocapWorldWrtWorld();
 
 
 
@@ -1028,7 +1004,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
     int error_predict_measurement_core=this->predictMeasurementCore(position_robot_wrt_world, attitude_robot_wrt_world,
                                                                     position_sensor_wrt_robot, attitude_sensor_wrt_robot,
                                                                     position_map_element_wrt_world, attitude_map_element_wrt_world,
-                                                                    position_map_element_wrt_sensor, attitude_map_element_wrt_sensor);
+                                                                    position_sensor_wrt_map_element, attitude_sensor_wrt_map_element);
 
     if(error_predict_measurement_core)
         return error_predict_measurement_core;
@@ -1036,20 +1012,20 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
 
     /// Set
     // Position
-    if(this->isMeasurementPositionEnabled())
+    if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
     {
-        predictedMeasurement->setVisualMarkerPosition(position_map_element_wrt_sensor);
+        predictedMeasurement->setPositionMocapSensorWrtMocapWorld(position_sensor_wrt_map_element);
     }
     // Attitude
-    if(this->isMeasurementAttitudeEnabled())
+    if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
     {
-        predictedMeasurement->setVisualMarkerAttitude(attitude_map_element_wrt_sensor);
+        predictedMeasurement->setAttitudeMocapSensorWrtMocapWorld(attitude_sensor_wrt_map_element);
     }
 
 
 
 #if _DEBUG_SENSOR_CORE
-    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"MocapSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
 #endif
 
 
@@ -1057,14 +1033,14 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
+int MocapSensorCore::predictMeasurementCore(// State: Robot
                                                      Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
                                                      // State: Sensor
                                                      Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
                                                      // State: Map
                                                      Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
                                                      // Predicted Measurement
-                                                     Eigen::Vector3d& position_map_element_wrt_sensor, Eigen::Vector4d& attitude_map_element_wrt_sensor)
+                                                     Eigen::Vector3d& position_sensor_wrt_map_element, Eigen::Vector4d& attitude_sensor_wrt_map_element)
 {
     // Aux vars
     Eigen::Vector4d attitude_visual_marker_eye_wrt_world=
@@ -1072,7 +1048,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
 
 
     // Position
-    if(this->isMeasurementPositionEnabled())
+    if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
     {
         // Aux Variable
         //Eigen::Vector3d position_visual_marker_wrt_visual_marker_eye;
@@ -1085,7 +1061,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
 
         // Equation
         //position_visual_marker_wrt_visual_marker_eye=
-        position_map_element_wrt_sensor=
+        position_sensor_wrt_map_element=
                 Quaternion::cross_sandwich(Quaternion::inv(attitude_visual_marker_eye_wrt_world), position_map_element_wrt_world-position_visual_marker_eye_wrt_world-position_robot_wrt_world, attitude_visual_marker_eye_wrt_world);
 
         // Set
@@ -1095,7 +1071,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
 
 
     // Attitude
-    if(this->isMeasurementAttitudeEnabled())
+    if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
     {
         // Aux Variable
         //Eigen::Vector4d attitude_visual_marker_wrt_visual_marker_eye;
@@ -1103,7 +1079,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
 
         // Equation
         //attitude_visual_marker_wrt_visual_marker_eye=
-        attitude_map_element_wrt_sensor=
+        attitude_sensor_wrt_map_element=
                 Quaternion::cross(Quaternion::inv(attitude_visual_marker_eye_wrt_world), attitude_map_element_wrt_world);
 
 
@@ -1116,7 +1092,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
 }
 
 
-int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
+int MocapSensorCore::predictErrorMeasurementJacobian(// Time
                                     const TimeStamp current_time_stamp,
                                     // Current State
                                     const std::shared_ptr<StateEstimationCore> current_state,
@@ -1139,25 +1115,25 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
     if(measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
         return -10;
 
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(measurement);
+    std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(measurement);
 
     // Nothing else needed
 
 
     // Predicted Measurement
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> predicted_sensor_measurement;
+    std::shared_ptr<MocapSensorMeasurementCore> predicted_sensor_measurement;
     if(!predicted_measurement)
         return -3;
     else
     {
         if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
             return -3;
-        predicted_sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(predicted_measurement);
+        predicted_sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(predicted_measurement);
     }
 
 
     // Search for the past sensor State Core
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> current_sensor_state;
     if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
@@ -1165,7 +1141,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
 
 
     // Search for the associated map element
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> current_map_element_state;
+    std::shared_ptr<MocapWorldStateCore> current_map_element_state;
     if(findMapElementState(current_state->TheListMapElementStateCore, sensor_measurement, current_map_element_state))
         return 1;
     if(!current_map_element_state)
@@ -1197,13 +1173,13 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
 }
 
 
-int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
                                                          const std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersStateCore,
                                                          const std::shared_ptr<RobotStateCore> currentRobotState,
-                                                         const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
-                                                         const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
-                                                         const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
-                                                         std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement)
+                                                         const std::shared_ptr<MocapSensorStateCore> currentSensorState,
+                                                         const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
+                                                         const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
+                                                         std::shared_ptr<MocapSensorMeasurementCore> &predictedMeasurement)
 {
     /// Variables needed
     // State
@@ -1262,8 +1238,8 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
     // Sensor
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> the_sensor_state_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorState);
-    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(the_sensor_state_core->getMsfElementCoreSharedPtr());
+    std::shared_ptr<MocapSensorStateCore> the_sensor_state_core=std::dynamic_pointer_cast<MocapSensorStateCore>(currentSensorState);
+    std::shared_ptr<const MocapSensorCore> the_sensor_core=std::dynamic_pointer_cast<const MocapSensorCore>(the_sensor_state_core->getMsfElementCoreSharedPtr());
 
     position_sensor_wrt_robot=currentSensorState->getPositionSensorWrtRobot();
     attitude_sensor_wrt_robot=currentSensorState->getAttitudeSensorWrtRobot();
@@ -1271,23 +1247,20 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
     // Map Element
     // Cast
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getMsfElementCoreSharedPtr());
+    std::shared_ptr<MocapWorldCore> TheMapElementCore=std::dynamic_pointer_cast<MocapWorldCore>(currentMapElementState->getMsfElementCoreSharedPtr());
 
-    position_map_element_wrt_world=currentMapElementState->getPosition();
-    attitude_map_element_wrt_world=currentMapElementState->getAttitude();
+    position_map_element_wrt_world=currentMapElementState->getPositionMocapWorldWrtWorld();
+    attitude_map_element_wrt_world=currentMapElementState->getAttitudeMocapWorldWrtWorld();
 
 
     // Matched measurement
-    //std::shared_ptr<CodedVisualMarkerMeasurementCore> TheMatchedMeasurementCore=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
-
-    meas_position_map_element_wrt_sensor=matchedMeasurement->getVisualMarkerPosition();
-    meas_attitude_map_element_wrt_sensor=matchedMeasurement->getVisualMarkerAttitude();
+    meas_position_map_element_wrt_sensor=matchedMeasurement->getPositionMocapSensorWrtMocapWorld();
+    meas_attitude_map_element_wrt_sensor=matchedMeasurement->getAttitudeMocapSensorWrtMocapWorld();
 
 
     // Predicted Measurement
-    position_map_element_wrt_sensor=predictedMeasurement->getVisualMarkerPosition();
-    attitude_map_element_wrt_sensor=predictedMeasurement->getVisualMarkerAttitude();
+    position_map_element_wrt_sensor=predictedMeasurement->getPositionMocapSensorWrtMocapWorld();
+    attitude_map_element_wrt_sensor=predictedMeasurement->getAttitudeMocapSensorWrtMocapWorld();
 
 
 
@@ -1361,7 +1334,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
     // Fill
     {
         int dimension_error_measurement_i=0;
-        if(this->isMeasurementPositionEnabled())
+        if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
         {
             // Switch depending on robot used
             switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
@@ -1424,7 +1397,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
             dimension_error_measurement_i+=3;
         }
 
-        if(this->isMeasurementAttitudeEnabled())
+        if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
         {
             // Switch depending on robot used
             switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
@@ -1516,7 +1489,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         int dimension_error_measurement_i=0;
 
         // pos
-        if(this->isMeasurementPositionEnabled())
+        if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
         {
             int dimension_sensor_error_parameters_i=0;
             int dimension_sensor_error_state_i=0;
@@ -1553,7 +1526,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         }
 
         // att
-        if(this->isMeasurementAttitudeEnabled())
+        if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
         {
             int dimension_sensor_error_parameters_i=0;
             int dimension_sensor_error_state_i=0;
@@ -1604,13 +1577,13 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         int dimension_error_measurement_i=0;
 
         // pos
-        if(this->isMeasurementPositionEnabled())
+        if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
         {
             int dimension_map_element_error_parameters_i=0;
             int dimension_map_element_error_state_i=0;
 
             // pos
-            if(TheMapElementCore->isEstimationPositionVisualMarkerWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationPositionMocapWorldWrtWorldEnabled())
             {
                 predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
                         jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
@@ -1624,7 +1597,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
             }
 
             // att
-            if(TheMapElementCore->isEstimationAttitudeVisualMarkerWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationAttitudeMocapWorldWrtWorldEnabled())
             {
                 // Zeros
                 dimension_map_element_error_state_i+=3;
@@ -1639,13 +1612,13 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         }
 
         // att
-        if(this->isMeasurementAttitudeEnabled())
+        if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
         {
             int dimension_map_element_error_parameters_i=0;
             int dimension_map_element_error_state_i=0;
 
             // pos
-            if(TheMapElementCore->isEstimationPositionVisualMarkerWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationPositionMocapWorldWrtWorldEnabled())
             {
                 // Zeros
                 dimension_map_element_error_state_i+=3;
@@ -1657,7 +1630,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
             }
 
             // att
-            if(TheMapElementCore->isEstimationAttitudeVisualMarkerWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationAttitudeMocapWorldWrtWorldEnabled())
             {
                 predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
                         jacobian_error_meas_att_wrt_error_state_map_elem_att;
@@ -1688,7 +1661,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         int dimension_error_measurement_i=0;
 
         // pos
-        if(this->isMeasurementPositionEnabled())
+        if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
         {
             predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
                     jacobian_error_meas_pos_wrt_error_meas_pos;
@@ -1698,7 +1671,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
 
         // att
-        if(this->isMeasurementAttitudeEnabled())
+        if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
         {
             predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
                     jacobian_error_meas_att_wrt_error_meas_att;
@@ -1713,16 +1686,16 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
+int MocapSensorCore::jacobiansErrorMeasurementsCore(// State: Robot
                                                              Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
                                                              // State: Sensor
                                                              Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
                                                              // State: Map
                                                              Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
                                                              // Measurement
-                                                             Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                             Eigen::Vector3d meas_position_sensor_wrt_map_element, Eigen::Vector4d meas_attitude_sensor_wrt_map_element,
                                                              // Predicted Measurement
-                                                             Eigen::Vector3d position_map_element_wrt_sensor, Eigen::Vector4d attitude_map_element_wrt_sensor,
+                                                             Eigen::Vector3d position_sensor_wrt_map_element, Eigen::Vector4d attitude_sensor_wrt_map_element,
                                                              // Jacobians: State and Params
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_robot_att,
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_sens_att,
@@ -1736,9 +1709,9 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
     Eigen::Vector3d tran_inc2_wrt_world=position_map_element_wrt_world-position_robot_wrt_world;
 
     //Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=TheMatchedMeasurementCore->getVisualMarkerAttitude();
-    Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=attitude_map_element_wrt_sensor;
+    Eigen::Vector4d att_pred_visual_marker_wrt_visual_marker_eye=attitude_sensor_wrt_map_element;
 
-    Eigen::Vector4d att_meas_visual_marker_wrt_visual_marker_eye=meas_attitude_map_element_wrt_sensor;
+    Eigen::Vector4d att_meas_visual_marker_wrt_visual_marker_eye=meas_attitude_sensor_wrt_map_element;
 
     Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
     Eigen::Vector4d att_world_wrt_visual_marker_eye=Quaternion::inv(att_visual_marker_eye_wrt_world);
@@ -1831,7 +1804,7 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::mapMeasurement(// Time
+int MocapSensorCore::mapMeasurement(// Time
                    const TimeStamp current_time_stamp,
                    // Current State
                    const std::shared_ptr<StateEstimationCore> current_state,
@@ -1850,7 +1823,7 @@ int CodedVisualMarkerEyeCore::mapMeasurement(// Time
     std::shared_ptr<RobotStateCore> current_robot_state=current_state->TheRobotStateCore;
 
     // Sensor State
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> current_sensor_state;
     if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
@@ -1861,11 +1834,11 @@ int CodedVisualMarkerEyeCore::mapMeasurement(// Time
         return -1;
     if(current_measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
         return -10;
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> current_sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(current_measurement);
+    std::shared_ptr<MocapSensorMeasurementCore> current_sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(current_measurement);
 
     // Find the map element core
     bool flag_new_map_element_core;
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> new_map_element_core;
+    std::shared_ptr<MocapWorldCore> new_map_element_core;
     if(findMapElementCore(list_map_element_core,
                           current_sensor_measurement,
                           new_map_element_core))
@@ -1877,10 +1850,10 @@ int CodedVisualMarkerEyeCore::mapMeasurement(// Time
         flag_new_map_element_core=true;
 
     // New map element state
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> new_landmark_state;
+    std::shared_ptr<MocapWorldStateCore> new_landmark_state;
     if(new_map_element_state)
     {
-        new_landmark_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(new_map_element_state);
+        new_landmark_state=std::dynamic_pointer_cast<MocapWorldStateCore>(new_map_element_state);
     }
 
 
@@ -1904,12 +1877,12 @@ int CodedVisualMarkerEyeCore::mapMeasurement(// Time
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStamp,
-                                             const std::shared_ptr<RobotStateCore> currentRobotState,
-                                             const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
-                                             const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
-                                             std::shared_ptr<CodedVisualMarkerLandmarkCore>& newMapElementCore,
-                                             std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState)
+int MocapSensorCore::mapMeasurementSpecific(const TimeStamp theTimeStamp,
+                                            const std::shared_ptr<RobotStateCore> currentRobotState,
+                                            const std::shared_ptr<MocapSensorStateCore> currentSensorState,
+                                            const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
+                                            std::shared_ptr<MocapWorldCore>& newMapElementCore,
+                                            std::shared_ptr<MocapWorldStateCore>& newMapElementState)
 {
     /// Checks
 
@@ -1987,8 +1960,8 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
 
     // Sensor
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(currentSensorState->getMsfElementCoreSharedPtr());
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> TheSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorState);
+    std::shared_ptr<MocapSensorCore> TheSensorCore=std::dynamic_pointer_cast<MocapSensorCore>(currentSensorState->getMsfElementCoreSharedPtr());
+    std::shared_ptr<MocapSensorStateCore> TheSensorState=std::dynamic_pointer_cast<MocapSensorStateCore>(currentSensorState);
 
     position_sensor_wrt_robot=TheSensorState->getPositionSensorWrtRobot();
     attitude_sensor_wrt_robot=TheSensorState->getAttitudeSensorWrtRobot();
@@ -1996,10 +1969,10 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
 
     // Measurement: Map Element
     // Cast
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> TheCodedVisualMarkerMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
+    std::shared_ptr<MocapSensorMeasurementCore> TheCodedVisualMarkerMeasurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(matchedMeasurement);
 
-    position_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getVisualMarkerPosition();
-    attitude_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getVisualMarkerAttitude();
+    position_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getPositionMocapSensorWrtMocapWorld();
+    attitude_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getAttitudeMocapSensorWrtMocapWorld();
 
 
 
@@ -2008,11 +1981,11 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
     /// Map Element Core
 
     // Create Map Element Core if it is empty
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(newMapElementCore);
+    std::shared_ptr<MocapWorldCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<MocapWorldCore>(newMapElementCore);
     if(!TheCodeCodedVisualMarkerLandmarkCore)
     {
         // Map element core
-        TheCodeCodedVisualMarkerLandmarkCore=std::make_shared<CodedVisualMarkerLandmarkCore>(this->getMsfStorageCoreWeakPtr());
+        TheCodeCodedVisualMarkerLandmarkCore=std::make_shared<MocapWorldCore>(this->getMsfStorageCoreWeakPtr());
 
         // Set the map core
         TheCodeCodedVisualMarkerLandmarkCore->setMsfElementCorePtr(TheCodeCodedVisualMarkerLandmarkCore);
@@ -2020,29 +1993,25 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
 
         // Configurations of the map element core. Only needed if was not previously set. Can be done anycase.
 
-        // Set id in the map element core
-        if(TheCodeCodedVisualMarkerLandmarkCore->setId(TheCodedVisualMarkerMeasurement->getVisualMarkerId()))
-            return 2;
-
         // Set name
-        if(TheCodeCodedVisualMarkerLandmarkCore->setMapElementName("visual_marker_"+std::to_string(TheCodeCodedVisualMarkerLandmarkCore->getId())))
+        if(TheCodeCodedVisualMarkerLandmarkCore->setMapElementName("mocap_world"))
             return 3;
 
 
         // Set Default configurations
         // Enable Estimation Position if measurement pos is enabled
         // TODO Check!
-        if(TheSensorCore->isMeasurementPositionEnabled())
-            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationPositionVisualMarkerWrtWorld();
+        if(TheSensorCore->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
+            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationPositionMocapWorldWrtWorld();
         else
-            TheCodeCodedVisualMarkerLandmarkCore->enableParameterPositionVisualMarkerWrtWorld();
+            TheCodeCodedVisualMarkerLandmarkCore->enableParameterPositionMocapWorldWrtWorld();
 
         // Enable Estimation Attitude if measurement att is enabled
         // TODO Check!
-        if(TheSensorCore->isMeasurementAttitudeEnabled())
-            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationAttitudeVisualMarkerWrtWorld();
+        if(TheSensorCore->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
+            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationAttitudeMocapWorldWrtWorld();
         else
-            TheCodeCodedVisualMarkerLandmarkCore->enableParameterAttitudeVisualMarkerWrtWorld();
+            TheCodeCodedVisualMarkerLandmarkCore->enableParameterAttitudeMocapWorldWrtWorld();
 
         // Covariances not needed because are included in P.
         // TODO check!
@@ -2052,10 +2021,10 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
 
 
     // Create Map Element State Core With Map Element Core
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> TheCodedVisualMarkerLandmarkStateCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(newMapElementState);
+    std::shared_ptr<MocapWorldStateCore> TheCodedVisualMarkerLandmarkStateCore=std::dynamic_pointer_cast<MocapWorldStateCore>(newMapElementState);
     if(!TheCodedVisualMarkerLandmarkStateCore)
     {
-        TheCodedVisualMarkerLandmarkStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(TheCodeCodedVisualMarkerLandmarkCore);
+        TheCodedVisualMarkerLandmarkStateCore=std::make_shared<MocapWorldStateCore>(TheCodeCodedVisualMarkerLandmarkCore);
     }
 
 
@@ -2072,8 +2041,8 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
 
     /// Set values
 
-    TheCodedVisualMarkerLandmarkStateCore->position_=position_map_element_wrt_world;
-    TheCodedVisualMarkerLandmarkStateCore->attitude_=attitude_map_element_wrt_world;
+    TheCodedVisualMarkerLandmarkStateCore->position_mocap_world_wrt_world_=position_map_element_wrt_world;
+    TheCodedVisualMarkerLandmarkStateCore->attitude_mocap_world_wrt_world_=attitude_map_element_wrt_world;
 
 
     /// Polymorph
@@ -2086,35 +2055,35 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::mapMeasurementCore(// robot wrt world (state)
+int MocapSensorCore::mapMeasurementCore(// robot wrt world (state)
                                                  Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
                                                  // sensor wrt world (state)
                                                  Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
-                                                 // Map element wrt sensor (measurement)
-                                                 Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                 // sensor wrt Map element (measurement)
+                                                 Eigen::Vector3d meas_position_sensor_wrt_map_element, Eigen::Vector4d meas_attitude_sensor_wrt_map_element,
                                                  // Map element wrt world (state new)
                                                  Eigen::Vector3d& position_map_element_wrt_world, Eigen::Vector4d& attitude_map_element_wrt_world)
 {
 
     // Position
-    if(this->isMeasurementPositionEnabled())
+    if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
     {
-        Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, meas_position_map_element_wrt_sensor, Quaternion::inv(attitude_sensor_wrt_robot)) + position_sensor_wrt_robot;
+        Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, meas_position_sensor_wrt_map_element, Quaternion::inv(attitude_sensor_wrt_robot)) + position_sensor_wrt_robot;
         position_map_element_wrt_world=Quaternion::cross_sandwich(attitude_robot_wrt_world, tran_visual_marker_wrt_robot, Quaternion::inv(attitude_robot_wrt_world)) + position_robot_wrt_world;
     }
 
 
     // Attitude
-    if(this->isMeasurementAttitudeEnabled())
+    if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
     {
-        attitude_map_element_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot, meas_attitude_map_element_wrt_sensor);
+        attitude_map_element_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot, meas_attitude_sensor_wrt_map_element);
     }
 
 
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(// Time
+int MocapSensorCore::jacobiansMapMeasurement(// Time
                    const TimeStamp current_time_stamp,
                    // Current State
                    const std::shared_ptr<StateEstimationCore> current_state,
@@ -2131,7 +2100,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(// Time
     std::shared_ptr<RobotStateCore> current_robot_state=current_state->TheRobotStateCore;
 
     // Sensor State
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
+    std::shared_ptr<MocapSensorStateCore> current_sensor_state;
     if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
@@ -2142,14 +2111,14 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(// Time
         return -1;
     if(current_measurement->getSensorCoreSharedPtr() != std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()))
         return -10;
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> current_sensor_measurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(current_measurement);
+    std::shared_ptr<MocapSensorMeasurementCore> current_sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(current_measurement);
 
     // New map element state
     if(!new_map_element_state)
         return -5;
     if(!new_map_element_state->getMsfElementCoreSharedPtr())
         return -6;
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> new_landmark_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(new_map_element_state);
+    std::shared_ptr<MocapWorldStateCore> new_landmark_state=std::dynamic_pointer_cast<MocapWorldStateCore>(new_map_element_state);
 
 
     // Call the specific
@@ -2163,11 +2132,11 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(// Time
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp theTimeStamp,
-                                                              const std::shared_ptr<RobotStateCore> currentRobotState,
-                                                              const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
-                                                              const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
-                                                              std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState)
+int MocapSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp theTimeStamp,
+                                                     const std::shared_ptr<RobotStateCore> currentRobotState,
+                                                     const std::shared_ptr<MocapSensorStateCore> currentSensorState,
+                                                     const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
+                                                     std::shared_ptr<MocapWorldStateCore>& newMapElementState)
 {
     /// Checks
 
@@ -2251,8 +2220,8 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
 
     // Sensor
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeCore> TheSensorCore=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(currentSensorState->getMsfElementCoreSharedPtr());
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> TheSensorState=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorState);
+    std::shared_ptr<MocapSensorCore> TheSensorCore=std::dynamic_pointer_cast<MocapSensorCore>(currentSensorState->getMsfElementCoreSharedPtr());
+    std::shared_ptr<MocapSensorStateCore> TheSensorState=std::dynamic_pointer_cast<MocapSensorStateCore>(currentSensorState);
 
     position_sensor_wrt_robot=TheSensorState->getPositionSensorWrtRobot();
     attitude_sensor_wrt_robot=TheSensorState->getAttitudeSensorWrtRobot();
@@ -2260,21 +2229,21 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
 
     // Measurement: Map Element
     // Cast
-    std::shared_ptr<CodedVisualMarkerMeasurementCore> TheCodedVisualMarkerMeasurement=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
+    std::shared_ptr<MocapSensorMeasurementCore> TheCodedVisualMarkerMeasurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(matchedMeasurement);
 
-    position_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getVisualMarkerPosition();
-    attitude_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getVisualMarkerAttitude();
+    position_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getPositionMocapSensorWrtMocapWorld();
+    attitude_map_element_wrt_sensor=TheCodedVisualMarkerMeasurement->getAttitudeMocapSensorWrtMocapWorld();
 
 
 
     // Map Element State Core
     // Cast
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> TheCodedVisualMarkerLandmarkStateCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(newMapElementState);
-    std::shared_ptr<CodedVisualMarkerLandmarkCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(newMapElementState->getMsfElementCoreSharedPtr());
+    std::shared_ptr<MocapWorldStateCore> TheCodedVisualMarkerLandmarkStateCore=std::dynamic_pointer_cast<MocapWorldStateCore>(newMapElementState);
+    std::shared_ptr<MocapWorldCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<MocapWorldCore>(newMapElementState->getMsfElementCoreSharedPtr());
 
 
-    position_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getPosition();
-    attitude_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getAttitude();
+    position_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getPositionMocapWorldWrtWorld();
+    attitude_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getAttitudeMocapWorldWrtWorld();
 
 
     //// Core
@@ -2525,7 +2494,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
         {
             int dimension_measurement_i=0;
             // tran meas
-            if(TheSensorCore->isMeasurementPositionEnabled())
+            if(TheSensorCore->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
             {
                 TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
                      jacobian_error_map_pos_wrt_error_meas_pos;
@@ -2533,7 +2502,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
             }
 
             // Atti meas
-            if(TheSensorCore->isMeasurementAttitudeEnabled())
+            if(TheSensorCore->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
             {
                 // Zeros
                 dimension_measurement_i+=3;
@@ -2548,14 +2517,14 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
             int dimension_measurement_i=0;
 
             // tran meas
-            if(TheSensorCore->isMeasurementPositionEnabled())
+            if(TheSensorCore->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
             {
                 // Zeros
                 dimension_measurement_i+=3;
             }
 
             // Atti meas
-            if(TheSensorCore->isMeasurementAttitudeEnabled())
+            if(TheSensorCore->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
             {
                 TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
                     jacobian_error_map_att_wrt_error_meas_att;
@@ -2575,14 +2544,14 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (state)
+int MocapSensorCore::jacobiansMapMeasurementCore(// robot wrt world (state)
                                                           Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
                                                           // sensor wrt world (state)
                                                           Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
                                                           // Map element wrt world (state new)
                                                           Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
-                                                          // Map element wrt sensor (measurement)
-                                                          Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                          // Sensor wrt Map element (measurement)
+                                                          Eigen::Vector3d meas_position_sensor_wrt_map_element, Eigen::Vector4d meas_attitude_sensor_wrt_map_element,
                                                           // Jacobians
                                                           // State and Params
                                                           Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_robot_att,
@@ -2592,7 +2561,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
 {
 
     // Aux vars
-    Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, meas_position_map_element_wrt_sensor, Quaternion::inv(attitude_sensor_wrt_robot))+position_sensor_wrt_robot;
+    Eigen::Vector3d tran_visual_marker_wrt_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, meas_position_sensor_wrt_map_element, Quaternion::inv(attitude_sensor_wrt_robot))+position_sensor_wrt_robot;
 
     Eigen::Vector4d att_visual_marker_eye_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
 
@@ -2600,8 +2569,8 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
     Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_world=Quaternion::quatMatPlus(attitude_map_element_wrt_world);
     Eigen::Matrix4d mat_inv_quat_plus_att_visual_marker_wrt_world=mat_quat_plus_att_visual_marker_wrt_world.inverse();
 
-    Eigen::Matrix4d mat_quat_minus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatMinus(meas_attitude_map_element_wrt_sensor);
-    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(meas_attitude_map_element_wrt_sensor);
+    Eigen::Matrix4d mat_quat_minus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatMinus(meas_attitude_sensor_wrt_map_element);
+    Eigen::Matrix4d mat_quat_plus_att_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(meas_attitude_sensor_wrt_map_element);
 
     Eigen::Matrix4d mat_quat_minus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatMinus(attitude_sensor_wrt_robot);
     Eigen::Matrix4d mat_quat_plus_att_visual_marker_eye_wrt_robot=Quaternion::quatMatPlus(attitude_sensor_wrt_robot);
@@ -2616,10 +2585,10 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
 
     Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_robot=Quaternion::quatMatPlus(tran_visual_marker_wrt_robot);
 
-    Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(meas_position_map_element_wrt_sensor);
+    Eigen::Matrix4d mat_quat_plus_tran_visual_marker_wrt_visual_marker_eye=Quaternion::quatMatPlus(meas_position_sensor_wrt_map_element);
 
     Eigen::Matrix4d mat_quat_minus_aux1=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(tran_visual_marker_wrt_robot, attitude_robot_wrt_world));
-    Eigen::Matrix4d mat_quat_minus_aux2=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(meas_position_map_element_wrt_sensor, att_visual_marker_eye_wrt_world));
+    Eigen::Matrix4d mat_quat_minus_aux2=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(meas_position_sensor_wrt_map_element, att_visual_marker_eye_wrt_world));
 
 
     Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
@@ -2666,7 +2635,7 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::findSensorState(const std::list< std::shared_ptr<SensorStateCore> > list_sensors_state, std::shared_ptr<CodedVisualMarkerEyeStateCore>& sensor_state)
+int MocapSensorCore::findSensorState(const std::list< std::shared_ptr<SensorStateCore> > list_sensors_state, std::shared_ptr<MocapSensorStateCore>& sensor_state)
 {
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator it_sensor_state=list_sensors_state.begin();
         it_sensor_state!=list_sensors_state.end();
@@ -2674,16 +2643,16 @@ int CodedVisualMarkerEyeCore::findSensorState(const std::list< std::shared_ptr<S
     {
         if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(*it_sensor_state);
+            sensor_state=std::dynamic_pointer_cast<MocapSensorStateCore>(*it_sensor_state);
             return 0;
         }
     }
     return -1;
 }
 
-int CodedVisualMarkerEyeCore::findMapElementCore(const std::list<std::shared_ptr<MapElementCore>> list_map_elements_core,
-                       const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
-                       std::shared_ptr<CodedVisualMarkerLandmarkCore>& map_element_core)
+int MocapSensorCore::findMapElementCore(const std::list<std::shared_ptr<MapElementCore>> list_map_elements_core,
+                       const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement,
+                       std::shared_ptr<MocapWorldCore>& map_element_core)
 {
     // Match with the map element
     for(std::list<std::shared_ptr<MapElementCore>>::const_iterator itVisualMarkerLandmark=list_map_elements_core.begin();
@@ -2693,20 +2662,12 @@ int CodedVisualMarkerEyeCore::findMapElementCore(const std::list<std::shared_ptr
         switch(std::dynamic_pointer_cast<MapElementCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr())->getMapElementType())
         {
             // Coded visual markers
-            case MapElementTypes::coded_visual_marker:
+            case MapElementTypes::mocap_world:
             {
-                // Cast
-                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr());
-
-                // Check ids
-                if(the_coded_visual_marker_landmark_core->getId() == sensor_measurement->getVisualMarkerId())
-                {
-                    map_element_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(*itVisualMarkerLandmark);
-                    return 0;
-                }
-
+                // No more checks available
+                map_element_core=std::dynamic_pointer_cast<MocapWorldCore>(*itVisualMarkerLandmark);
                 // End
-                break;
+                return 0;
             }
             // Default
             case MapElementTypes::undefined:
@@ -2717,9 +2678,9 @@ int CodedVisualMarkerEyeCore::findMapElementCore(const std::list<std::shared_ptr
     return -1;
 }
 
-int CodedVisualMarkerEyeCore::findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>> list_map_elements_state,
-                                                  const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
-                                                  std::shared_ptr<CodedVisualMarkerLandmarkStateCore> &map_element_state)
+int MocapSensorCore::findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>> list_map_elements_state,
+                                                  const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement,
+                                                  std::shared_ptr<MocapWorldStateCore> &map_element_state)
 {
     // Match with the map element
     for(std::list<std::shared_ptr<MapElementStateCore>>::const_iterator itVisualMarkerLandmark=list_map_elements_state.begin();
@@ -2729,20 +2690,13 @@ int CodedVisualMarkerEyeCore::findMapElementState(const std::list<std::shared_pt
         switch(std::dynamic_pointer_cast<MapElementCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr())->getMapElementType())
         {
             // Coded visual markers
-            case MapElementTypes::coded_visual_marker:
+            case MapElementTypes::mocap_world:
             {
-                // Cast
-                std::shared_ptr<CodedVisualMarkerLandmarkCore> the_coded_visual_marker_landmark_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>((*itVisualMarkerLandmark)->getMsfElementCoreSharedPtr());
-
-                // Check ids
-                if(the_coded_visual_marker_landmark_core->getId() == sensor_measurement->getVisualMarkerId())
-                {
-                    map_element_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*itVisualMarkerLandmark);
-                    return 0;
-                }
+                // No more checks available
+                map_element_state=std::dynamic_pointer_cast<MocapWorldStateCore>(*itVisualMarkerLandmark);
 
                 // End
-                break;
+                return 0;
             }
             // Default
             case MapElementTypes::undefined:

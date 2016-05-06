@@ -38,49 +38,6 @@ int CodedVisualMarkerEyeStateCore::init()
     return 0;
 }
 
-/*
-Eigen::MatrixXd CodedVisualMarkerEyeStateCore::getJacobianErrorState()
-{
-    Eigen::MatrixXd jacobian_error_state;
-
-    std::shared_ptr<CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
-
-    // Resize the jacobian
-    int dimension_error_state=the_sensor_core->getDimensionErrorState();
-
-    jacobian_error_state.resize(dimension_error_state, dimension_error_state);
-    jacobian_error_state.setZero();
-
-
-    // Fill
-    int dimension_error_state_i=0;
-
-    // Position sensor wrt robot
-    if(the_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
-    {
-        // Update jacobian
-        jacobian_error_state.block<3,3>(dimension_error_state_i, dimension_error_state_i)=error_state_jacobian_.position_sensor_wrt_robot_;
-
-        // Update dimension for next
-        dimension_error_state_i+=3;
-    }
-
-    // Attitude sensor wrt robot
-    if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
-    {
-        // Update jacobian
-        jacobian_error_state.block<3,3>(dimension_error_state_i, dimension_error_state_i)=error_state_jacobian_.attitude_sensor_wrt_robot_;
-
-        // Update dimension for next
-        dimension_error_state_i+=3;
-    }
-
-
-    // End
-    return jacobian_error_state;
-}
-*/
-
 
 int CodedVisualMarkerEyeStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
 {
