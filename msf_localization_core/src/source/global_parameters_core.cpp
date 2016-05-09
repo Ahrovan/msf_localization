@@ -196,6 +196,14 @@ Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
     return covariance_matrix;
 }
 
+Eigen::SparseMatrix<double> GlobalParametersCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
+{
+    Eigen::SparseMatrix<double> covariance_noise;
+
+
+    return covariance_noise;
+}
+
 int GlobalParametersCore::predictState(//Time
                                      const TimeStamp previousTimeStamp,
                                      const TimeStamp currentTimeStamp,

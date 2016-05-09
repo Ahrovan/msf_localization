@@ -92,7 +92,7 @@ public:
 
     // Covariance Noise Estimation: Qn
 public:
-    //Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp);
 
 
 

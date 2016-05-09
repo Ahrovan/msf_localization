@@ -863,6 +863,15 @@ int ImuInputCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
+Eigen::SparseMatrix<double> ImuInputCore::getCovarianceNoise(const TimeStamp deltaTimeStamp) const
+{
+    Eigen::SparseMatrix<double> covariance_noise;
+
+    // TODO
+
+    return covariance_noise;
+}
+
 int ImuInputCore::predictState(//Time
                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                  // Previous State

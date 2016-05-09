@@ -78,6 +78,8 @@
 #include "msf_localization_ros/ros_sensor_imu_interface.h"
 // ROS Aruco Eye
 #include "msf_localization_ros/ros_aruco_eye_interface.h"
+// Mocap
+#include "msf_localization_ros/ros_mocap_sensor_interface.h"
 
 
 /// ROS Inputs

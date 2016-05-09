@@ -56,6 +56,7 @@
 
 
 
+#include "msf_localization_core/block_matrix.h"
 
 
 #include "msf_localization_core/state_estimation_core.h"
@@ -82,6 +83,8 @@
 #include "msf_localization_core/imu_sensor_core.h"
 // Visual Marker Eye
 #include "msf_localization_core/coded_visual_marker_eye_core.h"
+// Mocap
+#include "msf_localization_core/mocap_sensor_core.h"
 
 /// Input
 #include "msf_localization_core/input_core.h"
@@ -91,6 +94,7 @@
 /// Map
 #include "msf_localization_core/map_element_core.h"
 #include "msf_localization_core/coded_visual_marker_landmark_core.h"
+#include "msf_localization_core/mocap_world_core.h"
 
 
 //// State
@@ -107,12 +111,14 @@
 #include "msf_localization_core/imu_input_state_core.h"
 // Map
 #include "msf_localization_core/coded_visual_marker_landmark_state_core.h"
+#include "msf_localization_core/mocap_world_state_core.h"
 
 
 //// Measurement
 #include "msf_localization_core/sensor_measurement_core.h"
 #include "msf_localization_core/imu_sensor_measurement_core.h"
 #include "msf_localization_core/coded_visual_marker_measurement_core.h"
+#include "msf_localization_core/mocap_sensor_measurement_core.h"
 
 
 //// Input Command
@@ -125,7 +131,7 @@
 #define _DEBUG_MSF_LOCALIZATION_CORE 0
 #define _DEBUG_MSF_LOCALIZATION_ALGORITHM 0
 
-#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 0
+#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 1
 
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 

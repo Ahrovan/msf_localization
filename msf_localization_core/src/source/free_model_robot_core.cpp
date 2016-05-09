@@ -486,7 +486,7 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp previousTimeStamp, 
     // Checks in the past state
     if(!pastState->isCorrect())
     {
-        std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+        std::cout<<"FreeModelRobotCore::predictState() error"<<std::endl;
         return -5;
     }
 
@@ -637,15 +637,6 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
 
 int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
 {
-    //std::cout<<"FreeModelRobotCore::predictErrorStateJacobians"<<std::endl;
-
-
-    // Polymorph
-    //std::shared_ptr<FreeModelRobotStateCore> pastState=std::static_pointer_cast<FreeModelRobotStateCore>(pastStateI);
-    //std::shared_ptr<FreeModelRobotStateCore> predictedState=std::static_pointer_cast<FreeModelRobotStateCore>(predictedStateI);
-
-
-
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)

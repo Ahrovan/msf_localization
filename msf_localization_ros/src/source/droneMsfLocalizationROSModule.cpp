@@ -275,6 +275,39 @@ int MsfLocalizationROS::readConfigFile()
 
         }
 
+        //// Mocap Sensor Type
+        if(sensorType=="mocap")
+        {
+            std::cout<<"sensor = mocap"<<std::endl;
+
+            // Create a class for the SensoreCore
+            std::shared_ptr<RosMocapSensorInterface> TheRosSensorInterface;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<MocapSensorStateCore> TheSensorStateCore;
+
+            // Create a class for the SensoreCore
+            if(!TheRosSensorInterface)
+                TheRosSensorInterface=std::make_shared<RosMocapSensorInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+
+            // Set the pointer to itself
+            TheRosSensorInterface->setMsfElementCorePtr(TheRosSensorInterface);
+
+            // Read configs
+            if(TheRosSensorInterface->readConfig(sensor, firstAvailableSensorId, TheSensorStateCore))
+                return -2;
+
+            // Update id
+            firstAvailableSensorId++;
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfSensorCore.push_back(TheRosSensorInterface);
+
+            // Push the init state of the sensor
+            InitialState->TheListSensorStateCore.push_back(TheSensorStateCore);
+
+        }
 
     }
 
@@ -333,7 +366,7 @@ int MsfLocalizationROS::readConfigFile()
         // Sensor Type
         std::string mapElementType=map_element.child_value("type");
 
-        // Coded visual marker
+        /// Coded visual marker
         if(mapElementType=="coded_visual_marker")
         {
             std::cout<<"map element = coded_visual_marker"<<std::endl;
@@ -347,6 +380,37 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class for the MapElementCore
             if(!TheMapElementCore)
                 TheMapElementCore=std::make_shared<CodedVisualMarkerLandmarkCore>(this->TheMsfStorageCore);
+
+            // Set the pointer to itself
+            TheMapElementCore->setMsfElementCorePtr(TheMapElementCore);
+
+            // Read configs
+            if(TheMapElementCore->readConfig(map_element, MapElementInitStateCore))
+                return -2;
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfMapElementCore.push_back(TheMapElementCore);
+
+            // Push the init state of the sensor
+            InitialState->TheListMapElementStateCore.push_back(MapElementInitStateCore);
+        }
+
+        /// Mocap World
+        if(mapElementType=="mocap_world")
+        {
+            std::cout<<"map element = mocap_world"<<std::endl;
+
+            // Create a class for the SensoreCore
+            std::shared_ptr<MocapWorldCore> TheMapElementCore;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<MocapWorldStateCore> MapElementInitStateCore;
+
+
+            // Create a class for the MapElementCore
+            if(!TheMapElementCore)
+                TheMapElementCore=std::make_shared<MocapWorldCore>(this->TheMsfStorageCore);
 
             // Set the pointer to itself
             TheMapElementCore->setMsfElementCorePtr(TheMapElementCore);
@@ -623,7 +687,30 @@ try
                     tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
                                                           this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
+                    break;
                 }
+            case MapElementTypes::mocap_world:
+            {
+                // Cast
+                std::shared_ptr<MocapWorldStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<MocapWorldStateCore>(*itMapElementState);
+
+                Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPositionMocapWorldWrtWorld();
+                Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitudeMocapWorldWrtWorld();
+
+
+
+
+                tf::Quaternion tf_rot(mapElementAttitude[1], mapElementAttitude[2], mapElementAttitude[3], mapElementAttitude[0]);
+                tf::Vector3 tf_tran(mapElementPosition[0], mapElementPosition[1], mapElementPosition[2]);
+
+                tf::Transform transform(tf_rot, tf_tran);
+
+
+                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
+                                                      this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
+
+                break;
+            }
             }
         }
 

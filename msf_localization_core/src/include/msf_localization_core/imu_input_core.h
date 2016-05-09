@@ -243,6 +243,13 @@ public:
 
 
 
+    ///// Get Covariances as a Eigen::MatrixXd
+
+public:
+    Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const;
+
+
+
 
     //// Predict Step Functions
 

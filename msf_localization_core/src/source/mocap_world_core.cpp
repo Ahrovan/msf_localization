@@ -59,7 +59,7 @@ int MocapWorldCore::readConfig(pugi::xml_node map_element, std::shared_ptr<Mocap
 
 
     // Visual landmark
-    pugi::xml_node visual_landmark=map_element.child("visual_landmark");
+    pugi::xml_node mocap_world=map_element.child("mocap_world");
 
 
     // Auxiliar reading value
@@ -74,7 +74,7 @@ int MocapWorldCore::readConfig(pugi::xml_node map_element, std::shared_ptr<Mocap
     //// Configs
 
     /// Pose of the map element wrt worl
-    pugi::xml_node pose_in_world=visual_landmark.child("pose_in_world");
+    pugi::xml_node pose_in_world=mocap_world.child("pose_in_world");
 
     // Position of the sensor wrt robot
     readingValue=pose_in_world.child("position").child_value("enabled");

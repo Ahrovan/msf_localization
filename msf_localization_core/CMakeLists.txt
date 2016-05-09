@@ -180,6 +180,9 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/msfLocalization.h
 
 
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/block_matrix.h
+
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/quaternion_algebra.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/ring_buffer.h

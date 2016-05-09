@@ -114,10 +114,10 @@ public:
     //virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
     virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
 
-
+*/
 public:
     virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const=0;
-*/
+
 
 
 
