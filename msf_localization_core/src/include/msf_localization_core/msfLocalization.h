@@ -286,18 +286,8 @@ public:
 
     //// Helper functions
 
-    // Helper functions
-protected:
-    int findSensorStateCoreFromList(std::list<std::shared_ptr<SensorStateCore> > TheListSensorStateCore, std::shared_ptr<SensorCore> TheSensorCore, std::shared_ptr<SensorStateCore>& TheSensorStateCore);
 
-    int findMapElementStateCoreWithMapCoreFromList(std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore, std::shared_ptr<MapElementCore> TheMapElementCore, std::shared_ptr<MapElementStateCore>& TheMapElementStateCore);
-
-    int findMapElementStateCoreWithMeasurementFromList(std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurementCore, std::shared_ptr<MapElementStateCore>& TheMapElementStateCore);
-
-    int findMapElementCoreWithMeasurementFromList(std::list< std::shared_ptr<MapElementCore> > TheListMapElementCore, std::shared_ptr<SensorMeasurementCore> TheSensorMeasurementCore, std::shared_ptr<MapElementCore>& TheMapElementCore);
-
-
-    // Helper functions
+    // Helper data type
 protected:
     struct MatrixPoint
     {
@@ -306,13 +296,6 @@ protected:
     };
 
 
-    // Concrete functions for covariances
-protected:
-    //int predictedFreeModelRobotCovariance(TimeStamp DeltaTime, std::shared_ptr<FreeModelRobotCore> robotCore, std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot, Eigen::MatrixXd* previousStateCovarianceMatrix, Eigen::MatrixXd* predictedStateCovarianceMatrix);
-
-    //int predictedFreeModelRobotImuCovariance(TimeStamp DeltaTime, std::shared_ptr<FreeModelRobotCore> robotCore, std::shared_ptr<ImuSensorCore> TheImuSensor1Core, std::shared_ptr<FreeModelRobotStateCore> predictedStateRobot, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1, Eigen::MatrixXd* previousStateCovarianceMatrix, MatrixPoint InitPoint, Eigen::MatrixXd* predictedStateCovarianceMatrix, MatrixPoint& EndPoint);
-
-    //int predictedImuImuCovariance(TimeStamp DeltaTime, std::shared_ptr<ImuSensorCore> TheImuSensor1Core, std::shared_ptr<ImuSensorCore> TheImuSensor2Core, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor1, std::shared_ptr<ImuSensorStateCore> predictedImuStateSensor2, Eigen::MatrixXd* previousStateCovarianceMatrix, MatrixPoint InitPoint, Eigen::MatrixXd* predictedStateCovarianceMatrix, MatrixPoint& EndPoint);
 
 
     //// Debug log

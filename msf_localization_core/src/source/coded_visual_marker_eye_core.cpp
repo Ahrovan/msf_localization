@@ -1172,10 +1172,42 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
         return 1;
 
 
+    //// Init Jacobians
+
+    /// Hx
+    // World
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.world;
+    // Robot
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.robot;
+    // Inputs
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.inputs.resize(current_state->getNumberInputStates());
+    // Sensors
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.sensors.resize(current_state->getNumberSensorStates());
+    // Map elements
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.map_elements.resize(current_state->getNumberMapElementStates());
+
+
+
+    /// Hp
+    // World
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.world;
+    // Robot
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.robot;
+    // Inputs
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.inputs.resize(current_state->getNumberInputStates());
+    // Sensors
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.resize(current_state->getNumberSensorStates());
+    // Map elements
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.resize(current_state->getNumberMapElementStates());
+
+
+
+    /// Hn
+    // TODO
+
 
     // Predict State
     int error_predict_measurement=predictErrorMeasurementJacobianSpecific(current_time_stamp,
-                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
                                                              std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
                                                              current_sensor_state,
                                                              current_map_element_state,
@@ -1198,7 +1230,6 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
 
 
 int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
-                                                         const std::shared_ptr<GlobalParametersStateCore> currentGlobalParametersStateCore,
                                                          const std::shared_ptr<RobotStateCore> currentRobotState,
                                                          const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
                                                          const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
@@ -1328,18 +1359,15 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
     // dimensions
 
-    // Dimension
-    int dimension_global_parameters_error_state=currentGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    int dimension_global_parameters_error_parameters=currentGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
-
     // Dimension robot error state
     int dimension_robot_error_state=currentRobotState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    int dimension_robot_error_parameters=currentRobotState->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
-    // Dimension
+    // Dimension sensor
     int dimension_sensor_error_state=the_sensor_core->getDimensionErrorState();
     int dimension_sensor_error_parameters=the_sensor_core->getDimensionErrorParameters();
 
-    // Dimension
+    // Dimension map element
     int dimension_map_element_error_state=currentMapElementState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     int dimension_map_element_error_parameters=currentMapElementState->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
@@ -1349,9 +1377,15 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
     /// All jacobians
 
 
-    //// Jacobian Measurement Error - Error State && Jacobian Measurement Error - Error Parameters
+    //// Jacobian Measurement Error - Error State / Error Parameters
 
-    /// Jacobian Measurement Error - Robot Error State
+    /// Jacobian Measurement Error - Robot Error State / Error Parameters
+
+    predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement_, dimension_robot_error_state);
+
+
+    predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement_, dimension_robot_error_parameters);
+
 
 
     // Resize and init
@@ -1485,17 +1519,34 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         }
     }
 
+    /*
+    // Inputs
+    predictedMeasurement->jacobian_error_measurement_wrt_error_state_.inputs.resize(current_state->getNumberInputStates());
+    // Sensors
+    predictedMeasurement->jacobian_error_measurement_wrt_error_state_.sensors.resize(current_state->getNumberSensorStates());
+    // Map elements
+    predictedMeasurement->jacobian_error_measurement_wrt_error_state_.map_elements.resize(current_state->getNumberMapElementState());
+
+    // Inputs
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.inputs.resize(current_state->getNumberInputStates());
+    // Sensors
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.resize(current_state->getNumberSensorStates());
+    // Map elements
+    predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.resize(current_state->getNumberMapElementState());
+    */
+
+
 
 
     /// Jacobian Measurement Error - Global Parameters Error State & Error Parameters
 
 
     // Resize and init
-    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.resize(dimension_error_measurement_, dimension_global_parameters_error_state);
-    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.setZero();
+    //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.resize(dimension_error_measurement_, dimension_global_parameters_error_state);
+    //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.setZero();
 
-    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimension_error_measurement_, dimension_global_parameters_error_parameters);
-    predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.setZero();
+    //predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimension_error_measurement_, dimension_global_parameters_error_parameters);
+    //predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.setZero();
 
     // Fill
     // No dependency on global parameters -> Everything is set to zero

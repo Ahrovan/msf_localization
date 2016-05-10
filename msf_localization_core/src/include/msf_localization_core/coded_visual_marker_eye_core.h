@@ -234,7 +234,6 @@ public:
 
 protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
-                                   const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                    const std::shared_ptr<RobotStateCore> currentRobotState,
                                    const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
                                    const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,

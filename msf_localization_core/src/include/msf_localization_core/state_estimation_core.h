@@ -101,14 +101,17 @@ public:
     // Inputs State
 public:
     std::list< std::shared_ptr<InputStateCore> > TheListInputStateCore;
+    int getNumberInputStates() const;
 
     // Sensors State
 public:
     std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
+    int getNumberSensorStates() const;
 
     // Map State
 public:
     std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
+    int getNumberMapElementStates() const;
 
 
 

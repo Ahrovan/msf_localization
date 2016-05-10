@@ -292,6 +292,21 @@ int StateEstimationCore::getDimensionErrorInputCommand() const
     return dimensionErrorInputCommand;
 }
 
+int StateEstimationCore::getNumberInputStates() const
+{
+    return this->TheListInputStateCore.size();
+}
+
+int StateEstimationCore::getNumberSensorStates() const
+{
+    return this->TheListSensorStateCore.size();
+}
+
+int StateEstimationCore::getNumberMapElementStates() const
+{
+    return this->TheListMapElementStateCore.size();
+}
+
 int StateEstimationCore::prepareCovarianceInitErrorState()
 {
     //std::cout<<"StateEstimationCore::prepareCovarianceInitErrorState()"<<std::endl;
