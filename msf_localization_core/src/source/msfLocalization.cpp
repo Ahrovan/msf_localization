@@ -1176,19 +1176,19 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         //jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
 
 
-        std::cout<<"Matrix jacobian_total_robot_error_noise_estimation:"<<std::endl;
-        for(int i=0; i<jacobian_total_robot_error_noise_estimation.rows(); i++)
-            for(int j=0; j<jacobian_total_robot_error_noise_estimation.cols(); j++)
-            {
-                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(jacobian_total_robot_error_noise_estimation(i,j))<<std::endl;
-            }
+//        std::cout<<"Matrix jacobian_total_robot_error_noise_estimation:"<<std::endl;
+//        for(int i=0; i<jacobian_total_robot_error_noise_estimation.rows(); i++)
+//            for(int j=0; j<jacobian_total_robot_error_noise_estimation.cols(); j++)
+//            {
+//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(jacobian_total_robot_error_noise_estimation(i,j))<<std::endl;
+//            }
 
-        std::cout<<"Matrix covariance_total_robot_error_noise_estimation:"<<std::endl;
-        for(int i=0; i<covariance_total_robot_error_noise_estimation.rows(); i++)
-            for(int j=0; j<covariance_total_robot_error_noise_estimation.cols(); j++)
-            {
-                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(covariance_total_robot_error_noise_estimation(i,j))<<std::endl;
-            }
+//        std::cout<<"Matrix covariance_total_robot_error_noise_estimation:"<<std::endl;
+//        for(int i=0; i<covariance_total_robot_error_noise_estimation.rows(); i++)
+//            for(int j=0; j<covariance_total_robot_error_noise_estimation.cols(); j++)
+//            {
+//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(covariance_total_robot_error_noise_estimation(i,j))<<std::endl;
+//            }
 
 
 
@@ -1197,24 +1197,38 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-        covariance_total_robot_error=jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation;
+        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation;
         //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation.transpose();
         //covariance_total_robot_error=covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
 
-
-        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
-
+        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation + jacobian_total_robot_error_noise_estimation;
 
 
+        covariance_total_robot_error=jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
 
 
 
-        std::cout<<"Matrix covariance_total_robot_error:"<<std::endl;
-        for(int i=0; i<covariance_total_robot_error.rows(); i++)
-            for(int j=0; j<covariance_total_robot_error.cols(); j++)
-            {
-                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(covariance_total_robot_error(i,j))<<std::endl;
-            }
+//        if(covariance_total_robot_error.analyse())
+//            std::cout<<"Error!"<<std::endl;
+
+        //std::cout<<"size_cols="<<covariance_total_robot_error.getColsSize().transpose()<<std::endl;
+        //std::cout<<"size_rows="<<covariance_total_robot_error.getRowsSize().transpose()<<std::endl;
+
+
+
+//        std::cout<<"Matrix covariance_total_robot_error:"<<std::endl;
+//        for(int i=0; i<covariance_total_robot_error.rows(); i++)
+//            for(int j=0; j<covariance_total_robot_error.cols(); j++)
+//            {
+//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(covariance_total_robot_error(i,j))<<std::endl;
+//            }
+
+
+
+//        Eigen::SparseMatrix<double> aux=convertToEigenSparse(covariance_total_robot_error);
+//        std::cout<<"full matrix="<<std::endl;
+//        std::cout<<Eigen::MatrixXd(aux)<<std::endl;
+
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -1649,7 +1663,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     {
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::predictCore() predicted covariance for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-        logString<<ThePredictedState->covarianceMatrix<<std::endl;
+        logString<<*ThePredictedState->covarianceMatrix<<std::endl;
         this->log(logString.str());
     }
 #endif

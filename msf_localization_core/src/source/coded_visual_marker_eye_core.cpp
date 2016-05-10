@@ -1522,7 +1522,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
             int dimension_sensor_error_state_i=0;
 
             // pos
-            if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            if(the_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
                 predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3, 3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
                         jacobian_error_meas_pos_wrt_error_state_sens_pos;
@@ -1559,7 +1559,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
             int dimension_sensor_error_state_i=0;
 
             // pos
-            if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
+            if(the_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
                 // Zeros
                 dimension_sensor_error_state_i+=3;
