@@ -244,10 +244,10 @@ private:
 
     /// Update Step functions
 protected:
-    int update(TimeStamp TheTimeStamp);
+    int update(const TimeStamp TheTimeStamp);
 
 private:
-    int updateCore(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore> OldState, std::shared_ptr<StateEstimationCore>& UpdatedState);
+    int updateCore(const TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore> OldState, std::shared_ptr<StateEstimationCore>& UpdatedState);
 
 
 
