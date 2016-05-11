@@ -243,7 +243,7 @@ Eigen::Matrix3d CodedVisualMarkerEyeCore::getNoiseMeasurementPosition() const
     return this->noise_measurement_position_;
 }
 
-int CodedVisualMarkerEyeCore::setNoiseMeasurementPosition(Eigen::Matrix3d noise_measurement_position)
+int CodedVisualMarkerEyeCore::setNoiseMeasurementPosition(const Eigen::Matrix3d noise_measurement_position)
 {
     this->noise_measurement_position_=noise_measurement_position;
     return 0;
@@ -270,7 +270,7 @@ Eigen::Matrix3d CodedVisualMarkerEyeCore::getNoiseMeasurementAttitude() const
     return this->noise_measurement_attitude_;
 }
 
-int CodedVisualMarkerEyeCore::setNoiseMeasurementAttitude(Eigen::Matrix3d noise_measurement_attitude)
+int CodedVisualMarkerEyeCore::setNoiseMeasurementAttitude(const Eigen::Matrix3d noise_measurement_attitude)
 {
     this->noise_measurement_attitude_=noise_measurement_attitude;
     return 0;
@@ -550,7 +550,7 @@ int CodedVisualMarkerEyeCore::predictStateSpecific(const TimeStamp previousTimeS
 }
 
 int CodedVisualMarkerEyeCore::predictStateCore(// State k: Sensor
-                                                 Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                 const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                                  // State k+1: Sensor
                                                  Eigen::Vector3d& pred_position_sensor_wrt_robot, Eigen::Vector4d& pred_attitude_sensor_wrt_robot)
 {
@@ -771,9 +771,9 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
 }
 
 int CodedVisualMarkerEyeCore::predictErrorStateJacobiansCore(// State k: Sensor
-                                                           Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                           const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                                            // State k+1: Sensor
-                                                           Eigen::Vector3d pred_position_sensor_wrt_robot, Eigen::Vector4d pred_attitude_sensor_wrt_robot,
+                                                           const Eigen::Vector3d pred_position_sensor_wrt_robot, const Eigen::Vector4d pred_attitude_sensor_wrt_robot,
                                                            // Jacobian: State
                                                            Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att)
 {
@@ -1058,11 +1058,11 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp theTime
 }
 
 int CodedVisualMarkerEyeCore::predictMeasurementCore(// State: Robot
-                                                     Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                     const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                                      // State: Sensor
-                                                     Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                     const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                                      // State: Map
-                                                     Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                     const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
                                                      // Predicted Measurement
                                                      Eigen::Vector3d& position_map_element_wrt_sensor, Eigen::Vector4d& attitude_map_element_wrt_sensor)
 {
@@ -1293,8 +1293,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
     // Sensor
     // Cast
-    std::shared_ptr<CodedVisualMarkerEyeStateCore> the_sensor_state_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(currentSensorState);
-    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(the_sensor_state_core->getMsfElementCoreSharedPtr());
+    std::shared_ptr<const CodedVisualMarkerEyeCore> the_sensor_core=std::dynamic_pointer_cast<const CodedVisualMarkerEyeCore>(currentSensorState->getMsfElementCoreSharedPtr());
 
     position_sensor_wrt_robot=currentSensorState->getPositionSensorWrtRobot();
     attitude_sensor_wrt_robot=currentSensorState->getAttitudeSensorWrtRobot();
@@ -1302,7 +1301,6 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
     // Map Element
     // Cast
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(currentMapElementStateI);
     std::shared_ptr<CodedVisualMarkerLandmarkCore> TheMapElementCore=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(currentMapElementState->getMsfElementCoreSharedPtr());
 
     position_map_element_wrt_world=currentMapElementState->getPosition();
@@ -1310,8 +1308,6 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
 
     // Matched measurement
-    //std::shared_ptr<CodedVisualMarkerMeasurementCore> TheMatchedMeasurementCore=std::dynamic_pointer_cast<CodedVisualMarkerMeasurementCore>(matchedMeasurement);
-
     meas_position_map_element_wrt_sensor=matchedMeasurement->getVisualMarkerPosition();
     meas_attitude_map_element_wrt_sensor=matchedMeasurement->getVisualMarkerAttitude();
 
@@ -1357,7 +1353,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
 
 
-    // dimensions
+    /// dimensions
 
     // Dimension robot error state
     int dimension_robot_error_state=currentRobotState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
@@ -1379,21 +1375,31 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
     //// Jacobian Measurement Error - Error State / Error Parameters
 
+
+    /// Jacobian Measurement Error - World Error State / Error Parameters
+
+    {
+        // Resize and init
+        // Nothing to do
+
+        // Fill
+        // No dependency on global parameters -> Everything is set to zero
+    }
+
+
     /// Jacobian Measurement Error - Robot Error State / Error Parameters
 
-    predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement_, dimension_robot_error_state);
-
-
-    predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement_, dimension_robot_error_parameters);
-
-
-
-    // Resize and init
-    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.resize(dimension_error_measurement_, dimension_robot_error_state);
-    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.setZero();
-
-    // Fill
     {
+        // Resize and init
+        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement_, dimension_robot_error_state);
+        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement_, dimension_robot_error_parameters);
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
+
+
+
+        // Fill
         int dimension_error_measurement_i=0;
         if(this->isMeasurementPositionEnabled())
         {
@@ -1404,8 +1410,9 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                 case RobotCoreTypes::free_model:
                 {
                     // pos
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,0)=
-                            jacobian_error_meas_pos_wrt_error_state_robot_pos;
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,0)=
+//                            jacobian_error_meas_pos_wrt_error_state_robot_pos;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_robot_pos, dimension_error_measurement_i, 0);
 
                     // lin_vel
                     // zeros
@@ -1414,8 +1421,9 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                     // zeros
 
                     // attit
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
-                            jacobian_error_meas_pos_wrt_error_state_robot_att;
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+//                            jacobian_error_meas_pos_wrt_error_state_robot_att;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_robot_att, dimension_error_measurement_i, 9);
 
                     // ang_vel
                     // zeros
@@ -1430,8 +1438,9 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                 case RobotCoreTypes::imu_driven:
                 {
                     // pos
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,0)=
-                            jacobian_error_meas_pos_wrt_error_state_robot_pos;
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,0)=
+//                            jacobian_error_meas_pos_wrt_error_state_robot_pos;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_robot_pos, dimension_error_measurement_i, 0);
 
                     // lin_vel
                     // zeros
@@ -1440,8 +1449,9 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                     // zeros
 
                     // attit
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
-                            jacobian_error_meas_pos_wrt_error_state_robot_att;
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+//                            jacobian_error_meas_pos_wrt_error_state_robot_att;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_robot_att, dimension_error_measurement_i, 9);
 
                     // ang_vel
                     // zeros
@@ -1476,8 +1486,9 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                     // zeros
 
                     // attit
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
-                            jacobian_error_meas_att_wrt_error_state_robot_att;
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+//                            jacobian_error_meas_att_wrt_error_state_robot_att;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_att_wrt_error_state_robot_att, dimension_error_measurement_i, 9);
 
                     // ang_vel
                     // zeros
@@ -1500,8 +1511,9 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                     // zeros
 
                     // attit
-                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
-                            jacobian_error_meas_att_wrt_error_state_robot_att;
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+//                            jacobian_error_meas_att_wrt_error_state_robot_att;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_att_wrt_error_state_robot_att, dimension_error_measurement_i, 9);
 
                     // ang_vel
                     // zeros
@@ -1517,6 +1529,10 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
             dimension_error_measurement_i+=3;
         }
+
+        // Set From Triplets
+        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
     }
 
     /*
@@ -1534,22 +1550,6 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
     // Map elements
     predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.resize(current_state->getNumberMapElementState());
     */
-
-
-
-
-    /// Jacobian Measurement Error - Global Parameters Error State & Error Parameters
-
-
-    // Resize and init
-    //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.resize(dimension_error_measurement_, dimension_global_parameters_error_state);
-    //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementGlobalParametersErrorState.setZero();
-
-    //predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.resize(dimension_error_measurement_, dimension_global_parameters_error_parameters);
-    //predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementGlobalParameters.setZero();
-
-    // Fill
-    // No dependency on global parameters -> Everything is set to zero
 
 
 
@@ -1765,15 +1765,15 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 }
 
 int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
-                                                             Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                             const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                                              // State: Sensor
-                                                             Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                             const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                                              // State: Map
-                                                             Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                             const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
                                                              // Measurement
-                                                             Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                             const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
                                                              // Predicted Measurement
-                                                             Eigen::Vector3d position_map_element_wrt_sensor, Eigen::Vector4d attitude_map_element_wrt_sensor,
+                                                             const Eigen::Vector3d position_map_element_wrt_sensor, const Eigen::Vector4d attitude_map_element_wrt_sensor,
                                                              // Jacobians: State and Params
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_robot_att,
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_sens_att,
@@ -2138,11 +2138,11 @@ int CodedVisualMarkerEyeCore::mapMeasurementSpecific(const TimeStamp theTimeStam
 }
 
 int CodedVisualMarkerEyeCore::mapMeasurementCore(// robot wrt world (state)
-                                                 Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                 const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                                  // sensor wrt world (state)
-                                                 Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                 const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                                  // Map element wrt sensor (measurement)
-                                                 Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                 const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
                                                  // Map element wrt world (state new)
                                                  Eigen::Vector3d& position_map_element_wrt_world, Eigen::Vector4d& attitude_map_element_wrt_world)
 {
@@ -2627,13 +2627,13 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp th
 }
 
 int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (state)
-                                                          Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                          const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                                           // sensor wrt world (state)
-                                                          Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                          const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                                           // Map element wrt world (state new)
-                                                          Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                          const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
                                                           // Map element wrt sensor (measurement)
-                                                          Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                                          const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
                                                           // Jacobians
                                                           // State and Params
                                                           Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_robot_att,

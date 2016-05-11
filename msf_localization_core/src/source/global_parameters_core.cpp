@@ -178,7 +178,34 @@ int GlobalParametersCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
+Eigen::SparseMatrix<double> GlobalParametersCore::getCovarianceParameters()
+{
+    Eigen::SparseMatrix<double> covariances_matrix;
+    covariances_matrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
+    //covariances_matrix.setZero();
+    covariances_matrix.reserve(this->getDimensionErrorParameters());
 
+    std::vector<Eigen::Triplet<double> > tripletCovarianceParameters;
+
+    unsigned int dimension=0;
+
+    if(!this->isEstimationGravityEnabled())
+    {
+        //covariance_matrix.block<3,3>(dimension, dimension)=this->getNoiseGravity();
+
+        for(int i=0; i<3; i++)
+            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseGravity(i,i)));
+
+        dimension+=3;
+    }
+
+    covariances_matrix.setFromTriplets(tripletCovarianceParameters.begin(), tripletCovarianceParameters.end());
+
+
+    return covariances_matrix;
+}
+
+/*
 Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
 {
     Eigen::MatrixXd covariance_matrix;
@@ -195,6 +222,7 @@ Eigen::MatrixXd GlobalParametersCore::getCovarianceGlobalParameters()
 
     return covariance_matrix;
 }
+*/
 
 Eigen::SparseMatrix<double> GlobalParametersCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {

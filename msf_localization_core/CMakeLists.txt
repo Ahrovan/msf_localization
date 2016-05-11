@@ -108,6 +108,8 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/msfLocalization.cpp
 
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/block_matrix.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/quaternion_algebra.cpp
 )
  

@@ -5,7 +5,7 @@
 
 
 
-
+#include "msf_localization_core/block_matrix.h"
 
 // Time Stamp
 #include "msf_localization_core/time_stamp.h"
@@ -333,6 +333,29 @@ protected:
                                    const std::shared_ptr<RobotStateCore> TheRobotStateCore,
                                    const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
                                    std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
+    int predictErrorMeasurementJacobianCore(// State: World
+                                            const Eigen::Vector3d gravity_wrt_world,
+                                            // State: Robot
+                                            const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
+                                            const Eigen::Vector3d lin_speed_robot_wrt_world, const Eigen::Vector3d ang_velocity_robot_wrt_world,
+                                            const Eigen::Vector3d lin_accel_robot_wrt_world, const Eigen::Vector3d ang_accel_robot_wrt_world,
+                                            // State: Sensor
+                                            const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                                            // Parameters: Sensor
+                                            const Eigen::Matrix3d sensitivity_meas_linear_acceleration, const Eigen::Matrix3d sensitivity_meas_angular_velocity,
+                                            // Measurement
+                                            const Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d meas_ang_velocity_sensor_wrt_sensor,
+                                            // Predicted Measurement
+                                            const Eigen::Vector3d lin_accel_sensor_wrt_sensor, const Eigen::Vector3d attitude_sensor_wrt_sensor, const Eigen::Vector3d ang_velocity_sensor_wrt_sensor,
+                                            // Jacobians: State and Params
+                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_gravity,
+                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_acc,
+                                            Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_robot_ang_vel,
+                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc,
+                                            Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_sensor_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel,
+                                            // Jacobians: Noise
+                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel
+                                            );
 
 
     /// Mapping

@@ -6,6 +6,8 @@
 
 #include <list>
 
+#include "msf_localization_core/block_matrix.h"
+
 
 // Time Stamp
 #include "msf_localization_core/time_stamp.h"
@@ -70,7 +72,7 @@ protected:
     Eigen::Matrix3d noise_measurement_position_;
 public:
     Eigen::Matrix3d getNoiseMeasurementPosition() const;
-    int setNoiseMeasurementPosition(Eigen::Matrix3d noise_measurement_position);
+    int setNoiseMeasurementPosition(const Eigen::Matrix3d noise_measurement_position);
 
 
 
@@ -86,7 +88,7 @@ protected:
     Eigen::Matrix3d noise_measurement_attitude_;
 public:
     Eigen::Matrix3d getNoiseMeasurementAttitude() const;
-    int setNoiseMeasurementAttitude(Eigen::Matrix3d noise_measurement_attitude);
+    int setNoiseMeasurementAttitude(const Eigen::Matrix3d noise_measurement_attitude);
 
 
 
@@ -155,7 +157,7 @@ protected:
                              std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 protected:
     int predictStateCore(// State k: Sensor
-                         Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                         const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                          // State k+1: Sensor
                          Eigen::Vector3d& pred_position_sensor_wrt_robot, Eigen::Vector4d& pred_attitude_sensor_wrt_robot);
 
@@ -178,9 +180,9 @@ protected:
 protected:
     // TODO Fix!!
     int predictErrorStateJacobiansCore(// State k: Sensor
-                                       Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                       const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                        // State k+1: Sensor
-                                       Eigen::Vector3d pred_position_sensor_wrt_robot, Eigen::Vector4d pred_attitude_sensor_wrt_robot,
+                                       const Eigen::Vector3d pred_position_sensor_wrt_robot, const Eigen::Vector4d pred_attitude_sensor_wrt_robot,
                                        // Jacobian: State
                                        Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att);
 
@@ -212,11 +214,11 @@ protected:
                            std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 protected:
     int predictMeasurementCore(// State: Robot
-                               Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                               const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                // State: Sensor
-                               Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                               const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                // State: Map
-                               Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                               const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
                                // Predicted Measurement
                                Eigen::Vector3d& position_map_element_wrt_sensor, Eigen::Vector4d& attitude_map_element_wrt_sensor);
 
@@ -241,15 +243,15 @@ protected:
                                    std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 protected:
     int jacobiansErrorMeasurementsCore(// State: Robot
-                                       Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                       const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                        // State: Sensor
-                                       Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                       const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                        // State: Map
-                                       Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                       const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
                                        // Measurement
-                                       Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                       const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
                                        // Predicted Measurement
-                                       Eigen::Vector3d position_map_element_wrt_sensor, Eigen::Vector4d attitude_map_element_wrt_sensor,
+                                       const Eigen::Vector3d position_map_element_wrt_sensor, const Eigen::Vector4d attitude_map_element_wrt_sensor,
                                        // Jacobians: State and Params
                                        Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_robot_att,
                                        Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_sens_att,
@@ -282,11 +284,11 @@ protected:
                                std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState);
 protected:
     int mapMeasurementCore(// robot wrt world (state)
-                           Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                           const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                            // sensor wrt world (state)
-                           Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                           const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                            // Map element wrt sensor (measurement)
-                           Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                           const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
                            // Map element wrt world (state new)
                            Eigen::Vector3d& position_map_element_wrt_world, Eigen::Vector4d& attitude_map_element_wrt_world);
 
@@ -310,13 +312,13 @@ protected:
                                         std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState);
 protected:
     int jacobiansMapMeasurementCore(// robot wrt world (state)
-                                    Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                    const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
                                     // sensor wrt world (state)
-                                    Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                    const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
                                     // Map element wrt world (state new)
-                                    Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                    const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
                                     // Map element wrt sensor (measurement)
-                                    Eigen::Vector3d meas_position_map_element_wrt_sensor, Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                    const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
                                     // Jacobians
                                     // State and Params
                                     Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_robot_att,

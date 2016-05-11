@@ -22,6 +22,9 @@ int RosMocapSensorInterface::setMeasurementRos(const geometry_msgs::PoseStampedP
     if(!isSensorEnabled())
         return 0;
 
+    if(msg->header.seq  % 4 != 0)
+        return 0;
+
 
     // Time Stamp
     TimeStamp the_time_stamp(msg->header.stamp.sec, msg->header.stamp.nsec);

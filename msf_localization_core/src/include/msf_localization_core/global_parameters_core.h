@@ -87,8 +87,8 @@ public:
 
     // Covariance Error Parameters: Rp = Qp
 public:
-    //Eigen::SparseMatrix<double> getCovarianceParameters();
-    Eigen::MatrixXd getCovarianceGlobalParameters();
+    Eigen::SparseMatrix<double> getCovarianceParameters();
+    //Eigen::MatrixXd getCovarianceGlobalParameters();
 
     // Covariance Noise Estimation: Qn
 public:

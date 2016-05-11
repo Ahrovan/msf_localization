@@ -52,11 +52,11 @@ public:
     virtual bool isCorrect();
 
 
-    /// Jacobians Measurement
+    //// Jacobians Error Measurement
 
-public:
-    // Jacobian Error Measurement wrt Error State
-    // Hx
+
+    /// Jacobian Error Measurement wrt Error State
+    /// Hx
 protected:
 public:
     struct
@@ -71,15 +71,15 @@ public:
 public:
     struct
     {
-        Eigen::MatrixXd jacobianMeasurementRobotErrorState;
-        Eigen::MatrixXd jacobianMeasurementGlobalParametersErrorState;
+        //Eigen::MatrixXd jacobianMeasurementGlobalParametersErrorState;
+        //Eigen::MatrixXd jacobianMeasurementRobotErrorState;
         Eigen::MatrixXd jacobianMeasurementSensorErrorState;
-        Eigen::MatrixXd jacobianMeasurementMapElementErrorState; // TODO
+        Eigen::MatrixXd jacobianMeasurementMapElementErrorState;
     } jacobianMeasurementErrorState;
 
 
-    // Jacobian Error Measurement wrt Error Parameters
-    // Hx
+    /// Jacobian Error Measurement wrt Error Parameters
+    /// Hp
 protected:
 public:
     struct
@@ -94,42 +94,23 @@ public:
 public:
     struct
     {
+        //Eigen::MatrixXd jacobianMeasurementGlobalParameters;
         // TODO Robot Parameters
-        Eigen::MatrixXd jacobianMeasurementGlobalParameters;
         Eigen::MatrixXd jacobianMeasurementSensorParameters;
         Eigen::MatrixXd jacobianMeasurementMapElementParameters;
     } jacobianMeasurementErrorParameters;
 
-
-    /*
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementSensorParameters;
-
-    } jacobianMeasurementSensorParameters;
-
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementGlobalParameters;
-
-    } jacobianMeasurementGlobalParameters;
-
-    struct
-    {
-        Eigen::MatrixXd jacobianMeasurementMapElementParameters;
-    } jacobianMeasurementMapElementParameters;
-    */
 
 
 
     //
 
 
-    // Jacobian Error Measurement wrt Noise
-    // Hn
+    /// Jacobian Error Measurement wrt Noise
+    /// Hn
 protected:
 public:
-
+    // TODO
 
 
 public:
