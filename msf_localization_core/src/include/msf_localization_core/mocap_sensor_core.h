@@ -235,11 +235,24 @@ public:
 
 protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
-                                   const std::shared_ptr<RobotStateCore> currentRobotState,
-                                   const std::shared_ptr<MocapSensorStateCore> currentSensorState,
-                                   const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
-                                   const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
-                                   std::shared_ptr<MocapSensorMeasurementCore>& predictedMeasurement);
+                                                const std::shared_ptr<RobotStateCore> currentRobotState,
+                                                const std::shared_ptr<MocapSensorStateCore> currentSensorState,
+                                                const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
+                                                const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
+                                                std::shared_ptr<MocapSensorMeasurementCore>& predictedMeasurement,
+                                                // Jacobians State
+                                                // Robot
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
+                                                // Sensor
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_state,
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_parameters,
+                                                // Map Element
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_map_element_error_state,
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_map_element_error_parameters,
+                                                // Jacobians Noise
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
+                                                );
 
 protected:
     int jacobiansErrorMeasurementsCore(// State: Robot

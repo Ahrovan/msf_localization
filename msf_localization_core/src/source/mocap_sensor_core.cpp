@@ -1101,15 +1101,9 @@ int MocapSensorCore::predictErrorMeasurementJacobian(// Time
 
 
     // Predicted Measurement
-    std::shared_ptr<MocapSensorMeasurementCore> predicted_sensor_measurement;
     if(!predicted_measurement)
         return -3;
-    else
-    {
-        if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
-            return -3;
-        predicted_sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(predicted_measurement);
-    }
+
 
 
     // Search for the past sensor State Core
@@ -1128,14 +1122,84 @@ int MocapSensorCore::predictErrorMeasurementJacobian(// Time
         return 1;
 
 
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorMeasurementJacobianInit(// Current State
+                                                                current_state,
+                                                                // Predicted Measurements
+                                                                predicted_measurement);
 
-    // Predict State
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+
+    /// Predicted Measurement Cast
+    std::shared_ptr<MocapSensorMeasurementCore> predicted_sensor_measurement;
+    if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
+        return -3;
+    predicted_sensor_measurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(predicted_measurement);
+
+
+
+    /// Get iterators to fill jacobians
+
+    // Robot
+    // Nothing to do
+
+    // Sensor
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_sensor_error_state;
+    it_jacobian_error_measurement_wrt_sensor_error_state=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.sensors.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_sensor_error_parameters;
+    it_jacobian_error_measurement_wrt_sensor_error_parameters=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.begin();
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=current_state->TheListSensorStateCore.end();
+        ++itSensorStateCore, ++it_jacobian_error_measurement_wrt_sensor_error_state, ++it_jacobian_error_measurement_wrt_sensor_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<MocapSensorStateCore>((*itSensorStateCore)) == current_sensor_state )
+            break;
+    }
+
+    // Map Element
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_map_element_error_state;
+    it_jacobian_error_measurement_wrt_map_element_error_state=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.map_elements.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_map_element_error_parameters;
+    it_jacobian_error_measurement_wrt_map_element_error_parameters=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.begin();
+
+    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
+        itMapElementStateCore!=current_state->TheListMapElementStateCore.end();
+        ++itMapElementStateCore, ++it_jacobian_error_measurement_wrt_map_element_error_state, ++it_jacobian_error_measurement_wrt_map_element_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<MocapWorldStateCore>((*itMapElementStateCore)) == current_map_element_state )
+            break;
+    }
+
+
+
+    /// Predict Measurement Jacobians
     int error_predict_measurement=predictErrorMeasurementJacobianSpecific(current_time_stamp,
-                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
-                                                             current_sensor_state,
-                                                             current_map_element_state,
-                                                             sensor_measurement,
-                                                             predicted_sensor_measurement);
+                                                                          std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                                          current_sensor_state,
+                                                                          current_map_element_state,
+                                                                          sensor_measurement,
+                                                                          predicted_sensor_measurement,
+                                                                          // Jacobians State
+                                                                          // Robot
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.robot,
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.robot,
+                                                                          // Sensor
+                                                                          (*it_jacobian_error_measurement_wrt_sensor_error_state),
+                                                                          (*it_jacobian_error_measurement_wrt_sensor_error_parameters),
+                                                                          // Map Element
+                                                                          (*it_jacobian_error_measurement_wrt_map_element_error_state),
+                                                                          (*it_jacobian_error_measurement_wrt_map_element_error_parameters),
+                                                                          // Jacobian Measurement
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_measurement_.measurement
+                                                                          );
 
     // Check error
     if(error_predict_measurement)
@@ -1153,11 +1217,24 @@ int MocapSensorCore::predictErrorMeasurementJacobian(// Time
 
 
 int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
-                                                         const std::shared_ptr<RobotStateCore> currentRobotState,
-                                                         const std::shared_ptr<MocapSensorStateCore> currentSensorState,
-                                                         const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
-                                                         const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
-                                                         std::shared_ptr<MocapSensorMeasurementCore> &predictedMeasurement)
+                                                             const std::shared_ptr<RobotStateCore> currentRobotState,
+                                                             const std::shared_ptr<MocapSensorStateCore> currentSensorState,
+                                                             const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
+                                                             const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
+                                                             std::shared_ptr<MocapSensorMeasurementCore> &predictedMeasurement,
+                                                             // Jacobians State
+                                                             // Robot
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
+                                                             // Sensor
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_state,
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_parameters,
+                                                             // Map Element
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_map_element_error_state,
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_map_element_error_parameters,
+                                                             // Jacobians Noise
+                                                             Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
+                                                             )
 {
     /// Variables needed
     // State
@@ -1318,8 +1395,8 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
 
     {
         // Resize and init
-        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement_, dimension_robot_error_state);
-        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement_, dimension_robot_error_parameters);
+        jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement_, dimension_robot_error_state);
+        jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement_, dimension_robot_error_parameters);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
@@ -1458,24 +1535,37 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
 
 
         // Set From Triplets
-        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
-        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
+        jacobian_error_measurement_wrt_robot_error_state.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        jacobian_error_measurement_wrt_robot_error_parameters.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
 
+    }
+
+
+    /// Jacobian error measurement - inputs error state / error parameters
+
+    {
+        // Resize and init
+        // Nothing to do
+
+        // Fill
+        // No dependency on global parameters -> Everything is set to zero
     }
 
 
     /// Jacobian Error Measurement - Sensor Error State / Error Parameters
 
     {
-        // Resize and init
-        predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimension_error_measurement_, dimension_sensor_error_state);
-        predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
 
-        predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.resize(dimension_error_measurement_, dimension_sensor_error_parameters);
-        predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.setZero();
+        // Resize and init
+        jacobian_error_measurement_wrt_sensor_error_state.resize(dimension_error_measurement_, dimension_sensor_error_state);
+        jacobian_error_measurement_wrt_sensor_error_parameters.resize(dimension_error_measurement_, dimension_sensor_error_parameters);
+
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
+
 
         // Fill
-
         int dimension_error_measurement_i=0;
 
         // pos
@@ -1487,14 +1577,18 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
             // pos
             if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3, 3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
-                        jacobian_error_meas_pos_wrt_error_state_sens_pos;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3, 3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_pos_wrt_error_state_sens_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_sens_pos, dimension_error_measurement_i, dimension_sensor_error_state_i);
+
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
-                        jacobian_error_meas_pos_wrt_error_state_sens_pos;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_pos_wrt_error_state_sens_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_pos_wrt_error_state_sens_pos, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
+
                 dimension_sensor_error_parameters_i+=3;
             }
 
@@ -1534,19 +1628,28 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
             // att
             if(the_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
-                        jacobian_error_meas_att_wrt_error_state_sens_att;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_att_wrt_error_state_sens_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_att_wrt_error_state_sens_att, dimension_error_measurement_i, dimension_sensor_error_state_i);
+
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
-                        jacobian_error_meas_att_wrt_error_state_sens_att;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_att_wrt_error_state_sens_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_att_wrt_error_state_sens_att, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
+
                 dimension_sensor_error_parameters_i+=3;
             }
 
             dimension_error_measurement_i+=3;
         }
+
+        // Set From Triplets
+        jacobian_error_measurement_wrt_sensor_error_state.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        jacobian_error_measurement_wrt_sensor_error_parameters.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
+
     }
 
 
@@ -1554,11 +1657,13 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
 
     {
         // Resize and init
-        predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.resize(dimension_error_measurement_, dimension_map_element_error_state);
-        predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.setZero();
+        jacobian_error_measurement_wrt_map_element_error_state.resize(dimension_error_measurement_, dimension_map_element_error_state);
+        jacobian_error_measurement_wrt_map_element_error_parameters.resize(dimension_error_measurement_, dimension_map_element_error_parameters);
 
-        predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.resize(dimension_error_measurement_, dimension_map_element_error_parameters);
-        predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.setZero();
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
+
 
         // Fill
         int dimension_error_measurement_i=0;
@@ -1572,28 +1677,36 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
             // pos
             if(TheMapElementCore->isEstimationPositionMocapWorldWrtWorldEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
-                        jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
+//                        jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_map_elem_pos, dimension_error_measurement_i, dimension_map_element_error_state_i);
+
                 dimension_map_element_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
-                        jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
+//                        jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_pos_wrt_error_state_map_elem_pos, dimension_error_measurement_i, dimension_map_element_error_parameters_i);
+
                 dimension_map_element_error_parameters_i+=3;
             }
 
             // att
             if(TheMapElementCore->isEstimationAttitudeMocapWorldWrtWorldEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
-                        jacobian_error_meas_pos_wrt_error_state_map_elem_att;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
+//                        jacobian_error_meas_pos_wrt_error_state_map_elem_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_map_elem_att, dimension_error_measurement_i, dimension_map_element_error_state_i);
+
                 dimension_map_element_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
-                        jacobian_error_meas_pos_wrt_error_state_map_elem_att;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
+//                        jacobian_error_meas_pos_wrt_error_state_map_elem_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_pos_wrt_error_state_map_elem_att, dimension_error_measurement_i, dimension_map_element_error_parameters_i);
+
                 dimension_map_element_error_parameters_i+=3;
             }
 
@@ -1621,19 +1734,28 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
             // att
             if(TheMapElementCore->isEstimationAttitudeMocapWorldWrtWorldEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
-                        jacobian_error_meas_att_wrt_error_state_map_elem_att;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
+//                        jacobian_error_meas_att_wrt_error_state_map_elem_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_att_wrt_error_state_map_elem_att, dimension_error_measurement_i, dimension_map_element_error_state_i);
+
                 dimension_map_element_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
-                        jacobian_error_meas_att_wrt_error_state_map_elem_att;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_parameters_i)=
+//                        jacobian_error_meas_att_wrt_error_state_map_elem_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_att_wrt_error_state_map_elem_att, dimension_error_measurement_i, dimension_map_element_error_parameters_i);
+
                 dimension_map_element_error_parameters_i+=3;
             }
 
             dimension_error_measurement_i+=3;
         }
+
+        // Set From Triplets
+        jacobian_error_measurement_wrt_map_element_error_state.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        jacobian_error_measurement_wrt_map_element_error_parameters.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
+
     }
 
 
@@ -1643,8 +1765,10 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
 
     {
         // Resize and init Jacobian
-        predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimension_error_measurement_, dimension_error_measurement_);
-        predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
+        jacobian_error_measurement_wrt_error_measurement.resize(dimension_error_measurement_, dimension_error_measurement_);
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_measurement;
+
 
         // Fill
 
@@ -1653,8 +1777,9 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
         // pos
         if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
         {
-            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
-                    jacobian_error_meas_pos_wrt_error_meas_pos;
+//            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+//                    jacobian_error_meas_pos_wrt_error_meas_pos;
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_measurement, jacobian_error_meas_pos_wrt_error_meas_pos, dimension_error_measurement_i, dimension_error_measurement_i);
 
             dimension_error_measurement_i+=3;
         }
@@ -1663,11 +1788,17 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
         // att
         if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
         {
-            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
-                    jacobian_error_meas_att_wrt_error_meas_att;
+//            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+//                    jacobian_error_meas_att_wrt_error_meas_att;
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_measurement, jacobian_error_meas_att_wrt_error_meas_att, dimension_error_measurement_i, dimension_error_measurement_i);
+
 
             dimension_error_measurement_i+=3;
         }
+
+
+        // Set From Triplets
+        jacobian_error_measurement_wrt_error_measurement.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_measurement.begin(), triplet_list_jacobian_error_measurement_wrt_error_measurement.end());
 
     }
 

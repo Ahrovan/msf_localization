@@ -180,3 +180,98 @@ int SensorCore::setNoisePositionSensorWrtRobot(Eigen::Matrix3d noisePositionSens
     return 0;
 }
 
+int SensorCore::predictErrorMeasurementJacobianInit(// Current State
+                                                    const std::shared_ptr<StateEstimationCore> current_state,
+                                                    // Predicted Measurements
+                                                    std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+{
+
+    //Checks
+    if(!current_state)
+        return -1;
+
+    if(!predicted_measurement)
+        return -10;
+
+
+    // Dimension
+    int dimension_error_measurement=this->getDimensionErrorMeasurement();
+
+
+    /// Hx
+    // World
+    predicted_measurement->jacobian_error_measurement_wrt_error_state_.world.resize(dimension_error_measurement, current_state->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState());
+    // Robot
+    predicted_measurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement, current_state->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState());
+    // Inputs
+    predicted_measurement->jacobian_error_measurement_wrt_error_state_.inputs.reserve(current_state->getNumberInputStates());
+    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputStateCore=current_state->TheListInputStateCore.begin();
+        itInputStateCore!=current_state->TheListInputStateCore.end();
+        ++itInputStateCore
+        )
+    {
+        predicted_measurement->jacobian_error_measurement_wrt_error_state_.inputs.push_back(Eigen::SparseMatrix<double>(dimension_error_measurement, (*itInputStateCore)->getMsfElementCoreSharedPtr()->getDimensionErrorState()));
+    }
+    // Sensors
+    predicted_measurement->jacobian_error_measurement_wrt_error_state_.sensors.reserve(current_state->getNumberSensorStates());
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=current_state->TheListSensorStateCore.end();
+        ++itSensorStateCore
+        )
+    {
+        predicted_measurement->jacobian_error_measurement_wrt_error_state_.sensors.push_back(Eigen::SparseMatrix<double>(dimension_error_measurement, (*itSensorStateCore)->getMsfElementCoreSharedPtr()->getDimensionErrorState()));
+    }
+    // Map elements
+    predicted_measurement->jacobian_error_measurement_wrt_error_state_.map_elements.reserve(current_state->getNumberMapElementStates());
+    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
+        itMapElementStateCore!=current_state->TheListMapElementStateCore.end();
+        ++itMapElementStateCore
+        )
+    {
+        predicted_measurement->jacobian_error_measurement_wrt_error_state_.map_elements.push_back(Eigen::SparseMatrix<double>(dimension_error_measurement, (*itMapElementStateCore)->getMsfElementCoreSharedPtr()->getDimensionErrorState()));
+    }
+
+
+
+    /// Hp
+    // World
+    predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.world.resize(dimension_error_measurement, current_state->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters());
+    // Robot
+    predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement, current_state->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters());
+    // Inputs
+    predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.inputs.reserve(current_state->getNumberInputStates());
+    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputStateCore=current_state->TheListInputStateCore.begin();
+        itInputStateCore!=current_state->TheListInputStateCore.end();
+        ++itInputStateCore
+        )
+    {
+        predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.inputs.push_back(Eigen::SparseMatrix<double>(dimension_error_measurement, (*itInputStateCore)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters()));
+    }
+    // Sensors
+    predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.reserve(current_state->getNumberSensorStates());
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=current_state->TheListSensorStateCore.end();
+        ++itSensorStateCore
+        )
+    {
+        predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.push_back(Eigen::SparseMatrix<double>(dimension_error_measurement, (*itSensorStateCore)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters()));
+    }
+    // Map elements
+    predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.reserve(current_state->getNumberMapElementStates());
+    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
+        itMapElementStateCore!=current_state->TheListMapElementStateCore.end();
+        ++itMapElementStateCore
+        )
+    {
+        predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.push_back(Eigen::SparseMatrix<double>(dimension_error_measurement, (*itMapElementStateCore)->getMsfElementCoreSharedPtr()->getDimensionErrorParameters()));
+    }
+
+
+    /// Hn
+    predicted_measurement->jacobian_error_measurement_wrt_error_measurement_.measurement.resize(dimension_error_measurement, dimension_error_measurement);
+
+
+    // End
+    return 0;
+}
+

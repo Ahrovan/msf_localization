@@ -75,17 +75,6 @@ public:
 
 
 
-    ///// Covariances Getters
-
-    // Covariance Error Parameters: Rp = Qp
-public:
-    //virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
-
-    // Covariance Noise Estimation: Qn
-public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)=0;
-
-
 
 
 

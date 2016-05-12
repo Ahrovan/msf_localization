@@ -120,13 +120,8 @@ public:
 public:
     virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
 
-    // Covariance Sensor Error Parameters: Rp = Qp
-public:
-    virtual Eigen::SparseMatrix<double> getCovarianceParameters()=0;
 
-    // Covariance Noise Estimation: Qn
-public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)=0;
+
 
 
 
@@ -171,6 +166,12 @@ public:
         std::cout<<"SensorCore::predictErrorMeasurementJacobian()"<<std::endl;
         return 1;
     }
+
+protected:
+    int predictErrorMeasurementJacobianInit(// Current State
+                                            const std::shared_ptr<StateEstimationCore> current_state,
+                                            // Predicted Measurements
+                                            std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 
 

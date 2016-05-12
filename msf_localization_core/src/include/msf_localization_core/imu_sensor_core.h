@@ -228,11 +228,11 @@ public:
 
     ///// Covariances Getters
 
-    // Covariance Sensor Error Measurements: Rn
+    // Covariance Error Measurements: Rn
 public:
     Eigen::SparseMatrix<double> getCovarianceMeasurement();
 
-    // Covariance Sensor Error Parameters: Rp = Qp
+    // Covariance Error Parameters: Rp = Qp
 public:
     Eigen::SparseMatrix<double> getCovarianceParameters();
 
@@ -329,10 +329,23 @@ public:
 
 protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
-                                   const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
-                                   const std::shared_ptr<RobotStateCore> TheRobotStateCore,
-                                   const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
-                                   std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
+                                                const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                                const std::shared_ptr<RobotStateCore> TheRobotStateCore,
+                                                const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
+                                                std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement,
+                                                // Jacobians State / Parameters
+                                                // World
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_state,
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_parameters,
+                                                // Robot
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
+                                                // Sensor
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_state,
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_parameters,
+                                                // Jacobians Measurement
+                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
+                                                );
     int predictErrorMeasurementJacobianCore(// State: World
                                             const Eigen::Vector3d gravity_wrt_world,
                                             // State: Robot

@@ -52,8 +52,8 @@ public:
     virtual bool isCorrect();
 
 
-    //// Jacobians Error Measurement
 
+    //// Jacobians Error Measurement
 
     /// Jacobian Error Measurement wrt Error State
     /// Hx
@@ -67,15 +67,6 @@ public:
         std::vector<Eigen::SparseMatrix<double> > sensors;
         std::vector<Eigen::SparseMatrix<double> > map_elements;
     } jacobian_error_measurement_wrt_error_state_;
-
-public:
-    struct
-    {
-        //Eigen::MatrixXd jacobianMeasurementGlobalParametersErrorState;
-        //Eigen::MatrixXd jacobianMeasurementRobotErrorState;
-        Eigen::MatrixXd jacobianMeasurementSensorErrorState;
-        Eigen::MatrixXd jacobianMeasurementMapElementErrorState;
-    } jacobianMeasurementErrorState;
 
 
     /// Jacobian Error Measurement wrt Error Parameters
@@ -91,34 +82,18 @@ public:
         std::vector<Eigen::SparseMatrix<double> > map_elements;
     } jacobian_error_measurement_wrt_error_parameters_;
 
-public:
-    struct
-    {
-        //Eigen::MatrixXd jacobianMeasurementGlobalParameters;
-        // TODO Robot Parameters
-        Eigen::MatrixXd jacobianMeasurementSensorParameters;
-        Eigen::MatrixXd jacobianMeasurementMapElementParameters;
-    } jacobianMeasurementErrorParameters;
 
-
-
-
-    //
 
 
     /// Jacobian Error Measurement wrt Noise
     /// Hn
 protected:
 public:
-    // TODO
-
-
-public:
     struct
     {
-        Eigen::MatrixXd jacobianMeasurementSensorNoise;
+        Eigen::SparseMatrix<double> measurement;
+    } jacobian_error_measurement_wrt_error_measurement_;
 
-    } jacobianMeasurementSensorNoise;
 
 
 

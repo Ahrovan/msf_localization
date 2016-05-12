@@ -1727,15 +1727,8 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 
 
     // Predicted Measurement
-    std::shared_ptr<ImuSensorMeasurementCore> predicted_sensor_measurement;
     if(!predicted_measurement)
         return -1;
-    else
-    {
-        if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
-            return -3;
-        predicted_sensor_measurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>(predicted_measurement);
-    }
 
 
 
@@ -1756,13 +1749,68 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
         return -10;
 
 
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorMeasurementJacobianInit(// Current State
+                                                                current_state,
+                                                                // Predicted Measurements
+                                                                predicted_measurement);
 
-    // Predict State
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+    // Predicted Measurement Cast
+    std::shared_ptr<ImuSensorMeasurementCore> predicted_sensor_measurement;
+    if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
+        return -3;
+    predicted_sensor_measurement=std::dynamic_pointer_cast<ImuSensorMeasurementCore>(predicted_measurement);
+
+
+
+    /// Get iterators to fill jacobians
+
+    // Robot
+    // Nothing to do
+
+    // Global Parameters
+    // Nothing to do
+
+    // Sensor
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_sensor_error_state;
+    it_jacobian_error_measurement_wrt_sensor_error_state=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.sensors.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_sensor_error_parameters;
+    it_jacobian_error_measurement_wrt_sensor_error_parameters=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.begin();
+
+    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=current_state->TheListSensorStateCore.end();
+        ++itSensorStateCore, ++it_jacobian_error_measurement_wrt_sensor_error_state, ++it_jacobian_error_measurement_wrt_sensor_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<ImuSensorStateCore>((*itSensorStateCore)) == current_sensor_state )
+            break;
+    }
+
+
+    /// Predict Error Measurement Jacobians
     int error_predict_measurement=predictErrorMeasurementJacobianSpecific(current_time_stamp,
-                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
-                                                             std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
-                                                             current_sensor_state,
-                                                             predicted_sensor_measurement);
+                                                                          std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
+                                                                          std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                                          current_sensor_state,
+                                                                          predicted_sensor_measurement,
+                                                                          // Jacobians State / Parameters
+                                                                          // World
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.world,
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.world,
+                                                                          // Robot
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.robot,
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.robot,
+                                                                          // Sensor
+                                                                          (*it_jacobian_error_measurement_wrt_sensor_error_state),
+                                                                          (*it_jacobian_error_measurement_wrt_sensor_error_parameters),
+                                                                          // Jacobians Measurement
+                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_measurement_.measurement
+                                                                          );
 
     // Check error
     if(error_predict_measurement)
@@ -1779,10 +1827,23 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 
 
 int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
-                                              const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
-                                              const std::shared_ptr<RobotStateCore> TheRobotStateCore,
-                                              const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
-                                              std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement)
+                                                           const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
+                                                           const std::shared_ptr<RobotStateCore> TheRobotStateCore,
+                                                           const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
+                                                           std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement,
+                                                           // Jacobians State / Parameters
+                                                           // World
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_state,
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_parameters,
+                                                           // Robot
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
+                                                           // Sensor
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_state,
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_sensor_error_parameters,
+                                                           // Jacobians Measurement
+                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
+                                                           )
 {
 
     // Checks
@@ -1841,9 +1902,9 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
     gravity_wrt_world=TheGlobalParametersStateCore->getGravity();
 
     // State: Robot
-    position_robot_wrt_world;
+    position_robot_wrt_world; // Not needed
     attitude_robot_wrt_world=TheRobotStateCoreAux->getAttitude();
-    lin_speed_robot_wrt_world;
+    lin_speed_robot_wrt_world; // Not needed
     ang_velocity_robot_wrt_world=TheRobotStateCoreAux->getAngularVelocity();
     lin_accel_robot_wrt_world=TheRobotStateCoreAux->getLinearAcceleration();
     ang_accel_robot_wrt_world=TheRobotStateCoreAux->getAngularAcceleration();
@@ -1947,8 +2008,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
     int dimension_robot_error_parameters=TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // dimension of the sensor
-    int dimensionSensorErrorState=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    int dimensionSensorParameters=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
+    int dimension_sensor_error_state=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+    int dimension_sensor_error_parameters=TheImuStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
 
 
@@ -1961,8 +2022,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
     {
 
         // Resize and init Jacobian
-        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.world.resize(dimension_error_measurement_, dimension_world_error_state);
-        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.world.resize(dimension_error_measurement_, dimension_world_error_parameters);
+        jacobian_error_measurement_wrt_world_error_state.resize(dimension_error_measurement_, dimension_world_error_state);
+        jacobian_error_measurement_wrt_world_error_parameters.resize(dimension_error_measurement_, dimension_world_error_parameters);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
@@ -2010,8 +2071,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         }
 
         // Set From Triplets
-        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.world.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
-        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.world.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
+        jacobian_error_measurement_wrt_world_error_state.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        jacobian_error_measurement_wrt_world_error_parameters.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
 
     }
 
@@ -2021,8 +2082,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
     {
 
         // Resize and init
-        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement_, dimension_robot_error_state);
-        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement_, dimension_robot_error_parameters);
+        jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement_, dimension_robot_error_state);
+        jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement_, dimension_robot_error_parameters);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
@@ -2154,24 +2215,34 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
 
 
         // Set From Triplets
-        predictedMeasurement->jacobian_error_measurement_wrt_error_state_.robot.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
-        predictedMeasurement->jacobian_error_measurement_wrt_error_parameters_.robot.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
+        jacobian_error_measurement_wrt_robot_error_state.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        jacobian_error_measurement_wrt_robot_error_parameters.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
 
+    }
+
+
+    /// Jacobian error measurement - inputs error state / error parameters
+
+    {
+        // Resize and init
+        // Nothing to do
+
+        // Fill
+        // No dependency on global parameters -> Everything is set to zero
     }
 
 
     /// Jacobian error measurement - sensor error / error parameters
 
     {
+        // Resize and init
+        jacobian_error_measurement_wrt_sensor_error_state.resize(dimension_error_measurement_, dimension_sensor_error_state);
+        jacobian_error_measurement_wrt_sensor_error_parameters.resize(dimension_error_measurement_, dimension_sensor_error_parameters);
 
-        // Resize and init Jacobian
-        predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.resize(dimension_error_measurement, dimensionSensorErrorState);
-        predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.setZero();
 
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
 
-        // Resize and init Jacobian
-        predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.resize(dimension_error_measurement, dimensionSensorParameters);
-        predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.setZero();
 
 
 
@@ -2181,58 +2252,64 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         // z_lin_acc
         if(this->isMeasurementLinearAccelerationEnabled())
         {
-            unsigned int dimension_error_state_sensor_i=0;
-            unsigned int dimension_error_parameter_sensor_i=0;
+            int dimension_sensor_error_state_i=0;
+            int dimension_sensor_error_parameters_i=0;
 
 
             // z_lin_acc / posi_sen_wrt_robot
             if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=
-                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos, dimension_error_measurement_i, dimension_sensor_error_state_i);
 
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=
-                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
 
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
             // z_lin_acc / atti_sen_wrt_robot
             if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=
-                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_att;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_lin_acc_wrt_error_state_sensor_att, dimension_error_measurement_i, dimension_sensor_error_state_i);
 
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=
-                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_att;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_lin_acc_wrt_error_state_sensor_att, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
 
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
             // z_lin_acc / ba
             if(the_imu_sensor_core->isEstimationBiasLinearAccelerationEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=
-                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc, dimension_error_measurement_i, dimension_sensor_error_state_i);
 
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=
-                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
 
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2240,15 +2317,15 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             /*
             if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=
-                        (accel_sensor_wrt_sensor+gravity_sensor).asDiagonal();
-                dimension_error_state_sensor_i+=3;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        (accel_sensor_wrt_sensor+gravity_sensor).asDiagonal();
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=
-                        (accel_sensor_wrt_sensor+gravity_sensor).asDiagonal();
-                dimension_error_parameter_sensor_i+=3;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        (accel_sensor_wrt_sensor+gravity_sensor).asDiagonal();
+                dimension_sensor_error_parameters_i+=3;
             }
             */
 
@@ -2257,12 +2334,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationBiasAngularVelocityEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2271,12 +2348,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationScaleAngularVelocityEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
             */
 
@@ -2288,22 +2365,22 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         if(this->isMeasurementOrientationEnabled())
         {
 
-            unsigned int dimension_error_state_sensor_i=0;
-            unsigned int dimension_error_parameter_sensor_i=0;
+            int dimension_sensor_error_state_i=0;
+            int dimension_sensor_error_parameters_i=0;
 
 
             // z_atti / posi_sen_wrt_robot
             if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
                 // TODO
-                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i);
-                dimension_error_state_sensor_i+=3;
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i);
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // TODO
-                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i);
-                dimension_error_parameter_sensor_i+=3;
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i);
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2311,14 +2388,14 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
                 // TODO
-                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i);
-                dimension_error_state_sensor_i+=3;
+                //predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i);
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // TODO
-                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i);
-                dimension_error_parameter_sensor_i+=3;
+                //predictedMeasurement->jacobianMeasurementSensorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i);
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2326,12 +2403,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationBiasLinearAccelerationEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2340,12 +2417,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
             */
 
@@ -2354,12 +2431,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationBiasAngularVelocityEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2368,12 +2445,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationScaleAngularVelocityEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
             */
 
@@ -2383,37 +2460,39 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         // z_ang_vel
         if(this->isMeasurementAngularVelocityEnabled())
         {
-            unsigned int dimension_error_state_sensor_i=0;
-            unsigned int dimension_error_parameter_sensor_i=0;
+            int dimension_sensor_error_state_i=0;
+            int dimension_sensor_error_parameters_i=0;
 
 
             // z_ang_vel / posi_sen_wrt_robot
             if(the_imu_sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
             // z_ang_vel / atti_sen_wrt_robot
             if(the_imu_sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=
-                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_att;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_ang_vel_wrt_error_state_sensor_att, dimension_error_measurement_i, dimension_sensor_error_state_i);
 
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=
-                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_att;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_ang_vel_wrt_error_state_sensor_att, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
 
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2421,12 +2500,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationBiasLinearAccelerationEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2435,12 +2514,12 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
             {
                 // Zeros
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
                 // Zeros
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
             */
 
@@ -2448,17 +2527,19 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             // z_ang_vel / bw
             if(the_imu_sensor_core->isEstimationBiasAngularVelocityEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=
-                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel, dimension_error_measurement_i, dimension_sensor_error_state_i);
 
-                dimension_error_state_sensor_i+=3;
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=
-                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
 
-                dimension_error_parameter_sensor_i+=3;
+                dimension_sensor_error_parameters_i+=3;
             }
 
 
@@ -2466,13 +2547,15 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             /*
             if(the_imu_sensor_core->isEstimationScaleAngularVelocityEnabled())
             {
-                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_error_state_sensor_i)=angular_velocity_imu_wrt_world_in_imu.asDiagonal();
-                dimension_error_state_sensor_i+=3;
+//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
+//                        angular_velocity_imu_wrt_world_in_imu.asDiagonal();
+                dimension_sensor_error_state_i+=3;
             }
             else
             {
-                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_error_parameter_sensor_i)=angular_velocity_imu_wrt_world_in_imu.asDiagonal();
-                dimension_error_parameter_sensor_i+=3;
+//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
+//                        angular_velocity_imu_wrt_world_in_imu.asDiagonal();
+                dimension_sensor_error_parameters_i+=3;
             }
             */
 
@@ -2480,16 +2563,17 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
             dimension_error_measurement_i+=3;
         }
 
+
+        // Set From Triplets
+        jacobian_error_measurement_wrt_sensor_error_state.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_state.begin(), triplet_list_jacobian_error_measurement_wrt_error_state.end());
+        jacobian_error_measurement_wrt_sensor_error_parameters.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_parameters.begin(), triplet_list_jacobian_error_measurement_wrt_error_parameters.end());
+
     }
 
 
     /// Jacobian measurement - map element error state / error parameters
 
     {
-        // Resize and init jacobian
-        //predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.resize(dimension_error_measurement, 0);
-        //predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementMapElementParameters.setZero();
-
         // Nothing to do
     }
 
@@ -2501,8 +2585,10 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
 
     {
         // Resize and init Jacobian
-        predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.resize(dimension_error_measurement, dimension_error_measurement);
-        predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.setZero();
+        jacobian_error_measurement_wrt_error_measurement.resize(dimension_error_measurement_, dimension_error_measurement_);
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_measurement;
+
 
         // Fill Jacobian
         int dimension_error_measurement_i=0;
@@ -2510,9 +2596,10 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         // z_lin_acc
         if(this->isMeasurementLinearAccelerationEnabled())
         {
-            // z_lin_acc / grav
-            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
-                    jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc;
+            // z_lin_acc
+//            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+//                    jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc;
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_measurement, jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc, dimension_error_measurement_i, dimension_error_measurement_i);
 
             dimension_error_measurement_i+=3;
         }
@@ -2520,9 +2607,10 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         // z_atti
         if(this->isMeasurementOrientationEnabled())
         {
-            // z_atti / grav
-            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
-                    jacobian_error_meas_att_wrt_error_meas_att;
+            // z_atti
+//            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+//                    jacobian_error_meas_att_wrt_error_meas_att;
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_measurement, jacobian_error_meas_att_wrt_error_meas_att, dimension_error_measurement_i, dimension_error_measurement_i);
 
             dimension_error_measurement_i+=3;
         }
@@ -2530,12 +2618,17 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
         // z_ang_vel
         if(this->isMeasurementAngularVelocityEnabled())
         {
-            // z_ang_vel / grav
-            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
-                    jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel;
+            // z_ang_vel
+//            predictedMeasurement->jacobianMeasurementSensorNoise.jacobianMeasurementSensorNoise.block<3,3>(dimension_error_measurement_i, dimension_error_measurement_i)=
+//                    jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel;
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_measurement, jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel, dimension_error_measurement_i, dimension_error_measurement_i);
 
             dimension_error_measurement_i+=3;
         }
+
+
+        // Set From Triplets
+        jacobian_error_measurement_wrt_error_measurement.setFromTriplets(triplet_list_jacobian_error_measurement_wrt_error_measurement.begin(), triplet_list_jacobian_error_measurement_wrt_error_measurement.end());
 
     }
 

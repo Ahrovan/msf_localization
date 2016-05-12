@@ -186,6 +186,16 @@ public:
 
     // TODO
 
+    // Covariance Error Parameters: Qp = Rp
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceParameters()
+        {throw;};
+
+    // Covariance Noise Estimation: Qn
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)
+        {throw;};
+
 
 
     //// Predict Step Functions

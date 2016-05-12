@@ -326,6 +326,13 @@ int FreeModelRobotCore::setNoiseAngularAcceleration(Eigen::Matrix3d noiseAngular
     return 0;
 }
 
+Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceParameters()
+{
+    // No parameters
+
+    return Eigen::SparseMatrix<double>();
+}
+
 Eigen::SparseMatrix<double> FreeModelRobotCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance_noise;

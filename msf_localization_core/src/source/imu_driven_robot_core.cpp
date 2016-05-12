@@ -230,6 +230,13 @@ Eigen::Matrix3d ImuDrivenRobotCore::getNoiseAngularVelocityRobotWrtWorld()
     return this->noise_angular_velocity_robot_wrt_world_;
 }
 
+Eigen::SparseMatrix<double> ImuDrivenRobotCore::getCovarianceParameters()
+{
+    // No parameters
+
+    return Eigen::SparseMatrix<double>();
+}
+
 Eigen::SparseMatrix<double> ImuDrivenRobotCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance_noise;

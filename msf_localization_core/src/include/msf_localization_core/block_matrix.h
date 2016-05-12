@@ -23,11 +23,20 @@ public:
     {
         return rows_size_;
     }
+    int getRowsSize(int row_i) const
+    {
+        return rows_size_(row_i);
+    }
+public:
     Eigen::VectorXi getColsSize() const
     {
         return cols_size_;
     }
-
+    int getColsSize(int col_i) const
+    {
+        return cols_size_(col_i);
+    }
+public:
     int getTotalRowsSize() const
     {
         int total_rows_size=0;
@@ -37,6 +46,7 @@ public:
 
         return total_rows_size;
     }
+public:
     int getTotalColsSize() const
     {
         int total_cols_size=0;

@@ -107,21 +107,25 @@ Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in)
 
     //std::cout<<"size_non_zero_coef="<<size_non_zero_coef<<std::endl;
 
-    // Second pass to get the non-zero coeffs
+    // Second pass to get the non-zero coeffs in the appropiate coordinate
     std::vector<Eigen::Triplet<double>> triplet_list;
     triplet_list.reserve(size_non_zero_coef);
+    int row_point=0;
     for(int i=0; i<in.rows(); i++)
     {
+        int col_point=0;
         for(int j=0; j<in.cols(); j++)
         {
             for (int k=0; k<in(i,j).outerSize(); ++k)
             {
                 for (Eigen::SparseMatrix<double>::InnerIterator it(in(i,j),k); it; ++it)
                 {
-                    triplet_list.push_back(Eigen::Triplet<double>(it.row(),it.col(),it.value()));
+                    triplet_list.push_back(Eigen::Triplet<double>(it.row()+row_point,it.col()+col_point,it.value()));
                 }
             }
+            col_point+=in.getColsSize(j);
         }
+        row_point+=in.getRowsSize(i);
     }
 
     // Set out
@@ -158,7 +162,8 @@ int insertVectorEigenTripletFromEigenDense(std::vector< Eigen::Triplet<double> >
 {
     for(int i=0; i<in.rows(); i++)
         for(int j=0; j<in.cols(); j++)
-            triplets.push_back(Eigen::Triplet<double>(i+row_offset,j+col_offset,in(i,j)));
+            if( std::abs(in(i,j)) > std::numeric_limits<double>::epsilon() ) // More efficient than a prune!
+                triplets.push_back(Eigen::Triplet<double>(i+row_offset, j+col_offset, in(i,j)));
     return 0;
 }
 
