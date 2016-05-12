@@ -8,6 +8,7 @@ namespace BlockMatrix
 // Operators
 //template<class Type1, class Type2, class TypeR>
 //Matrix<TypeR> operator*(const Matrix<Type1> &prod1, const Matrix<Type2> &prod2)
+
 MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
 {
     //Matrix<TypeR> product_matrix;

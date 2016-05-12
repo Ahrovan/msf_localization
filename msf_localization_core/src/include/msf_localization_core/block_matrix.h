@@ -11,8 +11,8 @@ namespace BlockMatrix
 {
 
 // Types
-template<class Type>
-class Matrix : public Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic>
+template<class Type, int RowsSize, int ColsSize>
+class Matrix : public Eigen::Matrix<Type, RowsSize, ColsSize>
 {
 protected:
     Eigen::VectorXi rows_size_;
@@ -155,6 +155,7 @@ public:
         return *this;
     }
 
+
     Matrix transpose()
     {
         Matrix out;
@@ -269,14 +270,115 @@ public:
 };
 
 
-using MatrixSparse = Matrix<Eigen::SparseMatrix<double>>;
+using MatrixSparse = Matrix<Eigen::SparseMatrix<double>, Eigen::Dynamic, Eigen::Dynamic>;
+/*
+class MatrixSparse : public Matrix<Eigen::SparseMatrix<double>, Eigen::Dynamic, Eigen::Dynamic>
+{
 
-using MatrixDense = Matrix<Eigen::MatrixXd>;
+};
+*/
 
 
+
+using MatrixDense = Matrix<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic>;
+/*
+class MatrixDense : public Matrix<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic>
+{
+
+};
+
+
+class VectorSparse : public Matrix<Eigen::SparseMatrix<double>, Eigen::Dynamic, 1>
+{
+
+};
+
+class VectorDense : public Matrix<Eigen::MatrixXd, Eigen::Dynamic, 1>
+{
+
+};
+*/
 
 
 MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
+
+/*
+template<class TypeResult, class TypeProd1, class TypeProd2>
+TypeResult operator*(const TypeProd1 &prod1, const TypeProd2 &prod2)
+{
+    //Matrix<TypeR> product_matrix;
+    TypeResult product_matrix;
+
+    // Check multiplication sizes
+    if(prod1.cols() != prod2.rows())
+        throw;
+
+    // Resize
+    product_matrix.resize(prod1.rows(), prod2.cols());
+
+    // Multiplication
+    for(int i=0; i<prod1.rows(); i++)
+        for(int j=0; j<prod2.cols(); j++)
+        {
+            // First pass -> checks and dimension of the block
+            int row_block=-1;
+            int col_block=-1;
+            for(int k=0; k<prod1.cols(); k++)
+            {
+                // Check prod1
+                if(prod1(i,k).cols() == 0 || prod1(k,j).rows() == 0)
+                    continue;
+
+                // Check prod2
+                if(prod2(i,k).cols() == 0 || prod2(k,j).rows() == 0)
+                    continue;
+
+                // Check prod1 * prod2
+                if(prod1(i,k).cols() != prod2(k,j).rows())
+                    throw;
+
+                // Rows and cols
+                if(row_block<0)
+                    row_block=prod1(k,j).rows();
+                if(col_block<0)
+                    col_block=prod2(k,j).cols();
+
+                // Check
+                if(row_block != prod1(k,j).rows())
+                    throw;
+
+                if(col_block != prod2(k,j).cols())
+                    throw;
+            }
+
+            // Dimensions
+            if(row_block < 0 || col_block < 0)
+                continue;
+
+            // Resize and set zero
+            product_matrix(i,j).resize(row_block, col_block);
+            product_matrix(i,j).setZero();
+
+            // Second pass -> Multiplication
+            for(int k=0; k<prod1.cols(); k++)
+            {
+                if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
+                    product_matrix(i,j)+= prod1(i,k)*prod2(k,j);
+
+            }
+        }
+
+
+    // End
+    return product_matrix;
+}
+
+
+// Template specialization
+template<>
+MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
+*/
+
 
 Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in);
 
