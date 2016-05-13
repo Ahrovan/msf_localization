@@ -36,7 +36,7 @@ public:
     Eigen::Vector3d position_;
 public:
     Eigen::Vector3d getPosition() const;
-    int setPosition(Eigen::Vector3d position);
+    int setPosition(const Eigen::Vector3d& position);
 
 
 
@@ -45,18 +45,8 @@ public:
     Eigen::Vector4d attitude_;
 public:
     Eigen::Vector4d getAttitude() const;
-    int setAttitude(Eigen::Vector4d attitude);
+    int setAttitude(const Eigen::Vector4d& attitude);
 
-
-/*
-    // Jacobians Error State (6 x 6) -> 6 non-zero elements
-public:
-    Eigen::SparseMatrix<double>  jacobian_error_state_;
-
-    // Jacobian Error State Noise (0x0)
-public:
-    Eigen::SparseMatrix<double> jacobian_error_state_noise_;
-*/
 
 
     // Jacobians mapping
@@ -81,7 +71,7 @@ public:
 
 
 public:
-    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
+    int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state);
 
 };
 

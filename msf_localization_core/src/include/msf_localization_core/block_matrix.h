@@ -107,6 +107,47 @@ public:
     }
 
 public:
+    int createFromEigen(const Type& mat_in, const Eigen::VectorXi& rows_size, const Eigen::VectorXi& cols_size)
+    {
+        // Resize
+        this->resize(rows_size, cols_size);
+
+        // Checks
+        if( getTotalRowsSize() != mat_in.rows() || getTotalColsSize() != mat_in.cols() )
+            throw;
+
+        // Fill blocks
+        int num_rows=rows_size.rows();
+        int num_cols=cols_size.rows();
+        int dimension_row_i=0;
+        for(int row=0; row<num_rows; row++)
+        {
+            int dimension_col_i=0;
+            for(int col=0; col<num_cols; col++)
+            {
+                this->operator()(row, col)=mat_in.block(dimension_row_i, dimension_col_i, rows_size_(row, 0), cols_size_(col, 0));
+                dimension_col_i+=cols_size_(col, 0);
+            }
+            dimension_row_i+=rows_size_(row, 0);
+        }
+
+        // End
+        return 0;
+    }
+
+    int createFromEigen(const Type& mat_in, const Eigen::VectorXi& rows_size)
+    {
+        Eigen::VectorXi cols_size(1);
+        cols_size(0)=1;
+
+        int error=createFromEigen(mat_in, rows_size, cols_size);
+        if(error)
+            return error;
+
+        // End
+        return 0;
+    }
+
     void resize(int num_rows, int num_cols)
     {
         if(num_rows < 0 || num_cols < 0)
@@ -123,7 +164,8 @@ public:
         rows_size_.setZero();
         cols_size_.setZero();
 
-        // Resize each block
+        // Resize each block -> Not Needed?
+        /*
         for(int row=0; row<num_rows; row++)
         {
             for(int col=0; col<num_cols; col++)
@@ -131,7 +173,36 @@ public:
                 this->operator()(row, col).resize(0, 0);
             }
         }
+        */
 
+        return;
+    }
+
+    void resize(const Eigen::VectorXi& rows_size, const Eigen::VectorXi& cols_size)
+    {
+        // Checks
+        if(rows_size.rows() == 0 || cols_size.rows() == 0)
+            throw;
+
+        // Reset
+        rows_size_=rows_size;
+        cols_size_=cols_size;
+
+        // Resize Block Data Matrix
+        int num_rows=rows_size_.rows();
+        int num_cols=cols_size_.rows();
+        Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic>::resize(num_rows, num_cols);
+
+        // Resize each blocks
+        for(int row=0; row<num_rows; row++)
+        {
+            for(int col=0; col<num_cols; col++)
+            {
+                this->operator()(row, col).resize(rows_size_(row,0), cols_size_(col,0));
+            }
+        }
+
+        // End
         return;
     }
 
@@ -280,7 +351,7 @@ class MatrixSparse : public Matrix<Eigen::SparseMatrix<double>, Eigen::Dynamic, 
 
 
 
-using MatrixDense = Matrix<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic>;
+using MatrixDense = Matrix<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>, Eigen::Dynamic, Eigen::Dynamic>;
 /*
 class MatrixDense : public Matrix<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic>
 {
@@ -381,8 +452,11 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
 
 
 Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in);
+// TODO
+//Eigen::MatrixXd convertToEigenDense(MatrixSparse& in);
 
-Eigen::MatrixXd convertToEigenDense(const MatrixSparse& in);
+
+Eigen::MatrixXd convertToEigenDense(MatrixDense &in);
 
 
 std::vector< Eigen::Triplet<double> > getVectorEigenTripletFromEigenDense(const Eigen::MatrixXd& in, int row_offset=0, int col_offset=0);

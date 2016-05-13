@@ -155,7 +155,7 @@ Eigen::MatrixXd ImuSensorStateCore::getJacobianErrorState()
 */
 
 
-int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int ImuSensorStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
     unsigned int dimension=0;
 
@@ -177,13 +177,7 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
 
         Eigen::Vector4d attitudeSensorWrtRobot=Quaternion::cross(this->attitudeSensorWrtRobot, DeltaQuat);
 
-//        if(attitudeSensorWrtRobot[0]<0)
-//        {
-//            this->attitudeSensorWrtRobot=-attitudeSensorWrtRobot;
-//            std::cout<<"ImuSensorStateCore::updateStateFromIncrementErrorState() quaternion!!"<<std::endl;
-//        }
-//        else
-            this->attitudeSensorWrtRobot=attitudeSensorWrtRobot;
+        this->attitudeSensorWrtRobot=attitudeSensorWrtRobot;
 
         dimension+=3;
     }
@@ -191,7 +185,7 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
     {
         this->biasesLinearAcceleration+=increment_error_state.block<3,1>(dimension, 0);
 
-        std::cout<<"biasesLinearAcceleration="<<this->biasesLinearAcceleration.transpose()<<std::endl;
+        //std::cout<<"biasesLinearAcceleration="<<this->biasesLinearAcceleration.transpose()<<std::endl;
 
         dimension+=3;
     }
@@ -204,7 +198,7 @@ int ImuSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd incre
     {
         this->biasesAngularVelocity+=increment_error_state.block<3,1>(dimension, 0);
 
-        std::cout<<"biasesAngularVelocity="<<this->biasesAngularVelocity.transpose()<<std::endl;
+        //std::cout<<"biasesAngularVelocity="<<this->biasesAngularVelocity.transpose()<<std::endl;
 
         dimension+=3;
     }

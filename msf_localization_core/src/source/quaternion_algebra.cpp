@@ -5,7 +5,7 @@
 namespace Quaternion
 {
 
-Quaternion conj(const Quaternion q)
+Quaternion conj(const Quaternion &q)
 {
     Eigen::Vector4d qr;
 
@@ -16,7 +16,7 @@ Quaternion conj(const Quaternion q)
 }
 
 
-Eigen::Vector4d inv(const Eigen::Vector4d q)
+Eigen::Vector4d inv(const Eigen::Vector4d& q)
 {
     Eigen::Vector4d qr;
 
@@ -29,7 +29,7 @@ Eigen::Vector4d inv(const Eigen::Vector4d q)
 
 
 
-Eigen::Vector4d cross(const Eigen::Vector4d q1, const Eigen::Vector4d q2)
+Eigen::Vector4d cross(const Eigen::Vector4d& q1, const Eigen::Vector4d& q2)
 {
     Eigen::Vector4d qres;
 
@@ -50,7 +50,7 @@ Eigen::Vector4d cross(const Eigen::Vector4d q1, const Eigen::Vector4d q2)
     return qres;
 }
 
-Eigen::Vector4d cross_gen_pure(const Eigen::Vector4d q1, const Eigen::Vector3d q2)
+Eigen::Vector4d cross_gen_pure(const Eigen::Vector4d &q1, const Eigen::Vector3d &q2)
 {
     Eigen::Vector4d qres;
 
@@ -71,7 +71,7 @@ Eigen::Vector4d cross_gen_pure(const Eigen::Vector4d q1, const Eigen::Vector3d q
     return qres;
 }
 
-Eigen::Vector4d cross_pure_gen(const Eigen::Vector3d q1, const Eigen::Vector4d q2)
+Eigen::Vector4d cross_pure_gen(const Eigen::Vector3d& q1, const Eigen::Vector4d& q2)
 {
     Eigen::Vector4d qres;
 
@@ -92,7 +92,7 @@ Eigen::Vector4d cross_pure_gen(const Eigen::Vector3d q1, const Eigen::Vector4d q
     return qres;
 }
 
-Eigen::Vector4d cross_pure_pure(const Eigen::Vector3d q1, const Eigen::Vector3d q2)
+Eigen::Vector4d cross_pure_pure(const Eigen::Vector3d& q1, const Eigen::Vector3d& q2)
 {
     Eigen::Vector4d qres;
 
@@ -115,7 +115,7 @@ Eigen::Vector4d cross_pure_pure(const Eigen::Vector3d q1, const Eigen::Vector3d 
 }
 
 
-Eigen::Vector3d cross_sandwich(const Eigen::Vector4d q1, const Eigen::Vector3d q2, const Eigen::Vector4d q3)
+Eigen::Vector3d cross_sandwich(const Eigen::Vector4d &q1, const Eigen::Vector3d &q2, const Eigen::Vector4d &q3)
 {
     Eigen::Vector4d qres;
 
@@ -126,7 +126,7 @@ Eigen::Vector3d cross_sandwich(const Eigen::Vector4d q1, const Eigen::Vector3d q
 
 
 // Q+
-Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d q)
+Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d &q)
 {
     Eigen::Matrix4d QuatMat=q[0]*Eigen::Matrix4d::Identity(4,4);
 
@@ -137,7 +137,7 @@ Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d q)
     return QuatMat;
 }
 
-Eigen::Matrix4d quatMatPlus(const Eigen::Vector3d q)
+Eigen::Matrix4d quatMatPlus(const Eigen::Vector3d& q)
 {
     Eigen::Vector4d quat;
     quat[0]=0;
@@ -148,7 +148,7 @@ Eigen::Matrix4d quatMatPlus(const Eigen::Vector3d q)
 
 
 // Q-
-Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d q)
+Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d& q)
 {
     Eigen::Matrix4d QuatMat=q[0]*Eigen::Matrix4d::Identity(4,4);
 
@@ -159,7 +159,7 @@ Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d q)
     return QuatMat;
 }
 
-Eigen::Matrix4d quatMatMinus(const Eigen::Vector3d q)
+Eigen::Matrix4d quatMatMinus(const Eigen::Vector3d& q)
 {
     Eigen::Vector4d quat;
     quat[0]=0;
@@ -169,7 +169,7 @@ Eigen::Matrix4d quatMatMinus(const Eigen::Vector3d q)
 }
 
 
-Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d v_rot)
+Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d& v_rot)
 {
     Eigen::Vector4d quat;
 
@@ -190,7 +190,7 @@ Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d v_rot)
 }
 
 
-Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot)
+Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d& v_rot)
 {
     Eigen::MatrixXd jacobian_matrix(4,3);
     jacobian_matrix.setZero();
@@ -215,7 +215,7 @@ Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d v_rot)
 }
 
 
-Eigen::Matrix3d skewSymMat(const Eigen::Vector3d w)
+Eigen::Matrix3d skewSymMat(const Eigen::Vector3d& w)
 {
     Eigen::Matrix3d skewSymMat;
     skewSymMat<<0, -w[2], w[1],

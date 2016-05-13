@@ -1959,41 +1959,71 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
             ///////// Get dimensions
 
-            //// Measurements
 
-            /// Matched Error Measurement
-            unsigned int dimensionErrorMeasurements=0;
-            for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
-                itListMatchedMeas!=TheListMatchedMeasurements.end();
-                ++itListMatchedMeas)
-            {
-                dimensionErrorMeasurements+=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
-            }
-
-
-            //// Error State
-
-            /// Error State
-            int dimensionErrorState=OldState->getDimensionErrorState();
-
-
-
-            // Num Error State blocks
-            int num_error_states=0;
-            // World
-            num_error_states++;
-            // Robot
-            num_error_states++;
-            // Inputs
-            num_error_states+=OldState->getNumberInputStates();
-            // Sensors
-            num_error_states+=OldState->getNumberSensorStates();
-            // Map Elements
-            num_error_states+=OldState->getNumberMapElementStates();
+            /// Error Measurements
 
             // Num Measurement blocks
             int num_error_measurements=0;
             num_error_measurements=TheListMatchedMeasurements.size();
+
+
+            //// Error State
+
+            // Error State
+            int dimensionErrorState=OldState->getDimensionErrorState();
+
+            // Num Error State blocks
+            int num_error_states=0;
+            {
+                // World
+                num_error_states++;
+                // Robot
+                num_error_states++;
+                // Inputs
+                num_error_states+=OldState->getNumberInputStates();
+                // Sensors
+                num_error_states+=OldState->getNumberSensorStates();
+                // Map Elements
+                num_error_states+=OldState->getNumberMapElementStates();
+            }
+
+            // Create vectors of state dimensions
+            Eigen::VectorXi size_error_state;
+            size_error_state.resize(num_error_states);
+            // Fill
+            {
+                int num_error_state_i=0;
+                // World
+                size_error_state(num_error_state_i)=OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+                num_error_state_i++;
+                // Robot
+                size_error_state(num_error_state_i)=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+                num_error_state_i++;
+                // Inputs
+                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=OldState->TheListInputStateCore.begin();
+                    itListInputState!=OldState->TheListInputStateCore.end();
+                    ++itListInputState)
+                {
+                    size_error_state(num_error_state_i)=(*itListInputState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+                    num_error_state_i++;
+                }
+                // Sensors
+                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=OldState->TheListSensorStateCore.begin();
+                    itListSensorState!=OldState->TheListSensorStateCore.end();
+                    ++itListSensorState)
+                {
+                    size_error_state(num_error_state_i)=(*itListSensorState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+                    num_error_state_i++;
+                }
+                // Map
+                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
+                    itListMapElementState!=OldState->TheListMapElementStateCore.end();
+                    ++itListMapElementState)
+                {
+                    size_error_state(num_error_state_i)=(*itListMapElementState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+                    num_error_state_i++;
+                }
+            }
 
 
 
@@ -2010,25 +2040,31 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
             ///// Innovation vector
 
-            // Vector
-            Eigen::VectorXd innovationVector;
-            innovationVector.resize(dimensionErrorMeasurements, 1);
-            innovationVector.setZero();
+            // Block matrix
+            BlockMatrix::MatrixDense block_innovation_vector;
+            block_innovation_vector.resize(num_error_measurements, 1);
 
             // Fill
             {
-                unsigned int dimension=0;
+                int num_error_measurements_i=0;
                 for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin(), itListPredictedMeas=TheListPredictedMeasurements.begin();
                     itListMatchedMeas!=TheListMatchedMeasurements.end() && itListPredictedMeas!=TheListMatchedMeasurements.end();
                     ++itListMatchedMeas, ++itListPredictedMeas)
                 {
-                    unsigned int dimensionErrorMeasurementSensorI=(*itListMatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+                    block_innovation_vector(num_error_measurements_i, 0)=
+                            (*itListMatchedMeas)->getInnovation((*itListMatchedMeas), (*itListPredictedMeas));
 
-                    innovationVector.block(dimension, 0, dimensionErrorMeasurementSensorI, 1)=(*itListMatchedMeas)->getInnovation((*itListMatchedMeas), (*itListPredictedMeas));
-
-                    dimension+=dimensionErrorMeasurementSensorI;
+                    num_error_measurements_i++;
                 }
             }
+
+            // Dense vector
+            Eigen::VectorXd innovationVector;
+
+            innovationVector=BlockMatrix::convertToEigenDense(block_innovation_vector);
+
+
+
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
@@ -2472,121 +2508,82 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
 
 
-            // Error Reset Matrixes
-            Eigen::Matrix3d G_update_theta_robot=Eigen::Matrix3d::Identity(3,3);
-
-
-
             /// Get the updated state from the increment of the Error State
 
             // Init and resize block matrix
             BlockMatrix::MatrixDense block_increment_error_state;
+            block_increment_error_state.resize(num_error_states,1);
 
-            // TODO
+            // Fill
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+            TimeStamp begin_time_block_increment_error_state=getTimeStamp();
+#endif
+
+            block_increment_error_state.createFromEigen(incrementErrorState, size_error_state);
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::update() block_increment_error_state time: "<<(getTimeStamp()-begin_time_block_increment_error_state).nsec<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
+            // Update states
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+            TimeStamp begin_time_update_error_state_from_increment_error_state=getTimeStamp();
+#endif
 
             {
-                unsigned int dimension=0;
+                int num_error_state_i=0;
 
-
-                // Global Parameters
-                unsigned int dimensionGlobalParametersErrorState=UpdatedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-                Eigen::VectorXd incrementErrorStateGlobalParameters;
-                if(dimensionGlobalParametersErrorState)
+                // World (Global Parameters)
                 {
-                    incrementErrorStateGlobalParameters=incrementErrorState.block(dimension, 0, dimensionGlobalParametersErrorState, 1);
-                    UpdatedState->TheGlobalParametersStateCore->updateStateFromIncrementErrorState(incrementErrorStateGlobalParameters);
+                    UpdatedState->TheGlobalParametersStateCore->updateStateFromIncrementErrorState(block_increment_error_state(num_error_state_i, 0));
+                    num_error_state_i++;
                 }
-                dimension+=dimensionGlobalParametersErrorState;
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-                {
-                    std::ostringstream logString;
-                    logString<<"MsfLocalizationCore::update() incrementDeltaStateGlobalParameters for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    logString<<incrementErrorStateGlobalParameters.transpose()<<std::endl;
-                    this->log(logString.str());
-                }
-#endif
 
                 // Robot
-                unsigned int dimensionRobotErrorState=UpdatedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-                Eigen::VectorXd incrementErrorStateRobot;
-                if(dimensionRobotErrorState)
                 {
-                    incrementErrorStateRobot=incrementErrorState.block(dimension, 0, dimensionRobotErrorState, 1);
-                    UpdatedState->TheRobotStateCore->updateStateFromIncrementErrorState(incrementErrorStateRobot);
-
-                    // Ojo, signo cambiado por la definicion de incrementError!
-                    G_update_theta_robot-=Quaternion::skewSymMat(0.5*incrementErrorStateRobot.block<3,1>(9,0));
-
+                    UpdatedState->TheRobotStateCore->updateStateFromIncrementErrorState(block_increment_error_state(num_error_state_i, 0));
+                    num_error_state_i++;
                 }
-                dimension+=dimensionRobotErrorState;
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-                {
-                    std::ostringstream logString;
-                    logString<<"MsfLocalizationCore::update() incrementDeltaStateRobot for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    logString<<incrementErrorStateRobot.transpose()<<std::endl;
-                    logString<<"G_update_theta_robot="<<std::endl;
-                    logString<<G_update_theta_robot<<std::endl;
-                    this->log(logString.str());
-                }
-#endif
-
 
                 // Inputs
-                // TODO
-
+                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
+                    itListInputState!=UpdatedState->TheListInputStateCore.end();
+                    ++itListInputState)
+                {
+                    (*itListInputState)->updateStateFromIncrementErrorState(block_increment_error_state(num_error_state_i, 0));
+                    num_error_state_i++;
+                }
 
                 // Sensors
                 for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
                     itListSensorState!=UpdatedState->TheListSensorStateCore.end();
                     ++itListSensorState)
                 {
-                    unsigned int dimensionSensorErrorState=(*itListSensorState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-                    Eigen::VectorXd incrementErrorStateSensor;
-                    if(dimensionSensorErrorState)
-                    {
-                        incrementErrorStateSensor=incrementErrorState.block(dimension, 0, dimensionSensorErrorState, 1);
-                        (*itListSensorState)->updateStateFromIncrementErrorState(incrementErrorStateSensor);
-                    }
-                    dimension+=dimensionSensorErrorState;
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfLocalizationCore::update() incrementDeltaStateSensor for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                        logString<<incrementErrorStateSensor.transpose()<<std::endl;
-                        this->log(logString.str());
-                    }
-#endif
+                    (*itListSensorState)->updateStateFromIncrementErrorState(block_increment_error_state(num_error_state_i, 0));
+                    num_error_state_i++;
                 }
-
 
                 // Map
                 for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
                     itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
                     ++itListMapElementState)
                 {
-                    unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-                    Eigen::VectorXd incrementErrorStateMapElement;
-                    if(dimensionMapElementErrorState)
-                    {
-                        incrementErrorStateMapElement=incrementErrorState.block(dimension, 0, dimensionMapElementErrorState, 1);
-                        (*itListMapElementState)->updateStateFromIncrementErrorState(incrementErrorStateMapElement);
-                    }
-                    dimension+=dimensionMapElementErrorState;
-
-#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfLocalizationCore::update() incrementDeltaStateMapElement for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                        logString<<incrementErrorStateMapElement.transpose()<<std::endl;
-                        this->log(logString.str());
-                    }
-#endif
+                    (*itListMapElementState)->updateStateFromIncrementErrorState(block_increment_error_state(num_error_state_i, 0));
+                    num_error_state_i++;
                 }
-
             }
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::update() update_error_state_from_increment_error_state time: "<<(getTimeStamp()-begin_time_update_error_state_from_increment_error_state).nsec<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
             {
@@ -2681,6 +2678,169 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
             ///// Reset Error State
             ////////////////////////
 
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+            TimeStamp beginErrorStateReset=getTimeStamp();
+#endif
+
+
+            /// Calculate jacobians reset error state
+
+            {
+                int num_error_states_i=0;
+
+                // Global Parameters
+                {
+                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>(UpdatedState->TheGlobalParametersStateCore);
+                    int error_jacobian_reset_error_state=UpdatedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->
+                            resetErrorStateJacobian(// time stamp
+                                                    TheTimeStamp,
+                                                    // Increment error state
+                                                    block_increment_error_state(num_error_states_i, 0),
+                                                    // current state
+                                                    state_core);
+                    UpdatedState->TheGlobalParametersStateCore=std::dynamic_pointer_cast<GlobalParametersStateCore>(state_core);
+                    if(error_jacobian_reset_error_state)
+                        return error_jacobian_reset_error_state;
+                    num_error_states_i++;
+                }
+
+                // Robot
+                {
+                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>(UpdatedState->TheRobotStateCore);
+                    int error_jacobian_reset_error_state=UpdatedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->
+                            resetErrorStateJacobian(// time stamp
+                                                    TheTimeStamp,
+                                                    // Increment error state
+                                                    block_increment_error_state(num_error_states_i, 0),
+                                                    // current state
+                                                    state_core);
+                    UpdatedState->TheRobotStateCore=std::dynamic_pointer_cast<RobotStateCore>(state_core);
+                    if(error_jacobian_reset_error_state)
+                        return error_jacobian_reset_error_state;
+                    num_error_states_i++;
+                }
+
+                // Inputs
+                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
+                    itListInputState!=UpdatedState->TheListInputStateCore.end();
+                    ++itListInputState)
+                {
+                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>((*itListInputState));
+                    int error_jacobian_reset_error_state=(*itListInputState)->getMsfElementCoreSharedPtr()->
+                            resetErrorStateJacobian(// time stamp
+                                                    TheTimeStamp,
+                                                    // Increment error state
+                                                    block_increment_error_state(num_error_states_i, 0),
+                                                    // current state
+                                                    state_core);
+                    (*itListInputState)=std::dynamic_pointer_cast<InputStateCore>(state_core);
+                    if(error_jacobian_reset_error_state)
+                        return error_jacobian_reset_error_state;
+                    num_error_states_i++;
+                }
+
+                // Sensors
+                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+                    itListSensorState!=UpdatedState->TheListSensorStateCore.end();
+                    ++itListSensorState)
+                {
+                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>((*itListSensorState));
+                    int error_jacobian_reset_error_state=(*itListSensorState)->getMsfElementCoreSharedPtr()->
+                            resetErrorStateJacobian(// time stamp
+                                                    TheTimeStamp,
+                                                    // Increment error state
+                                                    block_increment_error_state(num_error_states_i, 0),
+                                                    // current state
+                                                    state_core);
+                    (*itListSensorState)=std::dynamic_pointer_cast<SensorStateCore>(state_core);
+                    if(error_jacobian_reset_error_state)
+                        return error_jacobian_reset_error_state;
+                    num_error_states_i++;
+                }
+
+                // Map
+                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+                    itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
+                    ++itListMapElementState)
+                {
+                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>((*itListMapElementState));
+                    int error_jacobian_reset_error_state=(*itListMapElementState)->getMsfElementCoreSharedPtr()->
+                            resetErrorStateJacobian(// time stamp
+                                                    TheTimeStamp,
+                                                    // Increment error state
+                                                    block_increment_error_state(num_error_states_i, 0),
+                                                    // current state
+                                                    state_core);
+                    (*itListMapElementState)=std::dynamic_pointer_cast<MapElementStateCore>(state_core);
+                    if(error_jacobian_reset_error_state)
+                        return error_jacobian_reset_error_state;
+                    num_error_states_i++;
+                }
+            }
+
+
+            /// Create the full block jacobian
+
+            BlockMatrix::MatrixSparse block_jacobian_reset_error_state;
+            block_jacobian_reset_error_state.resize(num_error_states, num_error_states);
+
+            // Fill blocks
+            {
+                int num_error_states_i=0;
+
+                // World
+                {
+                    block_jacobian_reset_error_state(num_error_states_i, num_error_states_i)=
+                            UpdatedState->TheGlobalParametersStateCore->jacobian_error_state_reset_;
+                    num_error_states_i++;
+                }
+                // Robot
+                {
+                    block_jacobian_reset_error_state(num_error_states_i, num_error_states_i)=
+                            UpdatedState->TheRobotStateCore->jacobian_error_state_reset_;
+                    num_error_states_i++;
+                }
+                // Inputs
+                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
+                    itListInputState!=UpdatedState->TheListInputStateCore.end();
+                    ++itListInputState)
+                {
+                    block_jacobian_reset_error_state(num_error_states_i, num_error_states_i)=
+                            (*itListInputState)->jacobian_error_state_reset_;
+                    num_error_states_i++;
+                }
+                // Sensors
+                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+                    itListSensorState!=UpdatedState->TheListSensorStateCore.end();
+                    ++itListSensorState)
+                {
+                    block_jacobian_reset_error_state(num_error_states_i, num_error_states_i)=
+                            (*itListSensorState)->jacobian_error_state_reset_;
+                    num_error_states_i++;
+                }
+                // Map Elements
+                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+                    itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
+                    ++itListMapElementState)
+                {
+                    block_jacobian_reset_error_state(num_error_states_i, num_error_states_i)=
+                            (*itListMapElementState)->jacobian_error_state_reset_;
+                    num_error_states_i++;
+                }
+            }
+
+
+            /// Create sparse jacobian
+
+            Eigen::SparseMatrix<double> jacobian_reset_error_state;
+
+            jacobian_reset_error_state=BlockMatrix::convertToEigenSparse(block_jacobian_reset_error_state);
+
+
+
+            /// Update Covariance Error State
+
             // Aux Covariance
             Eigen::MatrixXd AuxiliarCovarianceMatrix(dimensionErrorState, dimensionErrorState);
             AuxiliarCovarianceMatrix.setZero();
@@ -2688,99 +2848,18 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
             AuxiliarCovarianceMatrix=*UpdatedState->covarianceMatrix;
 
 
-
-            // Robot
-            // TODO FIX!
-            UpdatedState->covarianceMatrix->block<3,9>(9,0)=
-                    G_update_theta_robot*AuxiliarCovarianceMatrix.block<3,9>(9,0);
-
-            UpdatedState->covarianceMatrix->block<9,3>(0,9)=
-                    AuxiliarCovarianceMatrix.block<9,3>(0,9)*G_update_theta_robot.transpose();
-
-
-            UpdatedState->covarianceMatrix->block(12,9,3,dimensionErrorState-12)=
-                    G_update_theta_robot*AuxiliarCovarianceMatrix.block(12,9,3,dimensionErrorState-12);
-
-            UpdatedState->covarianceMatrix->block(9,12,dimensionErrorState-12,3)=
-                    AuxiliarCovarianceMatrix.block(9,12,dimensionErrorState-12,3)*G_update_theta_robot.transpose();
-
-
-            UpdatedState->covarianceMatrix->block<3,3>(9,9)=
-                    G_update_theta_robot*AuxiliarCovarianceMatrix.block<3,3>(9,9)*G_update_theta_robot.transpose();
-
-
-            // Map
-            // TODO
-
-
-
-            /*
-            {
-                unsigned int dimension=0;
-
-                // Robot
-                unsigned int dimensionRobotErrorState=this->TheRobotCore->getDimensionErrorState();
-
-                if(dimensionRobotErrorState)
-                {
-
-                }
-                dimension+=dimensionRobotErrorState;
-
-
-                // Global Parameters
-                unsigned int dimensionGlobalParametersErrorState=this->TheGlobalParametersCore->getDimensionErrorState();
-
-                if(dimensionGlobalParametersErrorState)
-                {
-
-                }
-                dimension+=dimensionGlobalParametersErrorState;
-
-
-                // Sensors
-                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
-                    itListSensorState!=UpdatedState->TheListSensorStateCore.end();
-                    ++itListSensorState)
-                {
-                    unsigned int dimensionSensorErrorState=(*itListSensorState)->getTheSensorCore()->getDimensionErrorState();
-
-                    if(dimensionSensorErrorState)
-                    {
-
-                    }
-                    dimension+=dimensionSensorErrorState;
-
-
-                }
-
-
-                // Map
-                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
-                    itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
-                    ++itListMapElementState)
-                {
-                    unsigned int dimensionMapElementErrorState=(*itListMapElementState)->getTheMapElementCore()->getDimensionErrorState();
-
-                    if(dimensionMapElementErrorState)
-                    {
-
-                    }
-                    dimension+=dimensionMapElementErrorState;
-
-                }
-
-
-
-            }
-
-
-
             // Update Covariance Matrix
-            UpdatedState->covarianceMatrix=AuxiliarCovarianceMatrix;
+            *UpdatedState->covarianceMatrix=jacobian_reset_error_state*AuxiliarCovarianceMatrix*jacobian_reset_error_state.transpose();
 
-        */
 
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::update() error state reset time: "<<(getTimeStamp()-beginErrorStateReset).nsec<<std::endl;
+                this->log(logString.str());
+            }
+#endif
 
 
         }

@@ -56,13 +56,13 @@ std::string GlobalParametersCore::getWorldName() const
     return this->world_name_;
 }
 
-int GlobalParametersCore::setWorldName(std::string world_name)
+int GlobalParametersCore::setWorldName(const std::string& world_name)
 {
     this->world_name_=world_name;
     return 0;
 }
 
-int GlobalParametersCore::readConfig(pugi::xml_node global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore)
+int GlobalParametersCore::readConfig(const pugi::xml_node& global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore)
 {
     // Create a class for the TheGlobalParametersCore
     if(!GlobalParametersInitStateCore)
@@ -158,7 +158,7 @@ Eigen::Matrix3d GlobalParametersCore::getNoiseGravity() const
     return this->noiseGravity;
 }
 
-int GlobalParametersCore::setNoiseGravity(Eigen::Matrix3d noiseGravity)
+int GlobalParametersCore::setNoiseGravity(const Eigen::Matrix3d& noiseGravity)
 {
     this->noiseGravity=noiseGravity;
     return 0;
@@ -278,7 +278,7 @@ int GlobalParametersCore::predictState(//Time
     return 0;
 }
 
-int GlobalParametersCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<GlobalParametersStateCore> pastState, std::shared_ptr<GlobalParametersStateCore>& predictedState)
+int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp, const std::shared_ptr<GlobalParametersStateCore> pastState, std::shared_ptr<GlobalParametersStateCore>& predictedState)
 {
 
     // Checks in the past state
@@ -359,7 +359,7 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                             std::shared_ptr<GlobalParametersStateCore> pastState,
                                                             std::shared_ptr<GlobalParametersStateCore>& predictedState)
 {
@@ -392,3 +392,38 @@ int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp prev
     return 0;
 }
 
+int GlobalParametersCore::resetErrorStateJacobian(// Time
+                                                const TimeStamp& current_time_stamp,
+                                                // Increment Error State
+                                                const Eigen::VectorXd& increment_error_state,
+                                                // Current State
+                                                std::shared_ptr<StateCore>& current_state
+                                                )
+{
+    // Checks
+    if(!current_state)
+        return -1;
+
+
+    // Resize Jacobian
+    current_state->jacobian_error_state_reset_.resize(this->dimension_error_state_, this->dimension_error_state_);
+
+    // Fill
+    std::vector< Eigen::Triplet<double> > triplets_jacobian_error_reset;
+
+    int dimension_error_state_i=0;
+
+    if(this->isEstimationGravityEnabled())
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+
+    current_state->jacobian_error_state_reset_.setFromTriplets(triplets_jacobian_error_reset.begin(), triplets_jacobian_error_reset.end());
+
+    // End
+    return 0;
+}

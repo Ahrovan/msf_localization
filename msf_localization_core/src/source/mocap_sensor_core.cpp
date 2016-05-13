@@ -74,7 +74,7 @@ int MocapSensorCore::init()
     return 0;
 }
 
-int MocapSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MocapSensorStateCore>& SensorInitStateCore)
+int MocapSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<MocapSensorStateCore>& SensorInitStateCore)
 {
     // Create a class for the SensorStateCore
     if(!SensorInitStateCore)
@@ -244,7 +244,7 @@ Eigen::Matrix3d MocapSensorCore::getNoiseMeasurementPositionMocapSensorWrtMocapW
     return this->noise_measurement_position_mocap_sensor_wrt_mocap_world_;
 }
 
-int MocapSensorCore::setNoiseMeasurementPositionMocapSensorWrtMocapWorld(Eigen::Matrix3d noise_measurement_position_mocap_sensor_wrt_mocap_world)
+int MocapSensorCore::setNoiseMeasurementPositionMocapSensorWrtMocapWorld(const Eigen::Matrix3d& noise_measurement_position_mocap_sensor_wrt_mocap_world)
 {
     this->noise_measurement_position_mocap_sensor_wrt_mocap_world_=noise_measurement_position_mocap_sensor_wrt_mocap_world;
     return 0;
@@ -271,14 +271,14 @@ Eigen::Matrix3d MocapSensorCore::getNoiseMeasurementAttitudeMocapSensorWrtMocapW
     return this->noise_measurement_attitude_mocap_sensor_wrt_mocap_world_;
 }
 
-int MocapSensorCore::setNoiseMeasurementAttitudeMocapSensorWrtMocapWorld(Eigen::Matrix3d noise_measurement_attitude_mocap_sensor_wrt_mocap_world)
+int MocapSensorCore::setNoiseMeasurementAttitudeMocapSensorWrtMocapWorld(const Eigen::Matrix3d& noise_measurement_attitude_mocap_sensor_wrt_mocap_world)
 {
     this->noise_measurement_attitude_mocap_sensor_wrt_mocap_world_=noise_measurement_attitude_mocap_sensor_wrt_mocap_world;
     return 0;
 }
 
 
-int MocapSensorCore::setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement)
+int MocapSensorCore::setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement)
 {
     if(!isSensorEnabled())
         return 0;
@@ -474,7 +474,7 @@ int MocapSensorCore::predictState(//Time
     return 0;
 }
 
-int MocapSensorCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+int MocapSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                                    const std::shared_ptr<MocapSensorStateCore> pastState,
                                                    std::shared_ptr<MocapSensorStateCore>& predictedState)
 {
@@ -552,7 +552,7 @@ int MocapSensorCore::predictStateSpecific(const TimeStamp previousTimeStamp, con
 }
 
 int MocapSensorCore::predictStateCore(// State k: Sensor
-                                                 Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                 const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                                  // State k+1: Sensor
                                                  Eigen::Vector3d& pred_position_sensor_wrt_robot, Eigen::Vector4d& pred_attitude_sensor_wrt_robot)
 {
@@ -622,7 +622,7 @@ int MocapSensorCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                                                  const std::shared_ptr<MocapSensorStateCore> pastState,
                                                                  std::shared_ptr<MocapSensorStateCore> &predictedState)
 {
@@ -766,11 +766,11 @@ int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp previous
 }
 
 int MocapSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
-                                                           Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
-                                                           // State k+1: Sensor
-                                                           Eigen::Vector3d pred_position_sensor_wrt_robot, Eigen::Vector4d pred_attitude_sensor_wrt_robot,
-                                                           // Jacobian: State
-                                                           Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att)
+                                                    const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
+                                                   // State k+1: Sensor
+                                                   const Eigen::Vector3d& pred_position_sensor_wrt_robot, const Eigen::Vector4d& pred_attitude_sensor_wrt_robot,
+                                                   // Jacobian: State
+                                                   Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att)
 {
 
     /// Position
@@ -862,7 +862,7 @@ int MocapSensorCore::predictMeasurement(// Time
     return 0;
 }
 
-int MocapSensorCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
+int MocapSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
                                                  const std::shared_ptr<RobotStateCore> currentRobotState,
                                                  const std::shared_ptr<MocapSensorStateCore> currentSensorState,
                                                  const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
@@ -1034,11 +1034,11 @@ int MocapSensorCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
 }
 
 int MocapSensorCore::predictMeasurementCore(// State: Robot
-                                             Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                             const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                              // State: Sensor
-                                             Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                             const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                              // State: Map
-                                             Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                             const Eigen::Vector3d& position_map_element_wrt_world, const Eigen::Vector4d& attitude_map_element_wrt_world,
                                              // Predicted Measurement
                                              Eigen::Vector3d& position_sensor_wrt_map_element, Eigen::Vector4d& attitude_sensor_wrt_map_element)
 {
@@ -1216,7 +1216,7 @@ int MocapSensorCore::predictErrorMeasurementJacobian(// Time
 }
 
 
-int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp &theTimeStamp,
                                                              const std::shared_ptr<RobotStateCore> currentRobotState,
                                                              const std::shared_ptr<MocapSensorStateCore> currentSensorState,
                                                              const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
@@ -1808,15 +1808,15 @@ int MocapSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp the
 }
 
 int MocapSensorCore::jacobiansErrorMeasurementsCore(// State: Robot
-                                                             Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                             const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                                              // State: Sensor
-                                                             Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                             const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                                              // State: Map
-                                                             Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                             const Eigen::Vector3d& position_map_element_wrt_world, const Eigen::Vector4d& attitude_map_element_wrt_world,
                                                              // Measurement
-                                                             Eigen::Vector3d meas_position_sensor_wrt_map_element, Eigen::Vector4d meas_attitude_sensor_wrt_map_element,
+                                                             const Eigen::Vector3d& meas_position_sensor_wrt_map_element, const Eigen::Vector4d& meas_attitude_sensor_wrt_map_element,
                                                              // Predicted Measurement
-                                                             Eigen::Vector3d position_sensor_wrt_map_element, Eigen::Vector4d attitude_sensor_wrt_map_element,
+                                                             const Eigen::Vector3d& position_sensor_wrt_map_element, const Eigen::Vector4d& attitude_sensor_wrt_map_element,
                                                              // Jacobians: State and Params
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_robot_att,
                                                              Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_sens_att,
@@ -1936,6 +1936,59 @@ int MocapSensorCore::jacobiansErrorMeasurementsCore(// State: Robot
     return 0;
 }
 
+int MocapSensorCore::resetErrorStateJacobian(// Time
+                                                const TimeStamp& current_time_stamp,
+                                                // Increment Error State
+                                                const Eigen::VectorXd& increment_error_state,
+                                                // Current State
+                                                std::shared_ptr<StateCore>& current_state
+                                                )
+{
+    // Checks
+    if(!current_state)
+        return -1;
+
+
+    // Resize Jacobian
+    current_state->jacobian_error_state_reset_.resize(this->dimension_error_state_, this->dimension_error_state_);
+
+    // Fill
+    std::vector< Eigen::Triplet<double> > triplets_jacobian_error_reset;
+
+    int dimension_error_state_i=0;
+
+    // Position Sensor Wrt Robot
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Attitude Sensor Wrt Robot
+    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        // Error Reset Matrixes
+        Eigen::Matrix3d G_update_theta_robot=Eigen::Matrix3d::Identity(3,3);
+
+
+        // Ojo, signo cambiado por la definicion de incrementError!
+        G_update_theta_robot-=Quaternion::skewSymMat(0.5*increment_error_state.block<3,1>(dimension_error_state_i,0));
+
+        // Triplets
+        BlockMatrix::insertVectorEigenTripletFromEigenDense(triplets_jacobian_error_reset, G_update_theta_robot, dimension_error_state_i, dimension_error_state_i);
+
+        dimension_error_state_i+=3;
+    }
+
+
+    current_state->jacobian_error_state_reset_.setFromTriplets(triplets_jacobian_error_reset.begin(), triplets_jacobian_error_reset.end());
+
+    // End
+    return 0;
+}
+
 int MocapSensorCore::mapMeasurement(// Time
                    const TimeStamp current_time_stamp,
                    // Current State
@@ -2009,7 +2062,7 @@ int MocapSensorCore::mapMeasurement(// Time
     return 0;
 }
 
-int MocapSensorCore::mapMeasurementSpecific(const TimeStamp theTimeStamp,
+int MocapSensorCore::mapMeasurementSpecific(const TimeStamp &theTimeStamp,
                                             const std::shared_ptr<RobotStateCore> currentRobotState,
                                             const std::shared_ptr<MocapSensorStateCore> currentSensorState,
                                             const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
@@ -2188,11 +2241,11 @@ int MocapSensorCore::mapMeasurementSpecific(const TimeStamp theTimeStamp,
 }
 
 int MocapSensorCore::mapMeasurementCore(// robot wrt world (state)
-                                                 Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                 const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                                  // sensor wrt world (state)
-                                                 Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                 const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                                  // sensor wrt Map element (measurement)
-                                                 Eigen::Vector3d meas_position_sensor_wrt_map_element, Eigen::Vector4d meas_attitude_sensor_wrt_map_element,
+                                                 const Eigen::Vector3d& meas_position_sensor_wrt_map_element, const Eigen::Vector4d& meas_attitude_sensor_wrt_map_element,
                                                  // Map element wrt world (state new)
                                                  Eigen::Vector3d& position_map_element_wrt_world, Eigen::Vector4d& attitude_map_element_wrt_world)
 {
@@ -2264,7 +2317,7 @@ int MocapSensorCore::jacobiansMapMeasurement(// Time
     return 0;
 }
 
-int MocapSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp theTimeStamp,
+int MocapSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &theTimeStamp,
                                                      const std::shared_ptr<RobotStateCore> currentRobotState,
                                                      const std::shared_ptr<MocapSensorStateCore> currentSensorState,
                                                      const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
@@ -2677,13 +2730,13 @@ int MocapSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp theTimeStam
 }
 
 int MocapSensorCore::jacobiansMapMeasurementCore(// robot wrt world (state)
-                                                          Eigen::Vector3d position_robot_wrt_world, Eigen::Vector4d attitude_robot_wrt_world,
+                                                          const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                                           // sensor wrt world (state)
-                                                          Eigen::Vector3d position_sensor_wrt_robot, Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                          const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                                           // Map element wrt world (state new)
-                                                          Eigen::Vector3d position_map_element_wrt_world, Eigen::Vector4d attitude_map_element_wrt_world,
+                                                          const Eigen::Vector3d& position_map_element_wrt_world, const Eigen::Vector4d& attitude_map_element_wrt_world,
                                                           // Sensor wrt Map element (measurement)
-                                                          Eigen::Vector3d meas_position_sensor_wrt_map_element, Eigen::Vector4d meas_attitude_sensor_wrt_map_element,
+                                                          const Eigen::Vector3d& meas_position_sensor_wrt_map_element, const Eigen::Vector4d& meas_attitude_sensor_wrt_map_element,
                                                           // Jacobians
                                                           // State and Params
                                                           Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_robot_att,
@@ -2767,7 +2820,7 @@ int MocapSensorCore::jacobiansMapMeasurementCore(// robot wrt world (state)
     return 0;
 }
 
-int MocapSensorCore::findSensorState(const std::list< std::shared_ptr<SensorStateCore> > list_sensors_state, std::shared_ptr<MocapSensorStateCore>& sensor_state)
+int MocapSensorCore::findSensorState(const std::list<std::shared_ptr<SensorStateCore> > &list_sensors_state, std::shared_ptr<MocapSensorStateCore>& sensor_state)
 {
     for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator it_sensor_state=list_sensors_state.begin();
         it_sensor_state!=list_sensors_state.end();
@@ -2782,7 +2835,7 @@ int MocapSensorCore::findSensorState(const std::list< std::shared_ptr<SensorStat
     return -1;
 }
 
-int MocapSensorCore::findMapElementCore(const std::list<std::shared_ptr<MapElementCore>> list_map_elements_core,
+int MocapSensorCore::findMapElementCore(const std::list<std::shared_ptr<MapElementCore> > &list_map_elements_core,
                        const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement,
                        std::shared_ptr<MocapWorldCore>& map_element_core)
 {
@@ -2810,7 +2863,7 @@ int MocapSensorCore::findMapElementCore(const std::list<std::shared_ptr<MapEleme
     return -1;
 }
 
-int MocapSensorCore::findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>> list_map_elements_state,
+int MocapSensorCore::findMapElementState(const std::list<std::shared_ptr<MapElementStateCore> > &list_map_elements_state,
                                                   const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement,
                                                   std::shared_ptr<MocapWorldStateCore> &map_element_state)
 {

@@ -28,8 +28,8 @@ protected:
 
 
 public:
-    int setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d position_mocap_sensor_wrt_mocap_world);
-    int setAttitudeMocapSensorWrtMocapWorld(const Eigen::Vector4d attitude_mocap_sensor_wrt_mocap_world);
+    int setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d& position_mocap_sensor_wrt_mocap_world);
+    int setAttitudeMocapSensorWrtMocapWorld(const Eigen::Vector4d& attitude_mocap_sensor_wrt_mocap_world);
 public:
     Eigen::Vector3d getPositionMocapSensorWrtMocapWorld() const;
     Eigen::Vector4d getAttitudeMocapSensorWrtMocapWorld() const;

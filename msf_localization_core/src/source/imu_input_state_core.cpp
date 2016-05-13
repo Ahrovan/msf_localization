@@ -109,7 +109,7 @@ int ImuInputStateCore::setSensitivityAngularVelocity(Eigen::Matrix3d sensitivity
 }
 
 
-int ImuInputStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int ImuInputStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
 
     unsigned int dimension=0;

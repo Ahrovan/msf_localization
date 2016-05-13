@@ -39,7 +39,7 @@ int CodedVisualMarkerEyeStateCore::init()
 }
 
 
-int CodedVisualMarkerEyeStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int CodedVisualMarkerEyeStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
 
     unsigned int dimension=0;

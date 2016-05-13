@@ -43,7 +43,7 @@ bool ImuSensorMeasurementCore::isOrientationSet() const
     return this->flagOrientationSet;
 }
 
-int ImuSensorMeasurementCore::setOrientation(const Eigen::Vector4d Orientation)
+int ImuSensorMeasurementCore::setOrientation(const Eigen::Vector4d &Orientation)
 {
     std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getSensorCoreSharedPtr());
     if(TheSensorCorePtrAux->isMeasurementOrientationEnabled())
@@ -67,7 +67,7 @@ bool ImuSensorMeasurementCore::isAngularVelocitySet() const
     return this->flagAngularVelocitySet;
 }
 
-int ImuSensorMeasurementCore::setAngularVelocity(Eigen::Vector3d AngularVelocity)
+int ImuSensorMeasurementCore::setAngularVelocity(const Eigen::Vector3d &AngularVelocity)
 {
     std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getSensorCoreSharedPtr());
     if(TheSensorCorePtrAux->isMeasurementAngularVelocityEnabled())
@@ -90,7 +90,7 @@ bool ImuSensorMeasurementCore::isLinearAccelerationSet() const
     return this->flagLinearAccelerationSet;
 }
 
-int ImuSensorMeasurementCore::setLinearAcceleration(Eigen::Vector3d LinearAcceleration)
+int ImuSensorMeasurementCore::setLinearAcceleration(const Eigen::Vector3d &LinearAcceleration)
 {
     std::shared_ptr<const ImuSensorCore> TheSensorCorePtrAux=std::dynamic_pointer_cast<const ImuSensorCore>(this->getSensorCoreSharedPtr());
     if(TheSensorCorePtrAux->isMeasurementLinearAccelerationEnabled())

@@ -89,7 +89,7 @@ int ImuDrivenRobotStateCore::setAngularVelocityRobotWrtWorld(Eigen::Vector3d ang
     return 0;
 }
 
-int ImuDrivenRobotStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int ImuDrivenRobotStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
 
     position_robot_wrt_world_+=increment_error_state.block<3,1>(0,0);

@@ -16,6 +16,7 @@
 #include "msf_localization_core/quaternion_algebra.h"
 
 
+
 class MocapWorldStateCore : public MapElementStateCore
 {
 public:
@@ -70,7 +71,7 @@ public:
 
 
 public:
-    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
+    int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state);
 
 };
 

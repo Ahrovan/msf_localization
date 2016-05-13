@@ -45,7 +45,7 @@ protected:
 
 
 public:
-    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
+    int readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
 
 
 
@@ -79,7 +79,7 @@ protected:
     Eigen::Matrix3d noiseMeasurementAngularVelocity;
 public:
     Eigen::Matrix3d getNoiseMeasurementAngularVelocity() const;
-    int setNoiseMeasurementAngularVelocity(Eigen::Matrix3d noiseMeasurementAngularVelocity);
+    int setNoiseMeasurementAngularVelocity(const Eigen::Matrix3d& noiseMeasurementAngularVelocity);
 
 
     // Linear Acceleration Measurement
@@ -94,12 +94,12 @@ protected:
     Eigen::Matrix3d noiseMeasurementLinearAcceleration;
 public:
     Eigen::Matrix3d getNoiseMeasurementLinearAcceleration() const;
-    int setNoiseMeasurementLinearAcceleration(Eigen::Matrix3d noiseMeasurementLinearAcceleration);
+    int setNoiseMeasurementLinearAcceleration(const Eigen::Matrix3d& noiseMeasurementLinearAcceleration);
 
 
     // Store Measurement
 public:
-    int setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
+    int setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
 
 
 
@@ -127,7 +127,7 @@ protected:
     Eigen::Matrix3d noiseBiasAngularVelocity;
 public:
     Eigen::Matrix3d getNoiseBiasAngularVelocity() const;
-    int setNoiseBiasAngularVelocity(Eigen::Matrix3d noiseBiasAngularVelocity);
+    int setNoiseBiasAngularVelocity(const Eigen::Matrix3d& noiseBiasAngularVelocity);
 
 
     // Angular Velocity biases: Estimation Covariance (if enabled estimation -> used)
@@ -135,7 +135,7 @@ protected:
     Eigen::Matrix3d noiseEstimationBiasAngularVelocity;
 public:
     Eigen::Matrix3d getNoiseEstimationBiasAngularVelocity() const;
-    int setNoiseEstimationBiasAngularVelocity(Eigen::Matrix3d noiseEstimationBiasAngularVelocity);
+    int setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noiseEstimationBiasAngularVelocity);
 
 
 
@@ -155,7 +155,7 @@ protected:
     Eigen::Matrix3d noiseScaleAngularVelocity;
 public:
     Eigen::Matrix3d getNoiseScaleAngularVelocity() const;
-    int setNoiseScaleAngularVelocity(Eigen::Matrix3d noiseScaleAngularVelocity);
+    int setNoiseScaleAngularVelocity(const Eigen::Matrix3d& noiseScaleAngularVelocity);
 
 
     // Angular Velocity scale: Estimation Covariance (if enabled estimation -> used)
@@ -189,7 +189,7 @@ protected:
     Eigen::Matrix3d noiseBiasLinearAcceleration;
 public:
     Eigen::Matrix3d getNoiseBiasLinearAcceleration() const;
-    int setNoiseBiasLinearAcceleration(Eigen::Matrix3d noiseBiasLinearAcceleration);
+    int setNoiseBiasLinearAcceleration(const Eigen::Matrix3d& noiseBiasLinearAcceleration);
 
 
     // Linear Acceleration biases: estimation covariance (if enabled estimation -> used)
@@ -197,7 +197,7 @@ protected:
     Eigen::Matrix3d noiseEstimationBiasLinearAcceleration;
 public:
     Eigen::Matrix3d getNoiseEstimationBiasLinearAcceleration() const;
-    int setNoiseEstimationBiasLinearAcceleration(Eigen::Matrix3d noiseEstimationBiasLinearAcceleration);
+    int setNoiseEstimationBiasLinearAcceleration(const Eigen::Matrix3d& noiseEstimationBiasLinearAcceleration);
 
 
 
@@ -217,7 +217,7 @@ protected:
     Eigen::Matrix3d noiseScaleLinearAcceleration;
 public:
     Eigen::Matrix3d getNoiseScaleLinearAcceleration() const;
-    int setNoiseScaleLinearAcceleration(Eigen::Matrix3d noiseScaleLinearAcceleration);
+    int setNoiseScaleLinearAcceleration(const Eigen::Matrix3d& noiseScaleLinearAcceleration);
 
 
     // Linear acceleration scale: Estimation Covariance (if enabled estimation -> used)
@@ -268,7 +268,7 @@ public:
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                      const std::shared_ptr<ImuSensorStateCore> pastState,
                      std::shared_ptr<ImuSensorStateCore>& predictedState);
 
@@ -285,7 +285,7 @@ public:
                                  std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                    const std::shared_ptr<ImuSensorStateCore> pastState,
                                    std::shared_ptr<ImuSensorStateCore>& predictedState);
 
@@ -309,7 +309,7 @@ public:
                            std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
-    int predictMeasurementSpecific(const TimeStamp theTimeStamp,
+    int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
                            const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                            const std::shared_ptr<RobotStateCore> currentRobotState,
                            const std::shared_ptr<ImuSensorStateCore> currentImuState,
@@ -328,7 +328,7 @@ public:
                                         std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
-    int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+    int predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
                                                 const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                                 const std::shared_ptr<RobotStateCore> TheRobotStateCore,
                                                 const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
@@ -347,19 +347,19 @@ protected:
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
                                                 );
     int predictErrorMeasurementJacobianCore(// State: World
-                                            const Eigen::Vector3d gravity_wrt_world,
+                                            const Eigen::Vector3d& gravity_wrt_world,
                                             // State: Robot
-                                            const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
-                                            const Eigen::Vector3d lin_speed_robot_wrt_world, const Eigen::Vector3d ang_velocity_robot_wrt_world,
-                                            const Eigen::Vector3d lin_accel_robot_wrt_world, const Eigen::Vector3d ang_accel_robot_wrt_world,
+                                            const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
+                                            const Eigen::Vector3d& lin_speed_robot_wrt_world, const Eigen::Vector3d& ang_velocity_robot_wrt_world,
+                                            const Eigen::Vector3d& lin_accel_robot_wrt_world, const Eigen::Vector3d& ang_accel_robot_wrt_world,
                                             // State: Sensor
-                                            const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                                            const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                             // Parameters: Sensor
-                                            const Eigen::Matrix3d sensitivity_meas_linear_acceleration, const Eigen::Matrix3d sensitivity_meas_angular_velocity,
+                                            const Eigen::Matrix3d& sensitivity_meas_linear_acceleration, const Eigen::Matrix3d& sensitivity_meas_angular_velocity,
                                             // Measurement
-                                            const Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d meas_ang_velocity_sensor_wrt_sensor,
+                                            const Eigen::Vector3d& meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d& meas_ang_velocity_sensor_wrt_sensor,
                                             // Predicted Measurement
-                                            const Eigen::Vector3d lin_accel_sensor_wrt_sensor, const Eigen::Vector3d attitude_sensor_wrt_sensor, const Eigen::Vector3d ang_velocity_sensor_wrt_sensor,
+                                            const Eigen::Vector3d& lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& attitude_sensor_wrt_sensor, const Eigen::Vector3d& ang_velocity_sensor_wrt_sensor,
                                             // Jacobians: State and Params
                                             Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_gravity,
                                             Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_acc,
@@ -369,6 +369,19 @@ protected:
                                             // Jacobians: Noise
                                             Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel
                                             );
+
+
+
+    /// Reset Error State
+
+public:
+    int resetErrorStateJacobian(// Time
+                                const TimeStamp& current_time_stamp,
+                                // Increment Error State
+                                const Eigen::VectorXd& increment_error_state,
+                                // Current State
+                                std::shared_ptr<StateCore>& current_state
+                                );
 
 
     /// Mapping

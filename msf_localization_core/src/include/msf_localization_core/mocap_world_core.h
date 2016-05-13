@@ -152,6 +152,18 @@ protected:
 
 
 
+    /// Reset Error State
+
+public:
+    int resetErrorStateJacobian(// Time
+                                const TimeStamp& current_time_stamp,
+                                // Increment Error State
+                                const Eigen::VectorXd& increment_error_state,
+                                // Current State
+                                std::shared_ptr<StateCore>& current_state
+                                );
+
+
 };
 
 

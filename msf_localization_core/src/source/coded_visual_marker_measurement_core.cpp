@@ -45,7 +45,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerId(const int id)
     return 0;
 }
 
-int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vector3d position)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vector3d &position)
 {
     // Sensor Core -> to be able to do checks
     std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getSensorCoreSharedPtr());
@@ -61,7 +61,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vecto
     return 0;
 }
 
-int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vector4d attitude)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vector4d& attitude)
 {
     // Sensor Core -> to be able to do checks
     std::shared_ptr<CodedVisualMarkerEyeCore> the_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getSensorCoreSharedPtr());
@@ -81,7 +81,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vecto
     return 0;
 }
 
-int CodedVisualMarkerMeasurementCore::setVisualMarkerMeasurement(const int id, const Eigen::Vector3d position, Eigen::Vector4d attitude)
+int CodedVisualMarkerMeasurementCore::setVisualMarkerMeasurement(const int id, const Eigen::Vector3d &position, Eigen::Vector4d &attitude)
 {
     int error=0;
     error+=setVisualMarkerId(id);

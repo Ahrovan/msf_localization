@@ -30,12 +30,12 @@ public:
     Eigen::Vector3d gravity;
 public:
     Eigen::Vector3d getGravity() const;
-    int setGravity(Eigen::Vector3d gravity);
+    int setGravity(const Eigen::Vector3d& gravity);
 
 
 
 public:
-    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
+    int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state);
 
 
 };

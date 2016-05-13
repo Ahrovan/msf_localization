@@ -137,14 +137,36 @@ Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in)
 }
 
 
-Eigen::MatrixXd convertToEigenDense(const MatrixSparse& in)
+Eigen::MatrixXd convertToEigenDense(MatrixDense &in)
 {
     Eigen::MatrixXd out;
 
 
-    // TODO
+    // Analyse
+    if(in.analyse())
+        throw;
 
+    // Resize and init out
+    out.resize(in.getTotalRowsSize(), in.getTotalColsSize());
+    out.setZero();
 
+    // Fill blocks
+    int row_point=0;
+    for(int i=0; i<in.rows(); i++)
+    {
+        int col_point=0;
+        for(int j=0; j<in.cols(); j++)
+        {
+            // Block
+            if(in(i,j).cols() > 0 && in(i,j).rows() > 0 )
+                out.block(row_point, col_point, in.getRowsSize(i), in.getColsSize(j))=in(i,j);
+
+            col_point+=in.getColsSize(j);
+        }
+        row_point+=in.getRowsSize(i);
+    }
+
+    // End
     return out;
 }
 

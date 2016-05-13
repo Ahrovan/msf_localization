@@ -2,6 +2,9 @@
 #include "msf_localization_core/mocap_world_state_core.h"
 
 
+#include "msf_localization_core/mocap_world_core.h"
+
+
 MocapWorldStateCore::MocapWorldStateCore() :
     MapElementStateCore()
 {
@@ -71,22 +74,36 @@ Eigen::MatrixXd MocapWorldStateCore::getJacobianMappingErrorStateNoise()
     return this->jacobian_mapping_error_state_noise_;
 }
 
-int MocapWorldStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int MocapWorldStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
+    std::shared_ptr<MocapWorldCore> map_element_core=std::dynamic_pointer_cast<MocapWorldCore>(this->getMsfElementCoreSharedPtr());
+
+    int dimension_error_state_i=0;
+
     // Position
-    position_mocap_world_wrt_world_+=increment_error_state.block<3,1>(0,0);
+    if(map_element_core->isEstimationPositionMocapWorldWrtWorldEnabled())
+    {
+        position_mocap_world_wrt_world_+=increment_error_state.block<3,1>(dimension_error_state_i,0);
+        dimension_error_state_i+=3;
+    }
 
     // Attitude
-    Eigen::Vector4d DeltaQuat, DeltaQuatAux;
-    double NormDeltaQuatAux;
-    DeltaQuatAux[0]=1;
-    DeltaQuatAux.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(3,0);
-    NormDeltaQuatAux=DeltaQuatAux.norm();
-    DeltaQuat=DeltaQuatAux/NormDeltaQuatAux;
+    if(map_element_core->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+    {
+        Eigen::Vector4d DeltaQuat, DeltaQuatAux;
+        double NormDeltaQuatAux;
+        DeltaQuatAux[0]=1;
+        DeltaQuatAux.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(dimension_error_state_i,0);
+        NormDeltaQuatAux=DeltaQuatAux.norm();
+        DeltaQuat=DeltaQuatAux/NormDeltaQuatAux;
 
-    Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_mocap_world_wrt_world_, DeltaQuat);
+        Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_mocap_world_wrt_world_, DeltaQuat);
 
-    attitude_mocap_world_wrt_world_=attitude_aux;
+        attitude_mocap_world_wrt_world_=attitude_aux;
+
+        dimension_error_state_i+=3;
+    }
+
 
     return 0;
 }

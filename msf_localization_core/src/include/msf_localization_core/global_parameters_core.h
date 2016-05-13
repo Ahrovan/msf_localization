@@ -44,11 +44,11 @@ protected:
     std::string world_name_;
 public:
     std::string getWorldName() const;
-    int setWorldName(std::string world_name);
+    int setWorldName(const std::string& world_name);
 
 
 public:
-    int readConfig(pugi::xml_node global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
+    int readConfig(const pugi::xml_node& global_parameters, std::shared_ptr<GlobalParametersStateCore>& GlobalParametersInitStateCore);
 
 
 
@@ -72,7 +72,7 @@ protected:
     Eigen::Matrix3d noiseGravity;
 public:
     Eigen::Matrix3d getNoiseGravity() const;
-    int setNoiseGravity(Eigen::Matrix3d noiseGravity);
+    int setNoiseGravity(const Eigen::Matrix3d& noiseGravity);
 
 
 
@@ -112,7 +112,7 @@ public:
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                              const std::shared_ptr<GlobalParametersStateCore> pastState,
                              std::shared_ptr<GlobalParametersStateCore>& predictedState);
 
@@ -132,7 +132,7 @@ public:
                                  std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                           const std::shared_ptr<GlobalParametersStateCore> pastState,
                                           std::shared_ptr<GlobalParametersStateCore>& predictedState);
 
@@ -144,6 +144,14 @@ protected:
 
     // NONE
 
+public:
+    int resetErrorStateJacobian(// Time
+                                const TimeStamp& current_time_stamp,
+                                // Increment Error State
+                                const Eigen::VectorXd& increment_error_state,
+                                // Current State
+                                std::shared_ptr<StateCore>& current_state
+                                );
 
 };
 

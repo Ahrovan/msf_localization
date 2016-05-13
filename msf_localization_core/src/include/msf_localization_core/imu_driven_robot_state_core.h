@@ -71,7 +71,7 @@ public:
 
 
 public:
-    int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state);
+    int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state);
 
 
 };

@@ -32,9 +32,9 @@ protected:
 
 public:
     int setVisualMarkerId(const int id);
-    int setVisualMarkerPosition(const Eigen::Vector3d position);
-    int setVisualMarkerAttitude(const Eigen::Vector4d attitude);
-    int setVisualMarkerMeasurement(const int id, const Eigen::Vector3d position, Eigen::Vector4d attitude);
+    int setVisualMarkerPosition(const Eigen::Vector3d& position);
+    int setVisualMarkerAttitude(const Eigen::Vector4d& attitude);
+    int setVisualMarkerMeasurement(const int id, const Eigen::Vector3d& position, Eigen::Vector4d& attitude);
 public:
     int getVisualMarkerId() const;
     Eigen::Vector3d getVisualMarkerPosition() const;

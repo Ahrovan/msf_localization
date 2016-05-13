@@ -34,7 +34,7 @@ Eigen::Vector3d CodedVisualMarkerLandmarkStateCore::getPosition() const
     return this->position_;
 }
 
-int CodedVisualMarkerLandmarkStateCore::setPosition(Eigen::Vector3d position)
+int CodedVisualMarkerLandmarkStateCore::setPosition(const Eigen::Vector3d &position)
 {
     this->position_=position;
     return 0;
@@ -45,7 +45,7 @@ Eigen::Vector4d CodedVisualMarkerLandmarkStateCore::getAttitude() const
     return this->attitude_;
 }
 
-int CodedVisualMarkerLandmarkStateCore::setAttitude(Eigen::Vector4d attitude)
+int CodedVisualMarkerLandmarkStateCore::setAttitude(const Eigen::Vector4d &attitude)
 {
     this->attitude_=attitude;
     return 0;
@@ -71,28 +71,33 @@ Eigen::MatrixXd CodedVisualMarkerLandmarkStateCore::getJacobianMappingErrorState
     return this->jacobian_mapping_error_state_noise_;
 }
 
-int CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
+    std::shared_ptr<CodedVisualMarkerLandmarkCore> map_element_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(this->getMsfElementCoreSharedPtr());
 
-    position_+=increment_error_state.block<3,1>(0,0);
+    int dimension_error_state_i=0;
 
+    if(map_element_core->isEstimationPositionVisualMarkerWrtWorldEnabled())
+    {
+        position_+=increment_error_state.block<3,1>(dimension_error_state_i,0);
+        dimension_error_state_i+=3;
+    }
 
-    Eigen::Vector4d DeltaQuat, DeltaQuatAux;
-    double NormDeltaQuatAux;
-    DeltaQuatAux[0]=1;
-    DeltaQuatAux.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(3,0);
-    NormDeltaQuatAux=DeltaQuatAux.norm();
-    DeltaQuat=DeltaQuatAux/NormDeltaQuatAux;
+    if(map_element_core->isEstimationAttitudeVisualMarkerWrtWorldEnabled())
+    {
+        Eigen::Vector4d DeltaQuat, DeltaQuatAux;
+        double NormDeltaQuatAux;
+        DeltaQuatAux[0]=1;
+        DeltaQuatAux.block<3,1>(1,0)=0.5*increment_error_state.block<3,1>(dimension_error_state_i,0);
+        NormDeltaQuatAux=DeltaQuatAux.norm();
+        DeltaQuat=DeltaQuatAux/NormDeltaQuatAux;
 
-    Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_, DeltaQuat);
+        Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_, DeltaQuat);
 
-//    if(attitude_aux[0]<0)
-//    {
-//        attitude_=-attitude_aux;
-//        std::cout<<"CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState() quaternion!!"<<std::endl;
-//    }
-//    else
         attitude_=attitude_aux;
+
+        dimension_error_state_i+=3;
+    }
 
 
     return 0;

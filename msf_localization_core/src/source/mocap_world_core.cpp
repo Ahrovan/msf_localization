@@ -574,3 +574,55 @@ int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousT
     return 0;
 }
 
+int MocapWorldCore::resetErrorStateJacobian(// Time
+                                            const TimeStamp& current_time_stamp,
+                                            // Increment Error State
+                                            const Eigen::VectorXd& increment_error_state,
+                                            // Current State
+                                            std::shared_ptr<StateCore>& current_state
+                                            )
+{
+    // Checks
+    if(!current_state)
+        return -1;
+
+
+    // Resize Jacobian
+    current_state->jacobian_error_state_reset_.resize(this->dimension_error_state_, this->dimension_error_state_);
+
+    // Fill
+    std::vector< Eigen::Triplet<double> > triplets_jacobian_error_reset;
+
+    int dimension_error_state_i=0;
+
+    // Position Sensor World wrt World
+    if(this->isEstimationPositionMocapWorldWrtWorldEnabled())
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Attitude Sensor World wrt World
+    if(this->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+    {
+        // Error Reset Matrixes
+        Eigen::Matrix3d G_update_theta_robot=Eigen::Matrix3d::Identity(3,3);
+
+
+        // Ojo, signo cambiado por la definicion de incrementError!
+        G_update_theta_robot-=Quaternion::skewSymMat(0.5*increment_error_state.block<3,1>(dimension_error_state_i,0));
+
+        // Triplets
+        BlockMatrix::insertVectorEigenTripletFromEigenDense(triplets_jacobian_error_reset, G_update_theta_robot, dimension_error_state_i, dimension_error_state_i);
+
+        dimension_error_state_i+=3;
+    }
+
+
+    current_state->jacobian_error_state_reset_.setFromTriplets(triplets_jacobian_error_reset.begin(), triplets_jacobian_error_reset.end());
+
+    // End
+    return 0;
+}

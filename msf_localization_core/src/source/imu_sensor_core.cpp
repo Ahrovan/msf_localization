@@ -80,7 +80,7 @@ int ImuSensorCore::init()
     return 0;
 }
 
-int ImuSensorCore::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore)
+int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore)
 {
 
     // Create a class for the SensorStateCore
@@ -398,7 +398,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseMeasurementAngularVelocity() const
     return this->noiseMeasurementAngularVelocity;
 }
 
-int ImuSensorCore::setNoiseMeasurementAngularVelocity(Eigen::Matrix3d noiseMeasurementAngularVelocity)
+int ImuSensorCore::setNoiseMeasurementAngularVelocity(const Eigen::Matrix3d &noiseMeasurementAngularVelocity)
 {
     this->noiseMeasurementAngularVelocity=noiseMeasurementAngularVelocity;
     return 0;
@@ -426,7 +426,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseMeasurementLinearAcceleration() const
     return this->noiseMeasurementLinearAcceleration;
 }
 
-int ImuSensorCore::setNoiseMeasurementLinearAcceleration(Eigen::Matrix3d noiseMeasurementLinearAcceleration)
+int ImuSensorCore::setNoiseMeasurementLinearAcceleration(const Eigen::Matrix3d &noiseMeasurementLinearAcceleration)
 {
     this->noiseMeasurementLinearAcceleration=noiseMeasurementLinearAcceleration;
 
@@ -434,7 +434,7 @@ int ImuSensorCore::setNoiseMeasurementLinearAcceleration(Eigen::Matrix3d noiseMe
 }
 
 
-int ImuSensorCore::setMeasurement(const TimeStamp TheTimeStamp, std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
+int ImuSensorCore::setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
 {
     //std::cout<<"Imu Measurement Set"<<std::endl;
 
@@ -504,7 +504,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseBiasAngularVelocity() const
     return this->noiseBiasAngularVelocity;
 }
 
-int ImuSensorCore::setNoiseBiasAngularVelocity(Eigen::Matrix3d noiseBiasAngularVelocity)
+int ImuSensorCore::setNoiseBiasAngularVelocity(const Eigen::Matrix3d &noiseBiasAngularVelocity)
 {
     this->noiseBiasAngularVelocity=noiseBiasAngularVelocity;
     return 0;
@@ -517,7 +517,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseEstimationBiasAngularVelocity() const
     return this->noiseEstimationBiasAngularVelocity;
 }
 
-int ImuSensorCore::setNoiseEstimationBiasAngularVelocity(Eigen::Matrix3d noiseEstimationBiasAngularVelocity)
+int ImuSensorCore::setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noiseEstimationBiasAngularVelocity)
 {
     this->noiseEstimationBiasAngularVelocity=noiseEstimationBiasAngularVelocity;
     return 0;
@@ -570,7 +570,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseScaleAngularVelocity() const
     return this->noiseScaleAngularVelocity;
 }
 
-int ImuSensorCore::setNoiseScaleAngularVelocity(Eigen::Matrix3d noiseScaleAngularVelocity)
+int ImuSensorCore::setNoiseScaleAngularVelocity(const Eigen::Matrix3d &noiseScaleAngularVelocity)
 {
     this->noiseScaleAngularVelocity=noiseScaleAngularVelocity;
     return 0;
@@ -671,7 +671,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseBiasLinearAcceleration() const
     return this->noiseBiasLinearAcceleration;
 }
 
-int ImuSensorCore::setNoiseBiasLinearAcceleration(Eigen::Matrix3d noiseBiasLinearAcceleration)
+int ImuSensorCore::setNoiseBiasLinearAcceleration(const Eigen::Matrix3d &noiseBiasLinearAcceleration)
 {
     this->noiseBiasLinearAcceleration=noiseBiasLinearAcceleration;
     return 0;
@@ -682,7 +682,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseEstimationBiasLinearAcceleration() const
     return this->noiseEstimationBiasLinearAcceleration;
 }
 
-int ImuSensorCore::setNoiseEstimationBiasLinearAcceleration(Eigen::Matrix3d noiseEstimationBiasLinearAcceleration)
+int ImuSensorCore::setNoiseEstimationBiasLinearAcceleration(const Eigen::Matrix3d &noiseEstimationBiasLinearAcceleration)
 {
     this->noiseEstimationBiasLinearAcceleration=noiseEstimationBiasLinearAcceleration;
     return 0;
@@ -735,7 +735,7 @@ Eigen::Matrix3d ImuSensorCore::getNoiseScaleLinearAcceleration() const
     return this->noiseScaleLinearAcceleration;
 }
 
-int ImuSensorCore::setNoiseScaleLinearAcceleration(Eigen::Matrix3d noiseScaleLinearAcceleration)
+int ImuSensorCore::setNoiseScaleLinearAcceleration(const Eigen::Matrix3d &noiseScaleLinearAcceleration)
 {
     this->noiseScaleLinearAcceleration=noiseScaleLinearAcceleration;
     return 0;
@@ -1016,7 +1016,7 @@ int ImuSensorCore::predictState(//Time
 
 
 
-int ImuSensorCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+int ImuSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                         const std::shared_ptr<ImuSensorStateCore> pastState,
                                         std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
@@ -1154,7 +1154,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                               const std::shared_ptr<ImuSensorStateCore> pastState,
                                               std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
@@ -1450,7 +1450,7 @@ int ImuSensorCore::predictMeasurement(// Time
     return 0;
 }
 
-int ImuSensorCore::predictMeasurementSpecific(const TimeStamp theTimeStamp,
+int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
                                       const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                       const std::shared_ptr<RobotStateCore> currentRobotState,
                                       const std::shared_ptr<ImuSensorStateCore> currentImuState,
@@ -1826,7 +1826,7 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 }
 
 
-int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
                                                            const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                                            const std::shared_ptr<RobotStateCore> TheRobotStateCore,
                                                            const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
@@ -2638,19 +2638,19 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp theTi
 }
 
 int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
-                                                       const Eigen::Vector3d gravity_wrt_world,
+                                                       const Eigen::Vector3d& gravity_wrt_world,
                                                        // State: Robot
-                                                       const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
-                                                       const Eigen::Vector3d lin_speed_robot_wrt_world, const Eigen::Vector3d ang_velocity_robot_wrt_world,
-                                                       const Eigen::Vector3d lin_accel_robot_wrt_world, const Eigen::Vector3d ang_accel_robot_wrt_world,
+                                                       const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
+                                                       const Eigen::Vector3d& lin_speed_robot_wrt_world, const Eigen::Vector3d& ang_velocity_robot_wrt_world,
+                                                       const Eigen::Vector3d& lin_accel_robot_wrt_world, const Eigen::Vector3d& ang_accel_robot_wrt_world,
                                                        // State: Sensor
-                                                       const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                                                       const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                                        // Parameters: Sensor
-                                                       const Eigen::Matrix3d sensitivity_meas_linear_acceleration, const Eigen::Matrix3d sensitivity_meas_angular_velocity,
+                                                       const Eigen::Matrix3d& sensitivity_meas_linear_acceleration, const Eigen::Matrix3d& sensitivity_meas_angular_velocity,
                                                        // Measurement
-                                                       const Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d meas_ang_velocity_sensor_wrt_sensor,
+                                                       const Eigen::Vector3d& meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d& meas_ang_velocity_sensor_wrt_sensor,
                                                        // Predicted Measurement
-                                                       const Eigen::Vector3d lin_accel_sensor_wrt_sensor, const Eigen::Vector3d attitude_sensor_wrt_sensor, const Eigen::Vector3d ang_velocity_sensor_wrt_sensor,
+                                                       const Eigen::Vector3d& lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& attitude_sensor_wrt_sensor, const Eigen::Vector3d& ang_velocity_sensor_wrt_sensor,
                                                        // Jacobians: State and Params
                                                        Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_gravity,
                                                        Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_acc,
@@ -2846,5 +2846,76 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
 
 
     /// End
+    return 0;
+}
+
+int ImuSensorCore::resetErrorStateJacobian(// Time
+                                            const TimeStamp& current_time_stamp,
+                                            // Increment Error State
+                                            const Eigen::VectorXd& increment_error_state,
+                                            // Current State
+                                            std::shared_ptr<StateCore>& current_state
+                                            )
+{
+    // Checks
+    if(!current_state)
+        return -1;
+
+
+    // Resize Jacobian
+    current_state->jacobian_error_state_reset_.resize(this->dimension_error_state_, this->dimension_error_state_);
+
+    // Fill
+    std::vector< Eigen::Triplet<double> > triplets_jacobian_error_reset;
+
+    int dimension_error_state_i=0;
+
+    // Position Sensor Wrt Robot
+    if(this->isEstimationPositionSensorWrtRobotEnabled())
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Attitude Sensor Wrt Robot
+    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    {
+        // Error Reset Matrixes
+        Eigen::Matrix3d G_update_theta_robot=Eigen::Matrix3d::Identity(3,3);
+
+
+        // Ojo, signo cambiado por la definicion de incrementError!
+        G_update_theta_robot-=Quaternion::skewSymMat(0.5*increment_error_state.block<3,1>(dimension_error_state_i,0));
+
+        // Triplets
+        BlockMatrix::insertVectorEigenTripletFromEigenDense(triplets_jacobian_error_reset, G_update_theta_robot, dimension_error_state_i, dimension_error_state_i);
+
+        dimension_error_state_i+=3;
+    }
+
+    // Bias Linear Acceleration
+    if(this->isEstimationBiasLinearAccelerationEnabled())
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Bias Angular Acceleration
+    if(this->isEstimationBiasAngularVelocityEnabled())
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+
+    current_state->jacobian_error_state_reset_.setFromTriplets(triplets_jacobian_error_reset.begin(), triplets_jacobian_error_reset.end());
+
+    // End
     return 0;
 }

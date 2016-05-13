@@ -49,7 +49,7 @@ public:
 
 
 public:
-    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
+    int readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
 
 
 
@@ -72,7 +72,7 @@ protected:
     Eigen::Matrix3d noise_measurement_position_;
 public:
     Eigen::Matrix3d getNoiseMeasurementPosition() const;
-    int setNoiseMeasurementPosition(const Eigen::Matrix3d noise_measurement_position);
+    int setNoiseMeasurementPosition(const Eigen::Matrix3d& noise_measurement_position);
 
 
 
@@ -88,7 +88,7 @@ protected:
     Eigen::Matrix3d noise_measurement_attitude_;
 public:
     Eigen::Matrix3d getNoiseMeasurementAttitude() const;
-    int setNoiseMeasurementAttitude(const Eigen::Matrix3d noise_measurement_attitude);
+    int setNoiseMeasurementAttitude(const Eigen::Matrix3d& noise_measurement_attitude);
 
 
 
@@ -96,7 +96,7 @@ public:
     // Store Measurement
 public:
     //int setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement);
-    int setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > the_visual_marker_measurement_list);
+    int setMeasurementList(const TimeStamp& the_time_stamp, const std::list< std::shared_ptr<SensorMeasurementCore> >& the_visual_marker_measurement_list);
 
 
 
@@ -152,12 +152,12 @@ public:
                      std::shared_ptr<StateCore> &predictedState);
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                              const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
                              std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 protected:
     int predictStateCore(// State k: Sensor
-                         const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                         const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                          // State k+1: Sensor
                          Eigen::Vector3d& pred_position_sensor_wrt_robot, Eigen::Vector4d& pred_attitude_sensor_wrt_robot);
 
@@ -174,15 +174,15 @@ public:
                                  std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                    const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
                                    std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
 protected:
     // TODO Fix!!
     int predictErrorStateJacobiansCore(// State k: Sensor
-                                       const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                                       const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                        // State k+1: Sensor
-                                       const Eigen::Vector3d pred_position_sensor_wrt_robot, const Eigen::Vector4d pred_attitude_sensor_wrt_robot,
+                                       const Eigen::Vector3d& pred_position_sensor_wrt_robot, const Eigen::Vector4d& pred_attitude_sensor_wrt_robot,
                                        // Jacobian: State
                                        Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att);
 
@@ -206,7 +206,7 @@ public:
                            std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
-    int predictMeasurementSpecific(const TimeStamp theTimeStamp,
+    int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
                                    const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                    const std::shared_ptr<RobotStateCore> currentRobotState,
                                    const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
@@ -214,11 +214,11 @@ protected:
                                    std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement);
 protected:
     int predictMeasurementCore(// State: Robot
-                               const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
+                               const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                // State: Sensor
-                               const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                               const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                // State: Map
-                               const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
+                               const Eigen::Vector3d& position_map_element_wrt_world, const Eigen::Vector4d& attitude_map_element_wrt_world,
                                // Predicted Measurement
                                Eigen::Vector3d& position_map_element_wrt_sensor, Eigen::Vector4d& attitude_map_element_wrt_sensor);
 
@@ -235,7 +235,7 @@ public:
                                         std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
-    int predictErrorMeasurementJacobianSpecific(const TimeStamp theTimeStamp,
+    int predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
                                                const std::shared_ptr<RobotStateCore> currentRobotState,
                                                const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
                                                const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
@@ -256,21 +256,34 @@ protected:
                                                 );
 protected:
     int jacobiansErrorMeasurementsCore(// State: Robot
-                                       const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
+                                       const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                        // State: Sensor
-                                       const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                                       const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                        // State: Map
-                                       const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
+                                       const Eigen::Vector3d& position_map_element_wrt_world, const Eigen::Vector4d& attitude_map_element_wrt_world,
                                        // Measurement
-                                       const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                       const Eigen::Vector3d& meas_position_map_element_wrt_sensor, const Eigen::Vector4d& meas_attitude_map_element_wrt_sensor,
                                        // Predicted Measurement
-                                       const Eigen::Vector3d position_map_element_wrt_sensor, const Eigen::Vector4d attitude_map_element_wrt_sensor,
+                                       const Eigen::Vector3d& position_map_element_wrt_sensor, const Eigen::Vector4d& attitude_map_element_wrt_sensor,
                                        // Jacobians: State and Params
                                        Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_robot_att,
                                        Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_pos, Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_sens_att, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_sens_att,
                                        Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_state_map_elem_pos, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_state_map_elem_att,
                                        // Jacobians: Noise
                                        Eigen::Matrix3d& jacobian_error_meas_pos_wrt_error_meas_pos, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att);
+
+
+    /// Reset Error State
+
+public:
+    int resetErrorStateJacobian(// Time
+                                const TimeStamp& current_time_stamp,
+                                // Increment Error State
+                                const Eigen::VectorXd& increment_error_state,
+                                // Current State
+                                std::shared_ptr<StateCore>& current_state
+                                );
+
 
 
     /// Mapping
@@ -289,19 +302,19 @@ public:
                        std::shared_ptr<MapElementStateCore> &new_map_element_state);
 
 protected:
-    int mapMeasurementSpecific(const TimeStamp theTimeStamp,
+    int mapMeasurementSpecific(const TimeStamp& theTimeStamp,
                                const std::shared_ptr<RobotStateCore> currentRobotState,
-                               const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
+                               const std::shared_ptr<CodedVisualMarkerEyeStateCore>&currentSensorState,
                                const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
                                std::shared_ptr<CodedVisualMarkerLandmarkCore>& newMapElementCore,
                                std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState);
 protected:
     int mapMeasurementCore(// robot wrt world (state)
-                           const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
+                           const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                            // sensor wrt world (state)
-                           const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                           const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                            // Map element wrt sensor (measurement)
-                           const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                           const Eigen::Vector3d& meas_position_map_element_wrt_sensor, const Eigen::Vector4d& meas_attitude_map_element_wrt_sensor,
                            // Map element wrt world (state new)
                            Eigen::Vector3d& position_map_element_wrt_world, Eigen::Vector4d& attitude_map_element_wrt_world);
 
@@ -318,20 +331,20 @@ public:
                        std::shared_ptr<MapElementStateCore> &new_map_element_state);
 
 protected:
-    int jacobiansMapMeasurementSpecific(const TimeStamp theTimeStamp,
+    int jacobiansMapMeasurementSpecific(const TimeStamp& theTimeStamp,
                                         const std::shared_ptr<RobotStateCore> currentRobotState,
                                         const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
                                         const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
                                         std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& newMapElementState);
 protected:
     int jacobiansMapMeasurementCore(// robot wrt world (state)
-                                    const Eigen::Vector3d position_robot_wrt_world, const Eigen::Vector4d attitude_robot_wrt_world,
+                                    const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                     // sensor wrt world (state)
-                                    const Eigen::Vector3d position_sensor_wrt_robot, const Eigen::Vector4d attitude_sensor_wrt_robot,
+                                    const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                     // Map element wrt world (state new)
-                                    const Eigen::Vector3d position_map_element_wrt_world, const Eigen::Vector4d attitude_map_element_wrt_world,
+                                    const Eigen::Vector3d& position_map_element_wrt_world, const Eigen::Vector4d& attitude_map_element_wrt_world,
                                     // Map element wrt sensor (measurement)
-                                    const Eigen::Vector3d meas_position_map_element_wrt_sensor, const Eigen::Vector4d meas_attitude_map_element_wrt_sensor,
+                                    const Eigen::Vector3d& meas_position_map_element_wrt_sensor, const Eigen::Vector4d& meas_attitude_map_element_wrt_sensor,
                                     // Jacobians
                                     // State and Params
                                     Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_pos, Eigen::Matrix3d& jacobian_error_map_pos_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_map_att_wrt_error_state_robot_att,
@@ -343,14 +356,14 @@ protected:
 
     /// Auxiliar functions
 protected:
-    int findSensorState(const std::list< std::shared_ptr<SensorStateCore> > list_sensors_state,
+    int findSensorState(const std::list< std::shared_ptr<SensorStateCore> >& list_sensors_state,
                         std::shared_ptr<CodedVisualMarkerEyeStateCore>& sensor_state);
 
-    int findMapElementCore(const std::list<std::shared_ptr<MapElementCore>> list_map_elements_core,
+    int findMapElementCore(const std::list<std::shared_ptr<MapElementCore>>& list_map_elements_core,
                            const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
                            std::shared_ptr<CodedVisualMarkerLandmarkCore>& map_element_core);
 
-    int findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>> list_map_elements_state,
+    int findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>>& list_map_elements_state,
                             const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
                             std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& map_element_state);
 

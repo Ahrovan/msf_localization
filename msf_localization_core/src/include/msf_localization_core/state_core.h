@@ -143,10 +143,18 @@ public:
 
 
 
+
+    //// Jacobian Error State Reset
+
+public:
+    Eigen::SparseMatrix<double> jacobian_error_state_reset_;
+
+
+
     //// Update State
 
 public:
-    virtual int updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)=0;
+    virtual int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state)=0;
 
 
 };

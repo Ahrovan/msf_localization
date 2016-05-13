@@ -37,7 +37,7 @@ protected:
 
 
 public:
-    int readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
+    int readConfig(const pugi::xml_node& robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore);
 
 
 
@@ -50,7 +50,7 @@ public:
     Eigen::Matrix3d noisePosition;
 public:
     Eigen::Matrix3d getNoisePosition() const;
-    int setNoisePosition(Eigen::Matrix3d noisePosition);
+    int setNoisePosition(const Eigen::Matrix3d& noisePosition);
 
 
     // Noise Linear Speed
@@ -59,7 +59,7 @@ public:
     Eigen::Matrix3d noiseLinearSpeed;
 public:
     Eigen::Matrix3d getNoiseLinearSpeed() const;
-    int setNoiseLinearSpeed(Eigen::Matrix3d noiseLinearSpeed);
+    int setNoiseLinearSpeed(const Eigen::Matrix3d& noiseLinearSpeed);
 
 
     // Noise Linear Acceleration
@@ -68,7 +68,7 @@ public:
     Eigen::Matrix3d noiseLinearAcceleration;
 public:
     Eigen::Matrix3d getNoiseLinearAcceleration() const;
-    int setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration);
+    int setNoiseLinearAcceleration(const Eigen::Matrix3d& noiseLinearAcceleration);
 
 
     // Noise Attitude
@@ -77,7 +77,7 @@ public:
     Eigen::Matrix3d noiseAttitude;
 public:
     Eigen::Matrix3d getNoiseAttitude() const;
-    int setNoiseAttitude(Eigen::Matrix3d noiseAttitude);
+    int setNoiseAttitude(const Eigen::Matrix3d& noiseAttitude);
 
 
     // Noise Angular Velocity
@@ -86,7 +86,7 @@ public:
     Eigen::Matrix3d noiseAngularVelocity;
 public:
     Eigen::Matrix3d getNoiseAngularVelocity() const;
-    int setNoiseAngularVelocity(Eigen::Matrix3d noiseAngularVelocity);
+    int setNoiseAngularVelocity(const Eigen::Matrix3d& noiseAngularVelocity);
 
 
     // Noise Angular Acceleration
@@ -95,7 +95,7 @@ public:
     Eigen::Matrix3d noiseAngularAcceleration;
 public:
     Eigen::Matrix3d getNoiseAngularAcceleration() const;
-    int setNoiseAngularAcceleration(Eigen::Matrix3d noiseAngularAcceleration);
+    int setNoiseAngularAcceleration(const Eigen::Matrix3d& noiseAngularAcceleration);
 
 
 
@@ -118,12 +118,12 @@ public:
     int prepareCovarianceInitErrorStateSpecific();
 
 public:
-    int setInitErrorStateVariancePosition(Eigen::Vector3d initVariance);
-    int setInitErrorStateVarianceLinearSpeed(Eigen::Vector3d initVariance);
-    int setInitErrorStateVarianceLinearAcceleration(Eigen::Vector3d initVariance);
-    int setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance);
-    int setInitErrorStateVarianceAngularVelocity(Eigen::Vector3d initVariance);
-    int setInitErrorStateVarianceAngularAcceleration(Eigen::Vector3d initVariance);
+    int setInitErrorStateVariancePosition(const Eigen::Vector3d& initVariance);
+    int setInitErrorStateVarianceLinearSpeed(const Eigen::Vector3d &initVariance);
+    int setInitErrorStateVarianceLinearAcceleration(const Eigen::Vector3d& initVariance);
+    int setInitErrorStateVarianceAttitude(const Eigen::Vector3d &initVariance);
+    int setInitErrorStateVarianceAngularVelocity(const Eigen::Vector3d& initVariance);
+    int setInitErrorStateVarianceAngularAcceleration(const Eigen::Vector3d& initVariance);
 
 
 
@@ -146,7 +146,7 @@ public:
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                              const std::shared_ptr<FreeModelRobotStateCore> pastState,
                              std::shared_ptr<FreeModelRobotStateCore>& predictedState);
 
@@ -165,7 +165,7 @@ public:
                                  std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+    int predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                           const std::shared_ptr<FreeModelRobotStateCore> pastState,
                                           std::shared_ptr<FreeModelRobotStateCore>& predictedState);
 
@@ -176,6 +176,14 @@ protected:
 
     // None
 
+public:
+    int resetErrorStateJacobian(// Time
+                                const TimeStamp& current_time_stamp,
+                                // Increment Error State
+                                const Eigen::VectorXd& increment_error_state,
+                                // Current State
+                                std::shared_ptr<StateCore>& current_state
+                                );
 
 
 };

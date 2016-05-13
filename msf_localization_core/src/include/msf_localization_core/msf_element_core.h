@@ -40,6 +40,8 @@
 
 
 
+#include "msf_localization_core/block_matrix.h"
+
 #include "msf_localization_core/time_stamp.h"
 
 
@@ -238,6 +240,22 @@ public:
     //// Update Step Functions
 
     // TODO
+
+public:
+    virtual int resetErrorStateJacobian(// Time
+                                        const TimeStamp& current_time_stamp,
+                                        // Increment Error State
+                                        const Eigen::VectorXd& increment_error_state,
+                                        //const BlockMatrix::MatrixDense& block_increment_error_state,
+                                        // Reset Error State Jacobian
+                                        //Eigen::SparseMatrix<double>& jacobian_reset_error_state
+                                        // Current State
+                                        std::shared_ptr<StateCore>& current_state
+                                        )
+    {
+        std::cout<<"MsfElementCore::resetErrorStateJacobian()"<<std::endl;
+        return 1;
+    };
 
 
 

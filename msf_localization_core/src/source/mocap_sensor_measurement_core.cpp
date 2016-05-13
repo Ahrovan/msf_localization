@@ -39,7 +39,7 @@ int MocapSensorMeasurementCore::init()
 }
 
 
-int MocapSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d position_mocap_sensor_wrt_mocap_world)
+int MocapSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d &position_mocap_sensor_wrt_mocap_world)
 {
     // Sensor Core -> to be able to do checks
     std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getSensorCoreSharedPtr());
@@ -55,7 +55,7 @@ int MocapSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen:
     return 0;
 }
 
-int MocapSensorMeasurementCore::setAttitudeMocapSensorWrtMocapWorld(const Eigen::Vector4d attitude_mocap_sensor_wrt_mocap_world)
+int MocapSensorMeasurementCore::setAttitudeMocapSensorWrtMocapWorld(const Eigen::Vector4d& attitude_mocap_sensor_wrt_mocap_world)
 {
     // Sensor Core -> to be able to do checks
     std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getSensorCoreSharedPtr());

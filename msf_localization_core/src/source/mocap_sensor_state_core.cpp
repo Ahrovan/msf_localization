@@ -38,7 +38,7 @@ int MocapSensorStateCore::init()
 }
 
 
-int MocapSensorStateCore::updateStateFromIncrementErrorState(Eigen::VectorXd increment_error_state)
+int MocapSensorStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
 
     unsigned int dimension=0;

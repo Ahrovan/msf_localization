@@ -48,7 +48,7 @@ int FreeModelRobotCore::init()
     return 0;
 }
 
-int FreeModelRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore)
+int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore)
 {
     // Map Element Core Pointer
     //std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore(this);
@@ -264,7 +264,7 @@ Eigen::Matrix3d FreeModelRobotCore::getNoisePosition() const
     return this->noisePosition;
 }
 
-int FreeModelRobotCore::setNoisePosition(Eigen::Matrix3d noisePosition)
+int FreeModelRobotCore::setNoisePosition(const Eigen::Matrix3d &noisePosition)
 {
     this->noisePosition=noisePosition;
     return 0;
@@ -275,7 +275,7 @@ Eigen::Matrix3d FreeModelRobotCore::getNoiseLinearSpeed() const
     return this->noiseLinearSpeed;
 }
 
-int FreeModelRobotCore::setNoiseLinearSpeed(Eigen::Matrix3d noiseLinearSpeed)
+int FreeModelRobotCore::setNoiseLinearSpeed(const Eigen::Matrix3d &noiseLinearSpeed)
 {
     this->noiseLinearSpeed=noiseLinearSpeed;
     return 0;
@@ -286,7 +286,7 @@ Eigen::Matrix3d FreeModelRobotCore::getNoiseLinearAcceleration() const
     return this->noiseLinearAcceleration;
 }
 
-int FreeModelRobotCore::setNoiseLinearAcceleration(Eigen::Matrix3d noiseLinearAcceleration)
+int FreeModelRobotCore::setNoiseLinearAcceleration(const Eigen::Matrix3d& noiseLinearAcceleration)
 {
     this->noiseLinearAcceleration=noiseLinearAcceleration;
     return 0;
@@ -297,7 +297,7 @@ Eigen::Matrix3d FreeModelRobotCore::getNoiseAttitude() const
     return this->noiseAttitude;
 }
 
-int FreeModelRobotCore::setNoiseAttitude(Eigen::Matrix3d noiseAttitude)
+int FreeModelRobotCore::setNoiseAttitude(const Eigen::Matrix3d &noiseAttitude)
 {
     this->noiseAttitude=noiseAttitude;
     return 0;
@@ -308,7 +308,7 @@ Eigen::Matrix3d FreeModelRobotCore::getNoiseAngularVelocity() const
     return this->noiseAngularVelocity;
 }
 
-int FreeModelRobotCore::setNoiseAngularVelocity(Eigen::Matrix3d noiseAngularVelocity)
+int FreeModelRobotCore::setNoiseAngularVelocity(const Eigen::Matrix3d& noiseAngularVelocity)
 {
     this->noiseAngularVelocity=noiseAngularVelocity;
     return 0;
@@ -320,7 +320,7 @@ Eigen::Matrix3d FreeModelRobotCore::getNoiseAngularAcceleration() const
     return this->noiseAngularAcceleration;
 }
 
-int FreeModelRobotCore::setNoiseAngularAcceleration(Eigen::Matrix3d noiseAngularAcceleration)
+int FreeModelRobotCore::setNoiseAngularAcceleration(const Eigen::Matrix3d& noiseAngularAcceleration)
 {
     this->noiseAngularAcceleration=noiseAngularAcceleration;
     return 0;
@@ -407,37 +407,37 @@ int FreeModelRobotCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
-int FreeModelRobotCore::setInitErrorStateVariancePosition(Eigen::Vector3d initVariance)
+int FreeModelRobotCore::setInitErrorStateVariancePosition(const Eigen::Vector3d &initVariance)
 {
     this->covariance_init_error_state_.block<3,3>(0,0)=initVariance.asDiagonal();
     return 0;
 }
 
-int FreeModelRobotCore::setInitErrorStateVarianceLinearSpeed(Eigen::Vector3d initVariance)
+int FreeModelRobotCore::setInitErrorStateVarianceLinearSpeed(const Eigen::Vector3d& initVariance)
 {
     this->covariance_init_error_state_.block<3,3>(3,3)=initVariance.asDiagonal();
     return 0;
 }
 
-int FreeModelRobotCore::setInitErrorStateVarianceLinearAcceleration(Eigen::Vector3d initVariance)
+int FreeModelRobotCore::setInitErrorStateVarianceLinearAcceleration(const Eigen::Vector3d &initVariance)
 {
     this->covariance_init_error_state_.block<3,3>(6,6)=initVariance.asDiagonal();
     return 0;
 }
 
-int FreeModelRobotCore::setInitErrorStateVarianceAttitude(Eigen::Vector3d initVariance)
+int FreeModelRobotCore::setInitErrorStateVarianceAttitude(const Eigen::Vector3d& initVariance)
 {
     this->covariance_init_error_state_.block<3,3>(9,9)=initVariance.asDiagonal();
     return 0;
 }
 
-int FreeModelRobotCore::setInitErrorStateVarianceAngularVelocity(Eigen::Vector3d initVariance)
+int FreeModelRobotCore::setInitErrorStateVarianceAngularVelocity(const Eigen::Vector3d &initVariance)
 {
     this->covariance_init_error_state_.block<3,3>(12,12)=initVariance.asDiagonal();
     return 0;
 }
 
-int FreeModelRobotCore::setInitErrorStateVarianceAngularAcceleration(Eigen::Vector3d initVariance)
+int FreeModelRobotCore::setInitErrorStateVarianceAngularAcceleration(const Eigen::Vector3d& initVariance)
 {
     this->covariance_init_error_state_.block<3,3>(15,15)=initVariance.asDiagonal();
     return 0;
@@ -487,7 +487,7 @@ int FreeModelRobotCore::predictState(//Time
     return 0;
 }
 
-int FreeModelRobotCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
+int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp, const std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
 {
 
     // Checks in the past state
@@ -642,7 +642,7 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
+int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp, std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
 {
 
     // Create the predicted state if it doesn't exist
@@ -920,6 +920,87 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     return 0;
 }
 
+int FreeModelRobotCore::resetErrorStateJacobian(// Time
+                                                const TimeStamp& current_time_stamp,
+                                                // Increment Error State
+                                                const Eigen::VectorXd& increment_error_state,
+                                                // Current State
+                                                std::shared_ptr<StateCore>& current_state
+                                                )
+{
+    // Checks
+    if(!current_state)
+        return -1;
 
+
+    // Resize Jacobian
+    current_state->jacobian_error_state_reset_.resize(this->dimension_error_state_, this->dimension_error_state_);
+
+    // Fill
+    std::vector< Eigen::Triplet<double> > triplets_jacobian_error_reset;
+
+    int dimension_error_state_i=0;
+
+    // Position
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Lin speed
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Lin acceleration
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Attitude
+    {
+        // Error Reset Matrixes
+        Eigen::Matrix3d G_update_theta_robot=Eigen::Matrix3d::Identity(3,3);
+
+
+        // Ojo, signo cambiado por la definicion de incrementError!
+        G_update_theta_robot-=Quaternion::skewSymMat(0.5*increment_error_state.block<3,1>(dimension_error_state_i,0));
+
+        // Triplets
+        BlockMatrix::insertVectorEigenTripletFromEigenDense(triplets_jacobian_error_reset, G_update_theta_robot, dimension_error_state_i, dimension_error_state_i);
+
+        dimension_error_state_i+=3;
+    }
+
+    // Angular Veloc
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+    // Angular Acc
+    {
+        for(int i=0; i<3; i++)
+            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
+
+        dimension_error_state_i+=3;
+    }
+
+
+    current_state->jacobian_error_state_reset_.setFromTriplets(triplets_jacobian_error_reset.begin(), triplets_jacobian_error_reset.end());
+
+    // End
+    return 0;
+}
 
 

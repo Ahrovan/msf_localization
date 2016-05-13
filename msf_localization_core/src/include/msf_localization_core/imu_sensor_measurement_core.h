@@ -28,7 +28,7 @@ public:
 protected:
     Eigen::Vector4d Orientation;
 public:
-    int setOrientation(const Eigen::Vector4d Orientation);
+    int setOrientation(const Eigen::Vector4d& Orientation);
     Eigen::Vector4d getOrientation() const;
 
 
@@ -40,7 +40,7 @@ public:
 protected:
     Eigen::Vector3d AngularVelocity;
 public:
-    int setAngularVelocity(Eigen::Vector3d AngularVelocity);
+    int setAngularVelocity(const Eigen::Vector3d& AngularVelocity);
     Eigen::Vector3d getAngularVelocity() const;
 
 
@@ -52,7 +52,7 @@ public:
 protected:
     Eigen::Vector3d LinearAcceleration;
 public:
-    int setLinearAcceleration(Eigen::Vector3d LinearAcceleration);
+    int setLinearAcceleration(const Eigen::Vector3d& LinearAcceleration);
     Eigen::Vector3d getLinearAcceleration() const;
 
 
