@@ -532,7 +532,7 @@ int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousT
     // posi / posi
     if(flag_estimation_position_mocap_world_wrt_world_)
     {
-        //predictedState->error_state_jacobian_.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+        // Eigen::MatrixXd::Identity(3,3);
         for(int i=0; i<3; i++)
             tripletJacobianErrorState.push_back(Eigen::Triplet<double>(i,i,1));
     }
@@ -544,7 +544,7 @@ int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousT
     // att / att
     if(flag_estimation_attitude_mocap_world_wrt_world_)
     {
-        //predictedState->error_state_jacobian_.angular.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+        // Eigen::MatrixXd::Identity(3,3);
         for(int i=0; i<3; i++)
             tripletJacobianErrorState.push_back(Eigen::Triplet<double>(3+i,3+i,1));
     }
@@ -561,12 +561,14 @@ int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousT
 
     ///// Jacobian Error State Noise
 
-    predictedState->jacobian_error_state_noise_.resize(0, 0);
-    predictedState->jacobian_error_state_noise_.reserve(0);
+    {
+        predictedState->jacobian_error_state_noise_.resize(0, 0);
+        predictedState->jacobian_error_state_noise_.reserve(0);
 
-    std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
+        std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
 
-    // Nothing to do
+        // Nothing to do
+    }
 
 
 

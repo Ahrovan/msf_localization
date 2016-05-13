@@ -571,15 +571,10 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobiansSpecific(const Time
                                                                       const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
                                                                       std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState)
 {
-    // Poly
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerLandmarkStateCore>(pastStateI);
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerLandmarkStateCore>(predictedStateI);
-
-
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        return 1;
+        return -1;
     }
 
 
@@ -606,7 +601,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobiansSpecific(const Time
     // posi / posi
     if(flag_estimation_position_visual_marker_wrt_world)
     {
-        //predictedState->error_state_jacobian_.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+        //Eigen::MatrixXd::Identity(3,3);
         for(int i=0; i<3; i++)
             tripletJacobianErrorState.push_back(Eigen::Triplet<double>(i,i,1));
     }
@@ -618,7 +613,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobiansSpecific(const Time
     // att / att
     if(flag_estimation_attitude_visual_marker_wrt_world)
     {
-        //predictedState->error_state_jacobian_.angular.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+        //Eigen::MatrixXd::Identity(3,3);
         for(int i=0; i<3; i++)
             tripletJacobianErrorState.push_back(Eigen::Triplet<double>(3+i,3+i,1));
     }

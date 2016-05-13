@@ -757,10 +757,11 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
     ///// Robot
 
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    TimeStamp beginTimePredictRobot=getTimeStamp();
-#endif
     {
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictRobot=getTimeStamp();
+#endif
+
         //
         std::shared_ptr<StateCore> predicted_state;
 
@@ -801,186 +802,195 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
         // Set
         ThePredictedState->TheRobotStateCore=predicted_state;
-    }
+
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() predict Robot time state and jac pred: "<<(getTimeStamp()-beginTimePredictRobot).nsec<<std::endl;
-        this->log(logString.str());
-    }
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Robot time state and jac pred: "<<(getTimeStamp()-beginTimePredictRobot).nsec<<std::endl;
+            this->log(logString.str());
+        }
 #endif
+    }
 
 
     ///// Inputs
 
-    // Clean the list
-    ThePredictedState->TheListInputStateCore.clear();
-
-    // Iterate
-    for(std::list< std::shared_ptr<StateCore> >::iterator itInput=ThePreviousState->TheListInputStateCore.begin();
-        itInput!=ThePreviousState->TheListInputStateCore.end();
-        ++itInput)
     {
-        //
-        std::shared_ptr<StateCore> predicted_state;
+        // Clean the list
+        ThePredictedState->TheListInputStateCore.clear();
 
-        // State
-        int error_predict_state=(*itInput)->getMsfElementCoreSharedPtr()->
-                predictState(//Time
-                             ThePreviousTimeStamp,
-                             ThePredictedTimeStamp,
-                             // Previous State
-                             ThePreviousState,
-                             // Input
-                             inputCommand,
-                             // Predicted State
-                             predicted_state);
-        if(error_predict_state)
+        // Iterate
+        for(std::list< std::shared_ptr<StateCore> >::iterator itInput=ThePreviousState->TheListInputStateCore.begin();
+            itInput!=ThePreviousState->TheListInputStateCore.end();
+            ++itInput)
         {
-            std::cout<<"input: error_predict_state"<<std::endl;
-            return error_predict_state;
+            //
+            std::shared_ptr<StateCore> predicted_state;
+
+            // State
+            int error_predict_state=(*itInput)->getMsfElementCoreSharedPtr()->
+                    predictState(//Time
+                                 ThePreviousTimeStamp,
+                                 ThePredictedTimeStamp,
+                                 // Previous State
+                                 ThePreviousState,
+                                 // Input
+                                 inputCommand,
+                                 // Predicted State
+                                 predicted_state);
+            if(error_predict_state)
+            {
+                std::cout<<"input: error_predict_state"<<std::endl;
+                return error_predict_state;
+            }
+
+
+            // Jacobian Error State
+            int error_predict_error_state_jacobian=(*itInput)->getMsfElementCoreSharedPtr()->
+                    predictErrorStateJacobian(//Time
+                                             ThePreviousTimeStamp,
+                                             ThePredictedTimeStamp,
+                                             // Previous State
+                                             ThePreviousState,
+                                             // Input
+                                             inputCommand,
+                                             // Predicted State
+                                             predicted_state);
+            if(error_predict_error_state_jacobian)
+            {
+                std::cout<<"input: error_predict_error_state_jacobian"<<std::endl;
+                return error_predict_error_state_jacobian;
+            }
+
+            // Set
+            ThePredictedState->TheListInputStateCore.push_back(predicted_state);
         }
-
-
-        // Jacobian Error State
-        int error_predict_error_state_jacobian=(*itInput)->getMsfElementCoreSharedPtr()->
-                predictErrorStateJacobian(//Time
-                                         ThePreviousTimeStamp,
-                                         ThePredictedTimeStamp,
-                                         // Previous State
-                                         ThePreviousState,
-                                         // Input
-                                         inputCommand,
-                                         // Predicted State
-                                         predicted_state);
-        if(error_predict_error_state_jacobian)
-        {
-            std::cout<<"input: error_predict_error_state_jacobian"<<std::endl;
-            return error_predict_error_state_jacobian;
-        }
-
-        // Set
-        ThePredictedState->TheListInputStateCore.push_back(predicted_state);
     }
 
 
     ///// Sensors
+
+    {
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    TimeStamp beginTimePredictSensors=getTimeStamp();
+        TimeStamp beginTimePredictSensors=getTimeStamp();
 #endif
 
-    // Clean the list
-    ThePredictedState->TheListSensorStateCore.clear();
+        // Clean the list
+        ThePredictedState->TheListSensorStateCore.clear();
 
 
-    // Iterate
-    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorElement=ThePreviousState->TheListSensorStateCore.begin();
-        itSensorElement!=ThePreviousState->TheListSensorStateCore.end();
-        ++itSensorElement)
-    {
-        //
-        std::shared_ptr<StateCore> predicted_state;
-
-        // State
-        int error_predict_state=(*itSensorElement)->getMsfElementCoreSharedPtr()->
-                predictState(//Time
-                             ThePreviousTimeStamp,
-                             ThePredictedTimeStamp,
-                             // Previous State
-                             ThePreviousState,
-                             // Input
-                             inputCommand,
-                             // Predicted State
-                             predicted_state);
-        if(error_predict_state)
+        // Iterate
+        for(std::list< std::shared_ptr<StateCore> >::iterator itSensorElement=ThePreviousState->TheListSensorStateCore.begin();
+            itSensorElement!=ThePreviousState->TheListSensorStateCore.end();
+            ++itSensorElement)
         {
-            std::cout<<"sensor: error_predict_state"<<std::endl;
-            return error_predict_state;
+            //
+            std::shared_ptr<StateCore> predicted_state;
+
+            // State
+            int error_predict_state=(*itSensorElement)->getMsfElementCoreSharedPtr()->
+                    predictState(//Time
+                                 ThePreviousTimeStamp,
+                                 ThePredictedTimeStamp,
+                                 // Previous State
+                                 ThePreviousState,
+                                 // Input
+                                 inputCommand,
+                                 // Predicted State
+                                 predicted_state);
+            if(error_predict_state)
+            {
+                std::cout<<"sensor: error_predict_state"<<std::endl;
+                return error_predict_state;
+            }
+
+
+            // Jacobian Error State
+            int error_predict_error_state_jacobian=(*itSensorElement)->getMsfElementCoreSharedPtr()->
+                    predictErrorStateJacobian(//Time
+                                             ThePreviousTimeStamp,
+                                             ThePredictedTimeStamp,
+                                             // Previous State
+                                             ThePreviousState,
+                                             // Input
+                                             inputCommand,
+                                             // Predicted State
+                                             predicted_state);
+            if(error_predict_error_state_jacobian)
+            {
+                std::cout<<"sensor: error_predict_error_state_jacobian"<<std::endl;
+                return error_predict_error_state_jacobian;
+            }
+
+            // Set
+            ThePredictedState->TheListSensorStateCore.push_back(predicted_state);
         }
 
 
-        // Jacobian Error State
-        int error_predict_error_state_jacobian=(*itSensorElement)->getMsfElementCoreSharedPtr()->
-                predictErrorStateJacobian(//Time
-                                         ThePreviousTimeStamp,
-                                         ThePredictedTimeStamp,
-                                         // Previous State
-                                         ThePreviousState,
-                                         // Input
-                                         inputCommand,
-                                         // Predicted State
-                                         predicted_state);
-        if(error_predict_error_state_jacobian)
-        {
-            std::cout<<"sensor: error_predict_error_state_jacobian"<<std::endl;
-            return error_predict_error_state_jacobian;
-        }
-
-        // Set
-        ThePredictedState->TheListSensorStateCore.push_back(predicted_state);
-    }
-
-
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() predict Sensors time state and jac pred: "<<(getTimeStamp()-beginTimePredictSensors).nsec<<std::endl;
-        this->log(logString.str());
-    }
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Sensors time state and jac pred: "<<(getTimeStamp()-beginTimePredictSensors).nsec<<std::endl;
+            this->log(logString.str());
+        }
 #endif
+
+    }
 
 
     ///// Map
 
-    // Clean the list
-    ThePredictedState->TheListMapElementStateCore.clear();
-
-    // Iterate
-    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElement=ThePreviousState->TheListMapElementStateCore.begin();
-        itMapElement!=ThePreviousState->TheListMapElementStateCore.end();
-        ++itMapElement)
     {
-        //
-        std::shared_ptr<StateCore> predicted_state;
+        // Clean the list
+        ThePredictedState->TheListMapElementStateCore.clear();
 
-        // State
-        int error_predict_state=(*itMapElement)->getMsfElementCoreSharedPtr()->
-                predictState(//Time
-                             ThePreviousTimeStamp,
-                             ThePredictedTimeStamp,
-                             // Previous State
-                             ThePreviousState,
-                             // Input
-                             inputCommand,
-                             // Predicted State
-                             predicted_state);
-        if(error_predict_state)
+        // Iterate
+        for(std::list< std::shared_ptr<StateCore> >::iterator itMapElement=ThePreviousState->TheListMapElementStateCore.begin();
+            itMapElement!=ThePreviousState->TheListMapElementStateCore.end();
+            ++itMapElement)
         {
-            std::cout<<"map: error_predict_state"<<std::endl;
-            return error_predict_state;
+            //
+            std::shared_ptr<StateCore> predicted_state;
+
+            // State
+            int error_predict_state=(*itMapElement)->getMsfElementCoreSharedPtr()->
+                    predictState(//Time
+                                 ThePreviousTimeStamp,
+                                 ThePredictedTimeStamp,
+                                 // Previous State
+                                 ThePreviousState,
+                                 // Input
+                                 inputCommand,
+                                 // Predicted State
+                                 predicted_state);
+            if(error_predict_state)
+            {
+                std::cout<<"map: error_predict_state"<<std::endl;
+                return error_predict_state;
+            }
+
+
+            // Jacobian Error State
+            int error_predict_error_state_jacobian=(*itMapElement)->getMsfElementCoreSharedPtr()->
+                    predictErrorStateJacobian(//Time
+                                             ThePreviousTimeStamp,
+                                             ThePredictedTimeStamp,
+                                             // Previous State
+                                             ThePreviousState,
+                                             // Input
+                                             inputCommand,
+                                             // Predicted State
+                                             predicted_state);
+            if(error_predict_error_state_jacobian)
+            {
+                std::cout<<"map: error_predict_error_state_jacobian"<<std::endl;
+                return error_predict_error_state_jacobian;
+            }
+
+            // Set
+            ThePredictedState->TheListMapElementStateCore.push_back(predicted_state);
         }
-
-
-        // Jacobian Error State
-        int error_predict_error_state_jacobian=(*itMapElement)->getMsfElementCoreSharedPtr()->
-                predictErrorStateJacobian(//Time
-                                         ThePreviousTimeStamp,
-                                         ThePredictedTimeStamp,
-                                         // Previous State
-                                         ThePreviousState,
-                                         // Input
-                                         inputCommand,
-                                         // Predicted State
-                                         predicted_state);
-        if(error_predict_error_state_jacobian)
-        {
-            std::cout<<"map: error_predict_error_state_jacobian"<<std::endl;
-            return error_predict_error_state_jacobian;
-        }
-
-        // Set
-        ThePredictedState->TheListMapElementStateCore.push_back(predicted_state);
     }
 
 
@@ -1042,17 +1052,17 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-    /// Total Robot
-#if _DEBUG_MSF_LOCALIZATION_CORE
+    /// Cov Total Robot
+
     {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() covariance robot TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-        this->log(logString.str());
-    }
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() covariance robot TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
 #endif
 
-
-    {
         /// Dimensions total robot error state
 
         // Dimensions
@@ -1326,150 +1336,157 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     }
 
 
-    /// Robot-Sensors
-#if _DEBUG_MSF_LOCALIZATION_CORE
+    /// Cov Robot-Sensors
+
     {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() covariance robot-sensor TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-        this->log(logString.str());
-    }
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() covariance robot-sensor TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
 #endif
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    TimeStamp beginTimePredictCoreCovRobSen=getTimeStamp();
+        TimeStamp beginTimePredictCoreCovRobSen=getTimeStamp();
 #endif
 
-    // Init Point
-    WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    WorkingInitPoint.row=0;
-
-
-    // Iterate on the sensors
-    for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
-        it1Sens!=ThePredictedState->TheListSensorStateCore.end();
-        ++it1Sens)
-    {
-
-        // Dimensions
-        int dimensionRobotErrorState=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        int dimensionSensorErrorState=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-
-
-        // Calculate
-        ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)=
-                jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)*(*it1Sens)->getJacobianErrorStateSensor(0).transpose();
-
-
-
-        // Set the Symmetric
-        Eigen::MatrixXd auxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState);
-        ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row,dimensionSensorErrorState, dimensionRobotErrorState)=
-                auxMatSym.transpose();
-
-
-        // Update Point
+        // Init Point
+        WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         WorkingInitPoint.row=0;
-        WorkingInitPoint.col+=dimensionSensorErrorState;
-    }
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() predict Core time cov rob-sen: "<<(getTimeStamp()-beginTimePredictCoreCovRobSen).nsec<<std::endl;
-        this->log(logString.str());
-    }
-#endif
 
 
-
-    /// Sensors
-#if _DEBUG_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() covariance sensors TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    TimeStamp beginTimePredictCoreCovSenSen=getTimeStamp();
-#endif
-
-    // Init Point
-    WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    WorkingInitPoint.row=WorkingInitPoint.col;
-
-    // Iterate
-    for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
-        it1Sens!=ThePredictedState->TheListSensorStateCore.end();
-        ++it1Sens)
-    {
-
-        // Dimension sensor1
-        int dimensionSensor1ErrorState=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-
-
-        // Aux vars -> Jacobians
-        Eigen::MatrixXd jacobianSensor1ErrorState=(*it1Sens)->getJacobianErrorStateSensor(0);
-
-
-        // Iterate again
-        for(std::list< std::shared_ptr<StateCore> >::iterator it2Sens=it1Sens;
-            it2Sens!=ThePredictedState->TheListSensorStateCore.end();
-            ++it2Sens)
+        // Iterate on the sensors
+        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
+            it1Sens!=ThePredictedState->TheListSensorStateCore.end();
+            ++it1Sens)
         {
 
-            // Dimension sensor2
-            int dimensionSensor2ErrorState=(*it2Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+            // Dimensions
+            int dimensionRobotErrorState=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+            int dimensionSensorErrorState=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
 
             // Calculate
-            Eigen::MatrixXd CovarianceAuxMatrix=
-                    jacobianSensor1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)*(*it2Sens)->getJacobianErrorStateSensor(0).transpose();
+            ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)=
+                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)*(*it1Sens)->getJacobianErrorStateSensor(0).transpose();
 
 
 
-            // Noise if the same
-            if((*it1Sens) == (*it2Sens))
-            {
-                Eigen::SparseMatrix<double> covarianceErrorStateNoise=(*it1Sens)->getJacobianErrorStateNoise() * std::dynamic_pointer_cast<SensorCore>((*it1Sens)->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime) * (*it1Sens)->getJacobianErrorStateNoise().transpose();
-                ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState)=
-                        CovarianceAuxMatrix+
-                        Eigen::MatrixXd(covarianceErrorStateNoise);
-            }
+            // Set the Symmetric
+            Eigen::MatrixXd auxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState);
+            ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row,dimensionSensorErrorState, dimensionRobotErrorState)=
+                    auxMatSym.transpose();
 
 
-            // Value and Symmetric if different
-            if((*it1Sens) != (*it2Sens))
-            {
-                //Eigen::MatrixXd AuxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState).eval();
-                ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState)=
-                        CovarianceAuxMatrix;
-
-                ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row, dimensionSensor2ErrorState, dimensionSensor1ErrorState)=
-                        CovarianceAuxMatrix.transpose().eval();
-            }
-
-            // Update Working Point
-            WorkingInitPoint.col+=dimensionSensor2ErrorState;
-
+            // Update Point
+            WorkingInitPoint.row=0;
+            WorkingInitPoint.col+=dimensionSensorErrorState;
         }
 
-        // Update the dimension for the next sensor
-        WorkingInitPoint.row+=dimensionSensor1ErrorState;
-        WorkingInitPoint.col=WorkingInitPoint.row;
-
-    }
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() predict Core time cov sen-sen: "<<(getTimeStamp()-beginTimePredictCoreCovSenSen).nsec<<std::endl;
-        this->log(logString.str());
-    }
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Core time cov rob-sen: "<<(getTimeStamp()-beginTimePredictCoreCovRobSen).nsec<<std::endl;
+            this->log(logString.str());
+        }
 #endif
 
+    }
 
-    /// Robot-Map
+
+    /// Cov Sensors
+
+    {
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() covariance sensors TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictCoreCovSenSen=getTimeStamp();
+#endif
+
+        // Init Point
+        WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+        WorkingInitPoint.row=WorkingInitPoint.col;
+
+        // Iterate
+        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
+            it1Sens!=ThePredictedState->TheListSensorStateCore.end();
+            ++it1Sens)
+        {
+
+            // Dimension sensor1
+            int dimensionSensor1ErrorState=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+
+
+            // Aux vars -> Jacobians
+            Eigen::SparseMatrix<double> jacobianSensor1ErrorState=(*it1Sens)->getJacobianErrorStateSensor(0);
+
+
+            // Iterate again
+            for(std::list< std::shared_ptr<StateCore> >::iterator it2Sens=it1Sens;
+                it2Sens!=ThePredictedState->TheListSensorStateCore.end();
+                ++it2Sens)
+            {
+
+                // Dimension sensor2
+                int dimensionSensor2ErrorState=(*it2Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
+
+
+                // Calculate
+                Eigen::MatrixXd CovarianceAuxMatrix=
+                        jacobianSensor1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionSensor1ErrorState,dimensionSensor2ErrorState)*(*it2Sens)->getJacobianErrorStateSensor(0).transpose();
+
+
+                // Noise if the same
+                if((*it1Sens) == (*it2Sens))
+                {
+                    Eigen::SparseMatrix<double> covarianceErrorStateNoise=(*it1Sens)->getJacobianErrorStateNoise() * (*it1Sens)->getMsfElementCoreSharedPtr()->getCovarianceNoise(DeltaTime) * (*it1Sens)->getJacobianErrorStateNoise().transpose();
+
+                    ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState)=
+                            CovarianceAuxMatrix+
+                            Eigen::MatrixXd(covarianceErrorStateNoise);
+                }
+
+
+                // Value and Symmetric if different
+                if((*it1Sens) != (*it2Sens))
+                {
+                    //Eigen::MatrixXd AuxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState).eval();
+                    ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState)=
+                            CovarianceAuxMatrix;
+
+                    ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row, dimensionSensor2ErrorState, dimensionSensor1ErrorState)=
+                            CovarianceAuxMatrix.transpose().eval();
+                }
+
+                // Update Working Point
+                WorkingInitPoint.col+=dimensionSensor2ErrorState;
+
+            }
+
+            // Update the dimension for the next sensor
+            WorkingInitPoint.row+=dimensionSensor1ErrorState;
+            WorkingInitPoint.col=WorkingInitPoint.row;
+
+        }
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Core time cov sen-sen: "<<(getTimeStamp()-beginTimePredictCoreCovSenSen).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+    }
+
+
+    /// Cov Robot-Map
 
     {
         // dimensions
@@ -1517,8 +1534,11 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-    /// Sensors-Map
+    /// Cov Sensors-Map
     // TODO
+    {
+
+    }
 
 
     /// Map
@@ -1548,7 +1568,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
             // Aux vars -> Jacobians
-            Eigen::MatrixXd jacobianMapElement1ErrorState=(*it1MapElement)->getJacobianErrorStateMapElement(0);
+            Eigen::SparseMatrix<double> jacobianMapElement1ErrorState=(*it1MapElement)->getJacobianErrorStateMapElement(0);
 
 
             // Iterate again
@@ -1631,7 +1651,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         this->log(logString.str());
     }
 #endif
-
 
 
     // End

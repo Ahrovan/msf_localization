@@ -1158,54 +1158,62 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
                                               const std::shared_ptr<ImuSensorStateCore> pastState,
                                               std::shared_ptr<ImuSensorStateCore>& predictedState)
 {
-    //std::cout<<"ImuSensorCore::predictErrorStateJacobians"<<std::endl;
-
-
-    // Poly
-    //std::shared_ptr<ImuSensorStateCore> pastState=std::static_pointer_cast<ImuSensorStateCore>(pastStateI);
-    //std::shared_ptr<ImuSensorStateCore> predictedState=std::static_pointer_cast<ImuSensorStateCore>(predictedStateI);
-
-
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        return 1;
+        return -1;
     }
 
 
-    //// Jacobians Error State
-
-
-    // posi / posi
-    if(flagEstimationPositionSensorWrtRobot)
-        predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
-
-    // att / att
-    // TODO Fix!!
-    if(flagEstimationAttitudeSensorWrtRobot)
-        predictedState->errorStateJacobian.attitudeSensorWrtRobot=Eigen::Matrix3d::Identity();
-
-    // ba / ba
-    if(flagEstimationBiasLinearAcceleration)
-        predictedState->errorStateJacobian.biasesLinearAcceleration=Eigen::Matrix3d::Identity();
-
-    // ka / ka
-    if(flagEstimationScaleLinearAcceleration)
-        predictedState->errorStateJacobian.scaleLinearAcceleration=Eigen::Matrix3d::Identity();
-
-    // bw / bw
-    if(flagEstimationBiasAngularVelocity)
-        predictedState->errorStateJacobian.biasesAngularVelocity=Eigen::Matrix3d::Identity();
-
-    // kw / kw
-    if(flagEstimationScaleAngularVelocity)
-        predictedState->errorStateJacobian.scaleAngularVelocity=Eigen::Matrix3d::Identity();
-
-
-
-
-    /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
+    //// Jacobians Error State - Error State: Fx & Jacobians Error State - Error Parameters: Fp
+    // TODO FIX!
+    /// World
     {
+        // Nothing to do
+    }
+
+    /// Robot
+    {
+        // Nothing to do
+    }
+
+    /// Inputs
+    {
+        // Nothing to do
+    }
+
+    /// Sensors
+    {
+        // posi / posi
+        if(flagEstimationPositionSensorWrtRobot)
+            predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
+
+        // att / att
+        // TODO Fix!!
+        if(flagEstimationAttitudeSensorWrtRobot)
+            predictedState->errorStateJacobian.attitudeSensorWrtRobot=Eigen::Matrix3d::Identity();
+
+        // ba / ba
+        if(flagEstimationBiasLinearAcceleration)
+            predictedState->errorStateJacobian.biasesLinearAcceleration=Eigen::Matrix3d::Identity();
+
+        // ka / ka
+        if(flagEstimationScaleLinearAcceleration)
+            predictedState->errorStateJacobian.scaleLinearAcceleration=Eigen::Matrix3d::Identity();
+
+        // bw / bw
+        if(flagEstimationBiasAngularVelocity)
+            predictedState->errorStateJacobian.biasesAngularVelocity=Eigen::Matrix3d::Identity();
+
+        // kw / kw
+        if(flagEstimationScaleAngularVelocity)
+            predictedState->errorStateJacobian.scaleAngularVelocity=Eigen::Matrix3d::Identity();
+
+
+
+
+        /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
+
         Eigen::SparseMatrix<double> jacobian_error_state;
 
         jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
@@ -1281,96 +1289,85 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
 
         // TODO FIX!!!!!
         predictedState->setJacobianErrorStateSensor(jacobian_error_state, 0);
+
+    }
+
+    /// Map Elements
+    {
+        // Nothing to do
     }
 
 
 
-
-
-    //// Jacobian Error State Noise
-
-    //Eigen::SparseMatrix<double> jacobian_error_state_noise;
-
-    predictedState->jacobian_error_state_noise_.resize(getDimensionErrorState(), getDimensionNoise());
-    //jacobian_error_state_noise.setZero();
-    predictedState->jacobian_error_state_noise_.reserve(getDimensionNoise());
-
-//predictedStateI=predictedState;
-//return 0;
-
-
-
-    // Fill
-    int dimension_noise_i=0;
-
-    std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
-
-
-    // bias linear acceleration
-    if(isEstimationBiasLinearAccelerationEnabled())
+    //// Jacobian Error State - Error Noise
+    // TODO FIX!
     {
-        int dimension_error_state_i=0;
 
-        if(isEstimationPositionSensorWrtRobotEnabled())
-            dimension_error_state_i+=3;
-
-        if(isEstimationAttitudeSensorWrtRobotEnabled())
-            dimension_error_state_i+=3;
+        predictedState->jacobian_error_state_noise_.resize(getDimensionErrorState(), getDimensionNoise());
+        predictedState->jacobian_error_state_noise_.reserve(getDimensionNoise());
 
 
-        // Update jacobian
-        //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
-        for(int i=0; i<3; i++)
-            tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
+        // Fill
+        int dimension_noise_i=0;
+
+        std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
 
 
-
-        // Update dimension for next
-        dimension_noise_i+=3;
-    }
-
-    // bias angular velocity
-    if(isEstimationBiasAngularVelocityEnabled())
-    {
-        int dimension_error_state_i=0;
-
-        if(isEstimationPositionSensorWrtRobotEnabled())
-            dimension_error_state_i+=3;
-
-        if(isEstimationAttitudeSensorWrtRobotEnabled())
-            dimension_error_state_i+=3;
-
+        // bias linear acceleration
         if(isEstimationBiasLinearAccelerationEnabled())
-            dimension_error_state_i+=3;
+        {
+            int dimension_error_state_i=0;
 
-        if(isEstimationScaleLinearAccelerationEnabled())
-            dimension_error_state_i+=3;
+            if(isEstimationPositionSensorWrtRobotEnabled())
+                dimension_error_state_i+=3;
 
-        // Update jacobian
-        //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
-        for(int i=0; i<3; i++)
-            tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
+            if(isEstimationAttitudeSensorWrtRobotEnabled())
+                dimension_error_state_i+=3;
 
-        // Update dimension for next
-        dimension_noise_i+=3;
+            // Update jacobian
+            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+            for(int i=0; i<3; i++)
+                tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
+
+
+            // Update dimension for next
+            dimension_noise_i+=3;
+        }
+
+        // bias angular velocity
+        if(isEstimationBiasAngularVelocityEnabled())
+        {
+            int dimension_error_state_i=0;
+
+            if(isEstimationPositionSensorWrtRobotEnabled())
+                dimension_error_state_i+=3;
+
+            if(isEstimationAttitudeSensorWrtRobotEnabled())
+                dimension_error_state_i+=3;
+
+            if(isEstimationBiasLinearAccelerationEnabled())
+                dimension_error_state_i+=3;
+
+            if(isEstimationScaleLinearAccelerationEnabled())
+                dimension_error_state_i+=3;
+
+            // Update jacobian
+            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+            for(int i=0; i<3; i++)
+                tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
+
+            // Update dimension for next
+            dimension_noise_i+=3;
+        }
+
+
+
+        predictedState->jacobian_error_state_noise_.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
+
     }
 
 
-
-    predictedState->jacobian_error_state_noise_.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
-
-
-//    {
-//        std::ostringstream logString;
-//        logString<<"jacobianErrorStateNoise imu:"<<std::endl;
-//        logString<<Eigen::MatrixXd(predictedState->jacobianErrorStateNoise)<<std::endl;
-//        this->log(logString.str());
-//    }
-
-
-    //predictedStateI=predictedState;
-
-
+    // End
     return 0;
 }
 

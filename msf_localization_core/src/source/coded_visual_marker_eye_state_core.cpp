@@ -31,10 +31,6 @@ int CodedVisualMarkerEyeStateCore::init()
 {
     this->setSensorStateCoreType(SensorStateCoreTypes::coded_visual_maker_eye);
 
-    // Error State Jacobian: Init to zero
-    error_state_jacobian_.position_sensor_wrt_robot_.setZero();
-    error_state_jacobian_.attitude_sensor_wrt_robot_.setZero();
-
     return 0;
 }
 

@@ -406,12 +406,13 @@ Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceNoise(const T
 
     // Resize
     covariance_noise.resize(dimension_noise, dimension_noise);
-    //covariance_noise.setZero();
 
     // Fill
-    int dimension_noise_i=0;
+    {
+        int dimension_noise_i=0;
 
-    // Nothing
+        // Nothing
+    }
 
 
     // End
@@ -623,15 +624,10 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
                                                                  std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState)
 {
 
-    // Poly
-    //std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(pastStateI);
-    //std::shared_ptr<CodedVisualMarkerEyeStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedStateI);
-
-
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        return 1;
+        return -1;
     }
 
     // Variables
@@ -680,91 +676,116 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
 
 
 
-    ///// Jacobian Error State
+    ///// Jacobian Error State - Error State: Fx & Jacobian Error State - Error Parameters: Fp
+    // TODO FIX!
 
-    /// Jacobian of the error: Linear Part
-
-    // posi / posi
-    if(this->isEstimationPositionSensorWrtRobotEnabled())
+    /// World
     {
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.resize(3, 3);
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.setZero();
-
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.block<3,3>(0,0)=jacobian_error_sens_pos_wrt_error_state_sens_pos;
+        // Nothing to do
     }
 
-
-    /// Jacobian of the error -> Angular Part
-
-    // att / att
-    // TODO Fix!!
-    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    /// Robot
     {
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.resize(3, 3);
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.setZero();
-
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.block<3,3>(0,0)=jacobian_error_sens_att_wrt_error_state_sens_att;
+        // Nothing to do
     }
 
-
-    /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
+    /// Inputs
     {
-        Eigen::SparseMatrix<double> jacobian_error_state;
-        jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
-        jacobian_error_state.reserve(3*dimension_error_state_); //worst case -> Optimize
+        // Nothing to do
+    }
 
-        std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
+    /// Sensors
+    {
+        // Resize and init
+        Eigen::SparseMatrix<double> jacobian_error_state_wrt_robot_error_state;
+        jacobian_error_state_wrt_robot_error_state.resize(dimension_error_state_, dimension_error_state_);
+        Eigen::SparseMatrix<double> jacobian_error_state_wrt_robot_error_parameters;
+        jacobian_error_state_wrt_robot_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
 
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
+
+
+        // Fill
         int dimension_error_state_i=0;
+        int dimension_error_parameters_i=0;
 
         // Position sensor wrt robot
         if(this->isEstimationPositionSensorWrtRobotEnabled())
         {
-            // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->error_state_jacobian_.position_sensor_wrt_robot_(i,j)));
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_sens_pos_wrt_error_state_sens_pos, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
+        }
+        else
+        {
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_parameters, jacobian_error_sens_pos_wrt_error_state_sens_pos, dimension_error_parameters_i, dimension_error_parameters_i);
+
+            // Update dimension for next
+            dimension_error_parameters_i+=3;
         }
 
         // Attitude sensor wrt robot
         if(this->isEstimationAttitudeSensorWrtRobotEnabled())
         {
             // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_(i,j)));
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_sens_att_wrt_error_state_sens_att, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
         }
+        else
+        {
+            // Add to triplet list
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_parameters, jacobian_error_sens_att_wrt_error_state_sens_att, dimension_error_parameters_i, dimension_error_parameters_i);
+
+            // Update dimension for next
+            dimension_error_parameters_i+=3;
+        }
 
 
-        // Set from triplets
-        jacobian_error_state.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
+        // Set From Triplets
+        jacobian_error_state_wrt_robot_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
+        jacobian_error_state_wrt_robot_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
+
 
         // TODO FIX!!!
-        predictedState->setJacobianErrorStateSensor(jacobian_error_state, 0);
+        predictedState->setJacobianErrorStateSensor(jacobian_error_state_wrt_robot_error_state, 0);
+
+
+        // TODO
+
+    }
+
+    /// Map elements
+    {
+        // Nothing to do
     }
 
 
 
-    //// Jacobian Error State Noise
+    //// Jacobian Error State - Error Input
 
-    // Resize the jacobian
-    predictedState->jacobian_error_state_noise_.resize(getDimensionErrorState(), getDimensionNoise());
-    predictedState->jacobian_error_state_noise_.setZero();
-
-    // Fill
-
-    // Nothing to do
+    {
+        // Nothing to do
+    }
 
 
+    //// Jacobian Error State - Noise Estimation: Fn
 
-    //// Finish
-    //predictedStateI=predictedState;
+    {
+        // Resize
+        predictedState->jacobian_error_state_noise_.resize(this->dimension_error_state_, this->dimension_noise_);
+        //predictedState->jacobian_error_state_noise_.setZero();
+
+        // Fill
+        // Nothing to do
+    }
+
+
 
     // End
     return 0;
@@ -1435,12 +1456,8 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
         jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement_, dimension_robot_error_state);
         jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement_, dimension_robot_error_parameters);
 
-
-
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
-
-
 
         // Fill
         int dimension_error_measurement_i=0;

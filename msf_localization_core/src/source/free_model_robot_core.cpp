@@ -667,14 +667,6 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     jacobian_error_state.resize(18,18);
     jacobian_error_state.reserve(18+36);
 
-//    predictedState->errorStateJacobian.linear.resize(9, 9);
-//    predictedState->errorStateJacobian.linear.reserve(18);
-//    //predictedState->errorStateJacobian.linear.setZero();
-
-
-//    predictedState->errorStateJacobian.angular.resize(9, 9);
-//    predictedState->errorStateJacobian.linear.reserve(36);
-//    //predictedState->errorStateJacobian.angular.setZero();
 
 
 
@@ -682,19 +674,19 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
     // posi / posi  
-    //predictedState->errorStateJacobian.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i,1));
 
 
     // posi / vel
-    //predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::MatrixXd::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,3+i,dt));
 
 
     // posi / acc
-    //predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+    // 0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
     double dt2=pow(dt,2);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,0.5*dt2));
@@ -705,13 +697,13 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // vel / vel
-    //predictedState->errorStateJacobian.linear.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,3+i,1));
 
 
     // vel / acc
-    //predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::MatrixXd::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,6+i,dt));
 
@@ -724,7 +716,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // acc / acc
-    //predictedState->errorStateJacobian.linear.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(6+i,6+i,1));
 
@@ -772,8 +764,6 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // att / att [9 non-zero]
     Eigen::Matrix3d jacobianAttAtt=
             mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+pow(dt,2)/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
-    //predictedState->errorStateJacobian.angular.block<3,3>(0,0)=jacobianAttAtt;
-    //predictedState->errorStateJacobian.angular=jacobianAttAtt.sparseView();
     for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
             tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+j,jacobianAttAtt(i,j)));
@@ -783,8 +773,6 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // att / ang_vel [9 non-zero]
     Eigen::Matrix3d jacobianAttAngVel=
             2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + pow(dt,2)/24*mat_aux_j2);
-    //predictedState->errorStateJacobian.angular.block<3,3>(0,3)=jacobianAttAngVel;
-    //predictedState->errorStateJacobian.angular=jacobianAttAngVel.sparseView();
     for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
             tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+3+j,jacobianAttAngVel(i,j)));
@@ -793,8 +781,6 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // att / ang_accel [9 non-zero]
     Eigen::Matrix3d jacobianAttAngAcc=
             2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*pow(dt,2) + pow(dt,2)/24*mat_aux_j3);
-    //predictedState->errorStateJacobian.angular.block<3,3>(0,6)=jacobianAttAngVel;
-    //predictedState->errorStateJacobian.angular=jacobianAttAngAcc.sparseView();
     for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
             tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+6+j,jacobianAttAngAcc(i,j)));
@@ -805,14 +791,14 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // ang_vel / ang_vel [3 non-zero]
-    //predictedState->errorStateJacobian.angular.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+3+i,1));
 
 
 
     // ang_vel / ang_acc [3 non-zero]
-    //predictedState->errorStateJacobian.angular.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::MatrixXd::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+6+i,dt));
 
@@ -824,7 +810,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // ang_acc / ang_acc [3 non-zero]
-    //predictedState->errorStateJacobian.angular.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+6+i,9+6+i,1));
 
@@ -897,23 +883,6 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
     predictedState->jacobian_error_state_noise_.setFromTriplets(tripletListNoiseJacobian.begin(), tripletListNoiseJacobian.end());
 
-
-
-#if _DEBUG_ROBOT_CORE
-    {
-        std::ostringstream logString;
-        logString<<"FreeModelRobotCore::predictErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
-        logString<<"Jacobian Error State"<<std::endl;
-        logString<<Eigen::MatrixXd(predictedState->errorStateJacobian)<<std::endl;
-        logString<<"Jacobian Error State Noise"<<std::endl;
-        logString<<Eigen::MatrixXd(predictedState->errorStateNoiseJacobian)<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-
-    // Finish
-    //predictedStateI=predictedState;
 
 
 

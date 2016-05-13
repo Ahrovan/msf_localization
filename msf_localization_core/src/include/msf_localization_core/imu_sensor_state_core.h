@@ -36,7 +36,7 @@ public:
     Eigen::Vector3d biasesAngularVelocity;
 public:
     Eigen::Vector3d getBiasesAngularVelocity() const;
-    int setBiasesAngularVelocity(Eigen::Vector3d biasesAngularVelocity);
+    int setBiasesAngularVelocity(const Eigen::Vector3d& biasesAngularVelocity);
 
 
     // Angular Velocity Scale
@@ -45,7 +45,7 @@ public:
     Eigen::Vector3d scaleAngularVelocity;
 public:
     Eigen::Vector3d getScaleAngularVelocity() const;
-    int setScaleAngularVelocity(Eigen::Vector3d scaleAngularVelocity);
+    int setScaleAngularVelocity(const Eigen::Vector3d &scaleAngularVelocity);
 
 
     // Linear Acceleration Biases   
@@ -54,7 +54,7 @@ public:
     Eigen::Vector3d biasesLinearAcceleration;
 public:
     Eigen::Vector3d getBiasesLinearAcceleration() const;
-    int setBiasesLinearAcceleration(Eigen::Vector3d biasesLinearAcceleration);
+    int setBiasesLinearAcceleration(const Eigen::Vector3d& biasesLinearAcceleration);
 
 
     // Linear Acceleration Scale
@@ -63,7 +63,7 @@ public:
     Eigen::Vector3d scaleLinearAcceleration;
 public:
     Eigen::Vector3d getScaleLinearAcceleration() const;
-    int setScaleLinearAcceleration(Eigen::Vector3d scaleLinearAcceleration);
+    int setScaleLinearAcceleration(const Eigen::Vector3d &scaleLinearAcceleration);
 
 
 
@@ -85,10 +85,6 @@ public:
 
 
 
-
-
-//public:
-//    Eigen::MatrixXd getJacobianErrorState();
 
 
 

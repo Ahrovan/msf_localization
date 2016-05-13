@@ -540,14 +540,6 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     jacobian_error_state.resize(this->getDimensionErrorState(),this->getDimensionErrorState());
     jacobian_error_state.reserve(18+36);
 
-//    predictedState->errorStateJacobian.linear.resize(9, 9);
-//    predictedState->errorStateJacobian.linear.reserve(18);
-//    //predictedState->errorStateJacobian.linear.setZero();
-
-
-//    predictedState->errorStateJacobian.angular.resize(9, 9);
-//    predictedState->errorStateJacobian.linear.reserve(36);
-//    //predictedState->errorStateJacobian.angular.setZero();
 
 
 
@@ -555,19 +547,19 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
     // posi / posi
-    //predictedState->errorStateJacobian.linear.block<3,3>(0,0)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i,1));
 
 
     // posi / vel
-    //predictedState->errorStateJacobian.linear.block<3,3>(0,3)=Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::MatrixXd::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,3+i,dt));
 
 
     // posi / acc
-    //predictedState->errorStateJacobian.linear.block<3,3>(0,6)=0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+    // 0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
     double dt2=pow(dt,2);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,0.5*dt2));
@@ -578,13 +570,13 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     // zero
 
     // vel / vel
-    //predictedState->errorStateJacobian.linear.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,3+i,1));
 
 
     // vel / acc
-    //predictedState->errorStateJacobian.linear.block<3,3>(3,6)=Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::MatrixXd::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,6+i,dt));
 
@@ -597,7 +589,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     // zero
 
     // acc / acc
-    //predictedState->errorStateJacobian.linear.block<3,3>(6,6)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(6+i,6+i,1));
 
@@ -636,8 +628,6 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     // att / att [9 non-zero]
     Eigen::Matrix3d jacobianAttAtt=
             mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
-    //predictedState->errorStateJacobian.angular.block<3,3>(0,0)=jacobianAttAtt;
-    //predictedState->errorStateJacobian.angular=jacobianAttAtt.sparseView();
     for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
             tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+j,jacobianAttAtt(i,j)));
@@ -647,8 +637,6 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     // att / ang_vel [9 non-zero]
     Eigen::Matrix3d jacobianAttAngVel=
             2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt);
-    //predictedState->errorStateJacobian.angular.block<3,3>(0,3)=jacobianAttAngVel;
-    //predictedState->errorStateJacobian.angular=jacobianAttAngVel.sparseView();
     for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
             tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+i,9+3+j,jacobianAttAngVel(i,j)));
@@ -660,7 +648,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previo
     // zero
 
     // ang_vel / ang_vel [3 non-zero]
-    //predictedState->errorStateJacobian.angular.block<3,3>(3,3)=Eigen::MatrixXd::Identity(3,3);
+    // Eigen::MatrixXd::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+3+i,1));
 

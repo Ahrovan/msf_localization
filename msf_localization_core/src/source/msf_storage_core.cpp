@@ -701,13 +701,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
                 // Jacobian
-#if _DEBUG_DISPLAY
-                logString<<std::endl;
-                logString<<"Jacobian Robot Linear=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.linear<<"]";
 
-                logString<<std::endl;
-                logString<<"Jacobian Robot Angular=["<<std::endl<<FreeModelRobotStatePtr->errorStateJacobian.angular<<"]";
-#endif
 
                 break;
             }
@@ -757,23 +751,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
                     // Jacobian
-#if _DEBUG_DISPLAY
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                        logString<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
 
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                        logString<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
-
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                        logString<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
-
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                        logString<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
-#endif
 
 
                     break;
@@ -794,60 +772,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
             logString<<"\t\t";
             logString<<"Map Element";
 
-            /*
-            switch(SensorCorePtrAux->getSensorType())
-            {
-                case SensorTypes::undefined:
-                {
-                    break;
-                }
-                case SensorTypes::imu:
-                {
-                    logString<<" (IMU)";
-                    std::shared_ptr<const ImuSensorCore> ImuSensorCorePtrAux=std::dynamic_pointer_cast< const ImuSensorCore >(SensorCorePtrAux);
 
-
-                    std::shared_ptr<ImuSensorStateCore> sensorStatePtr=std::static_pointer_cast< ImuSensorStateCore >(*itSensorStateCore);
-
-                    // State (Parameters)
-                    //if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                        logString<<" posi_wrt_robot=["<<sensorStatePtr->getPositionSensorWrtRobot().transpose()<<"]'";
-
-                    //if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                        logString<<" atti_wrt_robot=["<<sensorStatePtr->getAttitudeSensorWrtRobot().transpose()<<"]'";
-
-                    //if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                        logString<<" est_bias_lin_acc=["<<sensorStatePtr->getBiasesLinearAcceleration().transpose()<<"]'";
-
-                    //if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                        logString<<" est_bias_ang_vel=["<<sensorStatePtr->getBiasesAngularVelocity().transpose()<<"]'";
-
-
-                    // Jacobian
-#if _DEBUG_DISPLAY
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationPositionSensorWrtRobotEnabled())
-                        logString<<"Jacobian Posi wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.positionSensorWrtRobot<<"]";
-
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationAttitudeSensorWrtRobotEnabled())
-                        logString<<"Jacobian Atti wrt Robot=["<<std::endl<<sensorStatePtr->errorStateJacobian.attitudeSensorWrtRobot<<"]";
-
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationBiasLinearAccelerationEnabled())
-                        logString<<"Jacobian Atti Linear Accele=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesLinearAcceleration<<"]";
-
-                    logString<<std::endl;
-                    if(ImuSensorCorePtrAux->isEstimationBiasAngularVelocityEnabled())
-                        logString<<"Jacobian Bias Angular Veloc=["<<std::endl<<sensorStatePtr->errorStateJacobian.biasesAngularVelocity<<"]";
-#endif
-
-
-                    break;
-                }
-
-            }
-            */
 
             logString<<std::endl;
         }
