@@ -23,6 +23,8 @@
 #include "msf_localization_core/coded_visual_marker_eye_state_core.h"
 
 
+#include "msf_localization_core/global_parameters_state_core.h"
+
 // Robot state
 #include "msf_localization_core/robot_state_core.h"
 #include "msf_localization_core/free_model_robot_state_core.h"
@@ -299,7 +301,7 @@ public:
                        // List Map Element Core -> New will be added if not available
                        std::list< std::shared_ptr<MapElementCore> >& list_map_element_core,
                        // New Map Element State Core
-                       std::shared_ptr<MapElementStateCore> &new_map_element_state);
+                       std::shared_ptr<StateCore> &new_map_element_state);
 
 protected:
     int mapMeasurementSpecific(const TimeStamp& theTimeStamp,
@@ -328,7 +330,7 @@ public:
                        // Current Measurement
                        const std::shared_ptr<SensorMeasurementCore> current_measurement,
                        // New Map Element State Core
-                       std::shared_ptr<MapElementStateCore> &new_map_element_state);
+                       std::shared_ptr<StateCore> &new_map_element_state);
 
 protected:
     int jacobiansMapMeasurementSpecific(const TimeStamp& theTimeStamp,
@@ -356,14 +358,14 @@ protected:
 
     /// Auxiliar functions
 protected:
-    int findSensorState(const std::list< std::shared_ptr<SensorStateCore> >& list_sensors_state,
+    int findSensorState(const std::list< std::shared_ptr<StateCore> >& list_sensors_state,
                         std::shared_ptr<CodedVisualMarkerEyeStateCore>& sensor_state);
 
     int findMapElementCore(const std::list<std::shared_ptr<MapElementCore>>& list_map_elements_core,
                            const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
                            std::shared_ptr<CodedVisualMarkerLandmarkCore>& map_element_core);
 
-    int findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>>& list_map_elements_state,
+    int findMapElementState(const std::list<std::shared_ptr<StateCore>>& list_map_elements_state,
                             const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
                             std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& map_element_state);
 

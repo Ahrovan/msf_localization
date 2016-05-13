@@ -28,6 +28,7 @@
 #include <Eigen/Dense>
 
 
+
 //#include "msf_localization_core/global_parameters_state_core.h"
 
 //#include "msf_localization_core/robot_state_core.h"
@@ -45,16 +46,8 @@
 
 /// Forward declarations
 
-// Global Parameters (World) State
-class GlobalParametersStateCore;
-// Robot State
-class RobotStateCore;
-// Inputs State
-class InputStateCore;
-// Sensors State
-class SensorStateCore;
-// Map State
-class MapElementStateCore;
+// States
+class StateCore;
 
 // Inputs
 class InputCommandCore;
@@ -90,27 +83,27 @@ public:
     int getDimensionErrorParameters() const;
 
 
-    // Global Parameters (World) State
+    // World (Global Parameters) State
 public:
-    std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore;
+    std::shared_ptr<StateCore> TheGlobalParametersStateCore;
 
     // Robot State
 public:
-    std::shared_ptr<RobotStateCore> TheRobotStateCore;
+    std::shared_ptr<StateCore> TheRobotStateCore;
 
     // Inputs State
 public:
-    std::list< std::shared_ptr<InputStateCore> > TheListInputStateCore;
+    std::list< std::shared_ptr<StateCore> > TheListInputStateCore;
     int getNumberInputStates() const;
 
     // Sensors State
 public:
-    std::list< std::shared_ptr<SensorStateCore> > TheListSensorStateCore;
+    std::list< std::shared_ptr<StateCore> > TheListSensorStateCore;
     int getNumberSensorStates() const;
 
     // Map State
 public:
-    std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
+    std::list< std::shared_ptr<StateCore> > TheListMapElementStateCore;
     int getNumberMapElementStates() const;
 
 

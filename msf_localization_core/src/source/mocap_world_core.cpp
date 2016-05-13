@@ -339,7 +339,7 @@ int MocapWorldCore::predictState(//Time
     // Search for the past map State Core
     std::shared_ptr<MocapWorldStateCore> past_map_state;
 
-    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
         it_map_state!=pastState->TheListMapElementStateCore.end();
         ++it_map_state)
     {
@@ -457,7 +457,7 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
     // Search for the past map State Core
     std::shared_ptr<MocapWorldStateCore> past_map_state;
 
-    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
         it_map_state!=pastState->TheListMapElementStateCore.end();
         ++it_map_state)
     {

@@ -751,7 +751,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         }
 
         // Set
-        ThePredictedState->TheGlobalParametersStateCore=std::dynamic_pointer_cast<GlobalParametersStateCore>(predicted_state);
+        ThePredictedState->TheGlobalParametersStateCore=predicted_state;
     }
 
 
@@ -800,7 +800,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         }
 
         // Set
-        ThePredictedState->TheRobotStateCore=std::dynamic_pointer_cast<RobotStateCore>(predicted_state);
+        ThePredictedState->TheRobotStateCore=predicted_state;
     }
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -818,7 +818,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     ThePredictedState->TheListInputStateCore.clear();
 
     // Iterate
-    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInput=ThePreviousState->TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itInput=ThePreviousState->TheListInputStateCore.begin();
         itInput!=ThePreviousState->TheListInputStateCore.end();
         ++itInput)
     {
@@ -861,7 +861,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         }
 
         // Set
-        ThePredictedState->TheListInputStateCore.push_back(std::dynamic_pointer_cast<InputStateCore>(predicted_state));
+        ThePredictedState->TheListInputStateCore.push_back(predicted_state);
     }
 
 
@@ -875,7 +875,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     // Iterate
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorElement=ThePreviousState->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorElement=ThePreviousState->TheListSensorStateCore.begin();
         itSensorElement!=ThePreviousState->TheListSensorStateCore.end();
         ++itSensorElement)
     {
@@ -918,7 +918,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         }
 
         // Set
-        ThePredictedState->TheListSensorStateCore.push_back(std::dynamic_pointer_cast<SensorStateCore>(predicted_state));
+        ThePredictedState->TheListSensorStateCore.push_back(predicted_state);
     }
 
 
@@ -937,7 +937,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     ThePredictedState->TheListMapElementStateCore.clear();
 
     // Iterate
-    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElement=ThePreviousState->TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElement=ThePreviousState->TheListMapElementStateCore.begin();
         itMapElement!=ThePreviousState->TheListMapElementStateCore.end();
         ++itMapElement)
     {
@@ -980,7 +980,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         }
 
         // Set
-        ThePredictedState->TheListMapElementStateCore.push_back(std::dynamic_pointer_cast<MapElementStateCore>(predicted_state));
+        ThePredictedState->TheListMapElementStateCore.push_back(predicted_state);
     }
 
 
@@ -1059,7 +1059,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         int dimension_world_error_state=ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         int dimension_robot_error_state=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         int dimension_inputs_error_state=0;
-        for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
             itInputState!=ThePredictedState->TheListInputStateCore.end();
             ++itInputState)
         {
@@ -1168,7 +1168,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
             size_total_robot_states_i++;
 
             // Inputs
-            for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
+            for(std::list< std::shared_ptr<StateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
                 itInputState!=ThePredictedState->TheListInputStateCore.end();
                 ++itInputState)
             {
@@ -1201,7 +1201,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
             size_total_robot_states_i++;
 
             // Inputs
-            for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
+            for(std::list< std::shared_ptr<StateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
                 itInputState!=ThePredictedState->TheListInputStateCore.end();
                 ++itInputState)
             {
@@ -1345,7 +1345,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     // Iterate on the sensors
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
         it1Sens!=ThePredictedState->TheListSensorStateCore.end();
         ++it1Sens)
     {
@@ -1400,7 +1400,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     WorkingInitPoint.row=WorkingInitPoint.col;
 
     // Iterate
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
         it1Sens!=ThePredictedState->TheListSensorStateCore.end();
         ++it1Sens)
     {
@@ -1414,7 +1414,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
         // Iterate again
-        for(std::list< std::shared_ptr<SensorStateCore> >::iterator it2Sens=it1Sens;
+        for(std::list< std::shared_ptr<StateCore> >::iterator it2Sens=it1Sens;
             it2Sens!=ThePredictedState->TheListSensorStateCore.end();
             ++it2Sens)
         {
@@ -1474,7 +1474,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     {
         // dimensions
         int dimensionSensorsErrorState=0;
-        for(std::list< std::shared_ptr<SensorStateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
             it1Sens!=ThePredictedState->TheListSensorStateCore.end();
             ++it1Sens)
         {
@@ -1487,7 +1487,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
         // Iterate on the map elements
-        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator it1MapElement=ThePredictedState->TheListMapElementStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::iterator it1MapElement=ThePredictedState->TheListMapElementStateCore.begin();
             it1MapElement!=ThePredictedState->TheListMapElementStateCore.end();
             ++it1MapElement)
         {
@@ -1526,7 +1526,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     {
         // dimension
         int dimensionSensorsErrorState=0;
-        for(std::list< std::shared_ptr<SensorStateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
             it1Sens!=ThePredictedState->TheListSensorStateCore.end();
             ++it1Sens)
         {
@@ -1538,7 +1538,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         WorkingInitPoint.row=WorkingInitPoint.col;
 
         // Iterate
-        for(std::list< std::shared_ptr<MapElementStateCore> >::iterator it1MapElement=ThePredictedState->TheListMapElementStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::iterator it1MapElement=ThePredictedState->TheListMapElementStateCore.begin();
             it1MapElement!=ThePredictedState->TheListMapElementStateCore.end();
             ++it1MapElement)
         {
@@ -1552,7 +1552,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
             // Iterate again
-            for(std::list< std::shared_ptr<MapElementStateCore> >::iterator it2MapElement=it1MapElement;
+            for(std::list< std::shared_ptr<StateCore> >::iterator it2MapElement=it1MapElement;
                 it2MapElement!=ThePredictedState->TheListMapElementStateCore.end();
                 ++it2MapElement)
             {
@@ -2043,7 +2043,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 size_error_state(num_error_state_i)=OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
                 num_error_state_i++;
                 // Inputs
-                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=OldState->TheListInputStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListInputState=OldState->TheListInputStateCore.begin();
                     itListInputState!=OldState->TheListInputStateCore.end();
                     ++itListInputState)
                 {
@@ -2051,7 +2051,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                     num_error_state_i++;
                 }
                 // Sensors
-                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=OldState->TheListSensorStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListSensorState=OldState->TheListSensorStateCore.begin();
                     itListSensorState!=OldState->TheListSensorStateCore.end();
                     ++itListSensorState)
                 {
@@ -2059,7 +2059,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                     num_error_state_i++;
                 }
                 // Map
-                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListMapElementState=OldState->TheListMapElementStateCore.begin();
                     itListMapElementState!=OldState->TheListMapElementStateCore.end();
                     ++itListMapElementState)
                 {
@@ -2324,7 +2324,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 }
 
                 // Inputs
-                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputStateCore=OldState->TheListInputStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListInputStateCore=OldState->TheListInputStateCore.begin();
                     itListInputStateCore!=OldState->TheListInputStateCore.end();
                     ++itListInputStateCore)
                 {
@@ -2334,7 +2334,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 }
 
                 // Sensors
-                for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itListSensorStateCore=OldState->TheListSensorStateCore.begin();
+                for(std::list<std::shared_ptr<StateCore> >::const_iterator itListSensorStateCore=OldState->TheListSensorStateCore.begin();
                     itListSensorStateCore!=OldState->TheListSensorStateCore.end();
                     ++itListSensorStateCore)
                 {
@@ -2344,7 +2344,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 }
 
                 // Map
-                for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itListMapElementStateCore=OldState->TheListMapElementStateCore.begin();
+                for(std::list<std::shared_ptr<StateCore> >::const_iterator itListMapElementStateCore=OldState->TheListMapElementStateCore.begin();
                     itListMapElementStateCore!=OldState->TheListMapElementStateCore.end();
                     ++itListMapElementStateCore)
                 {
@@ -2593,7 +2593,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 }
 
                 // Inputs
-                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
                     itListInputState!=UpdatedState->TheListInputStateCore.end();
                     ++itListInputState)
                 {
@@ -2602,7 +2602,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 }
 
                 // Sensors
-                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
                     itListSensorState!=UpdatedState->TheListSensorStateCore.end();
                     ++itListSensorState)
                 {
@@ -2611,7 +2611,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 }
 
                 // Map
-                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
                     itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
                     ++itListMapElementState)
                 {
@@ -2736,15 +2736,13 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
                 // Global Parameters
                 {
-                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>(UpdatedState->TheGlobalParametersStateCore);
                     int error_jacobian_reset_error_state=UpdatedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->
                             resetErrorStateJacobian(// time stamp
                                                     TheTimeStamp,
                                                     // Increment error state
                                                     block_increment_error_state(num_error_states_i, 0),
                                                     // current state
-                                                    state_core);
-                    UpdatedState->TheGlobalParametersStateCore=std::dynamic_pointer_cast<GlobalParametersStateCore>(state_core);
+                                                    UpdatedState->TheGlobalParametersStateCore);
                     if(error_jacobian_reset_error_state)
                         return error_jacobian_reset_error_state;
                     num_error_states_i++;
@@ -2752,72 +2750,64 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
                 // Robot
                 {
-                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>(UpdatedState->TheRobotStateCore);
                     int error_jacobian_reset_error_state=UpdatedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->
                             resetErrorStateJacobian(// time stamp
                                                     TheTimeStamp,
                                                     // Increment error state
                                                     block_increment_error_state(num_error_states_i, 0),
                                                     // current state
-                                                    state_core);
-                    UpdatedState->TheRobotStateCore=std::dynamic_pointer_cast<RobotStateCore>(state_core);
+                                                    UpdatedState->TheRobotStateCore);
                     if(error_jacobian_reset_error_state)
                         return error_jacobian_reset_error_state;
                     num_error_states_i++;
                 }
 
                 // Inputs
-                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
                     itListInputState!=UpdatedState->TheListInputStateCore.end();
                     ++itListInputState)
                 {
-                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>((*itListInputState));
                     int error_jacobian_reset_error_state=(*itListInputState)->getMsfElementCoreSharedPtr()->
                             resetErrorStateJacobian(// time stamp
                                                     TheTimeStamp,
                                                     // Increment error state
                                                     block_increment_error_state(num_error_states_i, 0),
                                                     // current state
-                                                    state_core);
-                    (*itListInputState)=std::dynamic_pointer_cast<InputStateCore>(state_core);
+                                                    (*itListInputState));
                     if(error_jacobian_reset_error_state)
                         return error_jacobian_reset_error_state;
                     num_error_states_i++;
                 }
 
                 // Sensors
-                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
                     itListSensorState!=UpdatedState->TheListSensorStateCore.end();
                     ++itListSensorState)
                 {
-                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>((*itListSensorState));
                     int error_jacobian_reset_error_state=(*itListSensorState)->getMsfElementCoreSharedPtr()->
                             resetErrorStateJacobian(// time stamp
                                                     TheTimeStamp,
                                                     // Increment error state
                                                     block_increment_error_state(num_error_states_i, 0),
                                                     // current state
-                                                    state_core);
-                    (*itListSensorState)=std::dynamic_pointer_cast<SensorStateCore>(state_core);
+                                                    (*itListSensorState));
                     if(error_jacobian_reset_error_state)
                         return error_jacobian_reset_error_state;
                     num_error_states_i++;
                 }
 
                 // Map
-                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
                     itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
                     ++itListMapElementState)
                 {
-                    std::shared_ptr<StateCore> state_core=std::dynamic_pointer_cast<StateCore>((*itListMapElementState));
                     int error_jacobian_reset_error_state=(*itListMapElementState)->getMsfElementCoreSharedPtr()->
                             resetErrorStateJacobian(// time stamp
                                                     TheTimeStamp,
                                                     // Increment error state
                                                     block_increment_error_state(num_error_states_i, 0),
                                                     // current state
-                                                    state_core);
-                    (*itListMapElementState)=std::dynamic_pointer_cast<MapElementStateCore>(state_core);
+                                                    (*itListMapElementState));
                     if(error_jacobian_reset_error_state)
                         return error_jacobian_reset_error_state;
                     num_error_states_i++;
@@ -2847,7 +2837,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                     num_error_states_i++;
                 }
                 // Inputs
-                for(std::list< std::shared_ptr<InputStateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListInputState=UpdatedState->TheListInputStateCore.begin();
                     itListInputState!=UpdatedState->TheListInputStateCore.end();
                     ++itListInputState)
                 {
@@ -2856,7 +2846,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                     num_error_states_i++;
                 }
                 // Sensors
-                for(std::list< std::shared_ptr<SensorStateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListSensorState=UpdatedState->TheListSensorStateCore.begin();
                     itListSensorState!=UpdatedState->TheListSensorStateCore.end();
                     ++itListSensorState)
                 {
@@ -2865,7 +2855,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                     num_error_states_i++;
                 }
                 // Map Elements
-                for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::iterator itListMapElementState=UpdatedState->TheListMapElementStateCore.begin();
                     itListMapElementState!=UpdatedState->TheListMapElementStateCore.end();
                     ++itListMapElementState)
                 {
@@ -2983,7 +2973,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
             ++itUnmatchedMeas)
         {
             // Aux vars
-            std::shared_ptr<MapElementStateCore> TheNewMapElementStateCore;
+            std::shared_ptr<StateCore> TheNewMapElementStateCore;
 
             // Map measurement
             int error_map_measurement=(*itUnmatchedMeas)->getSensorCoreSharedPtr()->
@@ -3018,7 +3008,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
             // Push into the lists
             TheListUnmatchedMeasurementsWithMapElement.push_back((*itUnmatchedMeas));
-            TheListNewMapElementsStateCore.push_back(TheNewMapElementStateCore);
+            TheListNewMapElementsStateCore.push_back(std::dynamic_pointer_cast<MapElementStateCore>(TheNewMapElementStateCore));
 
         }
 
@@ -3112,7 +3102,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                 // TODO
 
                 // Sensors
-                for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itListSensorCore=UpdatedState->TheListSensorStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::const_iterator itListSensorCore=UpdatedState->TheListSensorStateCore.begin();
                     itListSensorCore!=UpdatedState->TheListSensorStateCore.end();
                     ++itListSensorCore)
                 {
@@ -3134,7 +3124,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 
 
                 // Map Elements
-                for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itListMapElementCore=UpdatedState->TheListMapElementStateCore.begin();
+                for(std::list< std::shared_ptr<StateCore> >::const_iterator itListMapElementCore=UpdatedState->TheListMapElementStateCore.begin();
                     itListMapElementCore!=UpdatedState->TheListMapElementStateCore.end();
                     ++itListMapElementCore)
                 {
@@ -3282,7 +3272,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
             itNewMapElementsStateCore!=TheListNewMapElementsStateCore.end();
             ++itNewMapElementsStateCore)
         {
-            UpdatedState->TheListMapElementStateCore.push_back((*itNewMapElementsStateCore));
+            UpdatedState->TheListMapElementStateCore.push_back(std::dynamic_pointer_cast<StateCore>(*itNewMapElementsStateCore));
         }
 
 

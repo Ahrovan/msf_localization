@@ -1198,7 +1198,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
     std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_sensor_error_parameters;
     it_jacobian_error_measurement_wrt_sensor_error_parameters=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.begin();
 
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
         itSensorStateCore!=current_state->TheListSensorStateCore.end();
         ++itSensorStateCore, ++it_jacobian_error_measurement_wrt_sensor_error_state, ++it_jacobian_error_measurement_wrt_sensor_error_parameters
         )
@@ -1214,7 +1214,7 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobian(// Time
     std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_map_element_error_parameters;
     it_jacobian_error_measurement_wrt_map_element_error_parameters=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.begin();
 
-    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
         itMapElementStateCore!=current_state->TheListMapElementStateCore.end();
         ++itMapElementStateCore, ++it_jacobian_error_measurement_wrt_map_element_error_state, ++it_jacobian_error_measurement_wrt_map_element_error_parameters
         )
@@ -2028,14 +2028,14 @@ int CodedVisualMarkerEyeCore::mapMeasurement(// Time
                    // List Map Element Core -> New will be added if not available
                    std::list< std::shared_ptr<MapElementCore> >& list_map_element_core,
                    // New Map Element State Core
-                   std::shared_ptr<MapElementStateCore> &new_map_element_state)
+                   std::shared_ptr<StateCore> &new_map_element_state)
 {
     // Checks
     if(!current_state)
         return -1;
 
     // Robot State
-    std::shared_ptr<RobotStateCore> current_robot_state=current_state->TheRobotStateCore;
+    std::shared_ptr<RobotStateCore> current_robot_state=std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore);
 
     // Sensor State
     std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
@@ -2309,14 +2309,14 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurement(// Time
                    // Current Measurement
                    const std::shared_ptr<SensorMeasurementCore> current_measurement,
                    // New Map Element State Core
-                   std::shared_ptr<MapElementStateCore> &new_map_element_state)
+                   std::shared_ptr<StateCore> &new_map_element_state)
 {
     // Checks
     if(!current_state)
         return -1;
 
     // Robot State
-    std::shared_ptr<RobotStateCore> current_robot_state=current_state->TheRobotStateCore;
+    std::shared_ptr<RobotStateCore> current_robot_state=std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore);
 
     // Sensor State
     std::shared_ptr<CodedVisualMarkerEyeStateCore> current_sensor_state;
@@ -2854,9 +2854,9 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
     return 0;
 }
 
-int CodedVisualMarkerEyeCore::findSensorState(const std::list<std::shared_ptr<SensorStateCore> > &list_sensors_state, std::shared_ptr<CodedVisualMarkerEyeStateCore>& sensor_state)
+int CodedVisualMarkerEyeCore::findSensorState(const std::list<std::shared_ptr<StateCore> > &list_sensors_state, std::shared_ptr<CodedVisualMarkerEyeStateCore>& sensor_state)
 {
-    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator it_sensor_state=list_sensors_state.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator it_sensor_state=list_sensors_state.begin();
         it_sensor_state!=list_sensors_state.end();
         ++it_sensor_state)
     {
@@ -2905,12 +2905,12 @@ int CodedVisualMarkerEyeCore::findMapElementCore(const std::list<std::shared_ptr
     return -1;
 }
 
-int CodedVisualMarkerEyeCore::findMapElementState(const std::list<std::shared_ptr<MapElementStateCore>>& list_map_elements_state,
+int CodedVisualMarkerEyeCore::findMapElementState(const std::list<std::shared_ptr<StateCore> > &list_map_elements_state,
                                                   const std::shared_ptr<CodedVisualMarkerMeasurementCore> sensor_measurement,
                                                   std::shared_ptr<CodedVisualMarkerLandmarkStateCore> &map_element_state)
 {
     // Match with the map element
-    for(std::list<std::shared_ptr<MapElementStateCore>>::const_iterator itVisualMarkerLandmark=list_map_elements_state.begin();
+    for(std::list<std::shared_ptr<StateCore>>::const_iterator itVisualMarkerLandmark=list_map_elements_state.begin();
         itVisualMarkerLandmark!=list_map_elements_state.end();
         ++itVisualMarkerLandmark)
     {

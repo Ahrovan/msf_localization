@@ -3,15 +3,7 @@
 
 
 // To avoid circular dependencies
-#include "msf_localization_core/global_parameters_state_core.h"
-
-#include "msf_localization_core/robot_state_core.h"
-
-#include "msf_localization_core/sensor_state_core.h"
-
-#include "msf_localization_core/map_element_state_core.h"
-
-#include "msf_localization_core/input_state_core.h"
+#include "msf_localization_core/state_core.h"
 
 #include "msf_localization_core/input_command_core.h"
 
@@ -90,7 +82,7 @@ int StateEstimationCore::getDimensionState() const
     dimension_state+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionState();
 
     // Sensors
-    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
@@ -98,7 +90,7 @@ int StateEstimationCore::getDimensionState() const
     }
 
     // Inputs
-    for(std::list< std::shared_ptr<InputStateCore> >::const_iterator itInput=TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itInput=TheListInputStateCore.begin();
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
@@ -106,7 +98,7 @@ int StateEstimationCore::getDimensionState() const
     }
 
     // Map
-    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
@@ -130,7 +122,7 @@ int StateEstimationCore::getDimensionErrorState() const
     dimension_error_state+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Sensors
-    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
@@ -138,7 +130,7 @@ int StateEstimationCore::getDimensionErrorState() const
     }
 
     // Inputs
-    for(std::list< std::shared_ptr<InputStateCore> >::const_iterator itInput=TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itInput=TheListInputStateCore.begin();
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
@@ -146,7 +138,7 @@ int StateEstimationCore::getDimensionErrorState() const
     }
 
     // Map
-    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
@@ -169,7 +161,7 @@ int StateEstimationCore::getDimensionParameters() const
     dimension_parameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionParameters();
 
     // Sensors
-    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
@@ -177,7 +169,7 @@ int StateEstimationCore::getDimensionParameters() const
     }
 
     // Inputs
-    for(std::list< std::shared_ptr<InputStateCore> >::const_iterator itInput=TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itInput=TheListInputStateCore.begin();
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
@@ -185,7 +177,7 @@ int StateEstimationCore::getDimensionParameters() const
     }
 
     // Map
-    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
@@ -208,7 +200,7 @@ int StateEstimationCore::getDimensionErrorParameters() const
     dimension_error_parameters+=this->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // Sensors
-    for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensor=TheListSensorStateCore.begin();
         itSensor!=TheListSensorStateCore.end();
         ++itSensor)
     {
@@ -216,7 +208,7 @@ int StateEstimationCore::getDimensionErrorParameters() const
     }
 
     // Inputs
-    for(std::list< std::shared_ptr<InputStateCore> >::const_iterator itInput=TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itInput=TheListInputStateCore.begin();
         itInput!=TheListInputStateCore.end();
         ++itInput)
     {
@@ -224,7 +216,7 @@ int StateEstimationCore::getDimensionErrorParameters() const
     }
 
     // Map
-    for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElement=TheListMapElementStateCore.begin();
         itMapElement!=TheListMapElementStateCore.end();
         ++itMapElement)
     {
@@ -336,7 +328,7 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
 
 
     // Sensors
-    for(std::list<std::shared_ptr<SensorStateCore> >::const_iterator itLisSensorState=TheListSensorStateCore.begin();
+    for(std::list<std::shared_ptr<StateCore> >::const_iterator itLisSensorState=TheListSensorStateCore.begin();
         itLisSensorState!=TheListSensorStateCore.end();
         ++itLisSensorState)
     {
@@ -346,7 +338,7 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
     }
 
     // Input
-    for(std::list<std::shared_ptr<InputStateCore> >::const_iterator itListInputState=TheListInputStateCore.begin();
+    for(std::list<std::shared_ptr<StateCore> >::const_iterator itListInputState=TheListInputStateCore.begin();
         itListInputState!=TheListInputStateCore.end();
         ++itListInputState)
     {
@@ -357,7 +349,7 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
 
 
     // Map
-    for(std::list<std::shared_ptr<MapElementStateCore> >::const_iterator itLisMapElementState=TheListMapElementStateCore.begin();
+    for(std::list<std::shared_ptr<StateCore> >::const_iterator itLisMapElementState=TheListMapElementStateCore.begin();
         itLisMapElementState!=TheListMapElementStateCore.end();
         ++itLisMapElementState)
     {

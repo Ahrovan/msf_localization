@@ -972,7 +972,7 @@ int ImuSensorCore::predictState(//Time
     // Search for the past sensor State Core
     std::shared_ptr<ImuSensorStateCore> past_sensor_state;
 
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
         it_sensor_state!=pastState->TheListSensorStateCore.end();
         ++it_sensor_state)
     {
@@ -1114,7 +1114,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
     // Search for the past sensor State Core
     std::shared_ptr<ImuSensorStateCore> past_sensor_state;
 
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
         it_sensor_state!=pastState->TheListSensorStateCore.end();
         ++it_sensor_state)
     {
@@ -1416,7 +1416,7 @@ int ImuSensorCore::predictMeasurement(// Time
     // Search for the current sensor State Core
     std::shared_ptr<ImuSensorStateCore> current_sensor_state;
 
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
         it_sensor_state!=current_state->TheListSensorStateCore.end();
         ++it_sensor_state)
     {
@@ -1735,7 +1735,7 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
     // Search for the current sensor State Core
     std::shared_ptr<ImuSensorStateCore> current_sensor_state;
 
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
         it_sensor_state!=current_state->TheListSensorStateCore.end();
         ++it_sensor_state)
     {
@@ -1782,7 +1782,7 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
     std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_measurement_wrt_sensor_error_parameters;
     it_jacobian_error_measurement_wrt_sensor_error_parameters=predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.begin();
 
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
         itSensorStateCore!=current_state->TheListSensorStateCore.end();
         ++itSensorStateCore, ++it_jacobian_error_measurement_wrt_sensor_error_state, ++it_jacobian_error_measurement_wrt_sensor_error_parameters
         )

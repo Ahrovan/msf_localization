@@ -628,25 +628,25 @@ try
         int covRobotSize=this->TheRobotCore->getDimensionErrorState();
         std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore)->publish(TheTimeStamp,
                                                                                   this->TheGlobalParametersCore,
-                                                                                  PredictedState->TheRobotStateCore,
+                                                                                  std::dynamic_pointer_cast<RobotStateCore>(PredictedState->TheRobotStateCore),
                                                                                   PredictedState->covarianceMatrix->block(covRobotPointInit, covRobotPointInit, covRobotSize, covRobotSize));
 
 
 
 
         // Sensors
-        for(std::list< std::shared_ptr<SensorStateCore> >::const_iterator itSensorState=PredictedState->TheListSensorStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensorState=PredictedState->TheListSensorStateCore.begin();
             itSensorState!=PredictedState->TheListSensorStateCore.end();
             ++itSensorState)
         {
             std::dynamic_pointer_cast<RosSensorInterface>((*itSensorState)->getMsfElementCoreSharedPtr())->publish(TheTimeStamp,
                                                                                                                    std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore),
-                                                                                                                   (*itSensorState));
+                                                                                                                   std::dynamic_pointer_cast<SensorStateCore>((*itSensorState)));
         }
 
 
         // TF Map elements
-        for(std::list< std::shared_ptr<MapElementStateCore> >::const_iterator itMapElementState=PredictedState->TheListMapElementStateCore.begin();
+        for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElementState=PredictedState->TheListMapElementStateCore.begin();
             itMapElementState!=PredictedState->TheListMapElementStateCore.end();
             ++itMapElementState)
         {

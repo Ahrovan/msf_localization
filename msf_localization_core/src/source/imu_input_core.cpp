@@ -893,7 +893,7 @@ int ImuInputCore::predictState(//Time
     // Search for the past Input State Core
     std::shared_ptr<ImuInputStateCore> pastInputState;
 
-    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=pastState->TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itInputState=pastState->TheListInputStateCore.begin();
         itInputState!=pastState->TheListInputStateCore.end();
         ++itInputState)
     {

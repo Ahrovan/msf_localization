@@ -720,7 +720,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
         //// Sensors
-        for(std::list<std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=TheStateEstimationCore->TheListSensorStateCore.begin();
+        for(std::list<std::shared_ptr<StateCore> >::iterator itSensorStateCore=TheStateEstimationCore->TheListSensorStateCore.begin();
             itSensorStateCore!=TheStateEstimationCore->TheListSensorStateCore.end();
             ++itSensorStateCore)
         {
@@ -786,7 +786,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
 
         //// Map
-        for(std::list<std::shared_ptr<MapElementStateCore> >::iterator itSensorStateCore=TheStateEstimationCore->TheListMapElementStateCore.begin();
+        for(std::list<std::shared_ptr<StateCore> >::iterator itSensorStateCore=TheStateEstimationCore->TheListMapElementStateCore.begin();
             itSensorStateCore!=TheStateEstimationCore->TheListMapElementStateCore.end();
             ++itSensorStateCore)
         {

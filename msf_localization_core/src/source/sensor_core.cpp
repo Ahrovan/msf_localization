@@ -205,7 +205,7 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     predicted_measurement->jacobian_error_measurement_wrt_error_state_.robot.resize(dimension_error_measurement, current_state->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState());
     // Inputs
     predicted_measurement->jacobian_error_measurement_wrt_error_state_.inputs.reserve(current_state->getNumberInputStates());
-    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputStateCore=current_state->TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itInputStateCore=current_state->TheListInputStateCore.begin();
         itInputStateCore!=current_state->TheListInputStateCore.end();
         ++itInputStateCore
         )
@@ -214,7 +214,7 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     }
     // Sensors
     predicted_measurement->jacobian_error_measurement_wrt_error_state_.sensors.reserve(current_state->getNumberSensorStates());
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
         itSensorStateCore!=current_state->TheListSensorStateCore.end();
         ++itSensorStateCore
         )
@@ -223,7 +223,7 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     }
     // Map elements
     predicted_measurement->jacobian_error_measurement_wrt_error_state_.map_elements.reserve(current_state->getNumberMapElementStates());
-    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
         itMapElementStateCore!=current_state->TheListMapElementStateCore.end();
         ++itMapElementStateCore
         )
@@ -240,7 +240,7 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.robot.resize(dimension_error_measurement, current_state->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters());
     // Inputs
     predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.inputs.reserve(current_state->getNumberInputStates());
-    for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputStateCore=current_state->TheListInputStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itInputStateCore=current_state->TheListInputStateCore.begin();
         itInputStateCore!=current_state->TheListInputStateCore.end();
         ++itInputStateCore
         )
@@ -249,7 +249,7 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     }
     // Sensors
     predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.sensors.reserve(current_state->getNumberSensorStates());
-    for(std::list< std::shared_ptr<SensorStateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=current_state->TheListSensorStateCore.begin();
         itSensorStateCore!=current_state->TheListSensorStateCore.end();
         ++itSensorStateCore
         )
@@ -258,7 +258,7 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     }
     // Map elements
     predicted_measurement->jacobian_error_measurement_wrt_error_parameters_.map_elements.reserve(current_state->getNumberMapElementStates());
-    for(std::list< std::shared_ptr<MapElementStateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementStateCore=current_state->TheListMapElementStateCore.begin();
         itMapElementStateCore!=current_state->TheListMapElementStateCore.end();
         ++itMapElementStateCore
         )
