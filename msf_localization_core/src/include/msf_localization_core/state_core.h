@@ -59,7 +59,7 @@ public:
 
     //// Jacobians Prediction
 
-    // Fx
+    /// Fx
 protected:
     struct
     {
@@ -76,11 +76,11 @@ public:
     Eigen::SparseMatrix<double> getJacobianErrorStateSensor(int sensor_number);
     Eigen::SparseMatrix<double> getJacobianErrorStateMapElement(int map_element_number);
 public:
-    int setJacobianErrorStateWorld(Eigen::SparseMatrix<double> jacobian_error_state);
-    int setJacobianErrorStateRobot(Eigen::SparseMatrix<double> jacobian_error_state);
-    int setJacobianErrorStateInput(Eigen::SparseMatrix<double> jacobian_error_state, int input_number);
-    int setJacobianErrorStateSensor(Eigen::SparseMatrix<double> jacobian_error_state, int sensor_number);
-    int setJacobianErrorStateMapElement(Eigen::SparseMatrix<double> jacobian_error_state, int map_element_number);
+    int setJacobianErrorStateWorld(const Eigen::SparseMatrix<double>& jacobian_error_state);
+    int setJacobianErrorStateRobot(const Eigen::SparseMatrix<double>& jacobian_error_state);
+    int setJacobianErrorStateInput(const Eigen::SparseMatrix<double>& jacobian_error_state, int input_number);
+    int setJacobianErrorStateSensor(const Eigen::SparseMatrix<double>& jacobian_error_state, int sensor_number);
+    int setJacobianErrorStateMapElement(const Eigen::SparseMatrix<double>& jacobian_error_state, int map_element_number);
 public:
     int setJacobianErrorStateInputsSize(int size_inputs);
     int setJacobianErrorStateSensorsSize(int size_sensors);
@@ -88,7 +88,7 @@ public:
 
 
 
-    // Fp
+    /// Fp
 protected:
 public:
     Eigen::SparseMatrix<double> jacobian_error_parameters_;
@@ -107,7 +107,7 @@ public:
 
 
 
-    // Fu
+    /// Fu
 protected:
 public:
     Eigen::SparseMatrix<double> jacobian_error_inputs_;
@@ -123,7 +123,7 @@ public:
 
 
 
-    // Fn
+    /// Fn
 protected:
 public:
     Eigen::SparseMatrix<double> jacobian_error_state_noise_;

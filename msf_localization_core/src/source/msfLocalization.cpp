@@ -1027,6 +1027,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     // Aux Vars
+    // TODO FIX!
     Eigen::SparseMatrix<double> jacobianRobotErrorState=ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
 
 
@@ -1041,7 +1042,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-    /// Robot
+    /// Total Robot
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
@@ -1052,6 +1053,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     {
+        /// Dimensions total robot error state
+
         // Dimensions
         int dimension_world_error_state=ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
         int dimension_robot_error_state=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
@@ -1064,169 +1067,209 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         }
         int dimension_total_robot_error_state=dimension_world_error_state+dimension_robot_error_state+dimension_inputs_error_state;
 
-        // Sizes
-        int size_inputs=ThePredictedState->TheListInputStateCore.size();
-        int size_total_robot=1+1+size_inputs;
 
-
-        // Jacobians
-
-
-        /// Jacobian Error State
-
-        BlockMatrix::MatrixSparse jacobian_total_robot_error_state;
-        jacobian_total_robot_error_state.resize(size_total_robot, size_total_robot);
-
-
-        int jacobian_row=0;
-
-        // World
-        {
-            int jacobian_column=0;
-
-            // World / World
-            jacobian_total_robot_error_state(jacobian_row,jacobian_column)=ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateWorld();
-
-            // World / Robot
-            jacobian_total_robot_error_state(jacobian_row,jacobian_column)=ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateRobot();
-
-            // World / Inputs
-            // TODO
-
-        }
-        jacobian_row++;
-
-        // Robot
-        {
-            int jacobian_column=0;
-
-            // Robot / World
-            jacobian_total_robot_error_state(jacobian_row,jacobian_column)=ThePredictedState->TheRobotStateCore->getJacobianErrorStateWorld();
-
-            // Robot / Robot
-            jacobian_total_robot_error_state(jacobian_row,jacobian_column)=ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
-
-            // Robot / Inputs
-            // TODO
-
-        }
-
-        // Inputs
-        {
-            // Inputs / World
-
-            // Inputs / Robot
-
-            // Inputs / Inputs
-
-        }
-
-
-
-
-
-        /// Jacobian Error State Noise Estimation: Fn
-
-        BlockMatrix::MatrixSparse jacobian_total_robot_error_noise_estimation;
-        jacobian_total_robot_error_noise_estimation.resize(size_total_robot, size_total_robot);
-
+        // Size total robot error state
+        int size_total_robot_states=0;
         {
             // World
-            jacobian_total_robot_error_noise_estimation(0,0)=ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateNoise();
+            size_total_robot_states++;
+            // Robot
+            size_total_robot_states++;
+            // Inputs
+            size_total_robot_states+=ThePredictedState->getNumberInputStates();
+        }
+
+
+        ///// Jacobians Total Robot
+
+        /// Jacobian Error State: Fx_total_robot & Jacobian Error Parameters: Fp_total_robot
+
+        // Resize and init
+        BlockMatrix::MatrixSparse block_jacobian_total_robot_error_state;
+        block_jacobian_total_robot_error_state.resize(size_total_robot_states, size_total_robot_states);
+
+        BlockMatrix::MatrixSparse block_jacobian_total_robot_error_parameters;
+        block_jacobian_total_robot_error_parameters.resize(size_total_robot_states, size_total_robot_states);
+
+        // Fill
+        {
+            int jacobian_row=0;
+
+            // World
+            {
+                int jacobian_column=0;
+
+                // World / World
+                block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                        ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateWorld();
+                jacobian_column++;
+
+                // World / Robot
+                block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                        ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateRobot();
+                jacobian_column++;
+
+                // World / Inputs
+                // TODO
+
+                jacobian_row++;
+            }
+
 
             // Robot
-            jacobian_total_robot_error_noise_estimation(1,1)=ThePredictedState->TheRobotStateCore->getJacobianErrorStateNoise();
+            {
+                int jacobian_column=0;
+
+                // Robot / World
+                block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                        ThePredictedState->TheRobotStateCore->getJacobianErrorStateWorld();
+                jacobian_column++;
+
+                // Robot / Robot
+                block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                        ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
+                jacobian_column++;
+
+                // Robot / Inputs
+                // TODO
+
+                jacobian_row++;
+            }
 
             // Inputs
-            int size_input_i=0;
+            {
+                // Inputs / World
+
+                // Inputs / Robot
+
+                // Inputs / Inputs
+
+            }
+        }
+
+
+        /// Jacobian Error State Noise Estimation: Fn_total_robot
+
+        BlockMatrix::MatrixSparse block_jacobian_total_robot_error_noise_estimation;
+        block_jacobian_total_robot_error_noise_estimation.resize(size_total_robot_states, size_total_robot_states);
+
+        // Fill
+        {
+            int size_total_robot_states_i=0;
+
+            // World
+            block_jacobian_total_robot_error_noise_estimation(size_total_robot_states_i, size_total_robot_states_i)=
+                    ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateNoise();
+            size_total_robot_states_i++;
+
+            // Robot
+            block_jacobian_total_robot_error_noise_estimation(size_total_robot_states_i, size_total_robot_states_i)=
+                    ThePredictedState->TheRobotStateCore->getJacobianErrorStateNoise();
+            size_total_robot_states_i++;
+
+            // Inputs
             for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
                 itInputState!=ThePredictedState->TheListInputStateCore.end();
                 ++itInputState)
             {
-                jacobian_total_robot_error_noise_estimation(2+size_input_i, 2+size_input_i)=(*itInputState)->getJacobianErrorStateNoise();
-                size_input_i++;
+                block_jacobian_total_robot_error_noise_estimation(size_total_robot_states_i, size_total_robot_states_i)=
+                        (*itInputState)->getJacobianErrorStateNoise();
+                size_total_robot_states_i++;
             }
         }
+
+
+        ///// Covariances Total Robot
 
         /// Covariance Error State Noise Estimation: Qn
 
-        BlockMatrix::MatrixSparse covariance_total_robot_error_noise_estimation;
-        covariance_total_robot_error_noise_estimation.resize(size_total_robot, size_total_robot);
+        BlockMatrix::MatrixSparse block_covariance_total_robot_error_noise_estimation;
+        block_covariance_total_robot_error_noise_estimation.resize(size_total_robot_states, size_total_robot_states);
 
+        // Fill
         {
+            int size_total_robot_states_i=0;
+
             // World
-            covariance_total_robot_error_noise_estimation(0,0)=std::dynamic_pointer_cast<GlobalParametersCore>(ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime);
+            block_covariance_total_robot_error_noise_estimation(size_total_robot_states_i, size_total_robot_states_i)=
+                    std::dynamic_pointer_cast<GlobalParametersCore>(ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime);
+            size_total_robot_states_i++;
 
             // Robot
-            covariance_total_robot_error_noise_estimation(1,1)=std::dynamic_pointer_cast<RobotCore>(ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime);
+            block_covariance_total_robot_error_noise_estimation(size_total_robot_states_i, size_total_robot_states_i)=
+                    std::dynamic_pointer_cast<RobotCore>(ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime);
+            size_total_robot_states_i++;
 
             // Inputs
-            int size_input_i=0;
             for(std::list< std::shared_ptr<InputStateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
                 itInputState!=ThePredictedState->TheListInputStateCore.end();
                 ++itInputState)
             {
-                covariance_total_robot_error_noise_estimation(2+size_input_i, 2+size_input_i)=std::dynamic_pointer_cast<InputCore>((*itInputState)->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime);
-                size_input_i++;
+                block_covariance_total_robot_error_noise_estimation(size_total_robot_states_i, size_total_robot_states_i)=
+                        std::dynamic_pointer_cast<InputCore>((*itInputState)->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime);
+                size_total_robot_states_i++;
             }
         }
 
-        //jacobian_total_robot_error_noise_estimation.transpose();
-
-        //jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
 
 
-//        std::cout<<"Matrix jacobian_total_robot_error_noise_estimation:"<<std::endl;
-//        for(int i=0; i<jacobian_total_robot_error_noise_estimation.rows(); i++)
-//            for(int j=0; j<jacobian_total_robot_error_noise_estimation.cols(); j++)
+        ///
+        //block_jacobian_total_robot_error_noise_estimation.transpose();
+
+        //block_jacobian_total_robot_error_noise_estimation*block_covariance_total_robot_error_noise_estimation*block_jacobian_total_robot_error_noise_estimation.transpose();
+
+
+//        std::cout<<"Matrix block_jacobian_total_robot_error_noise_estimation:"<<std::endl;
+//        for(int i=0; i<block_jacobian_total_robot_error_noise_estimation.rows(); i++)
+//            for(int j=0; j<block_jacobian_total_robot_error_noise_estimation.cols(); j++)
 //            {
-//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(jacobian_total_robot_error_noise_estimation(i,j))<<std::endl;
+//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(block_jacobian_total_robot_error_noise_estimation(i,j))<<std::endl;
 //            }
 
-//        std::cout<<"Matrix covariance_total_robot_error_noise_estimation:"<<std::endl;
-//        for(int i=0; i<covariance_total_robot_error_noise_estimation.rows(); i++)
-//            for(int j=0; j<covariance_total_robot_error_noise_estimation.cols(); j++)
+//        std::cout<<"Matrix block_covariance_total_robot_error_noise_estimation:"<<std::endl;
+//        for(int i=0; i<block_covariance_total_robot_error_noise_estimation.rows(); i++)
+//            for(int j=0; j<block_covariance_total_robot_error_noise_estimation.cols(); j++)
 //            {
-//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(covariance_total_robot_error_noise_estimation(i,j))<<std::endl;
+//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(block_covariance_total_robot_error_noise_estimation(i,j))<<std::endl;
 //            }
 
 
 
-        BlockMatrix::MatrixSparse covariance_total_robot_error;
-        covariance_total_robot_error.resize(size_total_robot, size_total_robot);
+        BlockMatrix::MatrixSparse block_covariance_total_robot_error;
+        block_covariance_total_robot_error.resize(size_total_robot_states, size_total_robot_states);
 
 
 
-        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation;
-        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation;
-        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation.transpose();
-        //covariance_total_robot_error=covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
+        //block_covariance_total_robot_error=block_jacobian_total_robot_error_noise_estimation;
+        //block_covariance_total_robot_error=block_jacobian_total_robot_error_noise_estimation*block_covariance_total_robot_error_noise_estimation;
+        //block_covariance_total_robot_error=block_jacobian_total_robot_error_noise_estimation.transpose();
+        //block_covariance_total_robot_error=block_covariance_total_robot_error_noise_estimation*block_jacobian_total_robot_error_noise_estimation.transpose();
 
-        //covariance_total_robot_error=jacobian_total_robot_error_noise_estimation + jacobian_total_robot_error_noise_estimation;
-
-
-        covariance_total_robot_error=jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose();
+        //block_covariance_total_robot_error=block_jacobian_total_robot_error_noise_estimation + block_jacobian_total_robot_error_noise_estimation;
 
 
+        block_covariance_total_robot_error=block_jacobian_total_robot_error_noise_estimation*block_covariance_total_robot_error_noise_estimation*block_jacobian_total_robot_error_noise_estimation.transpose();
 
-//        if(covariance_total_robot_error.analyse())
+
+
+//        if(block_covariance_total_robot_error.analyse())
 //            std::cout<<"Error!"<<std::endl;
 
-        //std::cout<<"size_cols="<<covariance_total_robot_error.getColsSize().transpose()<<std::endl;
-        //std::cout<<"size_rows="<<covariance_total_robot_error.getRowsSize().transpose()<<std::endl;
+        //std::cout<<"size_cols="<<block_covariance_total_robot_error.getColsSize().transpose()<<std::endl;
+        //std::cout<<"size_rows="<<block_covariance_total_robot_error.getRowsSize().transpose()<<std::endl;
 
 
 
-//        std::cout<<"Matrix covariance_total_robot_error:"<<std::endl;
-//        for(int i=0; i<covariance_total_robot_error.rows(); i++)
-//            for(int j=0; j<covariance_total_robot_error.cols(); j++)
+//        std::cout<<"Matrix block_covariance_total_robot_error:"<<std::endl;
+//        for(int i=0; i<block_covariance_total_robot_error.rows(); i++)
+//            for(int j=0; j<block_covariance_total_robot_error.cols(); j++)
 //            {
-//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(covariance_total_robot_error(i,j))<<std::endl;
+//                std::cout<<"("<<i<<";"<<j<<")="<<std::endl<<Eigen::MatrixXd(block_covariance_total_robot_error(i,j))<<std::endl;
 //            }
 
 
 
-//        Eigen::SparseMatrix<double> aux=convertToEigenSparse(covariance_total_robot_error);
+//        Eigen::SparseMatrix<double> aux=convertToEigenSparse(block_covariance_total_robot_error);
 //        std::cout<<"full matrix="<<std::endl;
 //        std::cout<<Eigen::MatrixXd(aux)<<std::endl;
 
@@ -2530,11 +2573,11 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
 #endif
 
             // Update states
+            {
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-            TimeStamp begin_time_update_error_state_from_increment_error_state=getTimeStamp();
+                TimeStamp begin_time_update_error_state_from_increment_error_state=getTimeStamp();
 #endif
 
-            {
                 int num_error_state_i=0;
 
                 // World (Global Parameters)
@@ -2575,14 +2618,16 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp, std::shared_pt
                     (*itListMapElementState)->updateStateFromIncrementErrorState(block_increment_error_state(num_error_state_i, 0));
                     num_error_state_i++;
                 }
-            }
+
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationCore::update() update_error_state_from_increment_error_state time: "<<(getTimeStamp()-begin_time_update_error_state_from_increment_error_state).nsec<<std::endl;
-                this->log(logString.str());
-            }
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationCore::update() update_error_state_from_increment_error_state time: "<<(getTimeStamp()-begin_time_update_error_state_from_increment_error_state).nsec<<std::endl;
+                    this->log(logString.str());
+                }
 #endif
+            }
+
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE

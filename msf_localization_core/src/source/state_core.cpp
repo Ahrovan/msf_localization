@@ -105,19 +105,19 @@ Eigen::SparseMatrix<double> StateCore::getJacobianErrorStateMapElement(int map_e
     return this->jacobian_error_state_.map_elements[map_element_number];
 }
 
-int StateCore::setJacobianErrorStateWorld(Eigen::SparseMatrix<double> jacobian_error_state)
+int StateCore::setJacobianErrorStateWorld(const Eigen::SparseMatrix<double> &jacobian_error_state)
 {
     this->jacobian_error_state_.world=jacobian_error_state;
     return 0;
 }
 
-int StateCore::setJacobianErrorStateRobot(Eigen::SparseMatrix<double> jacobian_error_state)
+int StateCore::setJacobianErrorStateRobot(const Eigen::SparseMatrix<double>& jacobian_error_state)
 {
     this->jacobian_error_state_.robot=jacobian_error_state;
     return 0;
 }
 
-int StateCore::setJacobianErrorStateInput(Eigen::SparseMatrix<double> jacobian_error_state, int input_number)
+int StateCore::setJacobianErrorStateInput(const Eigen::SparseMatrix<double>& jacobian_error_state, int input_number)
 {
     if(input_number >= this->jacobian_error_state_.inputs.size())
     {
@@ -127,7 +127,7 @@ int StateCore::setJacobianErrorStateInput(Eigen::SparseMatrix<double> jacobian_e
     return 0;
 }
 
-int StateCore::setJacobianErrorStateSensor(Eigen::SparseMatrix<double> jacobian_error_state, int sensor_number)
+int StateCore::setJacobianErrorStateSensor(const Eigen::SparseMatrix<double> &jacobian_error_state, int sensor_number)
 {
     if(sensor_number >= this->jacobian_error_state_.sensors.size())
     {
@@ -137,7 +137,7 @@ int StateCore::setJacobianErrorStateSensor(Eigen::SparseMatrix<double> jacobian_
     return 0;
 }
 
-int StateCore::setJacobianErrorStateMapElement(Eigen::SparseMatrix<double> jacobian_error_state, int map_element_number)
+int StateCore::setJacobianErrorStateMapElement(const Eigen::SparseMatrix<double>& jacobian_error_state, int map_element_number)
 {
     if(map_element_number >= this->jacobian_error_state_.map_elements.size())
     {
