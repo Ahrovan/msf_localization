@@ -51,13 +51,6 @@ int RosSensorImuInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
     // Value
     std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurementCore=std::make_shared<ImuSensorMeasurementCore>(TheImuSensorCore);
 
-    // Set the sensor core -> Associate it to the SensorCore
-    //TheImuSensorMeasurementCore->setTheSensorCore(std::dynamic_pointer_cast<ImuSensorCore>(this));
-    //std::weak_ptr<const ImuSensorCore> TheImuSensorCorePtrAux=std::static_pointer_cast<const ImuSensorCore>((this));
-    //TheImuSensorMeasurementCore->setTheSensorCore(TheImuSensorCorePtrAux);
-
-    //TheImuSensorMeasurementCore->setTheSensorCore(TheImuSensorCore);
-
 
     // Orientation if enabled
     if(this->isMeasurementOrientationEnabled())
