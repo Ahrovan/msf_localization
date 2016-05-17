@@ -61,6 +61,11 @@ public:
     int getDimensionErrorInputCommand() const;
 
 
+    // Number of input commands
+public:
+    int getNumberInputCommand() const;
+
+
     // Avaliable Inputs
 public:
     std::list< std::shared_ptr<InputCommandCore> > TheListInputCommandCore;

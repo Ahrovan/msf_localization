@@ -570,16 +570,20 @@ int CodedVisualMarkerEyeCore::predictStateCore(// State k: Sensor
 int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> pastState,
+                             const std::shared_ptr<StateEstimationCore> past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                            const std::shared_ptr<InputCommandComponent> input_command,
                              // Predicted State
-                             std::shared_ptr<StateCore> &predictedState)
+                             std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
     // Past State
-    if(!pastState)
+    if(!past_state)
+        return -1;
+
+    // Predicted State
+    if(!predicted_state)
         return -1;
 
     // TODO
@@ -587,32 +591,79 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
 
     // Search for the past sensor State Core
     std::shared_ptr<CodedVisualMarkerEyeStateCore> past_sensor_state;
-    if(findSensorState(pastState->TheListSensorStateCore, past_sensor_state))
+    if(findSensorState(past_state->TheListSensorStateCore, past_sensor_state))
         return -2;
     if(!past_sensor_state)
         return -10;
 
-    // Predicted State
-    if(!predictedState)
-        return -1;
-    // Cast
+
+
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorStateJacobianInit(// Past State
+                                                           past_state,
+                                                           // Input commands
+                                                           input_command,
+                                                           // Predicted State
+                                                           predicted_state);
+
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+
+    /// Predicted State Cast
     std::shared_ptr<CodedVisualMarkerEyeStateCore> predicted_sensor_state;
-    predicted_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(predictedState);
+    predicted_sensor_state=std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>(predicted_state);
 
 
 
-    // Predict State
-    int error_predict_state=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
-                                         past_sensor_state,
-                                         predicted_sensor_state);
+
+    /// Get iterators to fill jacobians
+
+    // Fx & Fp
+    // Sensor
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_sensor_error_state;
+    it_jacobian_error_state_wrt_sensor_error_state=predicted_sensor_state->jacobian_error_state_.sensors.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_sensor_error_parameters;
+    it_jacobian_error_state_wrt_sensor_error_parameters=predicted_sensor_state->jacobian_error_parameters_.sensors.begin();
+
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=past_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=past_state->TheListSensorStateCore.end();
+        ++itSensorStateCore, ++it_jacobian_error_state_wrt_sensor_error_state, ++it_jacobian_error_state_wrt_sensor_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<CodedVisualMarkerEyeStateCore>((*itSensorStateCore)) == past_sensor_state )
+            break;
+    }
+
+
+    // Fu
+    // Nothing
+
+
+    // Fn
+    // Nothing
+
+
+
+    /// Predict State Jacobians
+    int error_predict_state_jacobians=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
+                                                                         past_sensor_state,
+                                                                         predicted_sensor_state,
+                                                                         // Jacobians Error State: Fx, Fp
+                                                                         // Sensor
+                                                                         (*it_jacobian_error_state_wrt_sensor_error_state),
+                                                                         (*it_jacobian_error_state_wrt_sensor_error_parameters)
+                                                                         );
 
     // Check error
-    if(error_predict_state)
-        return error_predict_state;
+    if(error_predict_state_jacobians)
+        return error_predict_state_jacobians;
 
 
-    // Set predicted state
-    predictedState=predicted_sensor_state;
+    /// Set predicted state
+    predicted_state=predicted_sensor_state;
 
 
     // End
@@ -621,16 +672,21 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobian(//Time
 
 int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                                                  const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
-                                                                 std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState)
+                                                                 std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState,
+                                                                 // Jacobians Error State: Fx, Fp
+                                                                 // Sensor
+                                                                 Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
+                                                                 Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_parameters
+                                                                 )
 {
 
-    // Create the predicted state if it doesn't exist
+    // Checks
     if(!predictedState)
     {
         return -1;
     }
 
-    // Variables
+    /// Variables
     // State k: Sensor
     Eigen::Vector3d position_sensor_wrt_robot;
     Eigen::Vector4d attitude_sensor_wrt_robot;
@@ -642,11 +698,6 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
     Eigen::Matrix3d jacobian_error_sens_pos_wrt_error_state_sens_pos;
     Eigen::Matrix3d jacobian_error_sens_att_wrt_error_state_sens_att;
 
-
-    //Delta Time
-    TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    // delta time
-    double dt=DeltaTime.get_double();
 
 
     /// Fill variables
@@ -677,7 +728,6 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
 
 
     ///// Jacobian Error State - Error State: Fx & Jacobian Error State - Error Parameters: Fp
-    // TODO FIX!
 
     /// World
     {
@@ -697,10 +747,8 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
     /// Sensors
     {
         // Resize and init
-        Eigen::SparseMatrix<double> jacobian_error_state_wrt_robot_error_state;
-        jacobian_error_state_wrt_robot_error_state.resize(dimension_error_state_, dimension_error_state_);
-        Eigen::SparseMatrix<double> jacobian_error_state_wrt_robot_error_parameters;
-        jacobian_error_state_wrt_robot_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
+        jacobian_error_state_wrt_sensor_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state_wrt_sensor_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
@@ -719,14 +767,6 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
             // Update dimension for next
             dimension_error_state_i+=3;
         }
-        else
-        {
-            // Add to the triplets
-            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_parameters, jacobian_error_sens_pos_wrt_error_state_sens_pos, dimension_error_parameters_i, dimension_error_parameters_i);
-
-            // Update dimension for next
-            dimension_error_parameters_i+=3;
-        }
 
         // Attitude sensor wrt robot
         if(this->isEstimationAttitudeSensorWrtRobotEnabled())
@@ -737,26 +777,11 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
             // Update dimension for next
             dimension_error_state_i+=3;
         }
-        else
-        {
-            // Add to triplet list
-            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_parameters, jacobian_error_sens_att_wrt_error_state_sens_att, dimension_error_parameters_i, dimension_error_parameters_i);
-
-            // Update dimension for next
-            dimension_error_parameters_i+=3;
-        }
 
 
         // Set From Triplets
-        jacobian_error_state_wrt_robot_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
-        jacobian_error_state_wrt_robot_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
-
-
-        // TODO FIX!!!
-        predictedState->setJacobianErrorStateSensor(jacobian_error_state_wrt_robot_error_state, 0);
-
-
-        // TODO
+        jacobian_error_state_wrt_sensor_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
+        jacobian_error_state_wrt_sensor_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
 
     }
 
@@ -777,10 +802,6 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansSpecific(const TimeStamp
     //// Jacobian Error State - Noise Estimation: Fn
 
     {
-        // Resize
-        predictedState->jacobian_error_state_noise_.resize(this->dimension_error_state_, this->dimension_noise_);
-        //predictedState->jacobian_error_state_noise_.setZero();
-
         // Fill
         // Nothing to do
     }

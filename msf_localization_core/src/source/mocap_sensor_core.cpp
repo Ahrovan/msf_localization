@@ -571,16 +571,20 @@ int MocapSensorCore::predictStateCore(// State k: Sensor
 int MocapSensorCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> pastState,
+                             const std::shared_ptr<StateEstimationCore> past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                            const std::shared_ptr<InputCommandComponent> input_command,
                              // Predicted State
-                             std::shared_ptr<StateCore> &predictedState)
+                             std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
     // Past State
-    if(!pastState)
+    if(!past_state)
+        return -1;
+
+    // Predicted State
+    if(!predicted_state)
         return -1;
 
     // TODO
@@ -588,43 +592,94 @@ int MocapSensorCore::predictErrorStateJacobian(//Time
 
     // Search for the past sensor State Core
     std::shared_ptr<MocapSensorStateCore> past_sensor_state;
-    if(findSensorState(pastState->TheListSensorStateCore, past_sensor_state))
+    if(findSensorState(past_state->TheListSensorStateCore, past_sensor_state))
         return -2;
     if(!past_sensor_state)
         return -10;
 
 
 
-    // Predicted State
-    if(!predictedState)
-        return -1;
-    // Cast
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorStateJacobianInit(// Past State
+                                                           past_state,
+                                                           // Input commands
+                                                           input_command,
+                                                           // Predicted State
+                                                           predicted_state);
+
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+
+    /// Predicted State Cast
     std::shared_ptr<MocapSensorStateCore> predicted_sensor_state;
-    predicted_sensor_state=std::dynamic_pointer_cast<MocapSensorStateCore>(predictedState);
+    predicted_sensor_state=std::dynamic_pointer_cast<MocapSensorStateCore>(predicted_state);
 
 
 
-    // Predict State
-    int error_predict_state=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
-                                         past_sensor_state,
-                                         predicted_sensor_state);
+    /// Get iterators to fill jacobians
+
+    // Fx & Fp
+    // Sensor
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_sensor_error_state;
+    it_jacobian_error_state_wrt_sensor_error_state=predicted_sensor_state->jacobian_error_state_.sensors.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_sensor_error_parameters;
+    it_jacobian_error_state_wrt_sensor_error_parameters=predicted_sensor_state->jacobian_error_parameters_.sensors.begin();
+
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=past_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=past_state->TheListSensorStateCore.end();
+        ++itSensorStateCore, ++it_jacobian_error_state_wrt_sensor_error_state, ++it_jacobian_error_state_wrt_sensor_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<MocapSensorStateCore>((*itSensorStateCore)) == past_sensor_state )
+            break;
+    }
+
+
+    // Fu
+    // Nothing
+
+
+    // Fn
+    // Nothing
+
+
+
+    /// Predict State Jacobians
+    int error_predict_state_jacobians=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
+                                                                        past_sensor_state,
+                                                                        predicted_sensor_state,
+                                                                        // Jacobians Error State: Fx, Fp
+                                                                        // Sensor
+                                                                        (*it_jacobian_error_state_wrt_sensor_error_state),
+                                                                        (*it_jacobian_error_state_wrt_sensor_error_parameters)
+                                                                        );
 
     // Check error
-    if(error_predict_state)
-        return error_predict_state;
+    if(error_predict_state_jacobians)
+        return error_predict_state_jacobians;
 
 
-    // Set predicted state
-    predictedState=predicted_sensor_state;
 
+    /// Set predicted state
+    predicted_state=predicted_sensor_state;
 
     // End
     return 0;
 }
 
 int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
-                                                                 const std::shared_ptr<MocapSensorStateCore> pastState,
-                                                                 std::shared_ptr<MocapSensorStateCore> &predictedState)
+                                                        const std::shared_ptr<MocapSensorStateCore> pastState,
+                                                        std::shared_ptr<MocapSensorStateCore> &predictedState,
+                                                        // Jacobians Error State: Fx, Fp
+                                                        // Sensor
+                                                        Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
+                                                        Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_parameters
+                                                        // Jacobians Noise: Hn
+                                                        // TODO
+                                                        )
 {
     // Create the predicted state if it doesn't exist
     if(!predictedState)
@@ -678,50 +733,43 @@ int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previou
 
 
 
-    ///// Jacobian Error State
+    ///// Jacobian Error State - Error State: Fx & Jacobian Error State - Error Parameters: Fp
 
-    /// Jacobian of the error: Linear Part
-
-    // posi / posi
-    if(this->isEstimationPositionSensorWrtRobotEnabled())
+    /// World
     {
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.resize(3, 3);
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.setZero();
-
-        predictedState->error_state_jacobian_.position_sensor_wrt_robot_.block<3,3>(0,0)=jacobian_error_sens_pos_wrt_error_state_sens_pos;
+        // Nothing to do
     }
 
-
-    /// Jacobian of the error -> Angular Part
-
-    // att / att
-    // TODO Fix!!
-    if(this->isEstimationAttitudeSensorWrtRobotEnabled())
+    /// Robot
     {
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.resize(3, 3);
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.setZero();
-
-        predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_.block<3,3>(0,0)=jacobian_error_sens_att_wrt_error_state_sens_att;
+        // Nothing to do
     }
 
-
-    /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
+    /// Inputs
     {
-        Eigen::SparseMatrix<double> jacobian_error_state;
-        jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
-        jacobian_error_state.reserve(3*dimension_error_state_); //worst case -> Optimize
+        // Nothing to do
+    }
 
-        std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
+    /// Sensors
+    {
+        // Resize and init
+        jacobian_error_state_wrt_sensor_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state_wrt_sensor_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
 
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
+
+
+        // Fill
         int dimension_error_state_i=0;
+        int dimension_error_parameters_i=0;
+
 
         // Position sensor wrt robot
         if(this->isEstimationPositionSensorWrtRobotEnabled())
         {
-            // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->error_state_jacobian_.position_sensor_wrt_robot_(i,j)));
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_sens_pos_wrt_error_state_sens_pos, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
@@ -731,33 +779,38 @@ int MocapSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previou
         if(this->isEstimationAttitudeSensorWrtRobotEnabled())
         {
             // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->error_state_jacobian_.attitude_sensor_wrt_robot_(i,j)));
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_sens_att_wrt_error_state_sens_att, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
         }
 
+        // Set From Triplets
+        jacobian_error_state_wrt_sensor_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
+        jacobian_error_state_wrt_sensor_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
 
-        // Set from triplets
-        jacobian_error_state.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
 
-        // TODO FIX!!!
-        predictedState->setJacobianErrorStateSensor(jacobian_error_state, 0);
+    }
+
+    /// Map elements
+    {
+        // Nothing to do
     }
 
 
 
-    //// Jacobian Error State Noise
+    //// Jacobian Error State - Error Input
 
-    // Resize the jacobian
-    predictedState->jacobian_error_state_noise_.resize(getDimensionErrorState(), getDimensionNoise());
-    predictedState->jacobian_error_state_noise_.setZero();
+    {
+        // Nothing to do
+    }
 
-    // Fill
 
-    // Nothing to do
+    //// Jacobian Error State - Noise Estimation: Fn
+
+    {
+        // Nothing to do
+    }
 
 
 
@@ -787,13 +840,13 @@ int MocapSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
 }
 
 int MocapSensorCore::predictMeasurement(// Time
-                                               const TimeStamp current_time_stamp,
-                                               // Current State
-                                               const std::shared_ptr<StateEstimationCore> current_state,
-                                                 // Measurements
-                                                 const std::shared_ptr<SensorMeasurementCore> measurement,
-                                               // Predicted Measurements
-                                               std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
+                                        const TimeStamp current_time_stamp,
+                                        // Current State
+                                        const std::shared_ptr<StateEstimationCore> current_state,
+                                        // Measurements
+                                        const std::shared_ptr<SensorMeasurementCore> measurement,
+                                        // Predicted Measurements
+                                        std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
 {
     // State
     if(!current_state)

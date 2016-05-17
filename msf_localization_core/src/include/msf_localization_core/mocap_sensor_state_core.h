@@ -31,18 +31,6 @@ protected:
 
 
 
-    ////// Jacobians
-
-    /// Jacobians Error State
-
-public:
-    struct
-    {
-        Eigen::Matrix3d position_sensor_wrt_robot_;
-        Eigen::Matrix3d attitude_sensor_wrt_robot_;
-    } error_state_jacobian_;
-
-
 
 public:
     int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state);

@@ -439,16 +439,20 @@ int MocapWorldCore::predictStateSpecific(const TimeStamp previousTimeStamp, cons
 int MocapWorldCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> pastState,
+                             const std::shared_ptr<StateEstimationCore> past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                            const std::shared_ptr<InputCommandComponent> input_command,
                              // Predicted State
-                             std::shared_ptr<StateCore> &predictedState)
+                             std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
     // Past State
-    if(!pastState)
+    if(!past_state)
+        return -1;
+
+    // Predicted State
+    if(!predicted_state)
         return -1;
 
     // TODO
@@ -457,8 +461,8 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
     // Search for the past map State Core
     std::shared_ptr<MocapWorldStateCore> past_map_state;
 
-    for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
-        it_map_state!=pastState->TheListMapElementStateCore.end();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=past_state->TheListMapElementStateCore.begin();
+        it_map_state!=past_state->TheListMapElementStateCore.end();
         ++it_map_state)
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
@@ -471,41 +475,89 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
         return -10;
 
 
-    // Predicted State
-    if(!predictedState)
-        return -1;
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorStateJacobianInit(// Past State
+                                                           past_state,
+                                                           // Input commands
+                                                           input_command,
+                                                           // Predicted State
+                                                           predicted_state);
 
-    // Search for the predicted map Predicted State
-    std::shared_ptr<MocapWorldStateCore> predicted_map_state=std::dynamic_pointer_cast<MocapWorldStateCore>(predictedState);
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+    /// predicted map State
+    std::shared_ptr<MocapWorldStateCore> predicted_map_state=std::dynamic_pointer_cast<MocapWorldStateCore>(predicted_state);
+
+
+    /// Get iterators to fill jacobians
+
+    // Fx & Fp
+    // Map Element
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_map_error_state;
+    it_jacobian_error_state_wrt_map_error_state=predicted_map_state->jacobian_error_state_.map_elements.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_map_error_parameters;
+    it_jacobian_error_state_wrt_map_error_parameters=predicted_map_state->jacobian_error_parameters_.map_elements.begin();
+
+    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementStateCore=past_state->TheListMapElementStateCore.begin();
+        itMapElementStateCore!=past_state->TheListMapElementStateCore.end();
+        ++itMapElementStateCore, ++it_jacobian_error_state_wrt_map_error_state, ++it_jacobian_error_state_wrt_map_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<MocapWorldStateCore>((*itMapElementStateCore)) == past_map_state )
+            break;
+    }
+
+
+    // Fu
+    // Nothing
+
+
+    // Fn
+    // Nothing
 
 
 
-    // Predict State
-    int error_predict_state=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
-                                         past_map_state,
-                                         predicted_map_state);
+    /// Predict State Jacobians
+    int error_predict_state_jacobians=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
+                                                                         past_map_state,
+                                                                         predicted_map_state,
+                                                                         // Jacobians Error State: Fx, Fp
+                                                                         (*it_jacobian_error_state_wrt_map_error_state),
+                                                                         (*it_jacobian_error_state_wrt_map_error_parameters)
+                                                                         // Jacobian Error Noise
+                                                                         // TODO
+                                                                         );
 
     // Check error
-    if(error_predict_state)
-        return error_predict_state;
+    if(error_predict_state_jacobians)
+        return error_predict_state_jacobians;
 
 
-    // Set predicted state
-    predictedState=predicted_map_state;
-
+    /// Set predicted state
+    predicted_state=predicted_map_state;
 
     // End
     return 0;
 }
 
 int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                                      const std::shared_ptr<MocapWorldStateCore> pastState,
-                                                                      std::shared_ptr<MocapWorldStateCore>& predictedState)
+                                                       const std::shared_ptr<MocapWorldStateCore> pastState,
+                                                       std::shared_ptr<MocapWorldStateCore>& predictedState,
+                                                       // Jacobians Error State: Fx, Fp
+                                                       // Map
+                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,
+                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_parameters
+                                                       // Jacobians Noise: Hn
+                                                       // TODO
+                                                       )
 {
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        return 1;
+        return -1;
     }
 
 
@@ -516,63 +568,89 @@ int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousT
 
 
 
-    //// Jacobian Error State
+    ///// Jacobian Error State - Error State: Fx & Jacobian Error State - Error Parameters: Fp
 
-    // Jacobian Size
-    Eigen::SparseMatrix<double> jacobian_error_state;
-    jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
-    jacobian_error_state.reserve(dimension_error_state_);
-
-    std::vector<Eigen::Triplet<double> > tripletJacobianErrorState;
-
-
-
-    /// Jacobian of the error: Linear Part
-
-    // posi / posi
-    if(flag_estimation_position_mocap_world_wrt_world_)
+    /// World
     {
-        // Eigen::MatrixXd::Identity(3,3);
-        for(int i=0; i<3; i++)
-            tripletJacobianErrorState.push_back(Eigen::Triplet<double>(i,i,1));
+        // Nothing to do
+    }
+
+    /// Robot
+    {
+        // Nothing to do
+    }
+
+    /// Inputs
+    {
+        // Nothing to do
+    }
+
+    /// Sensors
+    {
+        // Nothing to do
+    }
+
+    /// Map Elements
+    {
+        // Resize and init
+        jacobian_error_state_wrt_map_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state_wrt_map_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
+
+
+        // Fill
+        int dimension_error_state_i=0;
+        int dimension_error_parameters_i=0;
+
+
+
+        // posi / posi
+        if(isEstimationPositionMocapWorldWrtWorldEnabled())
+        {
+            //Eigen::MatrixXd::Identity(3,3);
+            for(int i=0; i<3; i++)
+                triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+i,1));
+            dimension_error_state_i+=3;
+        }
+
+
+        // att / att
+        if(isEstimationAttitudeMocapWorldWrtWorldEnabled())
+        {
+            //Eigen::MatrixXd::Identity(3,3);
+            for(int i=0; i<3; i++)
+                triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+i,1));
+            dimension_error_state_i+=3;
+        }
+
+
+        // Set From Triplets
+        jacobian_error_state_wrt_map_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
+        jacobian_error_state_wrt_map_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
+
     }
 
 
 
-    /// Jacobian of the error -> Angular Part
 
-    // att / att
-    if(flag_estimation_attitude_mocap_world_wrt_world_)
+    //// Jacobian Error State - Error Input
+
     {
-        // Eigen::MatrixXd::Identity(3,3);
-        for(int i=0; i<3; i++)
-            tripletJacobianErrorState.push_back(Eigen::Triplet<double>(3+i,3+i,1));
+        // Nothing to do
     }
 
 
-    /// Set
-    jacobian_error_state.setFromTriplets(tripletJacobianErrorState.begin(), tripletJacobianErrorState.end());
-
-
-    // TODO FIX!!
-    predictedState->setJacobianErrorStateMapElement(jacobian_error_state, 0);
-
-
-
-    ///// Jacobian Error State Noise
+    //// Jacobian Error State - Noise Estimation: Fn
 
     {
-        predictedState->jacobian_error_state_noise_.resize(0, 0);
-        predictedState->jacobian_error_state_noise_.reserve(0);
-
-        std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
-
         // Nothing to do
     }
 
 
 
-    // Finish
+    // End
     return 0;
 }
 

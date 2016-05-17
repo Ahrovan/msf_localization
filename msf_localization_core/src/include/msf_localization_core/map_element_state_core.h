@@ -27,13 +27,41 @@ protected:
 
 
 
+    //// Jacobians mapping: G
+
+    /// Jacobian mapping error state: Gx
+public:
+    struct JacobianMappingErrorState
+    {
+        Eigen::MatrixXd jacobian_mapping_global_parameters_error_state_;
+        Eigen::MatrixXd jacobian_mapping_robot_error_state_;
+        // TODO Inputs
+        Eigen::MatrixXd jacobian_mapping_sensor_error_state_;
+        // TODO Map elements
+    } jacobian_mapping_error_state_;
+
 
 public:
-    virtual Eigen::MatrixXd getJacobianMappingRobotErrorState()=0;
-    virtual Eigen::MatrixXd getJacobianMappingGlobalParametersErrorState()=0;
-    virtual Eigen::MatrixXd getJacobianMappingSensorErrorState()=0;
+    Eigen::MatrixXd getJacobianMappingGlobalParametersErrorState();
+    Eigen::MatrixXd getJacobianMappingRobotErrorState();
+    Eigen::MatrixXd getJacobianMappingSensorErrorState();
 
-    virtual Eigen::MatrixXd getJacobianMappingErrorStateNoise()=0;
+
+
+    /// Jacobian mapping error parameters: Gp
+    // TODO
+
+
+
+    /// Jacobian mapping noise: Gn
+
+protected:
+public:
+    Eigen::MatrixXd jacobian_mapping_error_state_noise_;
+
+
+public:
+    Eigen::MatrixXd getJacobianMappingErrorStateNoise();
 
 
 

@@ -83,21 +83,10 @@ public:
 
 
 
-    ///// Covariances Getters
-
-
-    // Covariance Noise Estimation: Qn
-public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp)=0;
-
-
-
-
-
 
     ///// Predict Step functions
 
-    //
+    // None
 
 
     //// Update Step functions

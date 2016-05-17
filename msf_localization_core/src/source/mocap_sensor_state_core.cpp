@@ -30,10 +30,6 @@ int MocapSensorStateCore::init()
 {
     this->setSensorStateCoreType(SensorStateCoreTypes::mocap);
 
-    // Error State Jacobian: Init to zero
-    error_state_jacobian_.position_sensor_wrt_robot_.setZero();
-    error_state_jacobian_.attitude_sensor_wrt_robot_.setZero();
-
     return 0;
 }
 

@@ -30,12 +30,6 @@ int ImuSensorStateCore::init()
 {
     this->setSensorStateCoreType(SensorStateCoreTypes::imu);
 
-    // Error State Jacobian: Init to zero
-    errorStateJacobian.positionSensorWrtRobot.setZero();
-    errorStateJacobian.attitudeSensorWrtRobot.setZero();
-    errorStateJacobian.biasesLinearAcceleration.setZero();
-    errorStateJacobian.biasesAngularVelocity.setZero();
-
     return 0;
 }
 

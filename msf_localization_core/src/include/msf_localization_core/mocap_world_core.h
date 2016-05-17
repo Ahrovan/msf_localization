@@ -133,16 +133,21 @@ public:
     int predictErrorStateJacobian(//Time
                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 const std::shared_ptr<StateEstimationCore> past_state,
                                  // Inputs
-                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 const std::shared_ptr<InputCommandComponent> input_command,
                                  // Predicted State
-                                 std::shared_ptr<StateCore>& predictedState);
+                                 std::shared_ptr<StateCore>& predicted_state);
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                   const std::shared_ptr<MocapWorldStateCore> pastState,
-                                   std::shared_ptr<MocapWorldStateCore>& predictedState);
+                                           const std::shared_ptr<MocapWorldStateCore> pastState,
+                                           std::shared_ptr<MocapWorldStateCore>& predictedState,
+                                           // Jacobians Error State: Fx, Fp
+                                           // Map
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_parameters
+                                           );
 
 
 

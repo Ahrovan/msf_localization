@@ -100,38 +100,24 @@ public:
 
 
 
+    ///// Covariances Getters
 
-/*
-    ////// Init error state variances -> Temporal, only for the initial configuration
+    // Covariance Error Inputs: Qu
 public:
-    virtual Eigen::MatrixXd getInitCovarianceErrorState()=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceInputs(const TimeStamp deltaTimeStamp)=0;
 
 
 
 
-    ///// Get Covariances as a Eigen::MatrixXd
-public:
-    //virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
+    ///// Predict Step functions
 
-*/
-public:
-    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp deltaTimeStamp) const=0;
+    // None
 
 
+    //// Update Step functions
 
+    // None
 
-
-
-    ///// Predict functions
-/*
-    // Prediction state function
-public:
-    virtual int predictState(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, const std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
-
-    // Jacobian
-public:
-    virtual int predictErrorStateJacobians(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp, std::shared_ptr<MapElementStateCore> pastState, std::shared_ptr<MapElementStateCore>& predictedState)=0;
-*/
 
 
 

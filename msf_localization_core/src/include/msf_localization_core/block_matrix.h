@@ -61,7 +61,40 @@ protected:
 public:
     int analyse()
     {
-        // Find dimensions
+        // Resize and init to zero -> Not needed. Done when resize()
+//        rows_size_.resize(this->rows());
+//        rows_size_.setZero();
+//        cols_size_.resize(this->cols());
+//        cols_size_.setZero();
+
+
+        // special case 1: this->cols() == 0
+        if( this->cols() == 0 && this->rows() != 0 )
+        {
+
+            return 0;
+        }
+
+
+        // special case 2: this->rows() == 0
+        if(this->rows() == 0 && this->cols() != 0)
+        {
+
+            return 0;
+        }
+
+
+        // special case 3: rows()==0 && cols()==0
+        if(this->rows() == 0 && this->cols() == 0)
+        {
+
+            return 0;
+        }
+
+
+
+        // Normal cases
+
         // rows
         for(int i=0; i<this->rows(); i++)
         {
@@ -130,6 +163,10 @@ public:
             }
             dimension_row_i+=rows_size_(row, 0);
         }
+
+        // Analyse
+        if(this->analyse())
+            throw;
 
         // End
         return 0;
@@ -221,6 +258,9 @@ public:
                     this->operator()(row,col)=other(row,col);
                 }
             }
+            // Analyse
+            if(this->analyse())
+                throw;
         }
         // by convention, always return *this
         return *this;
@@ -245,6 +285,9 @@ public:
                     out(col,row)=this->operator()(row, col).transpose();
                 }
             }
+        // Analyse out
+        if(out.analyse())
+            throw;
 
         return out;
     }
@@ -259,7 +302,7 @@ public:
     */
 
 
-    Matrix operator+(Matrix& sum1)
+    Matrix operator+(const Matrix& sum1)
     {
         Matrix sum_result;
 
@@ -270,11 +313,6 @@ public:
             throw;
 
         // Check blocks sizes
-        // Analyse both
-        if(this->analyse())
-            throw;
-        if(sum1.analyse())
-            throw;
         //Check
         if(this->getColsSize() != sum1.getColsSize())
             throw;
@@ -332,6 +370,23 @@ public:
 
             }
 
+        // Analyse the result
+        if(sum_result.analyse())
+            throw;
+
+        // End
+        return sum_result;
+    }
+
+
+    Matrix operator+=(const Matrix& sum1)
+    {
+        //
+        Matrix sum_result;
+
+        // Operator+()
+        sum_result=this->operator+(sum1);
+
         // End
         return sum_result;
     }
@@ -372,6 +427,7 @@ class VectorDense : public Matrix<Eigen::MatrixXd, Eigen::Dynamic, 1>
 
 
 MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
+//MatrixSparse operator+(MatrixSparse &sum1, MatrixSparse &sum2);
 
 /*
 template<class TypeResult, class TypeProd1, class TypeProd2>
@@ -451,12 +507,13 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
 */
 
 
-Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in);
+Eigen::SparseMatrix<double> convertToEigenSparse(const MatrixSparse &in);
 // TODO
 //Eigen::MatrixXd convertToEigenDense(MatrixSparse& in);
 
 
-Eigen::MatrixXd convertToEigenDense(MatrixDense &in);
+Eigen::MatrixXd convertToEigenDense(const MatrixSparse &in);
+Eigen::MatrixXd convertToEigenDense(const MatrixDense &in);
 
 
 std::vector< Eigen::Triplet<double> > getVectorEigenTripletFromEigenDense(const Eigen::MatrixXd& in, int row_offset=0, int col_offset=0);

@@ -169,16 +169,21 @@ public:
     int predictErrorStateJacobian(//Time
                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 const std::shared_ptr<StateEstimationCore> past_state,
                                  // Inputs
-                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 const std::shared_ptr<InputCommandComponent> input_command,
                                  // Predicted State
-                                 std::shared_ptr<StateCore>& predictedState);
+                                 std::shared_ptr<StateCore>& predicted_state);
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                   const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
-                                   std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState);
+                                           const std::shared_ptr<CodedVisualMarkerEyeStateCore> pastState,
+                                           std::shared_ptr<CodedVisualMarkerEyeStateCore>& predictedState,
+                                           // Jacobians Error State: Fx, Fp
+                                           // Sensor
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_parameters
+                                           );
 protected:
     // TODO Fix!!
     int predictErrorStateJacobiansCore(// State k: Sensor
@@ -243,7 +248,7 @@ protected:
                                                const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
                                                const std::shared_ptr<CodedVisualMarkerMeasurementCore> matchedMeasurement,
                                                std::shared_ptr<CodedVisualMarkerMeasurementCore>& predictedMeasurement,
-                                                // Jacobians State
+                                                // Jacobians Error State: Hx, Hp
                                                 // Robot
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
@@ -253,7 +258,7 @@ protected:
                                                 // Map Element
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_map_element_error_state,
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_map_element_error_parameters,
-                                                // Jacobians Noise
+                                                // Jacobians Noise: Hn
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
                                                 );
 protected:

@@ -30,3 +30,23 @@ int MapElementStateCore::init()
     return 0;
 }
 
+
+Eigen::MatrixXd MapElementStateCore::getJacobianMappingRobotErrorState()
+{
+    return this->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_;
+}
+
+Eigen::MatrixXd MapElementStateCore::getJacobianMappingGlobalParametersErrorState()
+{
+    return this->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_;
+}
+
+Eigen::MatrixXd MapElementStateCore::getJacobianMappingSensorErrorState()
+{
+    return this->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_;
+}
+
+Eigen::MatrixXd MapElementStateCore::getJacobianMappingErrorStateNoise()
+{
+    return this->jacobian_mapping_error_state_noise_;
+}

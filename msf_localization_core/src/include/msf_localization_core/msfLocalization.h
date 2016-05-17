@@ -131,7 +131,7 @@
 #define _DEBUG_MSF_LOCALIZATION_CORE 0
 #define _DEBUG_MSF_LOCALIZATION_ALGORITHM 0
 
-#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 1
+#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 0
 
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 
@@ -258,7 +258,6 @@ private:
 protected:
     double predictRateValue;
     std::thread* predictThread;
-    //SyncThreadState predictThreadState;
 protected:
     // TODO Finish
     virtual int predictThreadFunction();

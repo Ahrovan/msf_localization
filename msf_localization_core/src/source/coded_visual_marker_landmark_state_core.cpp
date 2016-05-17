@@ -51,26 +51,6 @@ int CodedVisualMarkerLandmarkStateCore::setAttitude(const Eigen::Vector4d &attit
     return 0;
 }
 
-Eigen::MatrixXd CodedVisualMarkerLandmarkStateCore::getJacobianMappingRobotErrorState()
-{
-    return this->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_;
-}
-
-Eigen::MatrixXd CodedVisualMarkerLandmarkStateCore::getJacobianMappingGlobalParametersErrorState()
-{
-    return this->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_;
-}
-
-Eigen::MatrixXd CodedVisualMarkerLandmarkStateCore::getJacobianMappingSensorErrorState()
-{
-    return this->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_;
-}
-
-Eigen::MatrixXd CodedVisualMarkerLandmarkStateCore::getJacobianMappingErrorStateNoise()
-{
-    return this->jacobian_mapping_error_state_noise_;
-}
-
 int CodedVisualMarkerLandmarkStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
     std::shared_ptr<CodedVisualMarkerLandmarkCore> map_element_core=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(this->getMsfElementCoreSharedPtr());

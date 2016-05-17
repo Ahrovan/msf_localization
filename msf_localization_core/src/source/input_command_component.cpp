@@ -61,3 +61,7 @@ int InputCommandComponent::getDimensionErrorInputCommand() const
     return dimensionErrorInputCommand;
 }
 
+int InputCommandComponent::getNumberInputCommand() const
+{
+    return this->TheListInputCommandCore.size();
+}

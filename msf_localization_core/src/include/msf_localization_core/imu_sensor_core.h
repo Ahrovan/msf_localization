@@ -278,16 +278,38 @@ public:
     int predictErrorStateJacobian(//Time
                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 const std::shared_ptr<StateEstimationCore> past_state,
                                  // Inputs
-                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 const std::shared_ptr<InputCommandComponent> input_command,
                                  // Predicted State
-                                 std::shared_ptr<StateCore>& predictedState);
+                                 std::shared_ptr<StateCore>& predicted_state);
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                   const std::shared_ptr<ImuSensorStateCore> pastState,
-                                   std::shared_ptr<ImuSensorStateCore>& predictedState);
+                                            const std::shared_ptr<ImuSensorStateCore> pastState,
+                                            std::shared_ptr<ImuSensorStateCore>& predictedState,
+                                           // Jacobians Error State: Fx, Fp
+                                           // Sensor
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_parameters,
+                                           // Jacobians Noise: Fn
+                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_noise
+                                           );
+
+
+protected:
+    int predictErrorStateJacobiansCore(// State k: Sensor
+                                       const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
+                                       // TODO Add others
+                                       // State k+1: Sensor
+                                       const Eigen::Vector3d& pred_position_sensor_wrt_robot, const Eigen::Vector4d& pred_attitude_sensor_wrt_robot,
+                                       // TODO add others
+                                       // Jacobian: State Fx & Fp
+                                       Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att,
+                                       Eigen::Matrix3d& jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc,
+                                       Eigen::Matrix3d& jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel
+                                       );
+
 
 
 

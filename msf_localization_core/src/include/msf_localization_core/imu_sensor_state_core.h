@@ -68,25 +68,6 @@ public:
 
 
 
-    ////// Jacobians
-
-    /// Jacobians Error State
-
-public:
-    struct
-    {
-        Eigen::Matrix3d positionSensorWrtRobot;
-        Eigen::Matrix3d attitudeSensorWrtRobot;
-        Eigen::Matrix3d biasesLinearAcceleration;
-        Eigen::Matrix3d scaleLinearAcceleration;
-        Eigen::Matrix3d biasesAngularVelocity;
-        Eigen::Matrix3d scaleAngularVelocity;
-    } errorStateJacobian;
-
-
-
-
-
 
 public:
     int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state);

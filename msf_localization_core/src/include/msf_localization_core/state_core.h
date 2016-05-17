@@ -61,6 +61,7 @@ public:
 
     /// Fx
 protected:
+public:
     struct
     {
         Eigen::SparseMatrix<double> world;
@@ -91,11 +92,6 @@ public:
     /// Fp
 protected:
 public:
-    Eigen::SparseMatrix<double> jacobian_error_parameters_;
-public:
-    Eigen::SparseMatrix<double> getJacobianErrorParameters();
-
-public:
     struct
     {
         Eigen::SparseMatrix<double> world;
@@ -103,23 +99,25 @@ public:
         std::vector<Eigen::SparseMatrix<double> > inputs;
         std::vector<Eigen::SparseMatrix<double> > sensors;
         std::vector<Eigen::SparseMatrix<double> > map_elements;
-    } jacobian_error_parameters_t;
+    } jacobian_error_parameters_;
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorParametersWorld();
+    Eigen::SparseMatrix<double> getJacobianErrorParametersRobot();
+    Eigen::SparseMatrix<double> getJacobianErrorParametersInput(int input_number);
+    Eigen::SparseMatrix<double> getJacobianErrorParametersSensor(int sensor_number);
+    Eigen::SparseMatrix<double> getJacobianErrorParametersMapElement(int map_element_number);
 
 
 
     /// Fu
 protected:
 public:
-    Eigen::SparseMatrix<double> jacobian_error_inputs_;
-public:
-    Eigen::SparseMatrix<double> getJacobianErrorInputs();
-
-
-public:
     struct
     {
         std::vector<Eigen::SparseMatrix<double> > input_commands;
-    } jacobian_error_input_commands_t;
+    } jacobian_error_input_commands_;
+public:
+    Eigen::SparseMatrix<double> getJacobianErrorInputCommands(int input_number);
 
 
 
@@ -129,17 +127,6 @@ public:
     Eigen::SparseMatrix<double> jacobian_error_state_noise_;
 public:
     Eigen::SparseMatrix<double> getJacobianErrorStateNoise();
-
-
-public:
-    struct
-    {
-        Eigen::SparseMatrix<double> world;
-        Eigen::SparseMatrix<double> robot;
-        std::vector<Eigen::SparseMatrix<double> > inputs;
-        std::vector<Eigen::SparseMatrix<double> > sensors;
-        std::vector<Eigen::SparseMatrix<double> > map_elements;
-    } jacobian_error_state_noise_t;
 
 
 

@@ -21,50 +21,29 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
     // Resize
     product_matrix.resize(prod1.rows(), prod2.cols());
 
+    // Check blocks
+    if(prod1.getColsSize() != prod2.getRowsSize())
+        throw;
+
     // Multiplication
     for(int i=0; i<prod1.rows(); i++)
+    {
         for(int j=0; j<prod2.cols(); j++)
         {
-            // First pass -> checks and dimension of the block
-            int row_block=-1;
-            int col_block=-1;
-            for(int k=0; k<prod1.cols(); k++)
-            {
-                // Check prod1
-                if(prod1(i,k).cols() == 0 || prod1(k,j).rows() == 0)
-                    continue;
+            // Sizes
+            int row_block=prod1.getRowsSize(i);
+            int col_block=prod2.getColsSize(j);
 
-                // Check prod2
-                if(prod2(i,k).cols() == 0 || prod2(k,j).rows() == 0)
-                    continue;
 
-                // Check prod1 * prod2
-                if(prod1(i,k).cols() != prod2(k,j).rows())
-                    throw;
-
-                // Rows and cols
-                if(row_block<0)
-                    row_block=prod1(k,j).rows();
-                if(col_block<0)
-                    col_block=prod2(k,j).cols();
-
-                // Check
-                if(row_block != prod1(k,j).rows())
-                    throw;
-
-                if(col_block != prod2(k,j).cols())
-                    throw;
-            }
-
-            // Dimensions
-            if(row_block < 0 || col_block < 0)
-                continue;
-
-            // Resize and set zero
+            // Resize block and set zero
             product_matrix(i,j).resize(row_block, col_block);
             product_matrix(i,j).setZero();
 
-            // Second pass -> Multiplication
+            // Avoid zero multiplication
+            if(row_block <= 0 || col_block <= 0)
+                continue;
+
+            // Multiplication
             for(int k=0; k<prod1.cols(); k++)
             {
                 if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
@@ -72,6 +51,11 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
 
             }
         }
+    }
+
+    // Analyse the result
+    if(product_matrix.analyse())
+        throw;
 
 
     // End
@@ -83,14 +67,79 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
 //MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
 
 
+/*
+MatrixSparse operator+(MatrixSparse &sum1, MatrixSparse &sum2)
+{
+    //Matrix<TypeR> product_matrix;
+    MatrixSparse product_matrix;
 
-Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in)
+    // Check multiplication sizes
+    if(sum1.cols() != sum2.cols() || sum1.rows() != sum2.rows() )
+        throw;
+
+    // Check block sizes
+    if(sum1.analyse())
+        throw;
+    if(sum2.analyse())
+        throw;
+
+    if(sum1.getColsSize() != sum2.getColsSize())
+        throw;
+    if(sum1.getRowsSize() != sum2.getRowsSize())
+        throw;
+
+    // Resize
+    product_matrix.resize(sum1.rows(), sum1.cols());
+
+    // Addition
+    for(int i=0; i<sum1.rows(); i++)
+    {
+        for(int j=0; j<sum1.cols(); j++)
+        {
+            // sum1 has no block, sum 2 has block
+            if( ( sum1(i,j).cols() == 0 || sum1(i,j).rows() == 0 ) &&
+                    ( sum2(i,j).cols() != 0 && sum2(i,j).rows() != 0 ) )
+            {
+                product_matrix(i,j).resize(sum2(i,j).cols(), sum2(i,j).rows());
+                product_matrix(i,j)=sum2(i,j);
+            }
+
+            // sum1 has block, sum 2 has no block
+            if( ( sum1(i,j).cols() != 0 && sum1(i,j).rows() != 0 ) &&
+                    ( sum2(i,j).cols() == 0 || sum2(i,j).rows() == 0 ) )
+            {
+                product_matrix(i,j).resize(sum1(i,j).cols(), sum1(i,j).rows());
+                product_matrix(i,j)=sum1(i,j);
+            }
+
+            // sum1 has block, sum 2 has block
+            if( ( sum1(i,j).cols() != 0 && sum1(i,j).rows() != 0 ) &&
+                    ( sum2(i,j).cols() != 0 && sum2(i,j).rows() != 0 ) )
+            {
+                // Add
+                product_matrix(i,j).resize(sum1(i,j).cols(), sum1(i,j).rows());
+                product_matrix(i,j)=sum1(i,j)+sum2(i,j);
+            }
+
+            // sum1 has no block, sum 2 has no block
+            if( ( sum1(i,j).cols() == 0 || sum1(i,j).rows() == 0 ) &&
+                    ( sum2(i,j).cols() == 0 || sum2(i,j).rows() == 0 ) )
+            {
+                product_matrix(i,j).resize(0, 0);
+            }
+        }
+    }
+
+    // End
+    return product_matrix;
+}
+*/
+
+
+
+Eigen::SparseMatrix<double> convertToEigenSparse(const MatrixSparse& in)
 {
     Eigen::SparseMatrix<double> out;
-
-    // Analyse
-    if(in.analyse())
-        throw;
 
     // Resize out
     out.resize(in.getTotalRowsSize(), in.getTotalColsSize());
@@ -136,15 +185,38 @@ Eigen::SparseMatrix<double> convertToEigenSparse(MatrixSparse& in)
     return out;
 }
 
-
-Eigen::MatrixXd convertToEigenDense(MatrixDense &in)
+Eigen::MatrixXd convertToEigenDense(const MatrixSparse &in)
 {
     Eigen::MatrixXd out;
 
 
-    // Analyse
-    if(in.analyse())
-        throw;
+    // Resize and init out
+    out.resize(in.getTotalRowsSize(), in.getTotalColsSize());
+    out.setZero();
+
+    // Fill blocks
+    int row_point=0;
+    for(int i=0; i<in.rows(); i++)
+    {
+        int col_point=0;
+        for(int j=0; j<in.cols(); j++)
+        {
+            // Block
+            if(in(i,j).cols() > 0 && in(i,j).rows() > 0 )
+                out.block(row_point, col_point, in.getRowsSize(i), in.getColsSize(j))=Eigen::MatrixXd(in(i,j));
+
+            col_point+=in.getColsSize(j);
+        }
+        row_point+=in.getRowsSize(i);
+    }
+
+    // End
+    return out;
+}
+
+Eigen::MatrixXd convertToEigenDense(const MatrixDense &in)
+{
+    Eigen::MatrixXd out;
 
     // Resize and init out
     out.resize(in.getTotalRowsSize(), in.getTotalColsSize());

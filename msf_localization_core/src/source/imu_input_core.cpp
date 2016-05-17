@@ -863,7 +863,25 @@ int ImuInputCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
-Eigen::SparseMatrix<double> ImuInputCore::getCovarianceNoise(const TimeStamp deltaTimeStamp) const
+Eigen::SparseMatrix<double> ImuInputCore::getCovarianceInputs(const TimeStamp deltaTimeStamp)
+{
+    Eigen::SparseMatrix<double> covariance_noise;
+
+    // TODO
+
+    return covariance_noise;
+}
+
+Eigen::SparseMatrix<double> ImuInputCore::getCovarianceParameters()
+{
+    Eigen::SparseMatrix<double> covariance_noise;
+
+    // TODO
+
+    return covariance_noise;
+}
+
+Eigen::SparseMatrix<double> ImuInputCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance_noise;
 
@@ -873,13 +891,13 @@ Eigen::SparseMatrix<double> ImuInputCore::getCovarianceNoise(const TimeStamp del
 }
 
 int ImuInputCore::predictState(//Time
-                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                 // Previous State
-                 const std::shared_ptr<StateEstimationCore> pastState,
-                 // Inputs
-                 const std::shared_ptr<InputCommandComponent> inputCommand,
-                 // Predicted State
-                 std::shared_ptr<StateCore> &predictedState)
+                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 // Previous State
+                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 // Inputs
+                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 // Predicted State
+                                 std::shared_ptr<StateCore> &predictedState)
 {
     // Checks
 

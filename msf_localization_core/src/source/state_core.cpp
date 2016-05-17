@@ -67,11 +67,6 @@ bool StateCore::isCorrect()
     return true;
 }
 
-//Eigen::SparseMatrix<double> StateCore::getJacobianErrorState()
-//{
-//    return this->jacobian_error_state_;
-//}
-
 Eigen::SparseMatrix<double> StateCore::getJacobianErrorStateWorld()
 {
     return this->jacobian_error_state_.world;
@@ -162,14 +157,44 @@ int StateCore::setJacobianErrorStateMapElementsSize(int size_map_elements)
     this->jacobian_error_state_.map_elements.resize(size_map_elements);
 }
 
-Eigen::SparseMatrix<double> StateCore::getJacobianErrorParameters()
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorParametersWorld()
 {
-    return this->jacobian_error_parameters_;
+    return this->jacobian_error_parameters_.world;
 }
 
-Eigen::SparseMatrix<double> StateCore::getJacobianErrorInputs()
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorParametersRobot()
 {
-    return this->jacobian_error_inputs_;
+    return this->jacobian_error_parameters_.robot;
+}
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorParametersInput(int input_number)
+{
+    if(input_number >= this->jacobian_error_parameters_.inputs.size())
+        return Eigen::SparseMatrix<double> ();
+    return this->jacobian_error_parameters_.inputs[input_number];
+}
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorParametersSensor(int sensor_number)
+{
+    if(sensor_number >= this->jacobian_error_parameters_.sensors.size())
+    {
+        return Eigen::SparseMatrix<double> ();
+    }
+    return this->jacobian_error_parameters_.sensors[sensor_number];
+}
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorParametersMapElement(int map_element_number)
+{
+    if(map_element_number >= this->jacobian_error_parameters_.map_elements.size())
+        return Eigen::SparseMatrix<double> ();
+    return this->jacobian_error_parameters_.map_elements[map_element_number];
+}
+
+Eigen::SparseMatrix<double> StateCore::getJacobianErrorInputCommands(int input_number)
+{
+    if(input_number >= this->jacobian_error_input_commands_.input_commands.size())
+        return Eigen::SparseMatrix<double> ();
+    return this->jacobian_error_input_commands_.input_commands[input_number];
 }
 
 Eigen::SparseMatrix<double> StateCore::getJacobianErrorStateNoise()

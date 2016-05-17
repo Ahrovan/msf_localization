@@ -1096,17 +1096,21 @@ int ImuSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, cons
 int ImuSensorCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> pastState,
+                             const std::shared_ptr<StateEstimationCore> past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                            const std::shared_ptr<InputCommandComponent> input_command,
                              // Predicted State
-                             std::shared_ptr<StateCore> &predictedState)
+                             std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
     // Past State
-    if(!pastState)
+    if(!past_state)
         return -1;
+
+    // Predicted State
+    if(!predicted_state)
+        return -10;
 
     // TODO
 
@@ -1114,8 +1118,8 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
     // Search for the past sensor State Core
     std::shared_ptr<ImuSensorStateCore> past_sensor_state;
 
-    for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
-        it_sensor_state!=pastState->TheListSensorStateCore.end();
+    for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=past_state->TheListSensorStateCore.begin();
+        it_sensor_state!=past_state->TheListSensorStateCore.end();
         ++it_sensor_state)
     {
         if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
@@ -1128,18 +1132,67 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
         return -10;
 
 
-    // Predicted State
-    if(!predictedState)
-        return -10;
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorStateJacobianInit(// Past State
+                                                           past_state,
+                                                           // Input commands
+                                                           input_command,
+                                                           // Predicted State
+                                                           predicted_state);
+
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+
+    /// Predicted State Cast
     std::shared_ptr<ImuSensorStateCore> predicted_sensor_state;
-    predicted_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(predictedState);
+    predicted_sensor_state=std::dynamic_pointer_cast<ImuSensorStateCore>(predicted_state);
+
+
+    /// Get iterators to fill jacobians
+
+    // Fx & Fp
+    // Sensor
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_sensor_error_state;
+    it_jacobian_error_state_wrt_sensor_error_state=predicted_sensor_state->jacobian_error_state_.sensors.begin();
+
+    std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_sensor_error_parameters;
+    it_jacobian_error_state_wrt_sensor_error_parameters=predicted_sensor_state->jacobian_error_parameters_.sensors.begin();
+
+    for(std::list< std::shared_ptr<StateCore> >::iterator itSensorStateCore=past_state->TheListSensorStateCore.begin();
+        itSensorStateCore!=past_state->TheListSensorStateCore.end();
+        ++itSensorStateCore, ++it_jacobian_error_state_wrt_sensor_error_state, ++it_jacobian_error_state_wrt_sensor_error_parameters
+        )
+    {
+        if( std::dynamic_pointer_cast<ImuSensorStateCore>((*itSensorStateCore)) == past_sensor_state )
+            break;
+    }
+
+
+    // Fu
+    // Nothing
+
+
+    // Fn
+    // Nothing
+
+
+
 
 
 
     // Predict State
     int error_predict_state=predictErrorStateJacobiansSpecific(previousTimeStamp, currentTimeStamp,
-                                         past_sensor_state,
-                                         predicted_sensor_state);
+                                                               past_sensor_state,
+                                                               predicted_sensor_state,
+                                                               // Jacobians Error State: Fx, Fp
+                                                               // Sensor
+                                                               (*it_jacobian_error_state_wrt_sensor_error_state),
+                                                               (*it_jacobian_error_state_wrt_sensor_error_parameters),
+                                                               // Jacobians Noise: Fn
+                                                               predicted_sensor_state->jacobian_error_state_noise_
+                                                               );
 
     // Check error
     if(error_predict_state)
@@ -1147,7 +1200,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
 
 
     // Set predicted state
-    predictedState=predicted_sensor_state;
+    predicted_state=predicted_sensor_state;
 
 
     // End
@@ -1155,14 +1208,65 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
 }
 
 int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
-                                              const std::shared_ptr<ImuSensorStateCore> pastState,
-                                              std::shared_ptr<ImuSensorStateCore>& predictedState)
+                                                      const std::shared_ptr<ImuSensorStateCore> pastState,
+                                                      std::shared_ptr<ImuSensorStateCore>& predictedState,
+                                                      // Jacobians Error State: Fx, Fp
+                                                      // Sensor
+                                                      Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
+                                                      Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_parameters,
+                                                      // Jacobians Noise: Fn
+                                                      Eigen::SparseMatrix<double>& jacobian_error_state_wrt_noise
+                                                      )
 {
-    // Create the predicted state if it doesn't exist
+
+    /// Checks
     if(!predictedState)
     {
         return -1;
     }
+
+    /// Variables
+    // State k: Sensor
+    Eigen::Vector3d position_sensor_wrt_robot;
+    Eigen::Vector4d attitude_sensor_wrt_robot;
+    // State k+1: Sensor
+    Eigen::Vector3d pred_position_sensor_wrt_robot;
+    Eigen::Vector4d pred_attitude_sensor_wrt_robot;
+
+    // Jacobian: State
+    Eigen::Matrix3d jacobian_error_sens_pos_wrt_error_state_sens_pos;
+    Eigen::Matrix3d jacobian_error_sens_att_wrt_error_state_sens_att;
+    Eigen::Matrix3d jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc;
+    Eigen::Matrix3d jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel;
+
+
+
+    /// Fill variables
+    // State k: Sensor
+    position_sensor_wrt_robot=pastState->getPositionSensorWrtRobot();
+    attitude_sensor_wrt_robot=pastState->getAttitudeSensorWrtRobot();
+
+    // State k+1: Sensor
+    pred_position_sensor_wrt_robot=predictedState->getPositionSensorWrtRobot();
+    pred_attitude_sensor_wrt_robot=predictedState->getAttitudeSensorWrtRobot();
+
+
+    //// Core
+
+    int error_predict_error_state_jacobians_core=predictErrorStateJacobiansCore(// State k: Sensor
+                                                                                position_sensor_wrt_robot,
+                                                                                attitude_sensor_wrt_robot,
+                                                                                // State k+1: Sensor
+                                                                                pred_position_sensor_wrt_robot,
+                                                                                pred_attitude_sensor_wrt_robot,
+                                                                                // Jacobians
+                                                                                jacobian_error_sens_pos_wrt_error_state_sens_pos,
+                                                                                jacobian_error_sens_att_wrt_error_state_sens_att,
+                                                                                jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc,
+                                                                                jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel);
+
+    if(error_predict_error_state_jacobians_core)
+        return error_predict_error_state_jacobians_core;
 
 
     //// Jacobians Error State - Error State: Fx & Jacobians Error State - Error Parameters: Fp
@@ -1184,82 +1288,51 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
 
     /// Sensors
     {
-        // posi / posi
-        if(flagEstimationPositionSensorWrtRobot)
-            predictedState->errorStateJacobian.positionSensorWrtRobot=Eigen::Matrix3d::Identity();
+        // Resize and init
+        jacobian_error_state_wrt_sensor_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state_wrt_sensor_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
 
-        // att / att
-        // TODO Fix!!
-        if(flagEstimationAttitudeSensorWrtRobot)
-            predictedState->errorStateJacobian.attitudeSensorWrtRobot=Eigen::Matrix3d::Identity();
-
-        // ba / ba
-        if(flagEstimationBiasLinearAcceleration)
-            predictedState->errorStateJacobian.biasesLinearAcceleration=Eigen::Matrix3d::Identity();
-
-        // ka / ka
-        if(flagEstimationScaleLinearAcceleration)
-            predictedState->errorStateJacobian.scaleLinearAcceleration=Eigen::Matrix3d::Identity();
-
-        // bw / bw
-        if(flagEstimationBiasAngularVelocity)
-            predictedState->errorStateJacobian.biasesAngularVelocity=Eigen::Matrix3d::Identity();
-
-        // kw / kw
-        if(flagEstimationScaleAngularVelocity)
-            predictedState->errorStateJacobian.scaleAngularVelocity=Eigen::Matrix3d::Identity();
-
-
-
-
-        /// Convert to Eigen::Sparse<double> and store in jacobian_error_state_
-
-        Eigen::SparseMatrix<double> jacobian_error_state;
-
-        jacobian_error_state.resize(dimension_error_state_, dimension_error_state_);
-        jacobian_error_state.reserve(3*dimension_error_state_); //worst case -> Optimize
-
-        std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
 
 
         // Fill
         int dimension_error_state_i=0;
+        int dimension_error_parameters_i=0;
+
 
         // Position sensor wrt robot
         if(this->isEstimationPositionSensorWrtRobotEnabled())
         {
-            // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.positionSensorWrtRobot(i,j)));
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_sens_pos_wrt_error_state_sens_pos, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
         }
+
 
         // Attitude sensor wrt robot
         if(this->isEstimationAttitudeSensorWrtRobotEnabled())
         {
-            // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.attitudeSensorWrtRobot(i,j)));
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_sens_att_wrt_error_state_sens_att, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
         }
+
 
         // bias linear acceleration
         if(this->isEstimationBiasLinearAccelerationEnabled())
         {
-            // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.biasesLinearAcceleration(i,j)));
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
         }
+
 
         // Ka
         // TODO
@@ -1267,15 +1340,13 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
         // bias angular velocity
         if(this->isEstimationBiasAngularVelocityEnabled())
         {
-            // Add to triplet list
-            for(int i=0; i<3; i++)
-                for(int j=0; j<3; j++)
-                    tripletListErrorJacobian.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+j, predictedState->errorStateJacobian.biasesAngularVelocity(i,j)));
-
+            // Add to the triplets
+            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel, dimension_error_state_i, dimension_error_state_i);
 
             // Update dimension for next
             dimension_error_state_i+=3;
         }
+
 
         // Kw
         // TODO
@@ -1283,12 +1354,9 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
 
 
 
-        // Set from triplets
-        jacobian_error_state.setFromTriplets(tripletListErrorJacobian.begin(), tripletListErrorJacobian.end());
-
-
-        // TODO FIX!!!!!
-        predictedState->setJacobianErrorStateSensor(jacobian_error_state, 0);
+        // Set From Triplets
+        jacobian_error_state_wrt_sensor_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
+        jacobian_error_state_wrt_sensor_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
 
     }
 
@@ -1300,11 +1368,11 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
 
 
     //// Jacobian Error State - Error Noise
-    // TODO FIX!
-    {
 
-        predictedState->jacobian_error_state_noise_.resize(getDimensionErrorState(), getDimensionNoise());
-        predictedState->jacobian_error_state_noise_.reserve(getDimensionNoise());
+    {
+        // Resize and init
+        jacobian_error_state_wrt_noise.resize(getDimensionErrorState(), getDimensionNoise());
+
 
 
         // Fill
@@ -1361,11 +1429,50 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
         }
 
 
-
-        predictedState->jacobian_error_state_noise_.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
+        // Set From Triplets
+        jacobian_error_state_wrt_noise.setFromTriplets(tripletJacobianErrorStateNoise.begin(), tripletJacobianErrorStateNoise.end());
 
     }
 
+
+    // End
+    return 0;
+}
+
+
+int ImuSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
+                                                  const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
+                                                  // TODO Add others
+                                                  // State k+1: Sensor
+                                                  const Eigen::Vector3d& pred_position_sensor_wrt_robot, const Eigen::Vector4d& pred_attitude_sensor_wrt_robot,
+                                                  // TODO add others
+                                                  // Jacobian: State Fx & Fp
+                                                  Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att,
+                                                  Eigen::Matrix3d& jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc,
+                                                  Eigen::Matrix3d& jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel
+                                                  )
+{
+
+
+    // posi sensor / posi sensor
+    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::Matrix3d::Identity();
+
+    // att sensor / att sensor
+    // TODO FIX
+    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::Matrix3d::Identity();
+
+
+    // ba / ba
+    jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc=Eigen::Matrix3d::Identity();;
+
+    // ka / ka
+    // TODO
+
+    // bw / bw
+    jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel=Eigen::Matrix3d::Identity();
+
+    // kw / kw
+    // TODO
 
     // End
     return 0;
@@ -1766,10 +1873,10 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 
     /// Get iterators to fill jacobians
 
-    // Robot
+    // World
     // Nothing to do
 
-    // Global Parameters
+    // Robot
     // Nothing to do
 
     // Sensor

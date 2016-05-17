@@ -54,26 +54,6 @@ int MocapWorldStateCore::setAttitudeMocapWorldWrtWorld(Eigen::Vector4d attitude_
     return 0;
 }
 
-Eigen::MatrixXd MocapWorldStateCore::getJacobianMappingRobotErrorState()
-{
-    return this->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_;
-}
-
-Eigen::MatrixXd MocapWorldStateCore::getJacobianMappingGlobalParametersErrorState()
-{
-    return this->jacobian_mapping_error_state_.jacobian_mapping_global_parameters_error_state_;
-}
-
-Eigen::MatrixXd MocapWorldStateCore::getJacobianMappingSensorErrorState()
-{
-    return this->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_;
-}
-
-Eigen::MatrixXd MocapWorldStateCore::getJacobianMappingErrorStateNoise()
-{
-    return this->jacobian_mapping_error_state_noise_;
-}
-
 int MocapWorldStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
     std::shared_ptr<MocapWorldCore> map_element_core=std::dynamic_pointer_cast<MocapWorldCore>(this->getMsfElementCoreSharedPtr());

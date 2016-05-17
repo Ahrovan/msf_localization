@@ -319,40 +319,76 @@ int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStam
 int GlobalParametersCore::predictErrorStateJacobian(//Time
                                                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                                                  // Previous State
-                                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                                 const std::shared_ptr<StateEstimationCore> past_state,
                                                     // Inputs
-                                                    const std::shared_ptr<InputCommandComponent> inputCommand,
+                                                    const std::shared_ptr<InputCommandComponent> input_command,
                                                  // Predicted State
-                                                 std::shared_ptr<StateCore> &predictedState)
+                                                 std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
     // Past State
-    if(!pastState)
+    if(!past_state)
         return -1;
 
     // TODO
 
 
     // Predicted State
-    if(!predictedState)
+    if(!predicted_state)
         return -1;
-    // World Predicted State
-    std::shared_ptr<GlobalParametersStateCore> predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState);
 
 
-    // Predict State
-    int error_predict_state=predictErrorStateJacobianSpecific(previousTimeStamp, currentTimeStamp,
-                                                            std::dynamic_pointer_cast<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore),
-                                                            predictedWorldState);
+    //// Init Jacobians
+    int error_init_jacobians=predictErrorStateJacobianInit(// Past State
+                                                           past_state,
+                                                           // Input commands
+                                                           input_command,
+                                                           // Predicted State
+                                                           predicted_state);
+
+    if(error_init_jacobians)
+        return error_init_jacobians;
+
+
+    /// World Predicted State
+    std::shared_ptr<GlobalParametersStateCore> predicted_world_state=std::dynamic_pointer_cast<GlobalParametersStateCore>(predicted_state);
+
+
+    /// Get iterators to fill jacobians
+
+    // Fx & Fp
+    // World
+    // Nothing to do
+
+
+    // Fu
+    // Nothing
+
+
+    // Fn
+    // TODO
+
+
+
+    /// Predict State Jacobians
+    int error_predict_state_jacobians=predictErrorStateJacobianSpecific(previousTimeStamp, currentTimeStamp,
+                                                                        std::dynamic_pointer_cast<GlobalParametersStateCore>(past_state->TheGlobalParametersStateCore),
+                                                                        predicted_world_state,
+                                                                        // Jacobians Error State: Fx, Fp
+                                                                        predicted_world_state->jacobian_error_state_.world,
+                                                                        predicted_world_state->jacobian_error_parameters_.world
+                                                                        // Jacobian Error Noise
+                                                                        // TODO
+                                                                        );
 
     // Check error
-    if(error_predict_state)
-        return error_predict_state;
+    if(error_predict_state_jacobians)
+        return error_predict_state_jacobians;
 
 
-    // Set predicted state
-    predictedState=predictedWorldState;
+    /// Set predicted state
+    predicted_state=predicted_world_state;
 
 
     // End
@@ -361,7 +397,14 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
 
 int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                             std::shared_ptr<GlobalParametersStateCore> pastState,
-                                                            std::shared_ptr<GlobalParametersStateCore>& predictedState)
+                                                            std::shared_ptr<GlobalParametersStateCore>& predictedState,
+                                                            // Jacobians Error State: Fx, Fp
+                                                            // World
+                                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_world_error_state,
+                                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_world_error_parameters
+                                                            // Jacobians Noise: Hn
+                                                            // TODO
+                                                            )
 {
     // Check
     if(!predictedState)
@@ -377,18 +420,76 @@ int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp& pre
     double dt=DeltaTime.get_double();
 
 
-    ///// Jacobian Error State
 
-    // TODO
+    ///// Jacobian Error State - Error State: Fx & Jacobian Error State - Error Parameters: Fp
+
+    /// World
+    {
+        // Resize and init
+        jacobian_error_state_wrt_world_error_state.resize(dimension_error_state_, dimension_error_state_);
+        jacobian_error_state_wrt_world_error_parameters.resize(dimension_error_state_, dimension_error_parameters_);
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
+
+
+        // Fill
+
+        int dimension_error_state_i=0;
+        int dimension_error_parameters_i=0;
+
+
+        // gravity
+        if(this->isEstimationGravityEnabled())
+        {
+            // TODO
+        }
+
+
+        // Set From Triplets
+        jacobian_error_state_wrt_world_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
+        jacobian_error_state_wrt_world_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
+
+    }
+
+    /// Robot
+    {
+        // Nothing to do
+    }
+
+    /// Inputs
+    {
+        // Nothing to do
+    }
+
+    /// Sensors
+    {
+        // Nothing to do
+    }
+
+    /// Map Elements
+    {
+        // Nothing to do
+    }
 
 
 
-    ///// Jacobian Error State Noise
+    //// Jacobian Error State - Error Input
 
-    // TODO
+    {
+        // Nothing to do
+    }
+
+
+    //// Jacobian Error State - Noise Estimation: Fn
+
+    {
+        // Nothing to do
+    }
 
 
 
+    // End
     return 0;
 }
 
