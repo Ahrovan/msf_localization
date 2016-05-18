@@ -7,6 +7,10 @@
 // Math
 #include "cmath"
 
+
+#include "pugixml/pugixml.hpp"
+
+
 // Time Stamp
 #include "msf_localization_core/time_stamp.h"
 
@@ -20,7 +24,6 @@
 #include "msf_localization_core/mocap_world_state_core.h"
 
 
-#include "pugixml/pugixml.hpp"
 
 
 class MocapWorldCore : public MapElementCore

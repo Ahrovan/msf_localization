@@ -60,32 +60,14 @@
 
 
 
-
-
-
-
 // Ros service
 #include <msf_localization_ros_srvs/SetBool.h>
 
 
 
+
 // ROS Interface
 #include "msf_localization_ros/ros_interface.h"
-
-
-/// ROS Sensors
-// ROS IMU Interface
-#include "msf_localization_ros/ros_sensor_imu_interface.h"
-// ROS Aruco Eye
-#include "msf_localization_ros/ros_aruco_eye_interface.h"
-// Mocap
-#include "msf_localization_ros/ros_mocap_sensor_interface.h"
-
-
-/// ROS Inputs
-// ROS IMU Input
-#include "msf_localization_ros/ros_imu_input_interface.h"
-
 
 
 // MSF Core
@@ -101,6 +83,20 @@
 #include "msf_localization_ros/ros_free_model_robot_interface.h"
 #include "msf_localization_ros/ros_imu_driven_robot_interface.h"
 #include "msf_localization_core/free_model_robot_state_core.h"
+
+
+/// ROS Sensors
+// ROS IMU Interface
+#include "msf_localization_ros/ros_sensor_imu_interface.h"
+// ROS Aruco Eye
+#include "msf_localization_ros/ros_aruco_eye_interface.h"
+// Mocap
+#include "msf_localization_ros/ros_mocap_sensor_interface.h"
+
+
+/// ROS Inputs
+// ROS IMU Input
+#include "msf_localization_ros/ros_imu_input_interface.h"
 
 
 

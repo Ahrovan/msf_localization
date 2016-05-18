@@ -70,21 +70,6 @@ class MsfStorageCore;
 class StateCore;
 
 
-//// Global Parameters (World) State
-//class GlobalParametersStateCore;
-//// Robot State
-//class RobotStateCore;
-//// Inputs State
-//class InputStateCore;
-//// Sensors State
-//class SensorStateCore;
-//// Map State
-//class MapElementStateCore;
-// // Predicted State
-//class StateCore;
-
-//class StateEstimationCore;
-
 
 class MsfElementCore
 {

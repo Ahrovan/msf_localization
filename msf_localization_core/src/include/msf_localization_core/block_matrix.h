@@ -277,11 +277,11 @@ public:
         for(int row=0; row<this->rows(); row++)
             for(int col=0; col<this->cols(); col++)
             {
+                // Resize block
+                out(col,row).resize(this->operator()(row, col).cols(), this->operator()(row, col).rows());
+                // Set block transposed
                 if(this->operator()(row, col).cols()>0 && this->operator()(row, col).rows()>0)
                 {
-                    // Resize block
-                    out(col,row).resize(this->operator()(row, col).cols(), this->operator()(row, col).rows());
-                    // Set block transposed
                     out(col,row)=this->operator()(row, col).transpose();
                 }
             }
@@ -427,7 +427,14 @@ class VectorDense : public Matrix<Eigen::MatrixXd, Eigen::Dynamic, 1>
 
 
 MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2);
+
+MatrixDense operator*(const MatrixDense &prod1, const MatrixSparse &prod2);
+MatrixDense operator*(const MatrixSparse &prod1, const MatrixDense &prod2);
+
+
 //MatrixSparse operator+(MatrixSparse &sum1, MatrixSparse &sum2);
+MatrixDense operator+(const MatrixDense &sum1, const MatrixSparse &sum2);
+MatrixDense operator+(const MatrixSparse &sum1, const MatrixDense &sum2);
 
 /*
 template<class TypeResult, class TypeProd1, class TypeProd2>
