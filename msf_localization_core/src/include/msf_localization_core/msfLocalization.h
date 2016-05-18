@@ -232,14 +232,22 @@ private:
 
 
 
+
+
+    // Time what is required betwwwn two prediction steps
+protected:
+    double predict_model_time_; // in seconds
+
+
     // Predict Thread
 protected:
-    double predictRateValue;
     std::thread* predictThread;
 protected:
     // TODO Finish
     virtual int predictThreadFunction();
 
+protected:
+    int predictThreadStep();
 
 
 

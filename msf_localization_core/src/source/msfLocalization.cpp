@@ -198,7 +198,76 @@ int MsfLocalizationCore::predictThreadFunction()
 }
 
 
+int MsfLocalizationCore::predictThreadStep()
+{
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::predictThreadFunction() loop init"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
 
+
+        // Search if element already exists
+        TimeStamp TheTimeStamp=getTimeStamp();
+        std::shared_ptr<StateEstimationCore> ThePredictedState;
+
+        // Predict. Typically it will not be any
+        //std::cout<<"Calling predict TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        this->TheMsfStorageCore->getElement(TheTimeStamp, ThePredictedState);
+
+        if(!ThePredictedState)
+        {
+//            predictThreadState.setProcessing(TheTimeStamp);
+            // TODO Fix. This should be a while but being careful with the memory
+
+
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::predictThreadFunction() predicting TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+            if(this->predict(TheTimeStamp))
+            {
+                // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationROS::predictThreadFunction() error in predict()"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+                return -1;
+//            predictThreadState.setNotProcessing();
+            }
+        }
+
+        if(ThePredictedState)
+            ThePredictedState.reset();
+
+
+        // Purge the buffer
+        //this->TheMsfStorageCore->purgeRingBuffer(20);
+
+
+        // Display the buffer
+        //this->TheMsfStorageCore->displayRingBuffer();
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::predictThreadFunction() loop end"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+
+        return 0;
+}
 
 
 int MsfLocalizationCore::bufferManagerThreadFunction()
@@ -255,9 +324,11 @@ int MsfLocalizationCore::bufferManagerThreadFunction()
 
 
 #if _BUFFER_PROPAGATION_MULTI_THREADING
+        // Multi-threading
         std::thread propagation_step_thread(&MsfLocalizationCore::bufferPropagationStep, this, OldestTimeStamp);
         propagation_step_thread.detach();
 #else
+        // Single-thread
         int error_propagating_buffer=bufferPropagationStep(OldestTimeStamp);
 
         if(error_propagating_buffer)
@@ -295,10 +366,45 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
     std::cout<<"num_buffer_propagation_threads= "<<num_buffer_propagation_threads<<std::endl;
 #endif
 
-    // Run predict and store updated predicted element
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_THREAD
+    // Check if the current element needs to be updated or if it can be deleted
     {
+        // Get current element (k)
+        std::shared_ptr<StateEstimationCore> current_element;
+        int error_get_current_element=this->TheMsfStorageCore->getElement(time_stamp, current_element);
+        if(error_get_current_element || !current_element)
+            return -10;
+
+        // Get previous element (k-1)
+        TimeStamp time_stamp_previous_element(0,0);
+        // TODO
+
+        // Get following element (k+1)
+        TimeStamp time_stamp_following_element(10.0);
+        // TODO
+
+
+        // Checks if has input commands or measurements
+        if( !current_element->hasInputCommand() && !current_element->hasMeasurement() )
+        {
+            // check if delta time stamps beetween k-1 and k+1 <= predict_model_time_
+            if( (time_stamp_following_element-time_stamp_previous_element) <= TimeStamp(predict_model_time_) )
+            {
+                // Delete current_element and finish
+                if(current_element)
+                    current_element.reset();
+                int error_purge_element=this->TheMsfStorageCore->purgeElementRingBuffer(time_stamp);
+                if(error_purge_element)
+                    return error_purge_element;
+                return 0;
+            }
+        }
+
+    }
+
+
+    // Run predict and store updated predicted element
+    {
+#if _DEBUG_TIME_MSF_LOCALIZATION_THREAD
         TimeStamp begin = this->getTimeStamp();
 #endif
 
@@ -332,16 +438,17 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
         logString<<"MsfLocalizationCore::bufferPropagationStep() -> predict() time: "<<(getTimeStamp()-begin).toNSec()<<" ns"<<std::endl;
         this->log(logString.str());
 
-    }
+
 #endif
+    }
 
 
     // Run update if there are measurements
-    int errorUpdate=0;
+    {
+        int errorUpdate=0;
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_THREAD
-    {
         TimeStamp begin = getTimeStamp();
 #endif
 
@@ -352,84 +459,85 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::bufferPropagationStep() -> update() time: "<<(getTimeStamp()-begin).toNSec()<<" ns"<<std::endl;
         this->log(logString.str());
-        }
 #endif
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::bufferPropagationStep() update response: "<<errorUpdate<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-
-
-    if(errorUpdate)
-    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::bufferPropagationStep() error update() "<<errorUpdate<<std::endl;
+            logString<<"MsfLocalizationCore::bufferPropagationStep() update response: "<<errorUpdate<<std::endl;
             this->log(logString.str());
         }
 #endif
 
-        // Add to the processing list
-        this->TheMsfStorageCore->addOutdatedElement(time_stamp);
 
-#if _BUFFER_PROPAGATION_MULTI_THREADING
-        num_buffer_propagation_threads--;
+
+        if(errorUpdate)
+        {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::bufferPropagationStep() error update() "<<errorUpdate<<std::endl;
+                this->log(logString.str());
+            }
 #endif
 
-        // Continue
-        return -2;
+            // Add to the processing list
+            this->TheMsfStorageCore->addOutdatedElement(time_stamp);
+
+#if _BUFFER_PROPAGATION_MULTI_THREADING
+            num_buffer_propagation_threads--;
+#endif
+
+            // Continue
+            return -2;
+        }
 
     }
-
-
-
 
 
     // Find the next element in the buffer and mark it as outdated
-    TimeStamp TheNewOutdatedTimeStamp;
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
     {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::bufferPropagationStep() Going to get next time stamp"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
+        TimeStamp TheNewOutdatedTimeStamp;
 
-    if(!this->TheMsfStorageCore->getNextTimeStamp(time_stamp, TheNewOutdatedTimeStamp))
-    {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::bufferPropagationStep() Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<"MsfLocalizationCore::bufferPropagationStep() Going to get next time stamp"<<std::endl;
             this->log(logString.str());
         }
 #endif
 
-        // Set the following element of the buffer as outdated
-        this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
-
-
-    }
-    else
-    {
-#if _DEBUG_MSF_LOCALIZATION_CORE
+        if(!this->TheMsfStorageCore->getNextTimeStamp(time_stamp, TheNewOutdatedTimeStamp))
         {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::bufferPropagationStep() Nothing new to be added"<<std::endl;
-            this->log(logString.str());
-        }
+#if _DEBUG_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::bufferPropagationStep() Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
+                this->log(logString.str());
+            }
 #endif
+
+            // Set the following element of the buffer as outdated
+            this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
+
+
+        }
+        else
+        {
+#if _DEBUG_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::bufferPropagationStep() Nothing new to be added"<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+        }
     }
 
 
+    // Purge the buffer
+    {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
@@ -453,6 +561,7 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
         // Sleep
         //bufferManagerRate.sleep();
 
+    }
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE

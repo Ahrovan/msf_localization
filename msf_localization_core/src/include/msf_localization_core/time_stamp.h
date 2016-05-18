@@ -5,6 +5,7 @@
 
 
 #include <ctime>
+#include <cmath>
 #include <cstdint>
 
 
@@ -32,6 +33,17 @@ public:
     TimeStamp(const TimeStamp* t) :
         TimeStamp(t->sec, t->nsec)
     {
+        return;
+    }
+
+    TimeStamp(double time_in_secs)
+    {
+        double fractpart, intpart;
+        fractpart = modf (time_in_secs , &intpart);
+
+        this->sec=static_cast<uint32_t>(intpart);
+        this->nsec=static_cast<uint32_t>(fractpart*1e9);
+
         return;
     }
 
@@ -83,6 +95,14 @@ public:
         if(this->sec < t2.sec)
             return true;
         else if(this->sec == t2.sec && this->nsec < t2.nsec)
+            return true;
+        else
+            return false;
+    }
+
+    bool operator<=(const TimeStamp t2) const
+    {
+        if(this->operator<(t2) || this->operator==(t2))
             return true;
         else
             return false;
