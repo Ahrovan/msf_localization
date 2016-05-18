@@ -247,7 +247,12 @@ public:
     }
 
 
-
+public:
+    int getOldestTimeStampInBuffer(TimeStamp& oldest_time_stamp)
+    {
+        oldest_time_stamp=this->TheElementsList.back().timeStamp;
+        return 0;
+    }
 
 
 public:

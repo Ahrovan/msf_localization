@@ -56,6 +56,18 @@ int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shar
 
     std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
 
+
+    // Get the oldest time stamp in the buffer
+    TimeStamp oldest_time_stamp;
+
+    if(getOldestTimeStamp(oldest_time_stamp))
+        return -1;
+
+    // If the new element is older than the oldest time stamp in buffer, we discard the element
+    if(TheTimeStamp<oldest_time_stamp)
+        return 0;
+
+
     // This is already safe
     this->getElement(TheTimeStamp, TheStateEstimationCore);
 
@@ -110,6 +122,18 @@ int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::
 
     std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
 
+
+    // Get the oldest time stamp in the buffer
+    TimeStamp oldest_time_stamp;
+
+    if(getOldestTimeStamp(oldest_time_stamp))
+        return -1;
+
+    // If the new element is older than the oldest time stamp in buffer, we discard the element
+    if(TheTimeStamp<oldest_time_stamp)
+        return 0;
+
+
     // This is already safe
     this->getElement(TheTimeStamp, TheStateEstimationCore);
 
@@ -157,6 +181,18 @@ int MsfStorageCore::setInputCommand(const TimeStamp time_stamp, const std::share
 #endif
 
     std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
+
+
+    // Get the oldest time stamp in the buffer
+    TimeStamp oldest_time_stamp;
+
+    if(getOldestTimeStamp(oldest_time_stamp))
+        return -1;
+
+    // If the new element is older than the oldest time stamp in buffer, we discard the element
+    if(time_stamp<oldest_time_stamp)
+        return 0;
+
 
     // This is already safe
     this->getElement(time_stamp, TheStateEstimationCore);
@@ -219,6 +255,18 @@ int MsfStorageCore::setInputCommandList(const TimeStamp time_stamp, const std::l
 #endif
 
     std::shared_ptr<StateEstimationCore> TheStateEstimationCore;
+
+
+    // Get the oldest time stamp in the buffer
+    TimeStamp oldest_time_stamp;
+
+    if(getOldestTimeStamp(oldest_time_stamp))
+        return -1;
+
+    // If the new element is older than the oldest time stamp in buffer, we discard the element
+    if(time_stamp<oldest_time_stamp)
+        return 0;
+
 
     // This is already safe
     this->getElement(time_stamp, TheStateEstimationCore);
@@ -572,6 +620,20 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp t
     if(!input_command_core)
         return 1;
 
+    return 0;
+}
+
+int MsfStorageCore::getOldestTimeStamp(TimeStamp& oldest_time_stamp)
+{
+    // Lock
+    TheRingBufferMutex.lock();
+
+    getOldestTimeStampInBuffer(oldest_time_stamp);
+
+    // Unlock
+    TheRingBufferMutex.unlock();
+
+    // End
     return 0;
 }
 

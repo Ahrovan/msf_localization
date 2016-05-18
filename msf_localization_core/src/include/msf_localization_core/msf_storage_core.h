@@ -130,6 +130,9 @@ public:
 public:
     int getPreviousInputCommandByStampAndInputCore(const TimeStamp time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core);
 
+    // Get oldest time stamp
+public:
+    int getOldestTimeStamp(TimeStamp& oldest_time_stamp);
 
 
     // Add element in the ring buffer by stamp (safe)
