@@ -15,7 +15,7 @@ enum class SensorTypes
     undefined=0,
     imu=1,
     coded_visual_marker_eye=2,
-    mocap
+    absolute_pose
 };
 
 
@@ -47,6 +47,13 @@ public:
     bool isSensorEnabled() const;
     int setSensorEnabled(bool flagSensorEnabled);
 
+
+    //// Name
+protected:
+    std::string sensor_name_;
+public:
+    int setSensorName(std::string sensor_name);
+    std::string getSensorName() const;
 
 };
 

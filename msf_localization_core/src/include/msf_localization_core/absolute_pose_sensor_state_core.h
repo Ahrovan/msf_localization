@@ -1,6 +1,6 @@
 
-#ifndef _MOCAP_STATE_SENSOR_CORE_H
-#define _MOCAP_STATE_SENSOR_CORE_H
+#ifndef _ABSOLUTE_POSE_SENSOR_STATE_CORE_H
+#define _ABSOLUTE_POSE_SENSOR_STATE_CORE_H
 
 
 
@@ -13,12 +13,12 @@
 
 
 
-class MocapSensorStateCore : public SensorStateCore
+class AbsolutePoseSensorStateCore : public SensorStateCore
 {
 public:
-    MocapSensorStateCore();
-    MocapSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
-    ~MocapSensorStateCore();
+    AbsolutePoseSensorStateCore();
+    AbsolutePoseSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    ~AbsolutePoseSensorStateCore();
 
 protected:
     int init();

@@ -836,9 +836,9 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
                     logString<<" (Coded Visual Marker Eye)";
                     break;
                 }
-                case SensorTypes::mocap:
+                case SensorTypes::absolute_pose:
                 {
-                    logString<<" (Mocap)";
+                    logString<<" (Absolute Pose)";
                     break;
                 }
             }

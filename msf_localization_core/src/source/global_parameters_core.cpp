@@ -278,7 +278,9 @@ int GlobalParametersCore::predictState(//Time
     return 0;
 }
 
-int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp, const std::shared_ptr<GlobalParametersStateCore> pastState, std::shared_ptr<GlobalParametersStateCore>& predictedState)
+int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                               const std::shared_ptr<GlobalParametersStateCore> pastState,
+                                               std::shared_ptr<GlobalParametersStateCore>& predictedState)
 {
 
     // Checks in the past state

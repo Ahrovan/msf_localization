@@ -661,6 +661,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     ///// World -> Global Parameters
 
     {
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictWorld=getTimeStamp();
+#endif
+
         //
         std::shared_ptr<StateCore> predicted_state;
 
@@ -701,6 +705,14 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
         // Set
         ThePredictedState->TheGlobalParametersStateCore=predicted_state;
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict World time state and jac pred: "<<(getTimeStamp()-beginTimePredictWorld).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
     }
 
 
@@ -766,6 +778,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     ///// Inputs
 
     {
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictInputs=getTimeStamp();
+#endif
+
         // Clean the list
         ThePredictedState->TheListInputStateCore.clear();
 
@@ -815,6 +831,14 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
             // Set
             ThePredictedState->TheListInputStateCore.push_back(predicted_state);
         }
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict inputs time state and jac pred: "<<(getTimeStamp()-beginTimePredictInputs).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
     }
 
 
@@ -891,6 +915,11 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     ///// Map
 
     {
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictMaps=getTimeStamp();
+#endif
+
         // Clean the list
         ThePredictedState->TheListMapElementStateCore.clear();
 
@@ -940,6 +969,14 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
             // Set
             ThePredictedState->TheListMapElementStateCore.push_back(predicted_state);
         }
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict map time state and jac pred: "<<(getTimeStamp()-beginTimePredictMaps).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
     }
 
 
@@ -969,7 +1006,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     // Dimension
-    MatrixPoint WorkingInitPoint;
+    //MatrixPoint WorkingInitPoint;
 
 
     // Delta Time Stamp
@@ -977,17 +1014,17 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     // Create and Resize the covariance Matrix
-    int dimensionOfErrorState=ThePredictedState->getDimensionErrorState();
+//    int dimensionOfErrorState=ThePredictedState->getDimensionErrorState();
     if(!ThePredictedState->covarianceMatrix)
         ThePredictedState->covarianceMatrix=std::make_shared<Eigen::MatrixXd>();
-    ThePredictedState->covarianceMatrix->resize(dimensionOfErrorState,dimensionOfErrorState);
-    ThePredictedState->covarianceMatrix->setZero();
+//    ThePredictedState->covarianceMatrix->resize(dimensionOfErrorState,dimensionOfErrorState);
+//    ThePredictedState->covarianceMatrix->setZero();
 
 
 
     // Aux Vars
     // TODO FIX!
-    Eigen::SparseMatrix<double> jacobianRobotErrorState=ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
+    //Eigen::SparseMatrix<double> jacobianRobotErrorState=ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
 
 
 
@@ -1781,8 +1818,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                                                 block_jacobian_total_robot_error_parameters*block_covariance_total_robot_error_parameters*block_jacobian_total_robot_error_parameters.transpose();
 
 
-            BlockMatrix::MatrixSparse aux;
-            aux=block_jacobian_total_robot_error_noise_estimation.transpose();
+//            BlockMatrix::MatrixSparse aux;
+//            aux=block_jacobian_total_robot_error_noise_estimation.transpose();
 
 
             /*

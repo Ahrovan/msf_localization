@@ -1,11 +1,11 @@
 
-#include "msf_localization_core/mocap_world_core.h"
+#include "msf_localization_core/world_reference_frame_core.h"
 
 #include "msf_localization_core/map_element_state_core.h"
-#include "msf_localization_core/mocap_world_state_core.h"
+#include "msf_localization_core/world_reference_frame_state_core.h"
 
 
-MocapWorldCore::MocapWorldCore():
+WorldReferenceFrameCore::WorldReferenceFrameCore():
     MapElementCore()
 {
     init();
@@ -13,7 +13,7 @@ MocapWorldCore::MocapWorldCore():
     return;
 }
 
-MocapWorldCore::MocapWorldCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
+WorldReferenceFrameCore::WorldReferenceFrameCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
     MapElementCore(TheMsfStorageCore)
 {
     init();
@@ -21,12 +21,12 @@ MocapWorldCore::MocapWorldCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore) 
     return;
 }
 
-MocapWorldCore::~MocapWorldCore()
+WorldReferenceFrameCore::~WorldReferenceFrameCore()
 {
     return;
 }
 
-int MocapWorldCore::init()
+int WorldReferenceFrameCore::init()
 {
     // Dimensions
     dimension_state_=0;
@@ -34,6 +34,9 @@ int MocapWorldCore::init()
 
     dimension_parameters_+=3+4;
     dimension_error_parameters_+=3+3;
+
+    // Init values
+    id_=-1;
 
     // Flags
     flag_estimation_position_mocap_world_wrt_world_=false;
@@ -45,21 +48,17 @@ int MocapWorldCore::init()
 
 
     // Map Type
-    setMapElementType(MapElementTypes::mocap_world);
+    setMapElementType(MapElementTypes::world_ref_frame);
 
 
     return 0;
 }
 
-int MocapWorldCore::readConfig(pugi::xml_node map_element, std::shared_ptr<MocapWorldStateCore>& MapElementInitStateCore)
+int WorldReferenceFrameCore::readConfig(pugi::xml_node map_element, std::shared_ptr<WorldReferenceFrameStateCore>& MapElementInitStateCore)
 {
     // Create a class for the SensorStateCore
     if(!MapElementInitStateCore)
-        MapElementInitStateCore=std::make_shared<MocapWorldStateCore>(this->getMsfElementCoreSharedPtr());
-
-
-    // Visual landmark
-    pugi::xml_node mocap_world=map_element.child("mocap_world");
+        MapElementInitStateCore=std::make_shared<WorldReferenceFrameStateCore>(this->getMsfElementCoreSharedPtr());
 
 
     // Auxiliar reading value
@@ -68,13 +67,22 @@ int MocapWorldCore::readConfig(pugi::xml_node map_element, std::shared_ptr<Mocap
 
 
     /// Name
-    this->setMapElementName("mocap_world");
+    std::string map_element_name=map_element.child_value("name");
+    this->setMapElementName(map_element_name);
+
+
+    /// Id
+    readingValue=map_element.child_value("id");
+    if(!readingValue.empty())
+    {
+        this->setId(std::stoi(readingValue));
+    }
 
 
     //// Configs
 
     /// Pose of the map element wrt worl
-    pugi::xml_node pose_in_world=mocap_world.child("pose_in_world");
+    pugi::xml_node pose_in_world=map_element.child("pose_in_world");
 
     // Position of the sensor wrt robot
     readingValue=pose_in_world.child("position").child_value("enabled");
@@ -163,12 +171,23 @@ int MocapWorldCore::readConfig(pugi::xml_node map_element, std::shared_ptr<Mocap
     return 0;
 }
 
-bool MocapWorldCore::isEstimationPositionMocapWorldWrtWorldEnabled()
+int WorldReferenceFrameCore::setId(int id)
+{
+    this->id_=id;
+    return 0;
+}
+
+int WorldReferenceFrameCore::getId() const
+{
+    return id_;
+}
+
+bool WorldReferenceFrameCore::isEstimationPositionMocapWorldWrtWorldEnabled()
 {
     return flag_estimation_position_mocap_world_wrt_world_;
 }
 
-int MocapWorldCore::enableEstimationPositionMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableEstimationPositionMocapWorldWrtWorld()
 {
     if(!flag_estimation_position_mocap_world_wrt_world_)
     {
@@ -181,7 +200,7 @@ int MocapWorldCore::enableEstimationPositionMocapWorldWrtWorld()
     return 0;
 }
 
-int MocapWorldCore::enableParameterPositionMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableParameterPositionMocapWorldWrtWorld()
 {
     if(flag_estimation_position_mocap_world_wrt_world_)
     {
@@ -194,24 +213,24 @@ int MocapWorldCore::enableParameterPositionMocapWorldWrtWorld()
     return 0;
 }
 
-Eigen::Matrix3d MocapWorldCore::getCovariancePositionMocapWorldWrtWorld() const
+Eigen::Matrix3d WorldReferenceFrameCore::getCovariancePositionMocapWorldWrtWorld() const
 {
     return this->covariance_position_mocap_world_wrt_world_;
 }
 
-int MocapWorldCore::setCovariancePositionMocapWorldWrtWorld(Eigen::Matrix3d covariance_position_mocap_world_wrt_world)
+int WorldReferenceFrameCore::setCovariancePositionMocapWorldWrtWorld(Eigen::Matrix3d covariance_position_mocap_world_wrt_world)
 {
     this->covariance_position_mocap_world_wrt_world_=covariance_position_mocap_world_wrt_world;
     return 0;
 }
 
 
-bool MocapWorldCore::isEstimationAttitudeMocapWorldWrtWorldEnabled()
+bool WorldReferenceFrameCore::isEstimationAttitudeMocapWorldWrtWorldEnabled()
 {
     return this->flag_estimation_attitude_mocap_world_wrt_world_;
 }
 
-int MocapWorldCore::enableEstimationAttitudeMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableEstimationAttitudeMocapWorldWrtWorld()
 {
     if(!flag_estimation_attitude_mocap_world_wrt_world_)
     {
@@ -225,7 +244,7 @@ int MocapWorldCore::enableEstimationAttitudeMocapWorldWrtWorld()
     return 0;
 }
 
-int MocapWorldCore::enableParameterAttitudeMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableParameterAttitudeMocapWorldWrtWorld()
 {
     if(flag_estimation_attitude_mocap_world_wrt_world_)
     {
@@ -239,12 +258,12 @@ int MocapWorldCore::enableParameterAttitudeMocapWorldWrtWorld()
 }
 
 
-Eigen::Matrix3d MocapWorldCore::getCovarianceAttitudeMocapWorldWrtWorld() const
+Eigen::Matrix3d WorldReferenceFrameCore::getCovarianceAttitudeMocapWorldWrtWorld() const
 {
     return this->covariance_attitude_mocap_world_wrt_world_;
 }
 
-int MocapWorldCore::setCovarianceAttitudeMocapWorldWrtWorld(Eigen::Matrix3d covariance_attitude_mocap_world_wrt_world)
+int WorldReferenceFrameCore::setCovarianceAttitudeMocapWorldWrtWorld(Eigen::Matrix3d covariance_attitude_mocap_world_wrt_world)
 {
     this->covariance_attitude_mocap_world_wrt_world_=covariance_attitude_mocap_world_wrt_world;
     return 0;
@@ -253,7 +272,7 @@ int MocapWorldCore::setCovarianceAttitudeMocapWorldWrtWorld(Eigen::Matrix3d cova
 
 
 
-int MocapWorldCore::prepareCovarianceInitErrorStateSpecific()
+int WorldReferenceFrameCore::prepareCovarianceInitErrorStateSpecific()
 {
     int dimension_i=0;
 
@@ -272,7 +291,7 @@ int MocapWorldCore::prepareCovarianceInitErrorStateSpecific()
     return 0;
 }
 
-Eigen::SparseMatrix<double> MocapWorldCore::getCovarianceParameters()
+Eigen::SparseMatrix<double> WorldReferenceFrameCore::getCovarianceParameters()
 {
     Eigen::SparseMatrix<double> covariance;
 
@@ -307,7 +326,7 @@ Eigen::SparseMatrix<double> MocapWorldCore::getCovarianceParameters()
 }
 
 
-Eigen::SparseMatrix<double> MocapWorldCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
+Eigen::SparseMatrix<double> WorldReferenceFrameCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance;
 
@@ -318,7 +337,7 @@ Eigen::SparseMatrix<double> MocapWorldCore::getCovarianceNoise(const TimeStamp d
     return covariance;
 }
 
-int MocapWorldCore::predictState(//Time
+int WorldReferenceFrameCore::predictState(//Time
                  const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                  // Previous State
                  const std::shared_ptr<StateEstimationCore> pastState,
@@ -337,7 +356,7 @@ int MocapWorldCore::predictState(//Time
     // TODO
 
     // Search for the past map State Core
-    std::shared_ptr<MocapWorldStateCore> past_map_state;
+    std::shared_ptr<WorldReferenceFrameStateCore> past_map_state;
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
         it_map_state!=pastState->TheListMapElementStateCore.end();
@@ -345,23 +364,23 @@ int MocapWorldCore::predictState(//Time
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_map_state=std::dynamic_pointer_cast<MocapWorldStateCore>(*it_map_state);
+            past_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(*it_map_state);
             break;
         }
     }
     if(!past_map_state)
     {
-        std::cout<<"MocapWorldCore::predictState() unable to find past_map_state"<<std::endl;
+        std::cout<<"WorldReferenceFrameCore::predictState() unable to find past_map_state"<<std::endl;
         return -10;
     }
 
 
     // Predicted State
-    std::shared_ptr<MocapWorldStateCore> predicted_map_state;
+    std::shared_ptr<WorldReferenceFrameStateCore> predicted_map_state;
     if(!predictedState)
-        predicted_map_state=std::make_shared<MocapWorldStateCore>(past_map_state->getMsfElementCoreWeakPtr());
+        predicted_map_state=std::make_shared<WorldReferenceFrameStateCore>(past_map_state->getMsfElementCoreWeakPtr());
     else
-        predicted_map_state=std::dynamic_pointer_cast<MocapWorldStateCore>(predictedState);
+        predicted_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(predictedState);
 
 
 
@@ -375,7 +394,7 @@ int MocapWorldCore::predictState(//Time
     // Check error
     if(error_predict_state)
     {
-        std::cout<<"MocapWorldCore::predictState() error_predict_state"<<std::endl;
+        std::cout<<"WorldReferenceFrameCore::predictState() error_predict_state"<<std::endl;
         return error_predict_state;
     }
 
@@ -389,23 +408,23 @@ int MocapWorldCore::predictState(//Time
     return 0;
 }
 
-int MocapWorldCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                        const std::shared_ptr<MocapWorldStateCore> pastState,
-                                                        std::shared_ptr<MocapWorldStateCore>& predictedState)
+int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                        const std::shared_ptr<WorldReferenceFrameStateCore> pastState,
+                                                        std::shared_ptr<WorldReferenceFrameStateCore>& predictedState)
 {
 
     // Checks in the past state
     if(!pastState->isCorrect())
     {
         return -5;
-        std::cout<<"MocapWorldCore::predictState() error"<<std::endl;
+        std::cout<<"WorldReferenceFrameCore::predictState() error"<<std::endl;
     }
 
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<MocapWorldStateCore>(pastState->getMsfElementCoreWeakPtr());
+        predictedState=std::make_shared<WorldReferenceFrameStateCore>(pastState->getMsfElementCoreWeakPtr());
     }
 
 
@@ -436,7 +455,7 @@ int MocapWorldCore::predictStateSpecific(const TimeStamp previousTimeStamp, cons
 }
 
 // Jacobian
-int MocapWorldCore::predictErrorStateJacobian(//Time
+int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
                              const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
                              // Previous State
                              const std::shared_ptr<StateEstimationCore> past_state,
@@ -459,7 +478,7 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
 
 
     // Search for the past map State Core
-    std::shared_ptr<MocapWorldStateCore> past_map_state;
+    std::shared_ptr<WorldReferenceFrameStateCore> past_map_state;
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=past_state->TheListMapElementStateCore.begin();
         it_map_state!=past_state->TheListMapElementStateCore.end();
@@ -467,7 +486,7 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_map_state=std::dynamic_pointer_cast<MocapWorldStateCore>(*it_map_state);
+            past_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(*it_map_state);
             break;
         }
     }
@@ -488,7 +507,7 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
 
 
     /// predicted map State
-    std::shared_ptr<MocapWorldStateCore> predicted_map_state=std::dynamic_pointer_cast<MocapWorldStateCore>(predicted_state);
+    std::shared_ptr<WorldReferenceFrameStateCore> predicted_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(predicted_state);
 
 
     /// Get iterators to fill jacobians
@@ -506,7 +525,7 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
         ++itMapElementStateCore, ++it_jacobian_error_state_wrt_map_error_state, ++it_jacobian_error_state_wrt_map_error_parameters
         )
     {
-        if( std::dynamic_pointer_cast<MocapWorldStateCore>((*itMapElementStateCore)) == past_map_state )
+        if( std::dynamic_pointer_cast<WorldReferenceFrameStateCore>((*itMapElementStateCore)) == past_map_state )
             break;
     }
 
@@ -543,9 +562,9 @@ int MocapWorldCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                       const std::shared_ptr<MocapWorldStateCore> pastState,
-                                                       std::shared_ptr<MocapWorldStateCore>& predictedState,
+int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                       const std::shared_ptr<WorldReferenceFrameStateCore> pastState,
+                                                       std::shared_ptr<WorldReferenceFrameStateCore>& predictedState,
                                                        // Jacobians Error State: Fx, Fp
                                                        // Map
                                                        Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,
@@ -654,7 +673,7 @@ int MocapWorldCore::predictErrorStateJacobiansSpecific(const TimeStamp previousT
     return 0;
 }
 
-int MocapWorldCore::resetErrorStateJacobian(// Time
+int WorldReferenceFrameCore::resetErrorStateJacobian(// Time
                                             const TimeStamp& current_time_stamp,
                                             // Increment Error State
                                             const Eigen::VectorXd& increment_error_state,

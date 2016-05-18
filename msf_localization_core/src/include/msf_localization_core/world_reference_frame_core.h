@@ -1,6 +1,6 @@
 
-#ifndef _MOCAP_WORLD_CORE_H
-#define _MOCAP_WORLD_CORE_H
+#ifndef _WORLD_REFERENCE_FRAME_CORE_H
+#define _WORLD_REFERENCE_FRAME_CORE_H
 
 
 
@@ -21,18 +21,18 @@
 #include "msf_localization_core/map_element_core.h"
 
 // State
-#include "msf_localization_core/mocap_world_state_core.h"
+#include "msf_localization_core/world_reference_frame_state_core.h"
 
 
 
 
-class MocapWorldCore : public MapElementCore
+class WorldReferenceFrameCore : public MapElementCore
 {
 
 public:
-    MocapWorldCore();
-    MocapWorldCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
-    ~MocapWorldCore();
+    WorldReferenceFrameCore();
+    WorldReferenceFrameCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+    ~WorldReferenceFrameCore();
 
 
 protected:
@@ -43,13 +43,21 @@ protected:
 
     /// Configs
 public:
-    int readConfig(pugi::xml_node map_element, std::shared_ptr<MocapWorldStateCore>& MapElementInitStateCore);
+    int readConfig(pugi::xml_node map_element, std::shared_ptr<WorldReferenceFrameStateCore>& MapElementInitStateCore);
 
 
 
     ///// State if enabled (or Parameters if disabled)
 
     // State: x_map=[t_mocap_world_wrt_world, q_mocap_world_wrt_world]'
+
+
+    // Id
+protected:
+    int id_;
+public:
+    int setId(int id);
+    int getId() const;
 
 
     // Position Mocap World Wrt World 3x1
@@ -127,8 +135,8 @@ public:
 
 protected:
     int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                             const std::shared_ptr<MocapWorldStateCore> pastState,
-                             std::shared_ptr<MocapWorldStateCore>& predictedState);
+                             const std::shared_ptr<WorldReferenceFrameStateCore> pastState,
+                             std::shared_ptr<WorldReferenceFrameStateCore>& predictedState);
 
 
     // Jacobian: F
@@ -144,8 +152,8 @@ public:
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                           const std::shared_ptr<MocapWorldStateCore> pastState,
-                                           std::shared_ptr<MocapWorldStateCore>& predictedState,
+                                           const std::shared_ptr<WorldReferenceFrameStateCore> pastState,
+                                           std::shared_ptr<WorldReferenceFrameStateCore>& predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Map
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,

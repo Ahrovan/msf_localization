@@ -1,18 +1,18 @@
 
-#ifndef _MOCAP_SENSOR_MEASUREMENT_CORE_H
-#define _MOCAP_SENSOR_MEASUREMENT_CORE_H
+#ifndef _ABSOLUTE_POSE_SENSOR_MEASUREMENT_CORE_H
+#define _ABSOLUTE_POSE_SENSOR_MEASUREMENT_CORE_H
 
 
 #include "msf_localization_core/sensor_measurement_core.h"
 
 
-class MocapSensorMeasurementCore : public SensorMeasurementCore
+class AbsolutePoseSensorMeasurementCore : public SensorMeasurementCore
 {
 public:
-    MocapSensorMeasurementCore();
-    MocapSensorMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core);
+    AbsolutePoseSensorMeasurementCore();
+    AbsolutePoseSensorMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core);
 public:
-    ~MocapSensorMeasurementCore();
+    ~AbsolutePoseSensorMeasurementCore();
 
 protected:
     int init();

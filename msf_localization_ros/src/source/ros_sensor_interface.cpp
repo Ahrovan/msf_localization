@@ -19,17 +19,6 @@ RosSensorInterface::~RosSensorInterface()
     return;
 }
 
-int RosSensorInterface::setSensorName(std::string sensor_name)
-{
-    this->sensor_name_=sensor_name;
-    return 0;
-}
-
-std::string RosSensorInterface::getSensorName() const
-{
-    return this->sensor_name_;
-}
-
 int RosSensorInterface::publishTfPoseSensorWrtRobot(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
 {
     Eigen::Vector3d sensorPosition=sensor_state_core->getPositionSensorWrtRobot();
@@ -42,7 +31,7 @@ int RosSensorInterface::publishTfPoseSensorWrtRobot(TimeStamp time_stamp, std::s
 
 
     tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(time_stamp.sec, time_stamp.nsec),
-                                          robot_core->getRobotName(), this->getSensorName()));
+                                          robot_core->getRobotName(), std::dynamic_pointer_cast<SensorCore>(sensor_state_core->getMsfElementCoreSharedPtr())->getSensorName()));
 
     return 0;
 }

@@ -1,10 +1,10 @@
 
-#include "msf_localization_core/mocap_sensor_state_core.h"
+#include "msf_localization_core/absolute_pose_sensor_state_core.h"
 
-#include "msf_localization_core/mocap_sensor_core.h"
+#include "msf_localization_core/absolute_pose_sensor_core.h"
 
 
-MocapSensorStateCore::MocapSensorStateCore() :
+AbsolutePoseSensorStateCore::AbsolutePoseSensorStateCore() :
     SensorStateCore()
 {
     init();
@@ -12,7 +12,7 @@ MocapSensorStateCore::MocapSensorStateCore() :
     return;
 }
 
-MocapSensorStateCore::MocapSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+AbsolutePoseSensorStateCore::AbsolutePoseSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     SensorStateCore(msf_element_core_ptr)
 {
     init();
@@ -20,13 +20,13 @@ MocapSensorStateCore::MocapSensorStateCore(std::weak_ptr<MsfElementCore> msf_ele
     return;
 }
 
-MocapSensorStateCore::~MocapSensorStateCore()
+AbsolutePoseSensorStateCore::~AbsolutePoseSensorStateCore()
 {
 
     return;
 }
 
-int MocapSensorStateCore::init()
+int AbsolutePoseSensorStateCore::init()
 {
     this->setSensorStateCoreType(SensorStateCoreTypes::mocap);
 
@@ -34,12 +34,12 @@ int MocapSensorStateCore::init()
 }
 
 
-int MocapSensorStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
+int AbsolutePoseSensorStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
 
     unsigned int dimension=0;
 
-    std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getMsfElementCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
 
     if(sensor_core->isEstimationPositionSensorWrtRobotEnabled())
     {

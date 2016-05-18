@@ -12,10 +12,10 @@
 #include "msf_localization_core/time_stamp.h"
 
 // Sensor Core
-#include "msf_localization_core/mocap_sensor_core.h"
+#include "msf_localization_core/absolute_pose_sensor_core.h"
 
 // Sensor measurement core
-#include "msf_localization_core/mocap_sensor_measurement_core.h"
+#include "msf_localization_core/absolute_pose_sensor_measurement_core.h"
 
 
 // ROS Sensor Interface
@@ -26,7 +26,7 @@
 
 
 
-class RosMocapSensorInterface : public RosSensorInterface, public MocapSensorCore
+class RosMocapSensorInterface : public RosSensorInterface, public AbsolutePoseSensorCore
 {
 public:
     RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
@@ -56,7 +56,7 @@ public:
 
 
 public:
-    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MocapSensorStateCore>& SensorInitStateCore);
+    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore);
 
 };
 

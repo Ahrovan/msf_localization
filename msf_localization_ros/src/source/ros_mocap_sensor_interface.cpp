@@ -3,7 +3,7 @@
 
 RosMocapSensorInterface::RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     RosSensorInterface(nh, tf_transform_broadcaster),
-    MocapSensorCore(the_msf_storage_core)
+    AbsolutePoseSensorCore(the_msf_storage_core)
 {
 
 
@@ -31,8 +31,8 @@ int RosMocapSensorInterface::setMeasurementRos(const geometry_msgs::PoseStampedP
 
 
     // Value with sensor core
-    std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getMsfElementCoreSharedPtr());
-    std::shared_ptr<MocapSensorMeasurementCore> measurement_core=std::make_shared<MocapSensorMeasurementCore>(sensor_core);
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorMeasurementCore> measurement_core=std::make_shared<AbsolutePoseSensorMeasurementCore>(sensor_core);
 
 
     // Measurement Position
@@ -105,10 +105,10 @@ int RosMocapSensorInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRo
     return 0;
 }
 
-int RosMocapSensorInterface::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<MocapSensorStateCore>& SensorInitStateCore)
+int RosMocapSensorInterface::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore)
 {
     /// Sensor General Configs
-    int errorReadConfig=this->MocapSensorCore::readConfig(sensor, sensorId, SensorInitStateCore);
+    int errorReadConfig=this->AbsolutePoseSensorCore::readConfig(sensor, sensorId, SensorInitStateCore);
 
     if(errorReadConfig)
         return errorReadConfig;
@@ -121,10 +121,6 @@ int RosMocapSensorInterface::readConfig(pugi::xml_node sensor, unsigned int sens
     std::string sensor_topic=sensor.child_value("ros_topic");
     this->setMeasurementMocapSensorWrtMocapWorldTopicName(sensor_topic);
 
-
-    // Name
-    std::string sensor_name=sensor.child_value("name");
-    this->setSensorName(sensor_name);
 
 
     /// Finish

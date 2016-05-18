@@ -7,6 +7,7 @@
 #include "msf_localization_ros/ros_robot_interface.h"
 
 #include "msf_localization_core/time_stamp.h"
+#include "msf_localization_core/sensor_core.h"
 #include "msf_localization_core/sensor_state_core.h"
 
 class RosSensorInterface : public RosInterface
@@ -16,13 +17,6 @@ protected:
 public:
     virtual ~RosSensorInterface();
 
-
-    //// Name
-protected:
-    std::string sensor_name_;
-public:
-    int setSensorName(std::string sensor_name);
-    std::string getSensorName() const;
 
 
 public:

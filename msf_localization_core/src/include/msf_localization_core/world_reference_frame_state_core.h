@@ -1,6 +1,6 @@
 
-#ifndef _MOCAP_WORLD_STATE_CORE_H
-#define _MOCAP_WORLD_STATE_CORE_H
+#ifndef _WORLD_REFERENCE_FRAME_STATE_CORE_H
+#define _WORLD_REFERENCE_FRAME_STATE_CORE_H
 
 
 
@@ -17,12 +17,12 @@
 
 
 
-class MocapWorldStateCore : public MapElementStateCore
+class WorldReferenceFrameStateCore : public MapElementStateCore
 {
 public:
-    MocapWorldStateCore();
-    MocapWorldStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
-    ~MocapWorldStateCore();
+    WorldReferenceFrameStateCore();
+    WorldReferenceFrameStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    ~WorldReferenceFrameStateCore();
 
 protected:
     int init();

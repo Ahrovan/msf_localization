@@ -276,14 +276,14 @@ int MsfLocalizationROS::readConfigFile()
         }
 
         //// Mocap Sensor Type
-        if(sensorType=="mocap")
+        if(sensorType=="absolute_pose")
         {
-            std::cout<<"sensor = mocap"<<std::endl;
+            std::cout<<"sensor = absolute_pose"<<std::endl;
 
             // Create a class for the SensoreCore
             std::shared_ptr<RosMocapSensorInterface> TheRosSensorInterface;
             // Create a class for the SensorStateCore
-            std::shared_ptr<MocapSensorStateCore> TheSensorStateCore;
+            std::shared_ptr<AbsolutePoseSensorStateCore> TheSensorStateCore;
 
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
@@ -398,19 +398,19 @@ int MsfLocalizationROS::readConfigFile()
         }
 
         /// Mocap World
-        if(mapElementType=="mocap_world")
+        if(mapElementType=="world_ref_frame")
         {
-            std::cout<<"map element = mocap_world"<<std::endl;
+            std::cout<<"map element = world_ref_frame"<<std::endl;
 
             // Create a class for the SensoreCore
-            std::shared_ptr<MocapWorldCore> TheMapElementCore;
+            std::shared_ptr<WorldReferenceFrameCore> TheMapElementCore;
             // Create a class for the SensorStateCore
-            std::shared_ptr<MocapWorldStateCore> MapElementInitStateCore;
+            std::shared_ptr<WorldReferenceFrameStateCore> MapElementInitStateCore;
 
 
             // Create a class for the MapElementCore
             if(!TheMapElementCore)
-                TheMapElementCore=std::make_shared<MocapWorldCore>(this->TheMsfStorageCore);
+                TheMapElementCore=std::make_shared<WorldReferenceFrameCore>(this->TheMsfStorageCore);
 
             // Set the pointer to itself
             TheMapElementCore->setMsfElementCorePtr(TheMapElementCore);
@@ -689,10 +689,10 @@ try
 
                     break;
                 }
-            case MapElementTypes::mocap_world:
+            case MapElementTypes::world_ref_frame:
             {
                 // Cast
-                std::shared_ptr<MocapWorldStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<MocapWorldStateCore>(*itMapElementState);
+                std::shared_ptr<WorldReferenceFrameStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(*itMapElementState);
 
                 Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPositionMocapWorldWrtWorld();
                 Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitudeMocapWorldWrtWorld();

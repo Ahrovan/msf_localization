@@ -99,6 +99,11 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
     //// Sensor configurations
 
 
+    /// Name
+    std::string sensor_name=sensor.child_value("name");
+    this->setSensorName(sensor_name);
+
+
     /// Pose of the sensor wrt robot
     pugi::xml_node pose_in_robot=sensor.child("pose_in_robot");
 

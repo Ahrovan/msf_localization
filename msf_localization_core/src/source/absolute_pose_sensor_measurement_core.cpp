@@ -1,9 +1,9 @@
 
-#include "msf_localization_core/mocap_sensor_measurement_core.h"
+#include "msf_localization_core/absolute_pose_sensor_measurement_core.h"
 
-#include "msf_localization_core/mocap_sensor_core.h"
+#include "msf_localization_core/absolute_pose_sensor_core.h"
 
-MocapSensorMeasurementCore::MocapSensorMeasurementCore() :
+AbsolutePoseSensorMeasurementCore::AbsolutePoseSensorMeasurementCore() :
     SensorMeasurementCore()
 {
     init();
@@ -11,20 +11,20 @@ MocapSensorMeasurementCore::MocapSensorMeasurementCore() :
     return;
 }
 
-MocapSensorMeasurementCore::MocapSensorMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
+AbsolutePoseSensorMeasurementCore::AbsolutePoseSensorMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
     SensorMeasurementCore(the_sensor_core)
 {
     init();
     return;
 }
 
-MocapSensorMeasurementCore::~MocapSensorMeasurementCore()
+AbsolutePoseSensorMeasurementCore::~AbsolutePoseSensorMeasurementCore()
 {
 
     return;
 }
 
-int MocapSensorMeasurementCore::init()
+int AbsolutePoseSensorMeasurementCore::init()
 {
     // Initial values of the measurement
     this->position_mocap_sensor_wrt_mocap_world_.setZero();
@@ -39,10 +39,10 @@ int MocapSensorMeasurementCore::init()
 }
 
 
-int MocapSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d &position_mocap_sensor_wrt_mocap_world)
+int AbsolutePoseSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d &position_mocap_sensor_wrt_mocap_world)
 {
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getSensorCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getSensorCoreSharedPtr());
 
     if(sensor_core->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
     {
@@ -55,10 +55,10 @@ int MocapSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen:
     return 0;
 }
 
-int MocapSensorMeasurementCore::setAttitudeMocapSensorWrtMocapWorld(const Eigen::Vector4d& attitude_mocap_sensor_wrt_mocap_world)
+int AbsolutePoseSensorMeasurementCore::setAttitudeMocapSensorWrtMocapWorld(const Eigen::Vector4d& attitude_mocap_sensor_wrt_mocap_world)
 {
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getSensorCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getSensorCoreSharedPtr());
 
     if(sensor_core->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
     {
@@ -72,17 +72,17 @@ int MocapSensorMeasurementCore::setAttitudeMocapSensorWrtMocapWorld(const Eigen:
     return 0;
 }
 
-Eigen::Vector3d MocapSensorMeasurementCore::getPositionMocapSensorWrtMocapWorld() const
+Eigen::Vector3d AbsolutePoseSensorMeasurementCore::getPositionMocapSensorWrtMocapWorld() const
 {
     return this->position_mocap_sensor_wrt_mocap_world_;
 }
 
-Eigen::Vector4d MocapSensorMeasurementCore::getAttitudeMocapSensorWrtMocapWorld() const
+Eigen::Vector4d AbsolutePoseSensorMeasurementCore::getAttitudeMocapSensorWrtMocapWorld() const
 {
     return this->attitude_mocap_sensor_wrt_mocap_world_;
 }
 
-Eigen::VectorXd MocapSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
+Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
 {
     // Create the Measurement
     Eigen::VectorXd the_innovation;
@@ -92,15 +92,15 @@ Eigen::VectorXd MocapSensorMeasurementCore::getInnovation(std::shared_ptr<Sensor
     // Check
     if(theMatchedMeasurementI->getSensorCoreSharedPtr() != thePredictedMeasurementI->getSensorCoreSharedPtr())
     {
-        std::cout<<"MocapSensorMeasurementCore::getInnovation() error"<<std::endl;
+        std::cout<<"AbsolutePoseSensorMeasurementCore::getInnovation() error"<<std::endl;
     }
 
     // Cast
-    std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(theMatchedMeasurementI->getSensorCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(theMatchedMeasurementI->getSensorCoreSharedPtr());
 
     // Cast
-    std::shared_ptr<MocapSensorMeasurementCore> theMatchedMeasurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(theMatchedMeasurementI);
-    std::shared_ptr<MocapSensorMeasurementCore> thePredictedMeasurement=std::dynamic_pointer_cast<MocapSensorMeasurementCore>(thePredictedMeasurementI);
+    std::shared_ptr<AbsolutePoseSensorMeasurementCore> theMatchedMeasurement=std::dynamic_pointer_cast<AbsolutePoseSensorMeasurementCore>(theMatchedMeasurementI);
+    std::shared_ptr<AbsolutePoseSensorMeasurementCore> thePredictedMeasurement=std::dynamic_pointer_cast<AbsolutePoseSensorMeasurementCore>(thePredictedMeasurementI);
 
     // Fill
     unsigned int dimension=0;
@@ -122,7 +122,7 @@ Eigen::VectorXd MocapSensorMeasurementCore::getInnovation(std::shared_ptr<Sensor
 }
 
 
-Eigen::VectorXd MocapSensorMeasurementCore::getMeasurement()
+Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getMeasurement()
 {
     // Create the Measurement
     Eigen::VectorXd the_measurement;
@@ -130,7 +130,7 @@ Eigen::VectorXd MocapSensorMeasurementCore::getMeasurement()
     the_measurement.setZero();
 
     // Sensor Core -> to be able to do checks
-    std::shared_ptr<MocapSensorCore> sensor_core=std::dynamic_pointer_cast<MocapSensorCore>(this->getSensorCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getSensorCoreSharedPtr());
 
     // Fill
     unsigned int dimension=0;

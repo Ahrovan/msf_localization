@@ -51,6 +51,17 @@ int SensorBasics::setSensorEnabled(bool flagSensorEnabled)
     return 0;
 }
 
+int SensorBasics::setSensorName(std::string sensor_name)
+{
+    this->sensor_name_=sensor_name;
+    return 0;
+}
+
+std::string SensorBasics::getSensorName() const
+{
+    return this->sensor_name_;
+}
+
 
 
 

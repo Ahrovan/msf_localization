@@ -148,11 +148,6 @@ int RosArucoEyeInterface::readConfig(pugi::xml_node sensor, unsigned int sensorI
     this->setMarkerListTopicName(sensor_topic);
 
 
-    // Name
-    std::string sensor_name=sensor.child_value("name");
-    this->setSensorName(sensor_name);
-
-
     /// Finish
 
     // Open

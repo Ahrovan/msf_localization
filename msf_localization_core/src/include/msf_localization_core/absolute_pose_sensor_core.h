@@ -1,6 +1,6 @@
 
-#ifndef _MOCAP_SENSOR_CORE_H
-#define _MOCAP_SENSOR_CORE_H
+#ifndef _ABSOLUTE_POSE_SENSOR_CORE_H
+#define _ABSOLUTE_POSE_SENSOR_CORE_H
 
 
 
@@ -17,9 +17,9 @@
 #include "msf_localization_core/sensor_core.h"
 
 // Sensor Measurement
-#include "msf_localization_core/mocap_sensor_measurement_core.h"
+#include "msf_localization_core/absolute_pose_sensor_measurement_core.h"
 // Sensor State
-#include "msf_localization_core/mocap_sensor_state_core.h"
+#include "msf_localization_core/absolute_pose_sensor_state_core.h"
 
 
 // Robot state
@@ -29,25 +29,25 @@
 
 
 // Map
-#include "msf_localization_core/mocap_world_core.h"
-#include "msf_localization_core/mocap_world_state_core.h"
+#include "msf_localization_core/world_reference_frame_core.h"
+#include "msf_localization_core/world_reference_frame_state_core.h"
 
 
 
-class MocapSensorCore : public SensorCore
+class AbsolutePoseSensorCore : public SensorCore
 {
 public:
-    MocapSensorCore();
-    MocapSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    AbsolutePoseSensorCore();
+    AbsolutePoseSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 public:
-    ~MocapSensorCore();
+    ~AbsolutePoseSensorCore();
 
 public:
     int init();
 
 
 public:
-    int readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<MocapSensorStateCore>& SensorInitStateCore);
+    int readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore);
 
 
 
@@ -56,6 +56,13 @@ public:
 
     // z=[{z_posi_vmi__wrt_aruco_eye, z_attit_vmi_wrt_aruco_eye}]'
 
+
+    // World Reference Frame id
+protected:
+    int world_reference_frame_id_;
+public:
+    int setWorldReferenceFrameId(int world_reference_frame_id);
+    int getWorldReferenceFrameId() const;
 
 
     // Position Measurement
@@ -93,7 +100,7 @@ public:
 
     // Store Measurement
 public:
-    int setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement);
+    int setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement);
     //int setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > sensor_measurement_list);
 
 
@@ -151,8 +158,8 @@ public:
 
 protected:
     int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                             const std::shared_ptr<MocapSensorStateCore> pastState,
-                             std::shared_ptr<MocapSensorStateCore>& predictedState);
+                             const std::shared_ptr<AbsolutePoseSensorStateCore> pastState,
+                             std::shared_ptr<AbsolutePoseSensorStateCore>& predictedState);
 
 protected:
     int predictStateCore(// State k: Sensor
@@ -174,8 +181,8 @@ public:
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                           const std::shared_ptr<MocapSensorStateCore> pastState,
-                                           std::shared_ptr<MocapSensorStateCore>& predictedState,
+                                           const std::shared_ptr<AbsolutePoseSensorStateCore> pastState,
+                                           std::shared_ptr<AbsolutePoseSensorStateCore>& predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Sensor
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
@@ -214,9 +221,9 @@ public:
 protected:
     int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
                            const std::shared_ptr<RobotStateCore> currentRobotState,
-                           const std::shared_ptr<MocapSensorStateCore> currentSensorState,
-                           const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
-                           std::shared_ptr<MocapSensorMeasurementCore>& predictedMeasurement);
+                           const std::shared_ptr<AbsolutePoseSensorStateCore> currentSensorState,
+                           const std::shared_ptr<WorldReferenceFrameStateCore> currentMapElementState,
+                           std::shared_ptr<AbsolutePoseSensorMeasurementCore>& predictedMeasurement);
 
 protected:
     int predictMeasurementCore(// State: Robot
@@ -243,10 +250,10 @@ public:
 protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
                                                 const std::shared_ptr<RobotStateCore> currentRobotState,
-                                                const std::shared_ptr<MocapSensorStateCore> currentSensorState,
-                                                const std::shared_ptr<MocapWorldStateCore> currentMapElementState,
-                                                const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
-                                                std::shared_ptr<MocapSensorMeasurementCore>& predictedMeasurement,
+                                                const std::shared_ptr<AbsolutePoseSensorStateCore> currentSensorState,
+                                                const std::shared_ptr<WorldReferenceFrameStateCore> currentMapElementState,
+                                                const std::shared_ptr<AbsolutePoseSensorMeasurementCore> matchedMeasurement,
+                                                std::shared_ptr<AbsolutePoseSensorMeasurementCore>& predictedMeasurement,
                                                 // Jacobians State
                                                 // Robot
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
@@ -312,10 +319,10 @@ public:
 protected:
     int mapMeasurementSpecific(const TimeStamp& theTimeStamp,
                                const std::shared_ptr<RobotStateCore> currentRobotState,
-                               const std::shared_ptr<MocapSensorStateCore> currentSensorState,
-                               const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
-                               std::shared_ptr<MocapWorldCore>& newMapElementCore,
-                               std::shared_ptr<MocapWorldStateCore>& newMapElementState);
+                               const std::shared_ptr<AbsolutePoseSensorStateCore> currentSensorState,
+                               const std::shared_ptr<AbsolutePoseSensorMeasurementCore> matchedMeasurement,
+                               std::shared_ptr<WorldReferenceFrameCore>& newMapElementCore,
+                               std::shared_ptr<WorldReferenceFrameStateCore>& newMapElementState);
 
 protected:
     int mapMeasurementCore(// robot wrt world (state)
@@ -342,9 +349,9 @@ public:
 protected:
     int jacobiansMapMeasurementSpecific(const TimeStamp& theTimeStamp,
                                         const std::shared_ptr<RobotStateCore> currentRobotState,
-                                        const std::shared_ptr<MocapSensorStateCore> currentSensorState,
-                                        const std::shared_ptr<MocapSensorMeasurementCore> matchedMeasurement,
-                                        std::shared_ptr<MocapWorldStateCore>& newMapElementState);
+                                        const std::shared_ptr<AbsolutePoseSensorStateCore> currentSensorState,
+                                        const std::shared_ptr<AbsolutePoseSensorMeasurementCore> matchedMeasurement,
+                                        std::shared_ptr<WorldReferenceFrameStateCore>& newMapElementState);
 
 protected:
     int jacobiansMapMeasurementCore(// robot wrt world (state)
@@ -367,15 +374,15 @@ protected:
     /// Auxiliar functions
 protected:
     int findSensorState(const std::list< std::shared_ptr<StateCore> >& list_sensors_state,
-                        std::shared_ptr<MocapSensorStateCore>& sensor_state);
+                        std::shared_ptr<AbsolutePoseSensorStateCore>& sensor_state);
 
     int findMapElementCore(const std::list<std::shared_ptr<MapElementCore>>& list_map_elements_core,
-                           const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement,
-                           std::shared_ptr<MocapWorldCore>& map_element_core);
+                           const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement,
+                           std::shared_ptr<WorldReferenceFrameCore>& map_element_core);
 
     int findMapElementState(const std::list<std::shared_ptr<StateCore>>& list_map_elements_state,
-                            const std::shared_ptr<MocapSensorMeasurementCore> sensor_measurement,
-                            std::shared_ptr<MocapWorldStateCore>& map_element_state);
+                            const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement,
+                            std::shared_ptr<WorldReferenceFrameStateCore>& map_element_state);
 
 
 };

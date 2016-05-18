@@ -140,10 +140,6 @@ int RosSensorImuInterface::readConfig(pugi::xml_node sensor, unsigned int sensor
     std::string sensor_topic=sensor.child_value("ros_topic");
     this->setImuTopicName(sensor_topic);
 
-    // Name
-    std::string sensor_name=sensor.child_value("name");
-    this->setSensorName(sensor_name);
-
 
     /// Finish
 
