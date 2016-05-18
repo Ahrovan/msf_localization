@@ -1587,7 +1587,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 //std::cout<<"P"<<std::endl;
 
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorStateAsBlock=getTimeStamp();
 #endif
 
@@ -1601,7 +1601,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         block_previous_covariance_error_state.createFromEigen((*ThePreviousState->covarianceMatrix), size_error_state, size_error_state);
 
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::predictCore() predict covariance error state as block: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateAsBlock).nsec<<std::endl;
@@ -1758,7 +1758,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         //// P(k+1|k)
 
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorState=getTimeStamp();
 #endif
 
@@ -1817,7 +1817,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
             // P(k+1|k)
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorStateLastSum=getTimeStamp();
 #endif
 
@@ -1826,7 +1826,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                                                     // Fp * Qp * Fp^t + Fu * Qu * Fu^t + Fn * Qn * Fn^t
                                                     block_covariance_total_robot_error;
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::predictCore() predict covariance error state last sum: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateLastSum).nsec<<std::endl;
@@ -1867,14 +1867,14 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorStateAsEigen=getTimeStamp();
 #endif
 
         // Store Covariance Error State as Eigen::MatrixXd
         (*ThePredictedState->covarianceMatrix)=BlockMatrix::convertToEigenDense(block_predicted_covariance_error_state);
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::predictCore() predict covariance error state as eigen: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateAsEigen).nsec<<std::endl;
@@ -1884,7 +1884,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
             logString<<"MsfLocalizationCore::predictCore() predict covariance error state: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorState).nsec<<std::endl;

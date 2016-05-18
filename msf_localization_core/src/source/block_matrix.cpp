@@ -26,8 +26,10 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
         throw;
 
     // Multiplication
+    #pragma omp parallel for
     for(int i=0; i<prod1.rows(); i++)
     {
+        #pragma omp parallel for
         for(int j=0; j<prod2.cols(); j++)
         {
             // Sizes
@@ -44,6 +46,7 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
                 continue;
 
             // Multiplication
+            #pragma omp parallel for
             for(int k=0; k<prod1.cols(); k++)
             {
                 if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
@@ -78,8 +81,10 @@ MatrixDense operator*(const MatrixDense &prod1, const MatrixSparse &prod2)
         throw;
 
     // Multiplication
+    #pragma omp parallel for
     for(int i=0; i<prod1.rows(); i++)
     {
+        #pragma omp parallel for
         for(int j=0; j<prod2.cols(); j++)
         {
             // Sizes
@@ -96,6 +101,7 @@ MatrixDense operator*(const MatrixDense &prod1, const MatrixSparse &prod2)
                 continue;
 
             // Multiplication
+            #pragma omp parallel for
             for(int k=0; k<prod1.cols(); k++)
             {
                 if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
@@ -130,8 +136,10 @@ MatrixDense operator*(const MatrixSparse &prod1, const MatrixDense &prod2)
         throw;
 
     // Multiplication
+    #pragma omp parallel for
     for(int i=0; i<prod1.rows(); i++)
     {
+        #pragma omp parallel for
         for(int j=0; j<prod2.cols(); j++)
         {
             // Sizes
@@ -148,6 +156,7 @@ MatrixDense operator*(const MatrixSparse &prod1, const MatrixDense &prod2)
                 continue;
 
             // Multiplication
+            #pragma omp parallel for
             for(int k=0; k<prod1.cols(); k++)
             {
                 if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
@@ -264,7 +273,9 @@ MatrixDense operator+(const MatrixDense &sum1, const MatrixSparse &sum2)
     sum_result.resize(sum2.rows(), sum2.cols());
 
     // Sum the blocks
+    #pragma omp parallel for
     for(int i=0; i<sum2.rows(); i++)
+        #pragma omp parallel for
         for(int j=0; j<sum2.cols(); j++)
         {
             // Two blocks non zero
@@ -340,7 +351,9 @@ MatrixDense operator+(const MatrixSparse &sum1, const MatrixDense &sum2)
     sum_result.resize(sum2.rows(), sum2.cols());
 
     // Sum the blocks
+    #pragma omp parallel for
     for(int i=0; i<sum2.rows(); i++)
+        #pragma omp parallel for
         for(int j=0; j<sum2.cols(); j++)
         {
             // Two blocks non zero

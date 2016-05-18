@@ -231,8 +231,10 @@ public:
         Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic>::resize(num_rows, num_cols);
 
         // Resize each blocks
+        #pragma omp parallel for
         for(int row=0; row<num_rows; row++)
         {
+            #pragma omp parallel for
             for(int col=0; col<num_cols; col++)
             {
                 this->operator()(row, col).resize(rows_size_(row,0), cols_size_(col,0));
@@ -251,8 +253,10 @@ public:
             // Resize
             this->resize(other.rows(), other.cols());
             // Copy Values of each block
+            #pragma omp parallel for
             for(int row=0; row<this->rows(); row++)
             {
+                #pragma omp parallel for
                 for(int col=0; col<this->cols(); col++)
                 {
                     this->operator()(row,col)=other(row,col);
@@ -274,7 +278,10 @@ public:
         // Resize
         out.resize(this->cols(), this->rows());
         // Copy Values of each block
+        #pragma omp parallel for
         for(int row=0; row<this->rows(); row++)
+        {
+            #pragma omp parallel for
             for(int col=0; col<this->cols(); col++)
             {
                 // Resize block
@@ -285,6 +292,7 @@ public:
                     out(col,row)=this->operator()(row, col).transpose();
                 }
             }
+        }
         // Analyse out
         if(out.analyse())
             throw;
@@ -325,7 +333,10 @@ public:
         sum_result.resize(this->rows(), this->cols());
 
         // Sum the blocks
+        #pragma omp parallel for
         for(int i=0; i<this->rows(); i++)
+        {
+            #pragma omp parallel for
             for(int j=0; j<this->cols(); j++)
             {
                 // Two blocks non zero
@@ -369,6 +380,7 @@ public:
 
 
             }
+        }
 
         // Analyse the result
         if(sum_result.analyse())
