@@ -763,6 +763,11 @@ TimeStamp MsfLocalizationROS::getTimeStamp()
     return TimeStamp(RosTimeStamp.sec, RosTimeStamp.nsec);
 }
 
+bool MsfLocalizationROS::isAlive()
+{
+    return ros::ok();
+}
+
 int MsfLocalizationROS::predictThreadFunction()
 {   
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -885,6 +890,7 @@ catch(...)
 }
 
 
+/*
 int MsfLocalizationROS::bufferManagerThreadFunction()
 {
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -896,7 +902,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 #endif
 
 
-    while(ros::ok())
+    while(isAlive())
     {
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -972,34 +978,33 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_ROS
         {
-            ros::Time begin = ros::Time::now();
+            TimeStamp begin = this->getTimeStamp();
 #endif
 
             int errorPredict=this->predict(OldestTimeStamp);
 
-        if(errorPredict)
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-
+            if(errorPredict)
             {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error 5!"<<std::endl;
-                this->log(logString.str());
-            }
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationROS::bufferManagerThreadFunction() error 5!"<<std::endl;
+                    this->log(logString.str());
+                }
 #endif
 
-            // Add to the processing list -> No
-            //this->TheMsfStorageCore->addOutdatedElement(OldestTimeStamp);
+                // Add to the processing list -> No
+                //this->TheMsfStorageCore->addOutdatedElement(OldestTimeStamp);
 
-            // Delete from buffer to avoid using it! -> No
-            //this->TheMsfStorageCore->purgeElementRingBuffer(OldestTimeStamp);
+                // Delete from buffer to avoid using it! -> No
+                //this->TheMsfStorageCore->purgeElementRingBuffer(OldestTimeStamp);
 
-            continue;
-        }
+                continue;
+            }
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_ROS
             std::ostringstream logString;
-            logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> predict() time: "<<(ros::Time::now()-begin).toNSec()<<" ns"<<std::endl;
+            logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> predict() time: "<<(getTimeStamp()-begin).toNSec()<<" ns"<<std::endl;
             this->log(logString.str());
 
         }
@@ -1060,7 +1065,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_ROS
         {
-            ros::Time begin = ros::Time::now();
+            TimeStamp begin = getTimeStamp();
 #endif
 
             errorUpdate=this->update(OldestTimeStamp);
@@ -1068,7 +1073,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_ROS
             std::ostringstream logString;
-            logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> update() time: "<<(ros::Time::now()-begin).toNSec()<<" ns"<<std::endl;
+            logString<<"MsfLocalizationROS::bufferManagerThreadFunction -> update() time: "<<(getTimeStamp-begin).toNSec()<<" ns"<<std::endl;
             this->log(logString.str());
             }
 #endif
@@ -1212,6 +1217,7 @@ int MsfLocalizationROS::bufferManagerThreadFunction()
     return 0;
 
 }
+*/
 
 
 int MsfLocalizationROS::run()

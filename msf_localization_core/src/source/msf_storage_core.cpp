@@ -437,7 +437,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
 #endif
 
     if(!PreviousState)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -653,6 +653,26 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
 #endif
 
 
+    // Check that nobody else is using the element in the buffer if it is going to be overwritten
+    std::shared_ptr<StateEstimationCore> OldStateEstimationElement;
+
+
+    this->getElement(TheTimeStamp, OldStateEstimationElement);
+
+
+    while(OldStateEstimationElement.use_count()>2)
+    {
+        // Do nothing, sleep for a little
+        std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
+    }
+
+
+    // Lock the buffer. OJO!! Posible fuente de errores. no 100% sincronizado!
+    TheRingBufferMutex.lock();
+
+
+
+    // New buffer element
     StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
     BufferElement.timeStamp=TheTimeStamp;
@@ -670,8 +690,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
     }
 #endif
 
-    // Lock
-    TheRingBufferMutex.lock();
+
 
     // Add
     errorType=this->addElementByStamp(BufferElement);
@@ -698,7 +717,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
         }
 #endif
 
-        return 1;
+        return errorType;
     }
 
 

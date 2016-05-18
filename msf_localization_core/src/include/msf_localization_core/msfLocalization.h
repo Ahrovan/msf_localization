@@ -99,10 +99,12 @@
 #define _DEBUG_MSF_LOCALIZATION_CORE 0
 #define _DEBUG_MSF_LOCALIZATION_ALGORITHM 0
 
-#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 1
+#define _DEBUG_TIME_MSF_LOCALIZATION_CORE 0
+#define _DEBUG_TIME_MSF_LOCALIZATION_THREAD 1
 
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 
+#define _BUFFER_PROPAGATION_MULTI_THREADING 0
 
 class MsfLocalizationCore
 {
@@ -166,6 +168,9 @@ protected:
 public:
     virtual TimeStamp getTimeStamp();
 
+    // isAlive
+public:
+    virtual bool isAlive();
 
 
     // State Estimation
@@ -180,7 +185,9 @@ public:
 
     // Get previous state
 protected:
-    int getPreviousState(TimeStamp TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState);
+    int getPreviousState(TimeStamp TheTimeStamp,
+                         TimeStamp& ThePreviousTimeStamp,
+                         std::shared_ptr<StateEstimationCore>& ThePreviousState);
 
     // Fill inputs
 protected:
@@ -194,7 +201,8 @@ protected:
 protected:
     int predict(TimeStamp TheTimeStamp);
 
-    int predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState);
+    int predictNoAddBuffer(TimeStamp TheTimeStamp,
+                           std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
 private:
     int predictSemiCore(TimeStamp ThePredictedTimeStamp,
@@ -215,7 +223,9 @@ protected:
     int update(const TimeStamp TheTimeStamp);
 
 private:
-    int updateCore(const TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore> OldState, std::shared_ptr<StateEstimationCore>& UpdatedState);
+    int updateCore(const TimeStamp TheTimeStamp,
+                   const std::shared_ptr<StateEstimationCore> OldState,
+                   std::shared_ptr<StateEstimationCore>& UpdatedState);
 
 
 
@@ -238,10 +248,14 @@ protected:
 protected:
     std::thread* bufferManagerThread;
 protected:
-    // TODO finish
-    virtual int bufferManagerThreadFunction();
+    int bufferManagerThreadFunction();
+protected:
+    int bufferPropagationStep(TimeStamp time_stamp);
 
-
+#if _BUFFER_PROPAGATION_MULTI_THREADING
+protected:
+    int num_buffer_propagation_threads=0;
+#endif
 
 
 

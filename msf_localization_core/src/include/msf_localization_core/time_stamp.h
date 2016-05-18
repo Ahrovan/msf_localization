@@ -42,6 +42,16 @@ public:
     }
 
 public:
+    int toNSec() const
+    {
+        int nsec;
+
+        nsec=this->sec*1e9 + this->nsec;
+
+        return nsec;
+    }
+
+public:
     bool operator==(const TimeStamp t2) const
     {
         if(this->sec == t2.sec && this->nsec == t2.nsec)

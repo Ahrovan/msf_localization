@@ -100,6 +100,14 @@ public:
             return 20;
         }
 
+        // The Last Element is the one
+        if(timeStamp == this->TheElementsList.back().timeStamp)
+        {
+            itElement=this->TheElementsList.end();
+            ++itElement;
+            return 1;
+        }
+
 
         //typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator ListIterator=this->TheElementsList.begin();
 

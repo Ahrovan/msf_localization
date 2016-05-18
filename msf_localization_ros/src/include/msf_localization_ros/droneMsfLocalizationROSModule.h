@@ -156,6 +156,10 @@ protected:
 public:
     TimeStamp getTimeStamp();
 
+    // isAlive
+public:
+    bool isAlive();
+
 
     // Algorithm Core threads with ROS time
 protected:
@@ -163,8 +167,8 @@ protected:
 
 
     // Buffer thread manager
-protected:
-    int bufferManagerThreadFunction();
+//protected:
+    //int bufferManagerThreadFunction();
 
 
 };
