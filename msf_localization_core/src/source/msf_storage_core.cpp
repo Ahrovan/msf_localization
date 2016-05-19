@@ -458,14 +458,15 @@ int MsfStorageCore::getElement(const TimeStamp timeStamp, std::shared_ptr<StateE
     return error;
 }
 
-int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp)
+int MsfStorageCore::getNextTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& nextTimeStamp)
 {
 
     //std::cout<<"MsfStorageCore::getNextTimeStamp()"<<std::endl;
 
-    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
+    //StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
+    TimeStamp bufferElementTimeStamp;
 
-    nextTimeStamp=previousTimeStamp;
+    nextTimeStamp=currentTimeStamp;
 
     // Find
     TheRingBufferMutex.lock();
@@ -478,15 +479,15 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStam
         ++itElement)
     {
         // Get the element
-        int errorGetElement=this->getElementI(BufferElement, itElement);
+        int errorGetElement=this->getElementITimeStamp(bufferElementTimeStamp, itElement);
 
         if(errorGetElement)
             continue;
 
         // Check the time stamp
-        if(BufferElement.timeStamp>previousTimeStamp)
+        if(bufferElementTimeStamp>currentTimeStamp)
         {
-            nextTimeStamp=BufferElement.timeStamp;
+            nextTimeStamp=bufferElementTimeStamp;
 
             //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
 
@@ -508,8 +509,62 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStam
     //logFile<<"MsfStorageCore::getNextTimeStamp() ended"<<std::endl;
 
     // Check if success
-    if(nextTimeStamp==previousTimeStamp)
+    if(nextTimeStamp<=currentTimeStamp)
         return 1;
+
+    return 0;
+}
+
+int MsfStorageCore::getPreviousTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& previousTimeStamp)
+{
+    //StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
+    TimeStamp bufferElementTimeStamp;
+
+    previousTimeStamp=currentTimeStamp;
+
+    // Find
+    TheRingBufferMutex.lock();
+
+//std::cout<<"TS: ";
+
+    // Loop
+    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+        itElement!=this->getEnd();
+        ++itElement)
+    {
+        // Get the element
+        int errorGetElement=this->getElementITimeStamp(bufferElementTimeStamp, itElement);
+
+        if(errorGetElement)
+            continue;
+
+        // Check the time stamp
+        if(bufferElementTimeStamp<currentTimeStamp)
+        {
+            previousTimeStamp=bufferElementTimeStamp;
+
+            //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+
+            break;
+        }
+        else
+        {
+            //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+            continue;
+        }
+    }
+
+
+    //std::cout<<std::endl;
+
+
+    TheRingBufferMutex.unlock();
+
+
+    // Check if success
+    if(previousTimeStamp>=currentTimeStamp)
+        return -1;
+
 
     return 0;
 }

@@ -279,6 +279,17 @@ public:
         return 0;
     }
 
+public:
+    int getElementITimeStamp(TimeStamp& timeStamp, typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator itElement) const
+    {
+        if(itElement==this->TheElementsList.end())
+            return 1;
+
+        timeStamp=(*itElement).timeStamp;
+
+        return 0;
+    }
+
 
 
 public:

@@ -124,7 +124,11 @@ public:
 
     // Get next timestap (safe)
 public:
-    int getNextTimeStamp(const TimeStamp previousTimeStamp, TimeStamp& nextTimeStamp);
+    int getNextTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& nextTimeStamp);
+
+    // Get previous timestamp
+public:
+    int getPreviousTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& previousTimeStamp);
 
     // Get the previous input by stamp using the input core
 public:
