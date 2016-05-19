@@ -239,6 +239,11 @@ public:
     int removeUnnecessaryStateFromBuffer(TimeStamp time_stamp);
 
 
+    // Find next element in buffer and add to outdated list
+public:
+    int findNextElementInBufferAndAddOutdatedList(TimeStamp time_stamp);
+
+
 
 
     // Time what is required betwwwn two prediction steps

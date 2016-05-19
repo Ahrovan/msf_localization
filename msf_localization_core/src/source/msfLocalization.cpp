@@ -375,7 +375,10 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
         }
         else if(error_remove_unnecessary_state == 0)
         {
-            // Succed in removing element. Finish
+            // Succed in removing element.
+            // Find the next element in the buffer and mark it as outdated
+            findNextElementInBufferAndAddOutdatedList(time_stamp);
+            // Finish
             return 0;
         }
         else
@@ -481,41 +484,7 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
 
     // Find the next element in the buffer and mark it as outdated
     {
-        TimeStamp TheNewOutdatedTimeStamp;
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::bufferPropagationStep() Going to get next time stamp"<<std::endl;
-            this->log(logString.str());
-        }
-#endif
-
-        if(!this->TheMsfStorageCore->getNextTimeStamp(time_stamp, TheNewOutdatedTimeStamp))
-        {
-#if _DEBUG_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationCore::bufferPropagationStep() Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
-                this->log(logString.str());
-            }
-#endif
-
-            // Set the following element of the buffer as outdated
-            this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
-
-
-        }
-        else
-        {
-#if _DEBUG_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationCore::bufferPropagationStep() Nothing new to be added"<<std::endl;
-                this->log(logString.str());
-            }
-#endif
-        }
+        findNextElementInBufferAndAddOutdatedList(time_stamp);
     }
 
 
@@ -637,6 +606,48 @@ int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(TimeStamp time_stamp)
 
 
     return -100;
+}
+
+int MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList(TimeStamp time_stamp)
+{
+    TimeStamp TheNewOutdatedTimeStamp;
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList() Going to get next time stamp"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    if(!this->TheMsfStorageCore->getNextTimeStamp(time_stamp, TheNewOutdatedTimeStamp))
+    {
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList() Adding to be processed TS: sec="<<TheNewOutdatedTimeStamp.sec<<" s; nsec="<<TheNewOutdatedTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+        // Set the following element of the buffer as outdated
+        this->TheMsfStorageCore->addOutdatedElement(TheNewOutdatedTimeStamp);
+
+
+    }
+    else
+    {
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList() Nothing new to be added"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+    }
+
+    // End
+    return 0;
 }
 
 
