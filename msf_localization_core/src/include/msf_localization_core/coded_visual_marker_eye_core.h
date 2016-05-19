@@ -22,13 +22,14 @@
 // VM State
 #include "msf_localization_core/coded_visual_marker_eye_state_core.h"
 
-
+// World
 #include "msf_localization_core/global_parameters_state_core.h"
+
+// Robot core
+#include "msf_localization_core/robot_core.h"
 
 // Robot state
 #include "msf_localization_core/robot_state_core.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
-#include "msf_localization_core/imu_driven_robot_state_core.h"
 
 
 // Map

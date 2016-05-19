@@ -39,7 +39,7 @@ Eigen::Vector3d ImuDrivenRobotStateCore::getPositionRobotWrtWorld() const
     return this->position_robot_wrt_world_;
 }
 
-int ImuDrivenRobotStateCore::setPositionRobotWrtWorld(Eigen::Vector3d position_robot_wrt_world)
+int ImuDrivenRobotStateCore::setPositionRobotWrtWorld(const Eigen::Vector3d &position_robot_wrt_world)
 {
     this->position_robot_wrt_world_=position_robot_wrt_world;
     return 0;
@@ -50,7 +50,7 @@ Eigen::Vector3d ImuDrivenRobotStateCore::getLinearSpeedRobotWrtWorld() const
     return this->linear_speed_robot_wrt_world_;
 }
 
-int ImuDrivenRobotStateCore::setLinearSpeedRobotWrtWorld(Eigen::Vector3d linear_speed_robot_wrt_world)
+int ImuDrivenRobotStateCore::setLinearSpeedRobotWrtWorld(const Eigen::Vector3d& linear_speed_robot_wrt_world)
 {
     this->linear_speed_robot_wrt_world_=linear_speed_robot_wrt_world;
     return 0;
@@ -61,7 +61,7 @@ Eigen::Vector3d ImuDrivenRobotStateCore::getLinearAccelerationRobotWrtWorld() co
     return this->linear_acceleration_robot_wrt_world_;
 }
 
-int ImuDrivenRobotStateCore::setLinearAccelerationRobotWrtWorld(Eigen::Vector3d linear_acceleration_robot_wrt_world)
+int ImuDrivenRobotStateCore::setLinearAccelerationRobotWrtWorld(const Eigen::Vector3d& linear_acceleration_robot_wrt_world)
 {
     this->linear_acceleration_robot_wrt_world_=linear_acceleration_robot_wrt_world;
     return 0;
@@ -72,7 +72,7 @@ Eigen::Vector4d ImuDrivenRobotStateCore::getAttitudeRobotWrtWorld() const
     return this->attitude_robot_wrt_world_;
 }
 
-int ImuDrivenRobotStateCore::setAttitudeRobotWrtWorld(Eigen::Vector4d attitude_robot_wrt_world)
+int ImuDrivenRobotStateCore::setAttitudeRobotWrtWorld(const Eigen::Vector4d& attitude_robot_wrt_world)
 {
     this->attitude_robot_wrt_world_=attitude_robot_wrt_world;
     return 0;
@@ -83,7 +83,7 @@ Eigen::Vector3d ImuDrivenRobotStateCore::getAngularVelocityRobotWrtWorld() const
     return this->angular_velocity_robot_wrt_world_;
 }
 
-int ImuDrivenRobotStateCore::setAngularVelocityRobotWrtWorld(Eigen::Vector3d angular_velocity_robot_wrt_world)
+int ImuDrivenRobotStateCore::setAngularVelocityRobotWrtWorld(const Eigen::Vector3d& angular_velocity_robot_wrt_world)
 {
     this->angular_velocity_robot_wrt_world_=angular_velocity_robot_wrt_world;
     return 0;

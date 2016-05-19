@@ -87,7 +87,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
         std::istringstream stm(readingValue);
         Eigen::Vector3d position;
         stm>>position[0]>>position[1]>>position[2];
-        RobotInitStateCore->setPosition(position);
+        RobotInitStateCore->setPositionRobotWrtWorld(position);
     }
 
     // Linear Speed
@@ -96,7 +96,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
         std::istringstream stm(readingValue);
         Eigen::Vector3d lin_speed;
         stm>>lin_speed[0]>>lin_speed[1]>>lin_speed[2];
-        RobotInitStateCore->setLinearSpeed(lin_speed);
+        RobotInitStateCore->setLinearSpeedRobotWrtWorld(lin_speed);
     }
 
     // Linear Acceleration
@@ -105,7 +105,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
         std::istringstream stm(readingValue);
         Eigen::Vector3d lin_accel;
         stm>>lin_accel[0]>>lin_accel[1]>>lin_accel[2];
-        RobotInitStateCore->setLinearAcceleration(lin_accel);
+        RobotInitStateCore->setLinearAccelerationRobotWrtWorld(lin_accel);
     }
 
     // Attitude
@@ -114,7 +114,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
         std::istringstream stm(readingValue);
         Eigen::Vector4d attitude;
         stm>>attitude[0]>>attitude[1]>>attitude[2]>>attitude[3];
-        RobotInitStateCore->setAttitude(attitude);
+        RobotInitStateCore->setAttitudeRobotWrtWorld(attitude);
     }
 
     // Angular Velocity
@@ -123,7 +123,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
         std::istringstream stm(readingValue);
         Eigen::Vector3d ang_velocity;
         stm>>ang_velocity[0]>>ang_velocity[1]>>ang_velocity[2];
-        RobotInitStateCore->setAngularVelocity(ang_velocity);
+        RobotInitStateCore->setAngularVelocityRobotWrtWorld(ang_velocity);
     }
 
     // Angular Acceleration
@@ -132,7 +132,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
         std::istringstream stm(readingValue);
         Eigen::Vector3d auxVec;
         stm>>auxVec[0]>>auxVec[1]>>auxVec[2];
-        RobotInitStateCore->setAngularAcceleration(auxVec);
+        RobotInitStateCore->setAngularAccelerationRobotWrtWorld(auxVec);
     }
 
 
@@ -517,22 +517,22 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp,
 
 
     /// Position
-    predictedState->position=pastState->position+pastState->linear_speed*dt+0.5*pastState->linear_acceleration*dt*dt;
+    predictedState->position_robot_wrt_world_=pastState->position_robot_wrt_world_+pastState->linear_speed_robot_wrt_world_*dt+0.5*pastState->linear_acceleration_robot_wrt_world_*dt*dt;
 
 
     /// Linear Speed
-    predictedState->linear_speed=pastState->linear_speed+pastState->linear_acceleration*dt;
+    predictedState->linear_speed_robot_wrt_world_=pastState->linear_speed_robot_wrt_world_+pastState->linear_acceleration_robot_wrt_world_*dt;
 
 
     /// Linear Acceleration
-    predictedState->linear_acceleration=pastState->linear_acceleration;
+    predictedState->linear_acceleration_robot_wrt_world_=pastState->linear_acceleration_robot_wrt_world_;
 
 
     /// Attitude
 
     // deltaQw
 
-    Eigen::Vector3d w_mean_dt=(pastState->angular_velocity+0.5*pastState->angular_acceleration*dt)*dt;
+    Eigen::Vector3d w_mean_dt=(pastState->angular_velocity_robot_wrt_world_+0.5*pastState->angular_acceleration_robot_wrt_world_*dt)*dt;
     Eigen::Vector4d rotation_w_mean_dt_to_quat;
     rotation_w_mean_dt_to_quat=Quaternion::rotationVectorToQuaternion(w_mean_dt);
     rotation_w_mean_dt_to_quat=rotation_w_mean_dt_to_quat/rotation_w_mean_dt_to_quat.norm();
@@ -543,8 +543,8 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp,
 
     // deltaQalpha
     Eigen::Vector3d alphaContribution;
-    alphaContribution=pastState->angular_velocity;
-    alphaContribution=alphaContribution.cross(pastState->angular_velocity+pastState->angular_acceleration*dt);
+    alphaContribution=pastState->angular_velocity_robot_wrt_world_;
+    alphaContribution=alphaContribution.cross(pastState->angular_velocity_robot_wrt_world_+pastState->angular_acceleration_robot_wrt_world_*dt);
 
     Eigen::Vector4d deltaQalpha;
     deltaQalpha[0]=0;
@@ -561,7 +561,7 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp,
 
     //std::cout<<"quat_perturbation="<<quat_perturbation<<std::endl;
 
-    Eigen::Vector4d predictedAttitude=Quaternion::cross(quat_perturbation, pastState->attitude);
+    Eigen::Vector4d predictedAttitude=Quaternion::cross(quat_perturbation, pastState->attitude_robot_wrt_world_);
 
 
     // Unit quaternion -> Very needed!
@@ -577,18 +577,18 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp,
 //        std::cout<<"FreeModelRobotCore::predictState() quaternion!!"<<std::endl;
 //    }
 //    else
-        predictedState->attitude=predictedAttitude/predictedAttitude.norm();
+        predictedState->attitude_robot_wrt_world_=predictedAttitude/predictedAttitude.norm();
 
 
 
     /// Angular Velocity
-    predictedState->angular_velocity=pastState->angular_velocity+pastState->angular_acceleration*dt;
+    predictedState->angular_velocity_robot_wrt_world_=pastState->angular_velocity_robot_wrt_world_+pastState->angular_acceleration_robot_wrt_world_*dt;
 
 //std::cout<<"predictedState->angular_velocity="<<predictedState->angular_velocity<<std::endl;
 
 
     /// Angular Acceleration
-    predictedState->angular_acceleration=pastState->angular_acceleration;
+    predictedState->angular_acceleration_robot_wrt_world_=pastState->angular_acceleration_robot_wrt_world_;
 //std::cout<<"predictedState->angular_acceleration="<<predictedState->angular_acceleration.transpose()<<std::endl;
 
 
@@ -828,24 +828,24 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
 
         // Auxiliar values
-        Eigen::Vector3d w_mean_dt=(pastState->angular_velocity+0.5*pastState->angular_acceleration*dt)*dt;
+        Eigen::Vector3d w_mean_dt=(pastState->angular_velocity_robot_wrt_world_+0.5*pastState->angular_acceleration_robot_wrt_world_*dt)*dt;
         Eigen::Vector4d quat_w_mean_dt=Quaternion::rotationVectorToQuaternion(w_mean_dt);
         Eigen::Vector4d quat_for_second_order_correction;
         quat_for_second_order_correction.setZero();
-        quat_for_second_order_correction.block<3,1>(1,0)=pastState->angular_velocity.cross(predictedState->angular_velocity);
+        quat_for_second_order_correction.block<3,1>(1,0)=pastState->angular_velocity_robot_wrt_world_.cross(predictedState->angular_velocity_robot_wrt_world_);
 
         // Auxiliar Matrixes
-        Eigen::Matrix4d quat_mat_plus_quat_ref_k1=Quaternion::quatMatPlus(predictedState->attitude);
+        Eigen::Matrix4d quat_mat_plus_quat_ref_k1=Quaternion::quatMatPlus(predictedState->attitude_robot_wrt_world_);
         Eigen::Matrix4d quat_mat_plus_quat_ref_k1_inv=quat_mat_plus_quat_ref_k1.inverse();
         Eigen::MatrixXd mat_delta_q_delta_theta(4, 3);
         mat_delta_q_delta_theta.setZero();
         mat_delta_q_delta_theta(1,0)=1;
         mat_delta_q_delta_theta(2,1)=1;
         mat_delta_q_delta_theta(3,2)=1;
-        Eigen::Matrix4d quat_mat_plus_quat_ref_k=Quaternion::quatMatPlus(pastState->attitude);
-        Eigen::Matrix4d quat_mat_minus_quat_ref_k=Quaternion::quatMatMinus(pastState->attitude);
+        Eigen::Matrix4d quat_mat_plus_quat_ref_k=Quaternion::quatMatPlus(pastState->attitude_robot_wrt_world_);
+        Eigen::Matrix4d quat_mat_minus_quat_ref_k=Quaternion::quatMatMinus(pastState->attitude_robot_wrt_world_);
         Eigen::MatrixXd mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
-        Eigen::Matrix3d skew_mat_alpha_dt=Quaternion::skewSymMat(pastState->angular_acceleration*dt);
+        Eigen::Matrix3d skew_mat_alpha_dt=Quaternion::skewSymMat(pastState->angular_acceleration_robot_wrt_world_*dt);
         Eigen::MatrixXd mat_aux_j2(4,3);
         mat_aux_j2.setZero();
         mat_aux_j2.block<3,3>(1,0)=-skew_mat_alpha_dt;

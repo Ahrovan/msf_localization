@@ -83,6 +83,8 @@
 
 //// State
 #include "msf_localization_core/state_core.h"
+// TODO REMOVE
+#include "msf_localization_core/map_element_state_core.h"
 
 
 //// Measurement

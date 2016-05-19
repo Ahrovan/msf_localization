@@ -22,10 +22,11 @@
 #include "msf_localization_core/absolute_pose_sensor_state_core.h"
 
 
+// Robot Core
+#include "msf_localization_core/robot_core.h"
+
 // Robot state
 #include "msf_localization_core/robot_state_core.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
-#include "msf_localization_core/imu_driven_robot_state_core.h"
 
 
 // Map

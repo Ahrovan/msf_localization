@@ -29,55 +29,55 @@ protected:
 
 protected:
 public:
-    Eigen::Vector3d position;
+    Eigen::Vector3d position_robot_wrt_world_;
 public:
-    Eigen::Vector3d getPosition() const;
-    int setPosition(Eigen::Vector3d position);
+    Eigen::Vector3d getPositionRobotWrtWorld() const;
+    int setPositionRobotWrtWorld(const Eigen::Vector3d& position);
 
 
 
 protected:
 public:
-    Eigen::Vector3d linear_speed;
+    Eigen::Vector3d linear_speed_robot_wrt_world_;
 public:
-    Eigen::Vector3d getLinearSpeed() const;
-    int setLinearSpeed(Eigen::Vector3d linear_speed);
+    Eigen::Vector3d getLinearSpeedRobotWrtWorld() const;
+    int setLinearSpeedRobotWrtWorld(const Eigen::Vector3d &linear_speed);
 
 
 
 protected:
 public:
-    Eigen::Vector3d linear_acceleration;
+    Eigen::Vector3d linear_acceleration_robot_wrt_world_;
 public:
-    Eigen::Vector3d getLinearAcceleration() const;
-    int setLinearAcceleration(Eigen::Vector3d linear_acceleration);
+    Eigen::Vector3d getLinearAccelerationRobotWrtWorld() const;
+    int setLinearAccelerationRobotWrtWorld(const Eigen::Vector3d& linear_acceleration);
 
 
 
 protected:
 public:
-    Eigen::Vector4d attitude;
+    Eigen::Vector4d attitude_robot_wrt_world_;
 public:
-    Eigen::Vector4d getAttitude() const;
-    int setAttitude(Eigen::Vector4d attitude);
+    Eigen::Vector4d getAttitudeRobotWrtWorld() const;
+    int setAttitudeRobotWrtWorld(const Eigen::Vector4d &attitude);
 
 
 
 protected:
 public:
-    Eigen::Vector3d angular_velocity;
+    Eigen::Vector3d angular_velocity_robot_wrt_world_;
 public:
-    Eigen::Vector3d getAngularVelocity() const;
-    int setAngularVelocity(Eigen::Vector3d angular_velocity);
+    Eigen::Vector3d getAngularVelocityRobotWrtWorld() const;
+    int setAngularVelocityRobotWrtWorld(const Eigen::Vector3d& angular_velocity);
 
 
 
 protected:
 public:
-    Eigen::Vector3d angular_acceleration;
+    Eigen::Vector3d angular_acceleration_robot_wrt_world_;
 public:
-    Eigen::Vector3d getAngularAcceleration() const;
-    int setAngularAcceleration(Eigen::Vector3d angular_acceleration);
+    Eigen::Vector3d getAngularAccelerationRobotWrtWorld() const;
+    int setAngularAccelerationRobotWrtWorld(const Eigen::Vector3d &angular_acceleration);
 
 
 

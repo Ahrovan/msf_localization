@@ -78,12 +78,12 @@ int RosFreeModelRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
 
     std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::static_pointer_cast<FreeModelRobotStateCore>(robot_state_core);
 
-    Eigen::Vector3d robotPosition=TheRobotStateCore->getPosition();
-    Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitude();
-    Eigen::Vector3d robotLinearSpeed=TheRobotStateCore->getLinearSpeed();
-    Eigen::Vector3d robotLinearAcceleration=TheRobotStateCore->getLinearAcceleration();
-    Eigen::Vector3d robotAngularVelocity=TheRobotStateCore->getAngularVelocity();
-    Eigen::Vector3d robotAngularAcceleration=TheRobotStateCore->getAngularAcceleration();
+    Eigen::Vector3d robotPosition=TheRobotStateCore->getPositionRobotWrtWorld();
+    Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitudeRobotWrtWorld();
+    Eigen::Vector3d robotLinearSpeed=TheRobotStateCore->getLinearSpeedRobotWrtWorld();
+    Eigen::Vector3d robotLinearAcceleration=TheRobotStateCore->getLinearAccelerationRobotWrtWorld();
+    Eigen::Vector3d robotAngularVelocity=TheRobotStateCore->getAngularVelocityRobotWrtWorld();
+    Eigen::Vector3d robotAngularAcceleration=TheRobotStateCore->getAngularAccelerationRobotWrtWorld();
 
 
 
@@ -220,8 +220,8 @@ int RosFreeModelRobotInterface::publishTfPoseRobotWrtWorld(TimeStamp time_stamp,
 {
     std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::dynamic_pointer_cast<FreeModelRobotStateCore>(robot_state_core);
 
-    Eigen::Vector3d robotPosition=TheRobotStateCore->getPosition();
-    Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitude();
+    Eigen::Vector3d robotPosition=TheRobotStateCore->getPositionRobotWrtWorld();
+    Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitudeRobotWrtWorld();
 
     tf::Quaternion tf_rot(robotAttitude[1], robotAttitude[2], robotAttitude[3], robotAttitude[0]);
     tf::Vector3 tf_tran(robotPosition[0], robotPosition[1], robotPosition[2]);

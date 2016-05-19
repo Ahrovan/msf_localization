@@ -33,69 +33,69 @@ int FreeModelRobotStateCore::init()
 }
 
 
-Eigen::Vector3d FreeModelRobotStateCore::getPosition() const
+Eigen::Vector3d FreeModelRobotStateCore::getPositionRobotWrtWorld() const
 {
-    return this->position;
+    return this->position_robot_wrt_world_;
 }
 
-int FreeModelRobotStateCore::setPosition(Eigen::Vector3d position)
+int FreeModelRobotStateCore::setPositionRobotWrtWorld(const Eigen::Vector3d &position)
 {
-    this->position=position;
+    this->position_robot_wrt_world_=position;
     return 0;
 }
 
-Eigen::Vector3d FreeModelRobotStateCore::getLinearSpeed() const
+Eigen::Vector3d FreeModelRobotStateCore::getLinearSpeedRobotWrtWorld() const
 {
-    return this->linear_speed;
+    return this->linear_speed_robot_wrt_world_;
 }
 
-int FreeModelRobotStateCore::setLinearSpeed(Eigen::Vector3d linear_speed)
+int FreeModelRobotStateCore::setLinearSpeedRobotWrtWorld(const Eigen::Vector3d& linear_speed)
 {
-    this->linear_speed=linear_speed;
+    this->linear_speed_robot_wrt_world_=linear_speed;
     return 0;
 }
 
-Eigen::Vector3d FreeModelRobotStateCore::getLinearAcceleration() const
+Eigen::Vector3d FreeModelRobotStateCore::getLinearAccelerationRobotWrtWorld() const
 {
-    return this->linear_acceleration;
+    return this->linear_acceleration_robot_wrt_world_;
 }
 
-int FreeModelRobotStateCore::setLinearAcceleration(Eigen::Vector3d linear_acceleration)
+int FreeModelRobotStateCore::setLinearAccelerationRobotWrtWorld(const Eigen::Vector3d &linear_acceleration)
 {
-    this->linear_acceleration=linear_acceleration;
+    this->linear_acceleration_robot_wrt_world_=linear_acceleration;
     return 0;
 }
 
-Eigen::Vector4d FreeModelRobotStateCore::getAttitude() const
+Eigen::Vector4d FreeModelRobotStateCore::getAttitudeRobotWrtWorld() const
 {
-    return this->attitude;
+    return this->attitude_robot_wrt_world_;
 }
 
-int FreeModelRobotStateCore::setAttitude(Eigen::Vector4d attitude)
+int FreeModelRobotStateCore::setAttitudeRobotWrtWorld(const Eigen::Vector4d& attitude)
 {
-    this->attitude=attitude;
+    this->attitude_robot_wrt_world_=attitude;
     return 0;
 }
 
-Eigen::Vector3d FreeModelRobotStateCore::getAngularVelocity() const
+Eigen::Vector3d FreeModelRobotStateCore::getAngularVelocityRobotWrtWorld() const
 {
-    return this->angular_velocity;
+    return this->angular_velocity_robot_wrt_world_;
 }
 
-int FreeModelRobotStateCore::setAngularVelocity(Eigen::Vector3d angular_velocity)
+int FreeModelRobotStateCore::setAngularVelocityRobotWrtWorld(const Eigen::Vector3d &angular_velocity)
 {
-    this->angular_velocity=angular_velocity;
+    this->angular_velocity_robot_wrt_world_=angular_velocity;
     return 0;
 }
 
-Eigen::Vector3d FreeModelRobotStateCore::getAngularAcceleration() const
+Eigen::Vector3d FreeModelRobotStateCore::getAngularAccelerationRobotWrtWorld() const
 {
-    return this->angular_acceleration;
+    return this->angular_acceleration_robot_wrt_world_;
 }
 
-int FreeModelRobotStateCore::setAngularAcceleration(Eigen::Vector3d angular_acceleration)
+int FreeModelRobotStateCore::setAngularAccelerationRobotWrtWorld(const Eigen::Vector3d& angular_acceleration)
 {
-    this->angular_acceleration=angular_acceleration;
+    this->angular_acceleration_robot_wrt_world_=angular_acceleration;
     return 0;
 }
 
@@ -104,9 +104,9 @@ int FreeModelRobotStateCore::setAngularAcceleration(Eigen::Vector3d angular_acce
 int FreeModelRobotStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
 
-    position+=increment_error_state.block<3,1>(0,0);
-    linear_speed+=increment_error_state.block<3,1>(3,0);
-    linear_acceleration+=increment_error_state.block<3,1>(6,0);
+    position_robot_wrt_world_+=increment_error_state.block<3,1>(0,0);
+    linear_speed_robot_wrt_world_+=increment_error_state.block<3,1>(3,0);
+    linear_acceleration_robot_wrt_world_+=increment_error_state.block<3,1>(6,0);
 
 
     Eigen::Vector4d DeltaQuat, DeltaQuatAux;
@@ -116,14 +116,14 @@ int FreeModelRobotStateCore::updateStateFromIncrementErrorState(const Eigen::Vec
     normDeltaQuatAux=DeltaQuatAux.norm();
     DeltaQuat=DeltaQuatAux/normDeltaQuatAux;
 
-    Eigen::Vector4d attitudeAux=Quaternion::cross(attitude, DeltaQuat);
+    Eigen::Vector4d attitudeAux=Quaternion::cross(attitude_robot_wrt_world_, DeltaQuat);
 
 
-    attitude=attitudeAux;
+    attitude_robot_wrt_world_=attitudeAux;
 
 
-    angular_velocity+=increment_error_state.block<3,1>(12,0);
-    angular_acceleration+=increment_error_state.block<3,1>(15,0);
+    angular_velocity_robot_wrt_world_+=increment_error_state.block<3,1>(12,0);
+    angular_acceleration_robot_wrt_world_+=increment_error_state.block<3,1>(15,0);
 
 
     return 0;

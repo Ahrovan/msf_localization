@@ -20,13 +20,13 @@
 // IMU State
 #include "msf_localization_core/imu_sensor_state_core.h"
 
+// Robot Core
+#include "msf_localization_core/robot_core.h"
 
 // Robot state
 #include "msf_localization_core/robot_state_core.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
 
 // Global parameters
-#include "msf_localization_core/global_parameters_core.h"
 #include "msf_localization_core/global_parameters_state_core.h"
 
 

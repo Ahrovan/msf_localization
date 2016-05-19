@@ -10,8 +10,7 @@ MsfLocalizationCore::MsfLocalizationCore()
     stateEstimationEnabled=false;
 
     // Create Robot Core
-    // TODO FIX! Must be done when reading the config file!
-    TheRobotCore=std::make_shared<FreeModelRobotCore>();
+    // No. Created when reading config files
 
     // Create Global Parameters Core
     TheGlobalParametersCore=std::make_shared<GlobalParametersCore>();
@@ -367,7 +366,6 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
 #endif
 
     // Check if the current element needs to be updated or if it can be deleted
-    if(1)
     {
         // Get current element (k)
         std::shared_ptr<StateEstimationCore> current_element;
@@ -391,7 +389,6 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
         {
             //std::cout<<"increment: sec="<<(time_stamp_following_element-time_stamp_previous_element).sec<<" s; nsec="<<(time_stamp_following_element-time_stamp_previous_element).nsec<<" ns"<<std::endl;
 
-
             // Checks if has input commands or measurements
             if( !current_element->hasInputCommand() && !current_element->hasMeasurement() )
             {
@@ -405,7 +402,7 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
                     int error_purge_element=this->TheMsfStorageCore->purgeElementRingBuffer(time_stamp);
                     if(error_purge_element)
                     {
-                        std::cout<<"!!!!! ERROR PURGE ELEMENT !!!!!!"<<std::endl;
+                        //std::cout<<"!!!!! ERROR PURGE ELEMENT !!!!!!"<<std::endl;
                         return error_purge_element;
                     }
                     return 0;

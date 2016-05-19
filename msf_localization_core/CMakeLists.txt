@@ -75,6 +75,13 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/input_state_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/imu_input_state_core.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/absolute_pose_input_command_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/absolute_pose_input_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/absolute_pose_input_state_core.cpp
+
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/absolute_pose_driven_robot_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/absolute_pose_driven_robot_state_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/global_parameters_core.cpp
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/global_parameters_state_core.cpp
@@ -134,6 +141,13 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/input_command_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/imu_input_command_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/absolute_pose_input_command_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/absolute_pose_input_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/absolute_pose_input_state_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/absolute_pose_driven_robot_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/absolute_pose_driven_robot_state_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/state_core.h
 

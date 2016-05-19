@@ -2,6 +2,15 @@
 #include "msf_localization_core/msf_storage_core.h"
 
 
+// Required for display!
+#include "msf_localization_core/robot_core.h"
+#include "msf_localization_core/robot_state_core.h"
+#include "msf_localization_core/imu_sensor_core.h"
+#include "msf_localization_core/imu_sensor_measurement_core.h"
+#include "msf_localization_core/imu_input_core.h"
+#include "msf_localization_core/imu_input_command_core.h"
+
+
 //#define _DEBUG_DISPLAY
 
 
@@ -816,6 +825,9 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
         logString<<"\t\t";
         logString<<"Robot ";
 
+        // Robot State
+        std::shared_ptr<RobotStateCore> current_robot_state=std::dynamic_pointer_cast<RobotStateCore>(TheStateEstimationCore->TheRobotStateCore);
+
         switch(std::dynamic_pointer_cast<RobotCore>(TheStateEstimationCore->TheRobotStateCore->getMsfElementCoreSharedPtr())->getRobotCoreType())
         {
             case RobotCoreTypes::undefined:
@@ -825,15 +837,12 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, 
 
             case RobotCoreTypes::free_model:
             {
-                //std::shared_ptr<const FreeModelRobotCore> FreeModelRobotPtr=std::dynamic_pointer_cast< const FreeModelRobotCore >(TheStateEstimationCore->TheRobotStateCore->getMsfElementCoreSharedPtr());
-                std::shared_ptr<FreeModelRobotStateCore> FreeModelRobotStatePtr=std::static_pointer_cast< FreeModelRobotStateCore >(TheStateEstimationCore->TheRobotStateCore);
-
                 // State
-                logString<<"pos=["<<FreeModelRobotStatePtr->getPosition().transpose()<<"]' ";
-                logString<<"lin_speed=["<<FreeModelRobotStatePtr->getLinearSpeed().transpose()<<"]' ";
-                logString<<"lin_accel=["<<FreeModelRobotStatePtr->getLinearAcceleration().transpose()<<"]' ";
-                logString<<"attit=["<<FreeModelRobotStatePtr->getAttitude().transpose()<<"]' ";
-                logString<<"ang_vel=["<<FreeModelRobotStatePtr->getAngularVelocity().transpose()<<"]' ";
+                logString<<"pos=["<<current_robot_state->getPositionRobotWrtWorld().transpose()<<"]' ";
+                logString<<"lin_speed=["<<current_robot_state->getLinearSpeedRobotWrtWorld().transpose()<<"]' ";
+                logString<<"lin_accel=["<<current_robot_state->getLinearAccelerationRobotWrtWorld().transpose()<<"]' ";
+                logString<<"attit=["<<current_robot_state->getAttitudeRobotWrtWorld().transpose()<<"]' ";
+                logString<<"ang_vel=["<<current_robot_state->getAngularVelocityRobotWrtWorld().transpose()<<"]' ";
 
 
                 // Jacobian

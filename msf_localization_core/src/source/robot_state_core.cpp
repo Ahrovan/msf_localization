@@ -42,15 +42,68 @@ RobotStateCoreTypes RobotStateCore::getRobotStateType()
     return robot_state_core_type_;
 }
 
-/*
-int RobotStateCore::setTheRobotCore(std::weak_ptr<const RobotCore> TheRobotCorePtr)
+Eigen::Vector3d RobotStateCore::getPositionRobotWrtWorld() const
 {
-    this->TheRobotCorePtr=TheRobotCorePtr;
-    return 0;
+    std::cout<<"Error in RobotStateCore::getXXRobotWrtWorld()"<<std::endl;
+    return Eigen::Vector3d();
 }
-std::shared_ptr<const RobotCore> RobotStateCore::getTheRobotCore() const
+
+int RobotStateCore::setPositionRobotWrtWorld(const Eigen::Vector3d& position)
 {
-    std::shared_ptr<const RobotCore> TheRobotCoreSharedPtr=this->TheRobotCorePtr.lock();
-    return TheRobotCoreSharedPtr;
+    return -1;
 }
-*/
+
+Eigen::Vector3d RobotStateCore::getLinearSpeedRobotWrtWorld() const
+{
+    std::cout<<"Error in RobotStateCore::getXXRobotWrtWorld()"<<std::endl;
+    return Eigen::Vector3d();
+}
+
+int RobotStateCore::setLinearSpeedRobotWrtWorld(const Eigen::Vector3d& linear_speed)
+{
+    return -1;
+}
+
+Eigen::Vector3d RobotStateCore::getLinearAccelerationRobotWrtWorld() const
+{
+    std::cout<<"Error in RobotStateCore::getXXRobotWrtWorld()"<<std::endl;
+    return Eigen::Vector3d();
+}
+
+int RobotStateCore::setLinearAccelerationRobotWrtWorld(const Eigen::Vector3d& linear_acceleration)
+{
+    return -1;
+}
+
+Eigen::Vector4d RobotStateCore::getAttitudeRobotWrtWorld() const
+{
+    std::cout<<"Error in RobotStateCore::getXXRobotWrtWorld()"<<std::endl;
+    return Eigen::Vector4d();
+}
+
+int RobotStateCore::setAttitudeRobotWrtWorld(const Eigen::Vector4d& attitude)
+{
+    return -1;
+}
+
+Eigen::Vector3d RobotStateCore::getAngularVelocityRobotWrtWorld() const
+{
+    std::cout<<"Error in RobotStateCore::getXXRobotWrtWorld()"<<std::endl;
+    return Eigen::Vector3d();
+}
+
+int RobotStateCore::setAngularVelocityRobotWrtWorld(const Eigen::Vector3d& angular_velocity)
+{
+    return -1;
+}
+
+Eigen::Vector3d RobotStateCore::getAngularAccelerationRobotWrtWorld() const
+{
+    std::cout<<"Error in RobotStateCore::getXXRobotWrtWorld()"<<std::endl;
+    return Eigen::Vector3d();
+}
+
+int RobotStateCore::setAngularAccelerationRobotWrtWorld(const Eigen::Vector3d& angular_acceleration)
+{
+    return -1;
+}

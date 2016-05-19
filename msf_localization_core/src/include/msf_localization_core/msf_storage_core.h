@@ -49,44 +49,45 @@
 
 /// Estimator Cores
 // Robot
-#include "msf_localization_core/free_model_robot_core.h"
+//#include "msf_localization_core/free_model_robot_core.h"
 // Global Parameters
-#include "msf_localization_core/global_parameters_core.h"
+//#include "msf_localization_core/global_parameters_core.h"
 // Sensor
-#include "msf_localization_core/imu_sensor_core.h"
+//#include "msf_localization_core/imu_sensor_core.h"
 // Input
-#include "msf_localization_core/input_core.h"
-#include "msf_localization_core/imu_input_core.h"
+//#include "msf_localization_core/input_core.h"
+//#include "msf_localization_core/imu_input_core.h"
 // Map
-#include "msf_localization_core/map_element_core.h"
+//#include "msf_localization_core/map_element_core.h"
 
 
 /// State
+#include "msf_localization_core/state_core.h"
 // Global Parameters
 
 // Robot
-#include "msf_localization_core/robot_state_core.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
+//#include "msf_localization_core/robot_state_core.h"
+//#include "msf_localization_core/free_model_robot_state_core.h"
 
 // Sensor
-#include "msf_localization_core/sensor_state_core.h"
-#include "msf_localization_core/imu_sensor_state_core.h"
+//#include "msf_localization_core/sensor_state_core.h"
+//#include "msf_localization_core/imu_sensor_state_core.h"
 
 // Input
 
 // Map
-#include "msf_localization_core/map_element_state_core.h"
+//#include "msf_localization_core/map_element_state_core.h"
 
 
 /// Measurement
 #include "msf_localization_core/sensor_measurement_core.h"
 // Imu
-#include "msf_localization_core/imu_sensor_measurement_core.h"
+//#include "msf_localization_core/imu_sensor_measurement_core.h"
 
 
 /// Input Command
 #include "msf_localization_core/input_command_core.h"
-#include "msf_localization_core/imu_input_command_core.h"
+//#include "msf_localization_core/imu_input_command_core.h"
 
 
 

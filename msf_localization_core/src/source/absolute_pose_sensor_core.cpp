@@ -1034,39 +1034,9 @@ int AbsolutePoseSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeS
     Eigen::Vector4d attitude_sensor_wrt_map_element;
 
 
-    // Switch depending on robot used
-    switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
-    {
-        // Free model robot
-        case RobotCoreTypes::free_model:
-        {
-            // Cast
-            std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
-
-            // Set Values of variables
-            position_robot_wrt_world=currentFreeModelRobotState->getPosition();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitude();
-
-            break;
-        }
-
-        // Imu Driven robot
-        case RobotCoreTypes::imu_driven:
-        {
-            // Cast
-            std::shared_ptr<ImuDrivenRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(currentRobotState);
-
-            // Robot
-            position_robot_wrt_world=currentFreeModelRobotState->getPositionRobotWrtWorld();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitudeRobotWrtWorld();
-
-            break;
-        }
-
-        // Default
-        default:
-            return -1000;
-    }
+    // Robot State
+    position_robot_wrt_world=currentRobotState->getPositionRobotWrtWorld();
+    attitude_robot_wrt_world=currentRobotState->getAttitudeRobotWrtWorld();
 
 
     // Sensor
@@ -1336,39 +1306,9 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
     Eigen::Vector4d attitude_map_element_wrt_sensor;
 
 
-    // Switch depending on robot used
-    switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
-    {
-        // Free model robot
-        case RobotCoreTypes::free_model:
-        {
-            // Cast
-            std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
-
-            // Set Values of variables
-            position_robot_wrt_world=currentFreeModelRobotState->getPosition();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitude();
-
-            break;
-        }
-
-        // Imu Driven robot
-        case RobotCoreTypes::imu_driven:
-        {
-            // Cast
-            std::shared_ptr<ImuDrivenRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(currentRobotState);
-
-            // Robot
-            position_robot_wrt_world=currentFreeModelRobotState->getPositionRobotWrtWorld();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitudeRobotWrtWorld();
-
-            break;
-        }
-
-        // Default
-        default:
-            return -1000;
-    }
+    // Robot State
+    position_robot_wrt_world=currentRobotState->getPositionRobotWrtWorld();
+    attitude_robot_wrt_world=currentRobotState->getAttitudeRobotWrtWorld();
 
 
     // Sensor
@@ -2187,40 +2127,8 @@ int AbsolutePoseSensorCore::mapMeasurementSpecific(const TimeStamp &theTimeStamp
 
 
     // Robot
-
-    // Switch depending on robot used
-    switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
-    {
-        // Free model robot
-        case RobotCoreTypes::free_model:
-        {
-            // Cast
-            std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
-
-            // Set Values of variables
-            position_robot_wrt_world=currentFreeModelRobotState->getPosition();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitude();
-
-            break;
-        }
-
-        // Imu Driven robot
-        case RobotCoreTypes::imu_driven:
-        {
-            // Cast
-            std::shared_ptr<ImuDrivenRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(currentRobotState);
-
-            // Robot
-            position_robot_wrt_world=currentFreeModelRobotState->getPositionRobotWrtWorld();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitudeRobotWrtWorld();
-
-            break;
-        }
-
-        // Default
-        default:
-            return -1000;
-    }
+    position_robot_wrt_world=currentRobotState->getPositionRobotWrtWorld();
+    attitude_robot_wrt_world=currentRobotState->getAttitudeRobotWrtWorld();
 
 
     // Sensor
@@ -2459,41 +2367,8 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &the
 
 
     // Robot
-
-    // Switch depending on robot used
-    switch(std::dynamic_pointer_cast<RobotCore>(currentRobotState->getMsfElementCoreSharedPtr())->getRobotCoreType())
-    {
-        // Free model robot
-        case RobotCoreTypes::free_model:
-        {
-            // Cast
-            std::shared_ptr<FreeModelRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(currentRobotState);
-
-            // Set Values of variables
-            position_robot_wrt_world=currentFreeModelRobotState->getPosition();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitude();
-
-            break;
-        }
-
-        // Imu Driven robot
-        case RobotCoreTypes::imu_driven:
-        {
-            // Cast
-            std::shared_ptr<ImuDrivenRobotStateCore> currentFreeModelRobotState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(currentRobotState);
-
-            // Robot
-            position_robot_wrt_world=currentFreeModelRobotState->getPositionRobotWrtWorld();
-            attitude_robot_wrt_world=currentFreeModelRobotState->getAttitudeRobotWrtWorld();
-
-            break;
-        }
-
-        // Default
-        default:
-            return -1000;
-    }
-
+    position_robot_wrt_world=currentRobotState->getPositionRobotWrtWorld();
+    attitude_robot_wrt_world=currentRobotState->getAttitudeRobotWrtWorld();
 
     // Sensor
     // Cast
