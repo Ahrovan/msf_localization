@@ -110,15 +110,14 @@ public:
 
 
 
-//    //// Debug log
-//protected:
-//    std::string logPath;
-//    std::ofstream logFile;
-//    // mutex to protect the log file
-//protected:
-//    std::mutex TheLogFileMutex;
-//public:
-//    int log(std::string logString);
+    ///// Covariances getters
+
+    // Covariance Sensor Error Measurements: Rn
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceMeasurement();
+
+
+
 
 };
 

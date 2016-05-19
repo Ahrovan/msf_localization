@@ -547,18 +547,20 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
     }
 
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::bufferManagerThreadFunction() loop end"<<std::endl;
-            this->log(logString.str());
-        }
-#endif
-
 #if _BUFFER_PROPAGATION_MULTI_THREADING
     num_buffer_propagation_threads--;
 #endif
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::bufferManagerThreadFunction() loop end"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
+    // End
     return 0;
 }
 
@@ -1449,85 +1451,31 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
     /////// Covariances
-#if _DEBUG_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() covariances TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    TimeStamp beginTimePredictCoreCov=getTimeStamp();
-#endif
-
-
-    // Dimension
-    //MatrixPoint WorkingInitPoint;
-
-
-    // Delta Time Stamp
-    TimeStamp DeltaTime=ThePredictedTimeStamp-ThePreviousTimeStamp;
-
-
-    // Create and Resize the covariance Matrix
-//    int dimensionOfErrorState=ThePredictedState->getDimensionErrorState();
-    if(!ThePredictedState->covarianceMatrix)
-        ThePredictedState->covarianceMatrix=std::make_shared<Eigen::MatrixXd>();
-//    ThePredictedState->covarianceMatrix->resize(dimensionOfErrorState,dimensionOfErrorState);
-//    ThePredictedState->covarianceMatrix->setZero();
-
-
-
-    // Aux Vars
-    // TODO FIX!
-    //Eigen::SparseMatrix<double> jacobianRobotErrorState=ThePredictedState->TheRobotStateCore->getJacobianErrorStateRobot();
-
-
-
-
-
-
-
-    /// Cov Total Robot
 
     {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() covariance robot TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<"MsfLocalizationCore::predictCore() covariances TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
             this->log(logString.str());
         }
 #endif
 
-
-        /*
-        /// Dimensions total robot error state
-
-        // Dimensions
-        int dimension_world_error_state=ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        int dimension_robot_error_state=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        int dimension_inputs_error_state=0;
-        for(std::list< std::shared_ptr<StateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
-            itInputState!=ThePredictedState->TheListInputStateCore.end();
-            ++itInputState)
-        {
-            dimension_inputs_error_state+=(*itInputState)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        }
-        int dimension_total_robot_error_state=dimension_world_error_state+dimension_robot_error_state+dimension_inputs_error_state;
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictCoreCov=getTimeStamp();
+#endif
 
 
-        // Size total robot error state
-        int num_robot_error_states=0;
-        {
-            // World
-            num_robot_error_states++;
-            // Robot
-            num_robot_error_states++;
-            // Inputs
-            num_robot_error_states+=ThePredictedState->getNumberInputStates();
-        }
-        */
+
+
+        // Delta Time Stamp
+        TimeStamp DeltaTime=ThePredictedTimeStamp-ThePreviousTimeStamp;
+
+
+        // Create and Resize the covariance Matrix
+        if(!ThePredictedState->covarianceMatrix)
+            ThePredictedState->covarianceMatrix=std::make_shared<Eigen::MatrixXd>();
+
 
 
         // Num Error State blocks
@@ -1592,7 +1540,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         ///// Jacobians
 
         /// Jacobian Error State: Fx & Jacobian Error Parameters: Fp
-//std::cout<<"Fx & Fp"<<std::endl;
         // Resize and init
         BlockMatrix::MatrixSparse block_jacobian_total_robot_error_state;
         block_jacobian_total_robot_error_state.resize(num_error_states, num_error_states);
@@ -1603,7 +1550,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         // Fill
         {
             int jacobian_row=0;
-//std::cout<<"world"<<std::endl;
             // World
             {
                 int jacobian_column=0;
@@ -1664,7 +1610,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 jacobian_row++;
             }
 
-//std::cout<<"robot"<<std::endl;
             // Robot
             {
                 int jacobian_column=0;
@@ -1724,7 +1669,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
                 jacobian_row++;
             }
-//std::cout<<"inputs"<<std::endl;
+
             // Inputs
             for(std::list< std::shared_ptr<StateCore> >::iterator itInputState=ThePredictedState->TheListInputStateCore.begin();
                 itInputState!=ThePredictedState->TheListInputStateCore.end();
@@ -1787,7 +1732,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
                 jacobian_row++;
             }
-//std::cout<<"sensors"<<std::endl;
+
             // Sensors
             for(std::list< std::shared_ptr<StateCore> >::iterator itSensorState=ThePredictedState->TheListSensorStateCore.begin();
                 itSensorState!=ThePredictedState->TheListSensorStateCore.end();
@@ -1850,7 +1795,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
                 jacobian_row++;
             }
-//std::cout<<"map elements"<<std::endl;
+
             // Map Elements
             for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementState=ThePredictedState->TheListMapElementStateCore.begin();
                 itMapElementState!=ThePredictedState->TheListMapElementStateCore.end();
@@ -1915,14 +1860,32 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 jacobian_row++;
             }
         }
-//std::cout<<"ended"<<std::endl;
+
         block_jacobian_total_robot_error_state.analyse();
         block_jacobian_total_robot_error_parameters.analyse();
+
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() block_jacobian_total_robot_error_state for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_state)<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() block_jacobian_total_robot_error_parameters for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_parameters)<<std::endl;
+            this->log(logString.str());
+        }
+#endif
 
 
 
         /// Jacobian Error State wrt Error Input Commands: Fu
-//std::cout<<"Fu"<<std::endl;
+
         BlockMatrix::MatrixSparse block_jacobian_total_robot_error_state_wrt_error_input_commands;
         block_jacobian_total_robot_error_state_wrt_error_input_commands.resize(num_error_states, num_input_commands);
 
@@ -2018,10 +1981,19 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
         block_jacobian_total_robot_error_state_wrt_error_input_commands.analyse();
 
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() block_jacobian_total_robot_error_state_wrt_error_input_commands for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_state_wrt_error_input_commands)<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
 
 
         /// Jacobian Error State Noise Estimation: Fn
-//std::cout<<"Fn"<<std::endl;
+
         BlockMatrix::MatrixSparse block_jacobian_total_robot_error_noise_estimation;
         block_jacobian_total_robot_error_noise_estimation.resize(num_error_states, num_error_states);
 
@@ -2072,21 +2044,26 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
         block_jacobian_total_robot_error_noise_estimation.analyse();
 
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() block_jacobian_total_robot_error_noise_estimation for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_noise_estimation)<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
 
 
         ///// Covariances Total Robot
 
 
         /// Covariance Error State: P
-//std::cout<<"P"<<std::endl;
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorStateAsBlock=getTimeStamp();
 #endif
-
-
-
 
 
         BlockMatrix::MatrixDense block_previous_covariance_error_state;
@@ -2105,13 +2082,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-//        std::cout<<"block_previous_covariance_error_state"<<std::endl;
-//        std::cout<<"size_rows="<<block_previous_covariance_error_state.getRowsSize().transpose()<<std::endl;
-//        std::cout<<"size_cols="<<block_previous_covariance_error_state.getColsSize().transpose()<<std::endl;
-
-
         /// Covariance Error Parameters: Qp
-//std::cout<<"Qp"<<std::endl;
+
         BlockMatrix::MatrixSparse block_covariance_total_robot_error_parameters;
         block_covariance_total_robot_error_parameters.resize(num_error_states, num_error_states);
 
@@ -2121,12 +2093,12 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
             // World
             block_covariance_total_robot_error_parameters(num_robot_error_states_i, num_robot_error_states_i)=
-                    ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                    ThePredictedState->TheGlobalParametersStateCore->getCovarianceParameters();
             num_robot_error_states_i++;
 
             // Robot
             block_covariance_total_robot_error_parameters(num_robot_error_states_i, num_robot_error_states_i)=
-                    ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                    ThePredictedState->TheRobotStateCore->getCovarianceParameters();
             num_robot_error_states_i++;
 
             // Inputs
@@ -2135,7 +2107,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itInputState)
             {
                 block_covariance_total_robot_error_parameters(num_robot_error_states_i, num_robot_error_states_i)=
-                        (*itInputState)->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                        (*itInputState)->getCovarianceParameters();
                 num_robot_error_states_i++;
             }
 
@@ -2145,7 +2117,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itSensorState)
             {
                 block_covariance_total_robot_error_parameters(num_robot_error_states_i, num_robot_error_states_i)=
-                        (*itSensorState)->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                        (*itSensorState)->getCovarianceParameters();
                 num_robot_error_states_i++;
             }
 
@@ -2155,7 +2127,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itMapElementState)
             {
                 block_covariance_total_robot_error_parameters(num_robot_error_states_i, num_robot_error_states_i)=
-                        (*itMapElementState)->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                        (*itMapElementState)->getCovarianceParameters();
                 num_robot_error_states_i++;
             }
         }
@@ -2163,9 +2135,18 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         block_covariance_total_robot_error_parameters.analyse();
 
 
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error_parameters for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error_parameters)<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
 
         /// Covariance Error Inputs: Qu
-//std::cout<<"Qu"<<std::endl;
+
         BlockMatrix::MatrixSparse block_covariance_total_robot_error_inputs;
         block_covariance_total_robot_error_inputs.resize(num_input_commands, num_input_commands);
 
@@ -2178,7 +2159,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itInputCommand++)
             {
                 block_covariance_total_robot_error_inputs(num_input_commands_i, num_input_commands_i)=
-                        (*itInputCommand)->getInputCoreSharedPtr()->getCovarianceInputs(DeltaTime);
+                        (*itInputCommand)->getCovarianceInputs(DeltaTime);
                 num_input_commands_i++;
             }
 
@@ -2187,9 +2168,19 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         block_covariance_total_robot_error_inputs.analyse();
 
 
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error_inputs for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error_inputs)<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
 
         /// Covariance Error State Noise Estimation: Qn
-//std::cout<<"Qn"<<std::endl;
+
         BlockMatrix::MatrixSparse block_covariance_total_robot_error_noise_estimation;
         block_covariance_total_robot_error_noise_estimation.resize(num_error_states, num_error_states);
 
@@ -2199,12 +2190,12 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
             // World
             block_covariance_total_robot_error_noise_estimation(num_robot_error_states_i, num_robot_error_states_i)=
-                    ThePredictedState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getCovarianceNoise(DeltaTime);
+                    ThePredictedState->TheGlobalParametersStateCore->getCovarianceNoise(DeltaTime);
             num_robot_error_states_i++;
 
             // Robot
             block_covariance_total_robot_error_noise_estimation(num_robot_error_states_i, num_robot_error_states_i)=
-                    ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getCovarianceNoise(DeltaTime);
+                    ThePredictedState->TheRobotStateCore->getCovarianceNoise(DeltaTime);
             num_robot_error_states_i++;
 
             // Inputs
@@ -2213,7 +2204,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itInputState)
             {
                 block_covariance_total_robot_error_noise_estimation(num_robot_error_states_i, num_robot_error_states_i)=
-                        (*itInputState)->getMsfElementCoreSharedPtr()->getCovarianceNoise(DeltaTime);
+                        (*itInputState)->getCovarianceNoise(DeltaTime);
                 num_robot_error_states_i++;
             }
 
@@ -2223,7 +2214,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itSensorState)
             {
                 block_covariance_total_robot_error_noise_estimation(num_robot_error_states_i, num_robot_error_states_i)=
-                        (*itSensorState)->getMsfElementCoreSharedPtr()->getCovarianceNoise(DeltaTime);
+                        (*itSensorState)->getCovarianceNoise(DeltaTime);
                 num_robot_error_states_i++;
             }
 
@@ -2233,7 +2224,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                 ++itMapElementState)
             {
                 block_covariance_total_robot_error_noise_estimation(num_robot_error_states_i, num_robot_error_states_i)=
-                        (*itMapElementState)->getMsfElementCoreSharedPtr()->getCovarianceNoise(DeltaTime);
+                        (*itMapElementState)->getCovarianceNoise(DeltaTime);
                 num_robot_error_states_i++;
             }
         }
@@ -2241,15 +2232,18 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         block_covariance_total_robot_error_noise_estimation.analyse();
 
 
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error_noise_estimation for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error_noise_estimation)<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
-//#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-//        TimeStamp beginTimePredictCoreCovRob=getTimeStamp();
-//#endif
 
 
-
-
-        //// P(k+1|k)
+        //// Covariance Error State: P(k+1|k)
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -2261,7 +2255,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         block_predicted_covariance_error_state.resize(num_error_states, num_error_states);
 
 
-//std::cout<<"before operations"<<std::endl;
+
         try
         {
 
@@ -2321,33 +2315,12 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
                                                     block_covariance_total_robot_error;
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() predict covariance error state last sum: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateLastSum).nsec<<std::endl;
-            this->log(logString.str());
-        }
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::predictCore() predict covariance error state last sum: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateLastSum).nsec<<std::endl;
+                this->log(logString.str());
+            }
 #endif
-
-
-
-
-//            std::cout<<"block_predicted_covariance_error_state"<<std::endl;
-//            std::cout<<"size_rows="<<block_predicted_covariance_error_state.getRowsSize().transpose()<<std::endl;
-//            std::cout<<"size_cols="<<block_predicted_covariance_error_state.getColsSize().transpose()<<std::endl;
-
-
-
-            /*
-            ThePredictedState->covarianceMatrix->block(0,0,dimension_robot_error_state,dimension_robot_error_state)=
-                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(0,0,dimension_robot_error_state,dimension_robot_error_state)*jacobianRobotErrorState.transpose() +
-                    covariance_total_robot_error;
-                    */
-
-            /*
-            ThePredictedState->covarianceMatrix->block(0,0,dimension_robot_error_state,dimension_robot_error_state)=
-                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(0,0,dimension_robot_error_state,dimension_robot_error_state)*jacobianRobotErrorState.transpose() +
-                    covariance_total_robot_error;
-                    */
 
 
 
@@ -2356,7 +2329,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
         {
             std::cout<<"Error in prediction covariances robot"<<std::endl;
         }
-//std::cout<<"after operations"<<std::endl;
+
 
 
 
@@ -2388,8 +2361,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-
-
     }
 
 
@@ -2401,226 +2372,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
     }
 #endif
 
-
-
-/*
-    /// Cov Robot-Sensors
-
-    {
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() covariance robot-sensor TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-            this->log(logString.str());
-        }
-#endif
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        TimeStamp beginTimePredictCoreCovRobSen=getTimeStamp();
-#endif
-
-        // Init Point
-        WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        WorkingInitPoint.row=0;
-
-
-        // Iterate on the sensors
-        int sensor_i=0;
-        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
-            it1Sens!=ThePredictedState->TheListSensorStateCore.end();
-            ++it1Sens)
-        {
-
-            // Dimensions
-            int dimensionRobotErrorState=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-            int dimensionSensorErrorState=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-
-
-            // Calculate
-            ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)=
-                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState)*(*it1Sens)->getJacobianErrorStateSensor(sensor_i).transpose();
-
-
-
-            // Set the Symmetric
-            Eigen::MatrixXd auxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionSensorErrorState);
-            ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row,dimensionSensorErrorState, dimensionRobotErrorState)=
-                    auxMatSym.transpose();
-
-
-            // Update Point
-            WorkingInitPoint.row=0;
-            WorkingInitPoint.col+=dimensionSensorErrorState;
-
-            sensor_i++;
-        }
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() predict Core time cov rob-sen: "<<(getTimeStamp()-beginTimePredictCoreCovRobSen).nsec<<std::endl;
-            this->log(logString.str());
-        }
-#endif
-
-    }
-
-
-    /// Cov Sensors
-
-
-    /// Cov Robot-Map
-
-    {
-        // dimensions
-        int dimensionSensorsErrorState=0;
-        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
-            it1Sens!=ThePredictedState->TheListSensorStateCore.end();
-            ++it1Sens)
-        {
-            dimensionSensorsErrorState+=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        }
-
-        // Init Point
-        WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState()+dimensionSensorsErrorState;
-        WorkingInitPoint.row=0;
-
-
-        // Iterate on the map elements
-        int map_element_i=0;
-        for(std::list< std::shared_ptr<StateCore> >::iterator it1MapElement=ThePredictedState->TheListMapElementStateCore.begin();
-            it1MapElement!=ThePredictedState->TheListMapElementStateCore.end();
-            ++it1MapElement)
-        {
-            // Dimensions
-            int dimensionRobotErrorState=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-            int dimensionMapElementErrorState=(*it1MapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-
-
-            // Calculate
-            ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionMapElementErrorState)=
-                    jacobianRobotErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionMapElementErrorState)*(*it1MapElement)->getJacobianErrorStateMapElement(map_element_i).transpose();
-
-
-
-            // Set the Symmetric
-            Eigen::MatrixXd auxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionRobotErrorState,dimensionMapElementErrorState);
-            ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row,dimensionMapElementErrorState, dimensionRobotErrorState)=
-                    auxMatSym.transpose();
-
-
-
-            // Update Point
-            WorkingInitPoint.row=0;
-            WorkingInitPoint.col+=dimensionMapElementErrorState;
-
-            map_element_i++;
-        }
-    }
-
-
-
-    /// Cov Sensors-Map
-    // TODO
-    {
-
-    }
-
-
-    /// Map
-
-    {
-        // dimension
-        int dimensionSensorsErrorState=0;
-        for(std::list< std::shared_ptr<StateCore> >::iterator it1Sens=ThePredictedState->TheListSensorStateCore.begin();
-            it1Sens!=ThePredictedState->TheListSensorStateCore.end();
-            ++it1Sens)
-        {
-            dimensionSensorsErrorState+=(*it1Sens)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-        }
-
-        // Init Point
-        WorkingInitPoint.col=ThePredictedState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState()+dimensionSensorsErrorState;
-        WorkingInitPoint.row=WorkingInitPoint.col;
-
-        // Iterate
-        int map_element_i=0;
-        for(std::list< std::shared_ptr<StateCore> >::iterator it1MapElement=ThePredictedState->TheListMapElementStateCore.begin();
-            it1MapElement!=ThePredictedState->TheListMapElementStateCore.end();
-            ++it1MapElement)
-        {
-
-            // Dimension mapElement1
-            int dimensionMapElement1ErrorState=(*it1MapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-
-
-            // Aux vars -> Jacobians
-            Eigen::SparseMatrix<double> jacobianMapElement1ErrorState=(*it1MapElement)->getJacobianErrorStateMapElement(map_element_i);
-
-
-            // Iterate again
-            int map_element_j=map_element_i;
-            for(std::list< std::shared_ptr<StateCore> >::iterator it2MapElement=it1MapElement;
-                it2MapElement!=ThePredictedState->TheListMapElementStateCore.end();
-                ++it2MapElement)
-            {
-
-                // Dimension mapElement2
-                int dimensionMapElement2ErrorState=(*it2MapElement)->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-
-
-                // Calculate
-                Eigen::MatrixXd CovarianceAuxMatrix=
-                        jacobianMapElement1ErrorState*ThePreviousState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col,dimensionMapElement1ErrorState,dimensionMapElement2ErrorState)*(*it2MapElement)->getJacobianErrorStateMapElement(map_element_j).transpose();
-
-
-
-                // Noise if the same
-                if((*it1MapElement) == (*it2MapElement))
-                {
-                    if((*it2MapElement)->getMsfElementCoreSharedPtr()->getDimensionNoise() != 0)
-                    {
-                        Eigen::SparseMatrix<double> covarianceErrorStateNoise=(*it1MapElement)->getJacobianErrorStateNoise() * std::dynamic_pointer_cast<MapElementCore>((*it1MapElement)->getMsfElementCoreSharedPtr())->getCovarianceNoise(DeltaTime) * (*it1MapElement)->getJacobianErrorStateNoise().transpose();
-
-                        ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionMapElement1ErrorState, dimensionMapElement2ErrorState)=
-                                CovarianceAuxMatrix+
-                                Eigen::MatrixXd(covarianceErrorStateNoise);
-                    }
-                    else
-                    {
-                        ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionMapElement1ErrorState, dimensionMapElement2ErrorState)=
-                                CovarianceAuxMatrix;
-                    }
-                }
-
-
-                // Value and Symmetric if different
-                if((*it1MapElement) != (*it2MapElement))
-                {
-                    //Eigen::MatrixXd AuxMatSym=ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionSensor1ErrorState, dimensionSensor2ErrorState).eval();
-                    ThePredictedState->covarianceMatrix->block(WorkingInitPoint.row, WorkingInitPoint.col, dimensionMapElement1ErrorState, dimensionMapElement2ErrorState)=
-                            CovarianceAuxMatrix;
-
-                    ThePredictedState->covarianceMatrix->block(WorkingInitPoint.col, WorkingInitPoint.row, dimensionMapElement2ErrorState, dimensionMapElement1ErrorState)=
-                            CovarianceAuxMatrix.transpose().eval();
-                }
-
-
-                // Update Working Point
-                WorkingInitPoint.col+=dimensionMapElement2ErrorState;
-
-                map_element_j++;
-            }
-
-            // Update the dimension for the next map element
-            WorkingInitPoint.row+=dimensionMapElement1ErrorState;
-            WorkingInitPoint.col=WorkingInitPoint.row;
-
-            map_element_i++;
-        }
-    }
-*/
 
 
 
@@ -2662,7 +2413,7 @@ int MsfLocalizationCore::update(const TimeStamp TheTimeStamp)
 #endif
 
 
-    // Get the outdated element to do the update
+    // Get the reading outdated element to do the update
     std::shared_ptr<StateEstimationCore> OldState;
     int error_get_element=this->TheMsfStorageCore->getElement(TheTimeStamp, OldState);
     if(error_get_element)
@@ -2692,54 +2443,6 @@ int MsfLocalizationCore::update(const TimeStamp TheTimeStamp)
         return -11;
     }
 
-    // Multi reading is allowed
-
-/*
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"number of users of updated state="<<OldState.use_count()<<std::endl;
-
-        this->log(logString.str());
-    }
-#endif
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    {
-        TimeStamp begin=getTimeStamp();
-#endif
-
-
-    while(OldState.use_count()>2)
-    {
-        // Do nothig. Sleep a little
-        // TODO optimize this!
-        std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
-
-#if 1 || _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::update -> waiting!"<<std::endl;
-        this->log(logString.str());
-#endif
-
-    }
-
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        logString<<"MsfLocalizationCore::update -> waiting time: "<<(getTimeStamp()-begin).nsec<<" ns"<<std::endl;
-        this->log(logString.str());
-
-    }
-#endif
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"number of users of updated state="<<OldState.use_count()<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-*/
 
     // Check if there are measurements
     if(OldState->TheListMeasurementCore.size()==0)
@@ -2765,9 +2468,6 @@ int MsfLocalizationCore::update(const TimeStamp TheTimeStamp)
 #endif
         return -12;
     }
-
-
-
 
 
 
@@ -2871,11 +2571,6 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                                     const std::shared_ptr<StateEstimationCore> OldState,
                                     std::shared_ptr<StateEstimationCore>& UpdatedState)
 {
-
-    //std::cout<<"update started"<<std::endl;
-
-
-//return 0;
 
     // Iterative EKF Vars and preparation
     bool iterativeEkfEnabled=false;
@@ -3347,14 +3042,14 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                 // World (Global Parameters)
                 {
                     block_covariance_error_parameters(num_error_state_i, num_error_state_i)=
-                            OldState->TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                            OldState->TheGlobalParametersStateCore->getCovarianceParameters();
                     num_error_state_i++;
                 }
 
                 // Robot
                 {
                     block_covariance_error_parameters(num_error_state_i, num_error_state_i)=
-                            OldState->TheRobotStateCore->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                            OldState->TheRobotStateCore->getCovarianceParameters();
                     num_error_state_i++;
                 }
 
@@ -3364,7 +3059,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                     ++itListInputStateCore)
                 {
                     block_covariance_error_parameters(num_error_state_i, num_error_state_i)=
-                            (*itListInputStateCore)->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                            (*itListInputStateCore)->getCovarianceParameters();
                     num_error_state_i++;
                 }
 
@@ -3374,7 +3069,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                     ++itListSensorStateCore)
                 {
                     block_covariance_error_parameters(num_error_state_i, num_error_state_i)=
-                            (*itListSensorStateCore)->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                            (*itListSensorStateCore)->getCovarianceParameters();
                     num_error_state_i++;
                 }
 
@@ -3384,7 +3079,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                     ++itListMapElementStateCore)
                 {
                     block_covariance_error_parameters(num_error_state_i, num_error_state_i)=
-                           (*itListMapElementStateCore)->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+                           (*itListMapElementStateCore)->getCovarianceParameters();
                     num_error_state_i++;
                 }
             }
@@ -3422,7 +3117,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                     ++itListPredictedMeas)
                 {
                     block_covariance_error_measurement(num_error_measurements_i, num_error_measurements_i)=
-                            (*itListPredictedMeas)->getSensorCoreSharedPtr()->getCovarianceMeasurement();
+                            (*itListPredictedMeas)->getCovarianceMeasurement();
                     num_error_measurements_i++;
                 }
             }
@@ -4301,7 +3996,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
                 {
                     if(dimension_error_measurement_i && dimension_error_measurement_j)
                         covarianceMapNewElements.block(dimension_error_measurement_total_i, dimension_error_measurement_total_j, dimension_error_measurement_i, dimension_error_measurement_j)=
-                                (*itUnmatchedMeasurementsWithMapElement)->getSensorCoreSharedPtr()->getCovarianceMeasurement();
+                                (*itUnmatchedMeasurementsWithMapElement)->getCovarianceMeasurement();
                 }
                 else
                 {

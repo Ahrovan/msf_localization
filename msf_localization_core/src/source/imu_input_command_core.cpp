@@ -69,3 +69,8 @@ Eigen::Vector3d ImuInputCommandCore::getLinearAcceleration() const
 {
     return this->linear_acceleration_;
 }
+
+Eigen::SparseMatrix<double> ImuInputCommandCore::getCovarianceInputs(const TimeStamp& deltaTimeStamp)
+{
+    return this->getInputCoreSharedPtr()->getCovarianceInputs(deltaTimeStamp);
+}

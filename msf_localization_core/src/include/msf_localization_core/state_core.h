@@ -144,6 +144,21 @@ public:
     virtual int updateStateFromIncrementErrorState(const Eigen::VectorXd& increment_error_state)=0;
 
 
+
+
+
+    ///// Covariances getters
+
+
+    // Covariance Sensor Error Parameters: Qp = Rp
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceParameters();
+
+
+    // Covariance Noise Estimation: Qn
+public:
+    virtual Eigen::SparseMatrix<double> getCovarianceNoise(const TimeStamp& delta_time_stamp);
+
 };
 
 

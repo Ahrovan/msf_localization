@@ -7,10 +7,12 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 
-// Velocities -> TODO
+// Velocities
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 
-// Accelerations -> TODO
+// Accelerations
+#include <geometry_msgs/AccelWithCovarianceStamped.h>
 #include <geometry_msgs/AccelStamped.h>
 
 
@@ -63,6 +65,17 @@ protected:
 
     /// Velocities
 
+    // Velocities stamped
+    ros::Publisher robot_velocities_stamped_pub_;
+    std::string robot_velocities_stamped_topic_name_;
+    geometry_msgs::TwistStamped robot_velocities_stamped_msg_;
+
+    // Velocities with covariance stamped
+    ros::Publisher robot_velocities_with_covariance_stamped_pub_;
+    std::string robot_velocities_with_covariance_stamped_topic_name_;
+    geometry_msgs::TwistWithCovarianceStamped robot_velocities_with_covariance_stamped_msg_;
+
+
     // Robot Linear Speed
     ros::Publisher robotLinearSpeedStampedPub;
     std::string robotLinearSpeedStampedTopicName;
@@ -75,6 +88,17 @@ protected:
 
 
     /// Accelerations
+
+    // Accelerations stamped
+    ros::Publisher robot_accelerations_stamped_pub_;
+    std::string robot_accelerations_stamped_topic_name_;
+    geometry_msgs::AccelStamped robot_accelerations_stamped_msg_;
+
+    // Accelerations with covariance stamped
+    ros::Publisher robot_accelerations_with_covariance_stamped_pub_;
+    std::string robot_accelerations_with_covariance_stamped_topic_name_;
+    geometry_msgs::AccelWithCovarianceStamped robot_accelerations_with_covariance_stamped_msg_;
+
 
     // Robot Linear Acceleration
     ros::Publisher robotLinearAccelerationStampedPub;

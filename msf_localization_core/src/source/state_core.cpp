@@ -201,3 +201,13 @@ Eigen::SparseMatrix<double> StateCore::getJacobianErrorStateNoise()
 {
     return this->jacobian_error_state_noise_;
 }
+
+Eigen::SparseMatrix<double> StateCore::getCovarianceParameters()
+{
+    return this->getMsfElementCoreSharedPtr()->getCovarianceParameters();
+}
+
+Eigen::SparseMatrix<double> StateCore::getCovarianceNoise(const TimeStamp& delta_time_stamp)
+{
+    return this->getMsfElementCoreSharedPtr()->getCovarianceNoise(delta_time_stamp);
+}

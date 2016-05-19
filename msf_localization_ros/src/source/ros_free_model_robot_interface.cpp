@@ -18,21 +18,39 @@ RosFreeModelRobotInterface::~RosFreeModelRobotInterface()
 int RosFreeModelRobotInterface::readParameters()
 {
     // Topic names
+
+    // Pose
     //
     ros::param::param<std::string>("~robot_pose_with_cov_topic_name", robotPoseWithCovarianceStampedTopicName, "msf_localization/robot_pose_cov");
     std::cout<<"\t robot_pose_with_cov_topic_name="<<robotPoseWithCovarianceStampedTopicName<<std::endl;
     //
     ros::param::param<std::string>("~robot_pose_topic_name", robotPoseStampedTopicName, "msf_localization/robot_pose");
     std::cout<<"\t robot_pose_topic_name="<<robotPoseStampedTopicName<<std::endl;
+
+    // Velocities
+    //
+    ros::param::param<std::string>("~robot_velocities_stamped_topic_name_", robot_velocities_stamped_topic_name_, "msf_localization/robot_velocity");
+    std::cout<<"\t robot_velocities_stamped_topic_name_="<<robot_velocities_stamped_topic_name_<<std::endl;
+    //
+    ros::param::param<std::string>("~robot_velocities_with_covariance_stamped_topic_name_", robot_velocities_with_covariance_stamped_topic_name_, "msf_localization/robot_velocity_cov");
+    std::cout<<"\t robot_velocities_with_covariance_stamped_topic_name_="<<robot_velocities_with_covariance_stamped_topic_name_<<std::endl;
     //
     ros::param::param<std::string>("~robot_linear_speed_topic_name", robotLinearSpeedStampedTopicName, "msf_localization/robot_linear_speed");
     std::cout<<"\t robot_linear_speed_topic_name="<<robotLinearSpeedStampedTopicName<<std::endl;
     //
-    ros::param::param<std::string>("~robot_linear_acceleration_topic_name", robotLinearAccelerationStampedTopicName, "msf_localization/robot_linear_acceleration");
-    std::cout<<"\t robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;
-    //
     ros::param::param<std::string>("~robot_angular_velocity_topic_name", robotAngularVelocityStampedTopicName, "msf_localization/robot_angular_velocity");
     std::cout<<"\t robot_angular_velocity_topic_name="<<robotAngularVelocityStampedTopicName<<std::endl;
+
+    // Accelerations
+    //
+    ros::param::param<std::string>("~robot_accelerations_stamped_topic_name_", robot_accelerations_stamped_topic_name_, "msf_localization/robot_acceleration");
+    std::cout<<"\t robot_accelerations_stamped_topic_name_="<<robot_accelerations_stamped_topic_name_<<std::endl;
+    //
+    ros::param::param<std::string>("~robot_accelerations_with_covariance_stamped_topic_name_", robot_accelerations_with_covariance_stamped_topic_name_, "msf_localization/robot_acceleration_cov");
+    std::cout<<"\t robot_accelerations_with_covariance_stamped_topic_name_="<<robot_accelerations_with_covariance_stamped_topic_name_<<std::endl;
+    //
+    ros::param::param<std::string>("~robot_linear_acceleration_topic_name", robotLinearAccelerationStampedTopicName, "msf_localization/robot_linear_acceleration");
+    std::cout<<"\t robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;
     //
     ros::param::param<std::string>("~robot_angular_acceleration_topic_name", robotAngularAccelerationStampedTopicName, "msf_localization/robot_angular_acceleration");
     std::cout<<"\t robot_angular_acceleration_topic_name="<<robotAngularAccelerationStampedTopicName<<std::endl;
@@ -48,16 +66,34 @@ int RosFreeModelRobotInterface::open()
 
 
     // Publishers
-    //
-    robotPoseWithCovarianceStampedPub = nh->advertise<geometry_msgs::PoseWithCovarianceStamped>(robotPoseWithCovarianceStampedTopicName, 1, true);
+
+
+    // Pose
     //
     robotPoseStampedPub = nh->advertise<geometry_msgs::PoseStamped>(robotPoseStampedTopicName, 1, true);
     //
+    robotPoseWithCovarianceStampedPub = nh->advertise<geometry_msgs::PoseWithCovarianceStamped>(robotPoseWithCovarianceStampedTopicName, 1, true);
+
+
+    // Velocities
+
+    //
+    robot_velocities_stamped_pub_=nh->advertise<geometry_msgs::TwistStamped>(robot_velocities_stamped_topic_name_, 1, true);
+    //
+    robot_velocities_with_covariance_stamped_pub_=nh->advertise<geometry_msgs::TwistWithCovarianceStamped>(robot_velocities_with_covariance_stamped_topic_name_, 1, true);
+    //
     robotLinearSpeedStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearSpeedStampedTopicName, 1, true);
     //
-    robotLinearAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearAccelerationStampedTopicName, 1, true);
-    //
     robotAngularVelocityStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotAngularVelocityStampedTopicName, 1, true);
+
+
+    // Accelerations
+    //
+    robot_accelerations_stamped_pub_=nh->advertise<geometry_msgs::AccelStamped>(robot_accelerations_stamped_topic_name_, 1, true);
+    //
+    robot_accelerations_with_covariance_stamped_pub_=nh->advertise<geometry_msgs::AccelWithCovarianceStamped>(robot_accelerations_with_covariance_stamped_topic_name_, 1, true);
+    //
+    robotLinearAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearAccelerationStampedTopicName, 1, true);
     //
     robotAngularAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotAngularAccelerationStampedTopicName, 1, true);
 
@@ -103,20 +139,46 @@ int RosFreeModelRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
     // Frame id
     robotPoseStampedMsg.header.frame_id=world_core->getWorldName();
 
+
+    // Velocities
+
+    //
+    robot_velocities_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    //
+    robot_velocities_stamped_msg_.header.frame_id=world_core->getWorldName();
+
+    //
+    robot_velocities_with_covariance_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    //
+    robot_velocities_with_covariance_stamped_msg_.header.frame_id=world_core->getWorldName();
+
     //
     robotLinearSpeedStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
     // Frame id
     robotLinearSpeedStampedMsg.header.frame_id=world_core->getWorldName();
 
     //
-    robotLinearAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
-    // Frame id
-    robotLinearAccelerationStampedMsg.header.frame_id=world_core->getWorldName();
-
-    //
     robotAngularVelocityStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
     // Frame id
     robotAngularVelocityStampedMsg.header.frame_id=world_core->getWorldName();
+
+
+    // Accelerations
+
+    //
+    robot_accelerations_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    //
+    robot_accelerations_stamped_msg_.header.frame_id=world_core->getWorldName();
+
+    //
+    robot_accelerations_with_covariance_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    //
+    robot_accelerations_with_covariance_stamped_msg_.header.frame_id=world_core->getWorldName();
+
+    //
+    robotLinearAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    // Frame id
+    robotLinearAccelerationStampedMsg.header.frame_id=world_core->getWorldName();
 
     //
     robotAngularAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
@@ -127,7 +189,7 @@ int RosFreeModelRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
 
 
 
-    // Pose
+    /// Pose
     geometry_msgs::Pose RobotPose;
 
     // Position
@@ -166,47 +228,139 @@ int RosFreeModelRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
    robotPoseStampedMsg.pose=RobotPose;
 
 
-   //
-   robotLinearSpeedStampedMsg.vector.x=robotLinearSpeed[0];
-   robotLinearSpeedStampedMsg.vector.y=robotLinearSpeed[1];
-   robotLinearSpeedStampedMsg.vector.z=robotLinearSpeed[2];
+
+   /// Velocity
+
+   geometry_msgs::Vector3 lin_vel;
+   lin_vel.x=robotLinearSpeed[0];
+   lin_vel.y=robotLinearSpeed[1];
+   lin_vel.z=robotLinearSpeed[2];
+
+   geometry_msgs::Vector3 ang_vel;
+   ang_vel.x=robotAngularVelocity[0];
+   ang_vel.y=robotAngularVelocity[1];
+   ang_vel.z=robotAngularVelocity[2];
+
+
+   geometry_msgs::Twist velocity;
+   velocity.linear=lin_vel;
+    velocity.angular=ang_vel;
+
+
+    //
+    robot_velocities_stamped_msg_.twist=velocity;
+
+    //
+    robot_velocities_with_covariance_stamped_msg_.twist.twist=velocity;
+
+    {
+        Eigen::MatrixXd covariance(6,6);
+        covariance.setZero();
+        covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(3,3);
+        covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(12,12);
+        double covarianceArray[36];
+        Eigen::Map<Eigen::MatrixXd>(covarianceArray, 6, 6) = covariance;
+        for(unsigned int i=0; i<36; i++)
+        {
+            robot_velocities_with_covariance_stamped_msg_.twist.covariance[i]=covarianceArray[i];
+        }
+    }
 
 
    //
-   robotLinearAccelerationStampedMsg.vector.x=robotLinearAcceleration[0];
-   robotLinearAccelerationStampedMsg.vector.y=robotLinearAcceleration[1];
-   robotLinearAccelerationStampedMsg.vector.z=robotLinearAcceleration[2];
+   robotLinearSpeedStampedMsg.vector=lin_vel;
 
 
    //
-   robotAngularVelocityStampedMsg.vector.x=robotAngularVelocity[0];
-   robotAngularVelocityStampedMsg.vector.y=robotAngularVelocity[1];
-   robotAngularVelocityStampedMsg.vector.z=robotAngularVelocity[2];
+   robotAngularVelocityStampedMsg.vector=ang_vel;
+
+
+
+
+   /// Acceleration
+
+
+   geometry_msgs::Vector3 lin_acc;
+   lin_acc.x=robotLinearAcceleration[0];
+   lin_acc.y=robotLinearAcceleration[1];
+   lin_acc.z=robotLinearAcceleration[2];
+
+   geometry_msgs::Vector3 ang_acc;
+   ang_acc.x=robotAngularAcceleration[0];
+   ang_acc.y=robotAngularAcceleration[1];
+   ang_acc.z=robotAngularAcceleration[2];
+
+
+   geometry_msgs::Accel acceleration;
+   acceleration.linear=lin_acc;
+    acceleration.angular=ang_acc;
+
+
+    //
+    robot_accelerations_stamped_msg_.accel=acceleration;
+
+    //
+    robot_accelerations_with_covariance_stamped_msg_.accel.accel=acceleration;
+
+    {
+        Eigen::MatrixXd covariance(6,6);
+        covariance.setZero();
+        covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(6,6);
+        covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(15,15);
+        double covarianceArray[36];
+        Eigen::Map<Eigen::MatrixXd>(covarianceArray, 6, 6) = covariance;
+        for(unsigned int i=0; i<36; i++)
+        {
+            robot_accelerations_with_covariance_stamped_msg_.accel.covariance[i]=covarianceArray[i];
+        }
+    }
+
 
 
    //
-   robotAngularAccelerationStampedMsg.vector.x=robotAngularAcceleration[0];
-   robotAngularAccelerationStampedMsg.vector.y=robotAngularAcceleration[1];
-   robotAngularAccelerationStampedMsg.vector.z=robotAngularAcceleration[2];
+   robotLinearAccelerationStampedMsg.vector=lin_acc;
+
+   //
+   robotAngularAccelerationStampedMsg.vector=ang_acc;
 
 
 
 
-   // Publish Robot Pose
-   if(robotPoseWithCovarianceStampedPub.getNumSubscribers()>0)
-       robotPoseWithCovarianceStampedPub.publish(robotPoseWithCovarianceStampedMsg);
+   /// Publish Robot State
 
+   // Pose
    if(robotPoseStampedPub.getNumSubscribers()>0)
        robotPoseStampedPub.publish(robotPoseStampedMsg);
 
-   if(robotLinearSpeedStampedPub.getNumSubscribers()>0)
-       robotLinearSpeedStampedPub.publish(robotLinearSpeedStampedMsg);
+   if(robotPoseWithCovarianceStampedPub.getNumSubscribers()>0)
+       robotPoseWithCovarianceStampedPub.publish(robotPoseWithCovarianceStampedMsg);
 
-   if(robotLinearAccelerationStampedPub.getNumSubscribers()>0)
-       robotLinearAccelerationStampedPub.publish(robotLinearAccelerationStampedMsg);
+
+    // Velocities
+
+   if(robot_velocities_stamped_pub_.getNumSubscribers()>0)
+       robot_velocities_stamped_pub_.publish(robot_velocities_stamped_msg_);
+
+   if(robot_velocities_with_covariance_stamped_pub_.getNumSubscribers()>0)
+       robot_velocities_with_covariance_stamped_pub_.publish(robot_velocities_with_covariance_stamped_msg_);
+
+   if(robotLinearSpeedStampedPub.getNumSubscribers()>0)
+        robotLinearSpeedStampedPub.publish(robotLinearSpeedStampedMsg);
 
    if(robotAngularVelocityStampedPub.getNumSubscribers()>0)
        robotAngularVelocityStampedPub.publish(robotAngularVelocityStampedMsg);
+
+
+    // Accelerations
+
+   if(robot_accelerations_stamped_pub_.getNumSubscribers()>0)
+       robot_accelerations_stamped_pub_.publish(robot_accelerations_stamped_msg_);
+
+   if(robot_accelerations_with_covariance_stamped_pub_.getNumSubscribers()>0)
+       robot_accelerations_with_covariance_stamped_pub_.publish(robot_accelerations_with_covariance_stamped_msg_);
+
+   if(robotLinearAccelerationStampedPub.getNumSubscribers()>0)
+       robotLinearAccelerationStampedPub.publish(robotLinearAccelerationStampedMsg);
 
    if(robotAngularAccelerationStampedPub.getNumSubscribers()>0)
        robotAngularAccelerationStampedPub.publish(robotAngularAccelerationStampedMsg);

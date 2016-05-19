@@ -25,11 +25,6 @@ SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> sensor_co
 
 SensorMeasurementCore::~SensorMeasurementCore()
 {
-//    // Log
-//    if(logFile.is_open())
-//    {
-//        logFile.close();
-//    }
 
     return;
 }
@@ -39,18 +34,6 @@ int SensorMeasurementCore::init()
 {
     measurementType=MeasurementTypes::undefined;
 
-
-    //    // LOG
-    //    const char* env_p = std::getenv("FUSEON_STACK");
-
-    //    logPath=std::string(env_p)+"/logs/"+"logSensorMeasurementCoreFile.txt";
-
-    //    logFile.open(logPath);
-
-    //    if(!logFile.is_open())
-    //    {
-    //        std::cout<<"unable to open log file"<<std::endl;
-    //    }
 
     return 0;
 }
@@ -90,4 +73,9 @@ bool SensorMeasurementCore::isCorrect()
         return false;
 
     return true;
+}
+
+Eigen::SparseMatrix<double> SensorMeasurementCore::getCovarianceMeasurement()
+{
+    return this->getSensorCoreSharedPtr()->getCovarianceMeasurement();
 }

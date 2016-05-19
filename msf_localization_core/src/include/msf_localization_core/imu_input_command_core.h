@@ -51,6 +51,12 @@ public:
 
 
 
+    ///// Covariances Getters
+
+    // Covariance Error Inputs: Qu
+public:
+    Eigen::SparseMatrix<double> getCovarianceInputs(const TimeStamp& deltaTimeStamp);
+
 
 
 };

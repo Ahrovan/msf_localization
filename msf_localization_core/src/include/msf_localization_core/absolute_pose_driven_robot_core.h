@@ -1,0 +1,8 @@
+
+#ifndef _ABSOLUTE_POSE_DRIVEN_ROBOT_CORE_H
+#define _ABSOLUTE_POSE_DRIVEN_ROBOT_CORE_H
+
+
+
+
+#endif

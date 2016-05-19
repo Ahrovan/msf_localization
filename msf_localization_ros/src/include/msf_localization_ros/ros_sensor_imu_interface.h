@@ -11,6 +11,9 @@
 // ROS Msg sensor_msgs::Imu
 #include <sensor_msgs/Imu.h>
 
+// ROS Msg for estimated biases
+#include <geometry_msgs/Vector3Stamped.h>
+
 
 // Time Stamp
 #include "msf_localization_core/time_stamp.h"
@@ -49,6 +52,19 @@ protected:
     void imuTopicCallback(const sensor_msgs::ImuConstPtr& msg);
 public:
     int setImuTopicName(std::string SensorImuTopicName);
+
+
+    // Publishers for biases
+protected:
+    std::string estimated_bias_linear_acceleration_topic_name_;
+public:
+    int setEstimatedBiasLinearAccelerationTopicName(const std::string& estimated_bias_linear_acceleration_topic_name);
+protected:
+    ros::Publisher estimated_bias_linear_acceleration_pub_;
+    geometry_msgs::Vector3Stamped estimated_bias_linear_acceleration_msg_;
+protected:
+    int publishEstimatedBiasLinearAcceleration(const TimeStamp& time_stamp, std::shared_ptr<ImuSensorStateCore> sensor_state_core);
+
 
 
 public:
