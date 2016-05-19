@@ -1625,7 +1625,71 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
 //    }
 
 
-    // Prediction
+
+    // Variables
+    // State: World
+    Eigen::Vector3d gravity_wrt_world;
+    // State: Robot
+    Eigen::Vector3d position_robot_wrt_world;
+    Eigen::Vector4d attitude_robot_wrt_world;
+    Eigen::Vector3d lin_speed_robot_wrt_world;
+    Eigen::Vector3d ang_velocity_robot_wrt_world;
+    Eigen::Vector3d lin_accel_robot_wrt_world;
+    Eigen::Vector3d ang_accel_robot_wrt_world;
+    // State: Sensor
+    Eigen::Vector3d position_sensor_wrt_robot;
+    Eigen::Vector4d attitude_sensor_wrt_robot;
+    // Parameters: Sensor
+    Eigen::Vector3d biases_meas_linear_acceleration;
+    Eigen::Matrix3d sensitivity_meas_linear_acceleration;
+    Eigen::Vector3d biases_meas_angular_velocity;
+    Eigen::Matrix3d sensitivity_meas_angular_velocity;
+//    // Measurement
+//    Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor;
+//    Eigen::Vector3d meas_attitude_sensor_wrt_sensor;
+//    Eigen::Vector3d meas_ang_velocity_sensor_wrt_sensor;
+//    // Predicted Measurement
+//    Eigen::Vector3d lin_accel_sensor_wrt_sensor;
+//    Eigen::Vector3d attitude_sensor_wrt_sensor;
+//    Eigen::Vector3d ang_velocity_sensor_wrt_sensor;
+
+
+    /// Fill Variables
+
+
+    // State: World
+    gravity_wrt_world=TheGlobalParametersStateCore->getGravity();
+
+    // State: Robot
+    position_robot_wrt_world; // Not needed
+    attitude_robot_wrt_world=currentRobotState->getAttitudeRobotWrtWorld();
+    lin_speed_robot_wrt_world; // Not needed
+    ang_velocity_robot_wrt_world=currentRobotState->getAngularVelocityRobotWrtWorld();
+    lin_accel_robot_wrt_world=currentRobotState->getLinearAccelerationRobotWrtWorld();
+    ang_accel_robot_wrt_world=currentRobotState->getAngularAccelerationRobotWrtWorld();
+
+    // State: Sensor
+    position_sensor_wrt_robot=currentImuState->getPositionSensorWrtRobot();
+    attitude_sensor_wrt_robot=currentImuState->getAttitudeSensorWrtRobot();
+
+    // Parameters: Sensor
+    biases_meas_linear_acceleration=currentImuState->getBiasesLinearAcceleration();
+    sensitivity_meas_linear_acceleration=currentImuState->getScaleLinearAcceleration().asDiagonal();
+    biases_meas_angular_velocity=currentImuState->getBiasesAngularVelocity();
+    sensitivity_meas_angular_velocity=currentImuState->getScaleAngularVelocity().asDiagonal();
+
+//    // Measurement
+//    meas_lin_accel_sensor_wrt_sensor;
+//    meas_attitude_sensor_wrt_sensor;
+//    meas_ang_velocity_sensor_wrt_sensor;
+
+//    // Predicted Measurement
+//    lin_accel_sensor_wrt_sensor;
+//    attitude_sensor_wrt_sensor;
+//    ang_velocity_sensor_wrt_sensor;
+
+
+    /// Measurements Prediction
 
 
 
@@ -1641,14 +1705,14 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
 
 
         // Angular vel
-        Eigen::Vector3d angular_vel_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(currentRobotState->getAttitudeRobotWrtWorld()), currentRobotState->getAngularVelocityRobotWrtWorld() ,currentRobotState->getAttitudeRobotWrtWorld());
+        Eigen::Vector3d angular_vel_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_velocity_robot_wrt_world ,attitude_robot_wrt_world);
         // Angular acceler
-        Eigen::Vector3d angular_acc_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(currentRobotState->getAttitudeRobotWrtWorld()), currentRobotState->getAngularAccelerationRobotWrtWorld() ,currentRobotState->getAttitudeRobotWrtWorld());
+        Eigen::Vector3d angular_acc_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_accel_robot_wrt_world ,attitude_robot_wrt_world);
 
         // Ficticious Acc: Normal
-        Eigen::Vector3d normal_acceleration=angular_vel_robot_wrt_world_in_robot.cross(angular_vel_robot_wrt_world_in_robot.cross(currentImuState->getPositionSensorWrtRobot()));
+        Eigen::Vector3d normal_acceleration=angular_vel_robot_wrt_world_in_robot.cross(angular_vel_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot));
         // Ficticious Acc: Tang
-        Eigen::Vector3d tangencial_acceleration=angular_acc_robot_wrt_world_in_robot.cross(currentImuState->getPositionSensorWrtRobot());
+        Eigen::Vector3d tangencial_acceleration=angular_acc_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot);
 
         // Ficticious Acc total
         Eigen::Vector3d ficticious_acceleration=normal_acceleration+tangencial_acceleration;
@@ -1660,17 +1724,17 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
 
 
         // Attitude sensor wrt world
-        Eigen::Vector4d attitude_sensor_wrt_world=Quaternion::cross(currentRobotState->getAttitudeRobotWrtWorld(), currentImuState->getAttitudeSensorWrtRobot());
+        Eigen::Vector4d attitude_sensor_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
 
         // Acceleracion in sensor
-        Eigen::Vector3d accel_sensor_wrt_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), currentRobotState->getLinearAccelerationRobotWrtWorld(), attitude_sensor_wrt_world) + Quaternion::cross_sandwich(Quaternion::inv(currentImuState->getAttitudeSensorWrtRobot()), ficticious_acceleration, currentImuState->getAttitudeSensorWrtRobot());
+        Eigen::Vector3d accel_sensor_wrt_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), lin_accel_robot_wrt_world, attitude_sensor_wrt_world) + Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_robot), ficticious_acceleration, attitude_sensor_wrt_robot);
 
         // Gravity in sensor
-        Eigen::Vector3d gravity_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), TheGlobalParametersStateCore->getGravity(), attitude_sensor_wrt_world);
+        Eigen::Vector3d gravity_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), gravity_wrt_world, attitude_sensor_wrt_world);
 
 
         // IMU Model
-        ThePredictedLinearAcceleration=currentImuState->getScaleLinearAcceleration().asDiagonal()*(accel_sensor_wrt_sensor-gravity_sensor)+currentImuState->getBiasesLinearAcceleration();
+        ThePredictedLinearAcceleration=sensitivity_meas_linear_acceleration*(accel_sensor_wrt_sensor-gravity_sensor)+biases_meas_linear_acceleration;
 
 #if _DEBUG_SENSOR_CORE
 
@@ -1679,7 +1743,7 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
         //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quat_angular_speed_r_w_w="<<quat_angular_speed_r_w_w.transpose()<<std::endl;
         //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quat_robot_w="<<currentRobotState->getAttitude().transpose()<<std::endl;
         //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quat_angular_speed_r_w_r="<<quat_angular_speed_r_w_r.transpose()<<std::endl;
-        //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted p_s_r="<<currentImuState->getPositionSensorWrtRobot().transpose()<<std::endl;
+        //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted p_s_r="<<position_sensor_wrt_robot.transpose()<<std::endl;
         //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quaternion_tangencial_acceleration="<<quaternion_tangencial_acceleration.transpose()<<std::endl;
         //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted quaternion_normal_acceleration="<<quaternion_normal_acceleration.transpose()<<std::endl;
         //logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted ficticious_acceleration="<<ficticious_acceleration.transpose()<<std::endl;
@@ -1700,8 +1764,8 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
         logFile<<"ImuSensorCore::predictMeasurementSpecific() accel_sensor_wrt_sensor"<<std::endl;
         logFile<<accel_sensor_wrt_sensor.transpose()<<std::endl;
 
-        logFile<<"ImuSensorCore::predictMeasurementSpecific() currentImuState->getBiasesLinearAcceleration()"<<std::endl;
-        logFile<<currentImuState->getBiasesLinearAcceleration().transpose()<<std::endl;
+        logFile<<"ImuSensorCore::predictMeasurementSpecific() biases_meas_linear_acceleration"<<std::endl;
+        logFile<<biases_meas_linear_acceleration.transpose()<<std::endl;
 
         logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted a="<<std::endl;
         logFile<<ThePredictedLinearAcceleration.transpose()<<std::endl;
@@ -1739,15 +1803,15 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
         // Model
         Eigen::Vector4d quat_predicted_angular_velocity_in_robot;
         quat_predicted_angular_velocity_in_robot[0]=0;
-        quat_predicted_angular_velocity_in_robot.block<3,1>(1,0)=currentRobotState->getAngularVelocityRobotWrtWorld();
+        quat_predicted_angular_velocity_in_robot.block<3,1>(1,0)=ang_velocity_robot_wrt_world;
         Eigen::Vector4d quat_predicted_angular_velocity_in_imu;
 
-        quat_predicted_angular_velocity_in_imu=Quaternion::cross(Quaternion::inv(currentImuState->getAttitudeSensorWrtRobot()), Quaternion::inv(currentRobotState->getAttitudeRobotWrtWorld()), quat_predicted_angular_velocity_in_robot, currentRobotState->getAttitudeRobotWrtWorld(), currentImuState->getAttitudeSensorWrtRobot());
+        quat_predicted_angular_velocity_in_imu=Quaternion::cross(Quaternion::inv(attitude_sensor_wrt_robot), Quaternion::inv(attitude_robot_wrt_world), quat_predicted_angular_velocity_in_robot, attitude_robot_wrt_world, attitude_sensor_wrt_robot);
 
         Eigen::Vector3d predicted_angular_velocity_in_imu;
         predicted_angular_velocity_in_imu=quat_predicted_angular_velocity_in_imu.block<3,1>(1,0);
 
-        ThePredictedAngularVelocity=currentImuState->getScaleAngularVelocity().asDiagonal()*predicted_angular_velocity_in_imu+currentImuState->getBiasesAngularVelocity();
+        ThePredictedAngularVelocity=sensitivity_meas_angular_velocity*predicted_angular_velocity_in_imu+biases_meas_angular_velocity;
 
 #if _DEBUG_SENSOR_CORE
         logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted w="<<ThePredictedAngularVelocity.transpose()<<std::endl;

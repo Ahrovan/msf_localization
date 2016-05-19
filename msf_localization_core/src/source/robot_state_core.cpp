@@ -50,6 +50,7 @@ Eigen::Vector3d RobotStateCore::getPositionRobotWrtWorld() const
 
 int RobotStateCore::setPositionRobotWrtWorld(const Eigen::Vector3d& position)
 {
+    std::cout<<"Error in RobotStateCore::setXXRobotWrtWorld()"<<std::endl;
     return -1;
 }
 
@@ -61,6 +62,7 @@ Eigen::Vector3d RobotStateCore::getLinearSpeedRobotWrtWorld() const
 
 int RobotStateCore::setLinearSpeedRobotWrtWorld(const Eigen::Vector3d& linear_speed)
 {
+    std::cout<<"Error in RobotStateCore::setXXRobotWrtWorld()"<<std::endl;
     return -1;
 }
 
@@ -72,6 +74,7 @@ Eigen::Vector3d RobotStateCore::getLinearAccelerationRobotWrtWorld() const
 
 int RobotStateCore::setLinearAccelerationRobotWrtWorld(const Eigen::Vector3d& linear_acceleration)
 {
+    std::cout<<"Error in RobotStateCore::setXXRobotWrtWorld()"<<std::endl;
     return -1;
 }
 
@@ -83,6 +86,7 @@ Eigen::Vector4d RobotStateCore::getAttitudeRobotWrtWorld() const
 
 int RobotStateCore::setAttitudeRobotWrtWorld(const Eigen::Vector4d& attitude)
 {
+    std::cout<<"Error in RobotStateCore::setXXRobotWrtWorld()"<<std::endl;
     return -1;
 }
 
@@ -94,6 +98,7 @@ Eigen::Vector3d RobotStateCore::getAngularVelocityRobotWrtWorld() const
 
 int RobotStateCore::setAngularVelocityRobotWrtWorld(const Eigen::Vector3d& angular_velocity)
 {
+    std::cout<<"Error in RobotStateCore::setXXRobotWrtWorld()"<<std::endl;
     return -1;
 }
 
@@ -105,5 +110,6 @@ Eigen::Vector3d RobotStateCore::getAngularAccelerationRobotWrtWorld() const
 
 int RobotStateCore::setAngularAccelerationRobotWrtWorld(const Eigen::Vector3d& angular_acceleration)
 {
+    std::cout<<"Error in RobotStateCore::setXXRobotWrtWorld()"<<std::endl;
     return -1;
 }

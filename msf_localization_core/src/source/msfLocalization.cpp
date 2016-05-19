@@ -367,49 +367,21 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
 
     // Check if the current element needs to be updated or if it can be deleted
     {
-        // Get current element (k)
-        std::shared_ptr<StateEstimationCore> current_element;
-        int error_get_current_element=this->TheMsfStorageCore->getElement(time_stamp, current_element);
-        if(error_get_current_element || !current_element)
-            return -10;
-        //std::cout<<"time_stamp: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
-
-        // Get previous element (k-1)
-        TimeStamp time_stamp_previous_element;
-        int error_get_previous_time_stamp=this->TheMsfStorageCore->getPreviousTimeStamp(time_stamp, time_stamp_previous_element);
-        //std::cout<<"time_stamp_previous_element: sec="<<time_stamp_previous_element.sec<<" s; nsec="<<time_stamp_previous_element.nsec<<" ns"<<std::endl;
-
-        // Get following element (k+1)
-        TimeStamp time_stamp_following_element;
-        int error_get_next_time_stamp=this->TheMsfStorageCore->getNextTimeStamp(time_stamp, time_stamp_following_element);
-        //std::cout<<"time_stamp_following_element: sec="<<time_stamp_following_element.sec<<" s; nsec="<<time_stamp_following_element.nsec<<" ns"<<std::endl;
-
-        // Check if no error getting timestamps
-        if( !error_get_next_time_stamp && !error_get_previous_time_stamp )
+        int error_remove_unnecessary_state=removeUnnecessaryStateFromBuffer(time_stamp);
+        if(error_remove_unnecessary_state < 0)
         {
-            //std::cout<<"increment: sec="<<(time_stamp_following_element-time_stamp_previous_element).sec<<" s; nsec="<<(time_stamp_following_element-time_stamp_previous_element).nsec<<" ns"<<std::endl;
-
-            // Checks if has input commands or measurements
-            if( !current_element->hasInputCommand() && !current_element->hasMeasurement() )
-            {
-                // check if delta time stamps beetween k-1 and k+1 <= predict_model_time_
-                if( (time_stamp_following_element-time_stamp_previous_element) <= TimeStamp(predict_model_time_) )
-                {
-                    //std::cout<<"deleting!"<<std::endl;
-                    // Delete current_element and finish
-                    if(current_element)
-                        current_element.reset();
-                    int error_purge_element=this->TheMsfStorageCore->purgeElementRingBuffer(time_stamp);
-                    if(error_purge_element)
-                    {
-                        //std::cout<<"!!!!! ERROR PURGE ELEMENT !!!!!!"<<std::endl;
-                        return error_purge_element;
-                    }
-                    return 0;
-                }
-            }
+            // Error getting elements
+            return -1;
         }
-
+        else if(error_remove_unnecessary_state == 0)
+        {
+            // Succed in removing element. Finish
+            return 0;
+        }
+        else
+        {
+            // Cannot be removed. Need to continue
+        }
     }
 
 
@@ -588,6 +560,81 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
 #endif
 
     return 0;
+}
+
+int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(TimeStamp time_stamp)
+{
+    // Get current element (k)
+    std::shared_ptr<StateEstimationCore> current_element;
+    int error_get_current_element=this->TheMsfStorageCore->getElement(time_stamp, current_element);
+    if( error_get_current_element || !current_element )
+    {
+        std::cout<<"Error getElement"<<std::endl;
+        return -10;
+    }
+    //std::cout<<"time_stamp: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+
+    // Checks if has input commands or measurements
+    if( current_element->hasInputCommand() || current_element->hasMeasurement() )
+    {
+        //std::cout<<"\t has measurements or input commands"<<std::endl;
+        // Cannot be removed
+        return 1;
+    }
+
+    // Free the pointer
+    if(current_element)
+        current_element.reset();
+
+    // Get previous element (k-1)
+    TimeStamp time_stamp_previous_element;
+    int error_get_previous_time_stamp=this->TheMsfStorageCore->getPreviousTimeStamp(time_stamp, time_stamp_previous_element);
+    //std::cout<<"\t time_stamp_previous_element: sec="<<time_stamp_previous_element.sec<<" s; nsec="<<time_stamp_previous_element.nsec<<" ns"<<std::endl;
+
+    // Check if no error getting timestamps
+    if( error_get_previous_time_stamp )
+    {
+        return 1;
+    }
+
+
+    // Get following element (k+1)
+    TimeStamp time_stamp_following_element;
+    int error_get_next_time_stamp=this->TheMsfStorageCore->getNextTimeStamp(time_stamp, time_stamp_following_element);
+    //std::cout<<"\t time_stamp_following_element: sec="<<time_stamp_following_element.sec<<" s; nsec="<<time_stamp_following_element.nsec<<" ns"<<std::endl;
+
+    // Check if no error getting timestamps
+    if( error_get_next_time_stamp )
+    {
+        return 2;
+    }
+
+
+    //std::cout<<"\t increment: sec="<<(time_stamp_following_element-time_stamp_previous_element).sec<<" s; nsec="<<(time_stamp_following_element-time_stamp_previous_element).nsec<<" ns"<<std::endl;
+
+    // check if delta time stamps beetween k-1 and k+1 <= predict_model_time_
+    if( (time_stamp_following_element-time_stamp_previous_element) <= TimeStamp(predict_model_time_) )
+    {
+        //std::cout<<"\t\t deleting!"<<std::endl;
+
+        // Delete current_element and finish
+        int error_purge_element=this->TheMsfStorageCore->purgeElementRingBuffer(time_stamp);
+        if(error_purge_element)
+        {
+            std::cout<<"!!!!! ERROR PURGE ELEMENT !!!!!!"<<std::endl;
+            return -3;
+        }
+        return 0;
+    }
+    else
+    {
+        // Cannot be removed
+        return 10;
+    }
+
+
+
+    return -100;
 }
 
 

@@ -234,6 +234,11 @@ private:
 
 
 
+    // Remove unneded current state
+public:
+    int removeUnnecessaryStateFromBuffer(TimeStamp time_stamp);
+
+
 
 
     // Time what is required betwwwn two prediction steps
