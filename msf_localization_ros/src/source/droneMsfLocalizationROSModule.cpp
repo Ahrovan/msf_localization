@@ -105,10 +105,10 @@ int MsfLocalizationROS::readConfigFile()
 
         // Finish
 
-        // Push the robot core
+        // Push the core
         TheGlobalParametersCore=TheGlobalParametersCoreAux;
 
-        // Push the init state of the robot
+        // Push the init state
         InitialState->TheGlobalParametersStateCore=TheGlobalParametersStateCore;
 
     }

@@ -22,9 +22,6 @@
 // VM State
 #include "msf_localization_core/coded_visual_marker_eye_state_core.h"
 
-// World
-#include "msf_localization_core/global_parameters_state_core.h"
-
 // Robot core
 #include "msf_localization_core/robot_core.h"
 
@@ -215,7 +212,6 @@ public:
 
 protected:
     int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
-                                   const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                    const std::shared_ptr<RobotStateCore> currentRobotState,
                                    const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
                                    const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,

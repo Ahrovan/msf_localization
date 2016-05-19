@@ -66,7 +66,7 @@ int GlobalParametersCore::readConfig(const pugi::xml_node& global_parameters, st
 {
     // Create a class for the TheGlobalParametersCore
     if(!GlobalParametersInitStateCore)
-        GlobalParametersInitStateCore=std::make_shared<GlobalParametersStateCore>(this->getMsfElementCoreSharedPtr());
+        GlobalParametersInitStateCore=std::make_shared<GlobalParametersStateCore>(this->getMsfElementCoreWeakPtr());
 
     // Aux vars
     std::string readingValue;

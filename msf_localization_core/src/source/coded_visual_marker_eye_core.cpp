@@ -895,7 +895,6 @@ int CodedVisualMarkerEyeCore::predictMeasurement(// Time
 
     // Predict State
     int error_predict_measurement=predictMeasurementSpecific(current_time_stamp,
-                                                             std::dynamic_pointer_cast<GlobalParametersStateCore>(current_state->TheGlobalParametersStateCore),
                                                              std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
                                                              current_sensor_state,
                                                              current_map_element_state,
@@ -916,7 +915,6 @@ int CodedVisualMarkerEyeCore::predictMeasurement(// Time
 }
 
 int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
-                                                 const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
                                                  const std::shared_ptr<RobotStateCore> currentRobotState,
                                                  const std::shared_ptr<CodedVisualMarkerEyeStateCore> currentSensorState,
                                                  const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> currentMapElementState,
@@ -932,13 +930,6 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp &theTim
         std::cout<<"CodedVisualMarkerEyeCore::predictMeasurement() error 50"<<std::endl;
         return -50;
     }
-
-    /// Check global parameters
-    if(!TheGlobalParametersStateCore)
-        return -1;
-
-    if(!TheGlobalParametersStateCore->isCorrect())
-        return -1;
 
     /// check Robot
     if(!currentRobotState)
