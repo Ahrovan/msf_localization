@@ -54,7 +54,7 @@ int WorldReferenceFrameCore::init()
     return 0;
 }
 
-int WorldReferenceFrameCore::readConfig(pugi::xml_node map_element, std::shared_ptr<WorldReferenceFrameStateCore>& MapElementInitStateCore)
+int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::shared_ptr<WorldReferenceFrameStateCore>& MapElementInitStateCore)
 {
     // Create a class for the SensorStateCore
     if(!MapElementInitStateCore)
@@ -218,7 +218,7 @@ Eigen::Matrix3d WorldReferenceFrameCore::getCovariancePositionMocapWorldWrtWorld
     return this->covariance_position_mocap_world_wrt_world_;
 }
 
-int WorldReferenceFrameCore::setCovariancePositionMocapWorldWrtWorld(Eigen::Matrix3d covariance_position_mocap_world_wrt_world)
+int WorldReferenceFrameCore::setCovariancePositionMocapWorldWrtWorld(const Eigen::Matrix3d &covariance_position_mocap_world_wrt_world)
 {
     this->covariance_position_mocap_world_wrt_world_=covariance_position_mocap_world_wrt_world;
     return 0;
@@ -263,7 +263,7 @@ Eigen::Matrix3d WorldReferenceFrameCore::getCovarianceAttitudeMocapWorldWrtWorld
     return this->covariance_attitude_mocap_world_wrt_world_;
 }
 
-int WorldReferenceFrameCore::setCovarianceAttitudeMocapWorldWrtWorld(Eigen::Matrix3d covariance_attitude_mocap_world_wrt_world)
+int WorldReferenceFrameCore::setCovarianceAttitudeMocapWorldWrtWorld(const Eigen::Matrix3d &covariance_attitude_mocap_world_wrt_world)
 {
     this->covariance_attitude_mocap_world_wrt_world_=covariance_attitude_mocap_world_wrt_world;
     return 0;

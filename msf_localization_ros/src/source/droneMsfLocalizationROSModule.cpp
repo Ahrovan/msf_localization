@@ -320,7 +320,7 @@ int MsfLocalizationROS::readConfigFile()
         std::string inputType=input.child_value("type");
 
 
-        //// IMU Sensor Type
+        //// IMU Input Type
         if(inputType=="imu")
         {
             std::cout<<"input = imu"<<std::endl;
@@ -334,6 +334,39 @@ int MsfLocalizationROS::readConfigFile()
             if(!ros_input_interface)
             {
                 ros_input_interface=std::make_shared<RosImuInputInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+            }
+
+            // Set the pointer to itself
+            ros_input_interface->setMsfElementCorePtr(ros_input_interface);
+
+            // Read configs
+            if(ros_input_interface->readConfig(input, input_state_core))
+                return -2;
+
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfInputCore.push_back(ros_input_interface);
+
+            // Push the init state of the sensor
+            InitialState->TheListInputStateCore.push_back(input_state_core);
+        }
+
+        //// Absolute Pose Input Type
+        if(inputType=="absolute_pose")
+        {
+            std::cout<<"input = absolute_pose"<<std::endl;
+
+            // Create a class for the SensoreCore
+            std::shared_ptr<RosAbsolutePoseInputInterface> ros_input_interface;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<AbsolutePoseInputStateCore> input_state_core;
+
+            // Create a class for the SensoreCore
+            if(!ros_input_interface)
+            {
+                ros_input_interface=std::make_shared<RosAbsolutePoseInputInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
             }
 
             // Set the pointer to itself

@@ -15,7 +15,7 @@ CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
     return;
 }
 
-CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     SensorCore(the_msf_storage_core)
 {
     //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;

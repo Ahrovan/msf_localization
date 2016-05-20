@@ -33,7 +33,7 @@
 class RosArucoEyeInterface : public RosSensorInterface, public CodedVisualMarkerEyeCore
 {
 public:
-    RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 
 
 
@@ -48,7 +48,7 @@ protected:
     ros::Subscriber marker_list_sub_;
     void markerListCallback(const aruco_eye_msgs::MarkerListPtr& msg);
 public:
-    int setMarkerListTopicName(std::string marker_list_topic_name);
+    int setMarkerListTopicName(const std::string marker_list_topic_name);
 
 
 public:
@@ -56,11 +56,11 @@ public:
 
 
 public:
-    int publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core);
+    int publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core);
 
 
 public:
-    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
+    int readConfig(const pugi::xml_node& sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore);
 
 };
 

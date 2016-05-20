@@ -16,7 +16,7 @@ class AbsolutePoseInputCommandCore : public InputCommandCore
 {
 public:
     AbsolutePoseInputCommandCore();
-    AbsolutePoseInputCommandCore(std::weak_ptr<InputCore> input_core_ptr);
+    AbsolutePoseInputCommandCore(const std::weak_ptr<InputCore> input_core_ptr);
     ~AbsolutePoseInputCommandCore();
 
 protected:
@@ -25,22 +25,28 @@ protected:
 
     ///// Input Commands
 
-    // Position Robot wrt World
+    // Position Input wrt Input World
 protected:
-    Eigen::Vector3d position_robot_wrt_world_;
+    Eigen::Vector3d position_input_wrt_input_world_;
 public:
-    int setPositionRobotWrtWorld(const Eigen::Vector3d& position_robot_wrt_world);
-    Eigen::Vector3d getPositionRobotWrtWorld() const;
+    void setPositionInputWrtInputWorld(const Eigen::Vector3d& position_input_wrt_input_world);
+    Eigen::Vector3d getPositionInputWrtInputWorld() const;
 
 
-    // Attitude Robot wrt World
+    // Attitude Input wrt Input World
 protected:
-    Eigen::Vector4d attitude_robot_wrt_world_;
+    Eigen::Vector4d attitude_input_wrt_input_world_;
 public:
-    int setAttitudeRobotWrtWorld(const Eigen::Vector4d& attitude_robot_wrt_world);
-    Eigen::Vector4d getAttitudeRobotWrtWorld() const;
+    void setAttitudeInputWrtInputWorld(const Eigen::Vector4d& attitude_input_wrt_input_world);
+    Eigen::Vector4d getAttitudeInputWrtInputWorld() const;
 
 
+    // Noise Input Command
+protected:
+    Eigen::MatrixXd noise_input_command_pose_input_wrt_input_world_;
+public:
+    void setNoiseInputCommandPoseInputWrtInputWorld(const Eigen::MatrixXd& noise_input_command_pose_input_wrt_input_world);
+    Eigen::MatrixXd  getNoiseInputCommandPoseInputWrtInputWorld() const;
 
 
     ///// Covariances Getters

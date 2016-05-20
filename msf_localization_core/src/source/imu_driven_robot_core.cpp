@@ -10,7 +10,7 @@ ImuDrivenRobotCore::ImuDrivenRobotCore() :
     return;
 }
 
-ImuDrivenRobotCore::ImuDrivenRobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+ImuDrivenRobotCore::ImuDrivenRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     RobotCore(msf_storage_core_ptr)
 {
     init();
@@ -51,7 +51,7 @@ int ImuDrivenRobotCore::init()
     return 0;
 }
 
-int ImuDrivenRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_init_state)
+int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_init_state)
 {
     // Create a class for the RobotStateCore
     if(!robot_init_state)
@@ -175,7 +175,7 @@ int ImuDrivenRobotCore::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDriv
     return 0;
 }
 
-int ImuDrivenRobotCore::setNoisePositionRobotWrtWorld(Eigen::Matrix3d noise_position_robot_wrt_world)
+int ImuDrivenRobotCore::setNoisePositionRobotWrtWorld(const Eigen::Matrix3d &noise_position_robot_wrt_world)
 {
     this->noise_position_robot_wrt_world_=noise_position_robot_wrt_world;
     return 0;
@@ -186,7 +186,7 @@ Eigen::Matrix3d ImuDrivenRobotCore::getNoisePositionRobotWrtWorld()
     return this->noise_position_robot_wrt_world_;
 }
 
-int ImuDrivenRobotCore::setNoiseLinearSpeedRobotWrtWorld(Eigen::Matrix3d noise_linear_speed_robot_wrt_world)
+int ImuDrivenRobotCore::setNoiseLinearSpeedRobotWrtWorld(const Eigen::Matrix3d &noise_linear_speed_robot_wrt_world)
 {
     this->noise_linear_speed_robot_wrt_world_=noise_linear_speed_robot_wrt_world;
     return 0;
@@ -197,7 +197,7 @@ Eigen::Matrix3d ImuDrivenRobotCore::getNoiseLinearSpeedRobotWrtWorld()
     return this->noise_linear_speed_robot_wrt_world_;
 }
 
-int ImuDrivenRobotCore::setNoiseLinearAccelerationRobotWrtWorld(Eigen::Matrix3d noise_linear_acceleration_robot_wrt_world)
+int ImuDrivenRobotCore::setNoiseLinearAccelerationRobotWrtWorld(const Eigen::Matrix3d &noise_linear_acceleration_robot_wrt_world)
 {
     this->noise_linear_acceleration_robot_wrt_world_=noise_linear_acceleration_robot_wrt_world;
     return 0;
@@ -208,7 +208,7 @@ Eigen::Matrix3d ImuDrivenRobotCore::getNoiseLinearAccelerationRobotWrtWorld()
     return this->noise_linear_acceleration_robot_wrt_world_;
 }
 
-int ImuDrivenRobotCore::setNoiseAttitudeRobotWrtWorld(Eigen::Matrix3d noise_attitude_robot_wrt_world)
+int ImuDrivenRobotCore::setNoiseAttitudeRobotWrtWorld(const Eigen::Matrix3d &noise_attitude_robot_wrt_world)
 {
     this->noise_attitude_robot_wrt_world_=noise_attitude_robot_wrt_world;
     return 0;
@@ -219,7 +219,7 @@ Eigen::Matrix3d ImuDrivenRobotCore::getNoiseAttitudeRobotWrtWorld()
     return this->noise_attitude_robot_wrt_world_;
 }
 
-int ImuDrivenRobotCore::setNoiseAngularVelocityRobotWrtWorld(Eigen::Matrix3d noise_angular_velocity_robot_wrt_world)
+int ImuDrivenRobotCore::setNoiseAngularVelocityRobotWrtWorld(const Eigen::Matrix3d &noise_angular_velocity_robot_wrt_world)
 {
     this->noise_angular_velocity_robot_wrt_world_=noise_angular_velocity_robot_wrt_world;
     return 0;

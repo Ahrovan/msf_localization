@@ -18,7 +18,7 @@ RosRobotInterface::~RosRobotInterface()
     return;
 }
 
-int RosRobotInterface::setRobotName(std::string robot_name)
+int RosRobotInterface::setRobotName(const std::string robot_name)
 {
     this->robot_name_=robot_name;
     return 0;

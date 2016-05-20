@@ -19,7 +19,7 @@ RosSensorInterface::~RosSensorInterface()
     return;
 }
 
-int RosSensorInterface::publishTfPoseSensorWrtRobot(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
+int RosSensorInterface::publishTfPoseSensorWrtRobot(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)
 {
     Eigen::Vector3d sensorPosition=sensor_state_core->getPositionSensorWrtRobot();
     Eigen::Vector4d sensorAttitude=sensor_state_core->getAttitudeSensorWrtRobot();

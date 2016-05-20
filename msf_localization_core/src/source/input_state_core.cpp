@@ -11,7 +11,7 @@ InputStateCore::InputStateCore() :
     return;
 }
 
-InputStateCore::InputStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+InputStateCore::InputStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     StateCore(msf_element_core_ptr)
 {
     init();

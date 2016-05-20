@@ -12,7 +12,7 @@ AbsolutePoseSensorStateCore::AbsolutePoseSensorStateCore() :
     return;
 }
 
-AbsolutePoseSensorStateCore::AbsolutePoseSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+AbsolutePoseSensorStateCore::AbsolutePoseSensorStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     SensorStateCore(msf_element_core_ptr)
 {
     init();

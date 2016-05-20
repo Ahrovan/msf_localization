@@ -15,7 +15,7 @@ RobotCore::RobotCore() :
 }
 
 
-RobotCore::RobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+RobotCore::RobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     MsfElementCore(msf_storage_core_ptr)
 {
     init();

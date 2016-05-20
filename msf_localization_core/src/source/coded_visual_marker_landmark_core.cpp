@@ -13,7 +13,7 @@ CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore():
     return;
 }
 
-CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
+CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore(const std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
     MapElementCore(TheMsfStorageCore)
 {
     init();
@@ -64,7 +64,7 @@ int CodedVisualMarkerLandmarkCore::setId(int id)
     return 0;
 }
 
-int CodedVisualMarkerLandmarkCore::readConfig(pugi::xml_node map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore)
+int CodedVisualMarkerLandmarkCore::readConfig(const pugi::xml_node& map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore)
 {
     // Map Element Core Pointer
     //std::shared_ptr<MapElementCore> TheMapElementCore(this);
@@ -231,7 +231,7 @@ Eigen::Matrix3d CodedVisualMarkerLandmarkCore::getCovariancePositionVisualMarker
     return this->covariancePositionVisualMarkerWrtWorld;
 }
 
-int CodedVisualMarkerLandmarkCore::setCovariancePositionVisualMarkerWrtWorld(Eigen::Matrix3d covariancePositionVisualMarkerWrtWorld)
+int CodedVisualMarkerLandmarkCore::setCovariancePositionVisualMarkerWrtWorld(const Eigen::Matrix3d& covariancePositionVisualMarkerWrtWorld)
 {
     this->covariancePositionVisualMarkerWrtWorld=covariancePositionVisualMarkerWrtWorld;
     return 0;
@@ -276,7 +276,7 @@ Eigen::Matrix3d CodedVisualMarkerLandmarkCore::getCovarianceAttitudeVisualMarker
     return this->covarianceAttitudeVisualMarkerWrtWorld;
 }
 
-int CodedVisualMarkerLandmarkCore::setCovarianceAttitudeVisualMarkerWrtWorld(Eigen::Matrix3d covarianceAttitudeVisualMarkerWrtWorld)
+int CodedVisualMarkerLandmarkCore::setCovarianceAttitudeVisualMarkerWrtWorld(const Eigen::Matrix3d &covarianceAttitudeVisualMarkerWrtWorld)
 {
     this->covarianceAttitudeVisualMarkerWrtWorld=covarianceAttitudeVisualMarkerWrtWorld;
     return 0;

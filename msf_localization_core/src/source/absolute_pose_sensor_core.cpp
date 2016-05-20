@@ -16,7 +16,7 @@ AbsolutePoseSensorCore::AbsolutePoseSensorCore() :
     return;
 }
 
-AbsolutePoseSensorCore::AbsolutePoseSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+AbsolutePoseSensorCore::AbsolutePoseSensorCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     SensorCore(the_msf_storage_core)
 {
     //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
@@ -341,8 +341,6 @@ Eigen::SparseMatrix<double> AbsolutePoseSensorCore::getCovarianceMeasurement()
     Eigen::SparseMatrix<double> covariances_matrix;
 
     covariances_matrix.resize(this->getDimensionErrorMeasurement(), this->getDimensionErrorMeasurement());
-    //covariances_matrix.setZero();
-    covariances_matrix.reserve(this->getDimensionErrorMeasurement());
 
     std::vector<Eigen::Triplet<double> > tripletCovarianceMeasurement;
 
@@ -467,7 +465,7 @@ int AbsolutePoseSensorCore::predictState(//Time
 
     // Search for the past sensor State Core
     std::shared_ptr<AbsolutePoseSensorStateCore> past_sensor_state;
-    if(findSensorState(pastState->TheListSensorStateCore, past_sensor_state))
+    if(findState(pastState->TheListSensorStateCore, past_sensor_state))
         return -2;
     if(!past_sensor_state)
         return -10;
@@ -619,7 +617,7 @@ int AbsolutePoseSensorCore::predictErrorStateJacobian(//Time
 
     // Search for the past sensor State Core
     std::shared_ptr<AbsolutePoseSensorStateCore> past_sensor_state;
-    if(findSensorState(past_state->TheListSensorStateCore, past_sensor_state))
+    if(findState(past_state->TheListSensorStateCore, past_sensor_state))
         return -2;
     if(!past_sensor_state)
         return -10;
@@ -907,7 +905,7 @@ int AbsolutePoseSensorCore::predictMeasurement(// Time
 
     // Search for the past sensor State Core
     std::shared_ptr<AbsolutePoseSensorStateCore> current_sensor_state;
-    if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
+    if(findState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
         return -10;
@@ -1158,7 +1156,7 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobian(// Time
 
     // Search for the past sensor State Core
     std::shared_ptr<AbsolutePoseSensorStateCore> current_sensor_state;
-    if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
+    if(findState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
         return -10;
@@ -2029,7 +2027,7 @@ int AbsolutePoseSensorCore::mapMeasurement(// Time
 
     // Sensor State
     std::shared_ptr<AbsolutePoseSensorStateCore> current_sensor_state;
-    if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
+    if(findState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
         return -10;
@@ -2286,7 +2284,7 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurement(// Time
 
     // Sensor State
     std::shared_ptr<AbsolutePoseSensorStateCore> current_sensor_state;
-    if(findSensorState(current_state->TheListSensorStateCore, current_sensor_state))
+    if(findState(current_state->TheListSensorStateCore, current_sensor_state))
         return -2;
     if(!current_sensor_state)
         return -10;
@@ -2796,15 +2794,15 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementCore(// robot wrt world (stat
     return 0;
 }
 
-int AbsolutePoseSensorCore::findSensorState(const std::list<std::shared_ptr<StateCore> > &list_sensors_state, std::shared_ptr<AbsolutePoseSensorStateCore>& sensor_state)
+int AbsolutePoseSensorCore::findState(const std::list<std::shared_ptr<StateCore> > &list_state, std::shared_ptr<AbsolutePoseSensorStateCore>& found_state)
 {
-    for(std::list< std::shared_ptr<StateCore> >::const_iterator it_sensor_state=list_sensors_state.begin();
-        it_sensor_state!=list_sensors_state.end();
-        ++it_sensor_state)
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator it_state=list_state.begin();
+        it_state!=list_state.end();
+        ++it_state)
     {
-        if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
+        if((*it_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            sensor_state=std::dynamic_pointer_cast<AbsolutePoseSensorStateCore>(*it_sensor_state);
+            found_state=std::dynamic_pointer_cast<AbsolutePoseSensorStateCore>(*it_state);
             return 0;
         }
     }

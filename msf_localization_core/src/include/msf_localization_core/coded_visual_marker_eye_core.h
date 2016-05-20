@@ -40,7 +40,7 @@ class CodedVisualMarkerEyeCore : public SensorCore
 {
 public:
     CodedVisualMarkerEyeCore();
-    CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    CodedVisualMarkerEyeCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 public:
     ~CodedVisualMarkerEyeCore();
 

@@ -9,7 +9,7 @@ InputCommandCore::InputCommandCore()
     return;
 }
 
-InputCommandCore::InputCommandCore(std::weak_ptr<InputCore> input_core_ptr)
+InputCommandCore::InputCommandCore(const std::weak_ptr<InputCore> input_core_ptr)
 {
     init();
 
@@ -31,7 +31,7 @@ int InputCommandCore::init()
     return 0;
 }
 
-int InputCommandCore::setInputCorePtr(std::weak_ptr<InputCore> input_core_ptr)
+int InputCommandCore::setInputCorePtr(const std::weak_ptr<InputCore> input_core_ptr)
 {
     this->input_core_ptr_=input_core_ptr;
     return 0;

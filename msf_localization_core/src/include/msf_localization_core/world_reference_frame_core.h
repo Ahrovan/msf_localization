@@ -43,7 +43,7 @@ protected:
 
     /// Configs
 public:
-    int readConfig(pugi::xml_node map_element, std::shared_ptr<WorldReferenceFrameStateCore>& MapElementInitStateCore);
+    int readConfig(const pugi::xml_node& map_element, std::shared_ptr<WorldReferenceFrameStateCore>& MapElementInitStateCore);
 
 
 
@@ -74,7 +74,7 @@ protected:
     Eigen::Matrix3d covariance_position_mocap_world_wrt_world_;
 public:
     Eigen::Matrix3d getCovariancePositionMocapWorldWrtWorld() const;
-    int setCovariancePositionMocapWorldWrtWorld(Eigen::Matrix3d covariance_position_mocap_world_wrt_world);
+    int setCovariancePositionMocapWorldWrtWorld(const Eigen::Matrix3d& covariance_position_mocap_world_wrt_world);
 
 
 
@@ -92,7 +92,7 @@ protected:
     Eigen::Matrix3d covariance_attitude_mocap_world_wrt_world_;
 public:
     Eigen::Matrix3d getCovarianceAttitudeMocapWorldWrtWorld() const;
-    int setCovarianceAttitudeMocapWorldWrtWorld(Eigen::Matrix3d covariance_attitude_mocap_world_wrt_world);
+    int setCovarianceAttitudeMocapWorldWrtWorld(const Eigen::Matrix3d& covariance_attitude_mocap_world_wrt_world);
 
 
 

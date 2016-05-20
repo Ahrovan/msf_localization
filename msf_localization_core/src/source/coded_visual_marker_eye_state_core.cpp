@@ -13,7 +13,7 @@ CodedVisualMarkerEyeStateCore::CodedVisualMarkerEyeStateCore() :
     return;
 }
 
-CodedVisualMarkerEyeStateCore::CodedVisualMarkerEyeStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+CodedVisualMarkerEyeStateCore::CodedVisualMarkerEyeStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     SensorStateCore(msf_element_core_ptr)
 {
     init();

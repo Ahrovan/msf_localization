@@ -17,7 +17,7 @@ class AbsolutePoseSensorStateCore : public SensorStateCore
 {
 public:
     AbsolutePoseSensorStateCore();
-    AbsolutePoseSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    AbsolutePoseSensorStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~AbsolutePoseSensorStateCore();
 
 protected:

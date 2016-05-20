@@ -13,7 +13,7 @@ ImuInputStateCore::ImuInputStateCore() :
     return;
 }
 
-ImuInputStateCore::ImuInputStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+ImuInputStateCore::ImuInputStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     InputStateCore(msf_element_core_ptr)
 {
     init();
@@ -47,7 +47,7 @@ Eigen::Vector3d ImuInputStateCore::getPositionInputWrtRobot() const
     return this->position_input_wrt_robot_;
 }
 
-int ImuInputStateCore::setPositionInputWrtRobot(Eigen::Vector3d position_input_wrt_robot)
+int ImuInputStateCore::setPositionInputWrtRobot(const Eigen::Vector3d &position_input_wrt_robot)
 {
     this->position_input_wrt_robot_=position_input_wrt_robot;
     return 0;
@@ -58,7 +58,7 @@ Eigen::Vector4d ImuInputStateCore::getAttitudeInputWrtRobot() const
     return this->attitude_input_wrt_robot_;
 }
 
-int ImuInputStateCore::setAttitudeInputWrtRobot(Eigen::Vector4d attitude_input_wrt_robot)
+int ImuInputStateCore::setAttitudeInputWrtRobot(const Eigen::Vector4d &attitude_input_wrt_robot)
 {
     this->attitude_input_wrt_robot_=attitude_input_wrt_robot;
     return 0;
@@ -69,7 +69,7 @@ Eigen::Vector3d ImuInputStateCore::getBiasesLinearAcceleration() const
     return this->biases_linear_acceleration_;
 }
 
-int ImuInputStateCore::setBiasesLinearAcceleration(Eigen::Vector3d biases_linear_acceleration)
+int ImuInputStateCore::setBiasesLinearAcceleration(const Eigen::Vector3d &biases_linear_acceleration)
 {
     this->biases_linear_acceleration_=biases_linear_acceleration;
     return 0;
@@ -80,7 +80,7 @@ Eigen::Vector3d ImuInputStateCore::getBiasesAngularVelocity() const
     return this->biases_angular_velocity_;
 }
 
-int ImuInputStateCore::setBiasesAngularVelocity(Eigen::Vector3d biases_angular_velocity)
+int ImuInputStateCore::setBiasesAngularVelocity(const Eigen::Vector3d& biases_angular_velocity)
 {
     this->biases_angular_velocity_=biases_angular_velocity;
     return 0;
@@ -91,7 +91,7 @@ Eigen::Matrix3d ImuInputStateCore::getSensitivityLinearAcceleration() const
     return this->sensitivity_linear_acceleration_;
 }
 
-int ImuInputStateCore::setSensitivityLinearAcceleration(Eigen::Matrix3d sensitivity_linear_acceleration)
+int ImuInputStateCore::setSensitivityLinearAcceleration(const Eigen::Matrix3d& sensitivity_linear_acceleration)
 {
     this->sensitivity_linear_acceleration_=sensitivity_linear_acceleration;
     return 0;
@@ -102,7 +102,7 @@ Eigen::Matrix3d ImuInputStateCore::getSensitivityAngularVelocity() const
     return this->sensitivity_angular_velocity_;
 }
 
-int ImuInputStateCore::setSensitivityAngularVelocity(Eigen::Matrix3d sensitivity_angular_velocity)
+int ImuInputStateCore::setSensitivityAngularVelocity(const Eigen::Matrix3d &sensitivity_angular_velocity)
 {
     this->sensitivity_angular_velocity_=sensitivity_angular_velocity;
     return 0;

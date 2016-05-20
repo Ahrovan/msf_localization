@@ -59,7 +59,7 @@ class RobotCore : public MsfElementCore
 
 public:
     RobotCore();
-    RobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    RobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     ~RobotCore();
 
 protected:

@@ -26,7 +26,7 @@ class SensorStateCore : public StateCore
 {
 public:
     SensorStateCore();
-    SensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    SensorStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~SensorStateCore();
 
 
@@ -54,7 +54,7 @@ public:
     Eigen::Vector3d positionSensorWrtRobot;
 public:
     Eigen::Vector3d getPositionSensorWrtRobot() const;
-    int setPositionSensorWrtRobot(Eigen::Vector3d positionSensorWrtRobot);
+    int setPositionSensorWrtRobot(const Eigen::Vector3d& positionSensorWrtRobot);
 
 
     // attitude
@@ -63,7 +63,7 @@ public:
     Eigen::Vector4d attitudeSensorWrtRobot;
 public:
     Eigen::Vector4d getAttitudeSensorWrtRobot() const;
-    int setAttitudeSensorWrtRobot(Eigen::Vector4d attitudeSensorWrtRobot);
+    int setAttitudeSensorWrtRobot(const Eigen::Vector4d& attitudeSensorWrtRobot);
 
 
 

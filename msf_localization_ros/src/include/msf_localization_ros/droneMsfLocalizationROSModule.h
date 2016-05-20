@@ -97,6 +97,7 @@
 /// ROS Inputs
 // ROS IMU Input
 #include "msf_localization_ros/ros_imu_input_interface.h"
+#include "msf_localization_ros/ros_absolute_pose_input_interface.h"
 
 
 
@@ -165,10 +166,6 @@ public:
 protected:
     int predictThreadFunction();
 
-
-    // Buffer thread manager
-//protected:
-    //int bufferManagerThreadFunction();
 
 
 };

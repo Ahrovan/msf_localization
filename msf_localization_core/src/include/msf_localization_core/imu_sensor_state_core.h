@@ -17,7 +17,7 @@ class ImuSensorStateCore : public SensorStateCore
 {
 public:
     ImuSensorStateCore();
-    ImuSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    ImuSensorStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~ImuSensorStateCore();
 
 protected:

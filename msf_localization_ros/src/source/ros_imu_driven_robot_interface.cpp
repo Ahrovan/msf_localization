@@ -1,7 +1,7 @@
 
 #include "msf_localization_ros/ros_imu_driven_robot_interface.h"
 
-RosImuDrivenRobotInterface::RosImuDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosImuDrivenRobotInterface::RosImuDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     RosRobotInterface(nh, tf_transform_broadcaster),
     ImuDrivenRobotCore(the_msf_storage_core)
 {
@@ -58,7 +58,7 @@ int RosImuDrivenRobotInterface::open()
     return 0;
 }
 
-int RosImuDrivenRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core, Eigen::MatrixXd covariance_robot_matrix)
+int RosImuDrivenRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
 {
     /// tf pose robot wrt world
     this->publishTfPoseRobotWrtWorld(time_stamp, world_core, robot_state_core);
@@ -187,7 +187,7 @@ int RosImuDrivenRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
     return 0;
 }
 
-int RosImuDrivenRobotInterface::publishTfPoseRobotWrtWorld(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core)
+int RosImuDrivenRobotInterface::publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core)
 {
     std::shared_ptr<ImuDrivenRobotStateCore> TheRobotStateCore=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(robot_state_core);
 
@@ -206,7 +206,7 @@ int RosImuDrivenRobotInterface::publishTfPoseRobotWrtWorld(TimeStamp time_stamp,
     return 0;
 }
 
-int RosImuDrivenRobotInterface::readConfig(pugi::xml_node robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_state_core)
+int RosImuDrivenRobotInterface::readConfig(const pugi::xml_node &robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_state_core)
 {
     /// Imu Sensor Configs
     int errorReadConfig=this->ImuDrivenRobotCore::readConfig(robot, robot_state_core);

@@ -13,7 +13,7 @@ ImuSensorCore::ImuSensorCore() :
     return;
 }
 
-ImuSensorCore::ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+ImuSensorCore::ImuSensorCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     SensorCore(the_msf_storage_core)
 {
     //std::cout<<"ImuSensorCore::ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;

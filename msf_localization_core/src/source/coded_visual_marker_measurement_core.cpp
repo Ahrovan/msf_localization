@@ -11,7 +11,7 @@ CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore() :
     return;
 }
 
-CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
+CodedVisualMarkerMeasurementCore::CodedVisualMarkerMeasurementCore(const std::weak_ptr<SensorCore> the_sensor_core) :
     SensorMeasurementCore(the_sensor_core)
 {
     init();

@@ -18,7 +18,7 @@ class FreeModelRobotStateCore : public RobotStateCore
 {
 public:
     FreeModelRobotStateCore();
-    FreeModelRobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    FreeModelRobotStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~FreeModelRobotStateCore();
 
 protected:

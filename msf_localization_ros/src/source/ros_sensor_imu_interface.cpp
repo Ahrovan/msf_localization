@@ -5,7 +5,7 @@
 
 
 
-RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     RosSensorInterface(nh, tf_transform_broadcaster),
     ImuSensorCore(the_msf_storage_core)
 {
@@ -15,7 +15,7 @@ RosSensorImuInterface::RosSensorImuInterface(ros::NodeHandle* nh, tf::TransformB
 
 
 
-int RosSensorImuInterface::setImuTopicName(std::string ImuTopicName)
+int RosSensorImuInterface::setImuTopicName(const std::string ImuTopicName)
 {
     this->ImuTopicName=ImuTopicName;
     return 0;
@@ -115,7 +115,7 @@ int RosSensorImuInterface::setEstimatedBiasLinearAccelerationTopicName(const std
     return 0;
 }
 
-int RosSensorImuInterface::publishEstimatedBiasLinearAcceleration(const TimeStamp& time_stamp, std::shared_ptr<ImuSensorStateCore> sensor_state_core)
+int RosSensorImuInterface::publishEstimatedBiasLinearAcceleration(const TimeStamp& time_stamp, const std::shared_ptr<ImuSensorStateCore> sensor_state_core)
 {
     if(estimated_bias_linear_acceleration_pub_.getNumSubscribers() > 0)
     {
@@ -150,7 +150,7 @@ int RosSensorImuInterface::open()
     return 0;
 }
 
-int RosSensorImuInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
+int RosSensorImuInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)
 {
     // tf pose sensor wrt robot
     this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);
@@ -162,7 +162,7 @@ int RosSensorImuInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobo
     return 0;
 }
 
-int RosSensorImuInterface::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore)
+int RosSensorImuInterface::readConfig(const pugi::xml_node& sensor, unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore)
 {
     /// Imu Sensor Configs
     int errorReadConfig=this->ImuSensorCore::readConfig(sensor, sensorId, SensorInitStateCore);

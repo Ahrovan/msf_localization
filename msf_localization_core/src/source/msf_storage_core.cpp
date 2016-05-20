@@ -179,7 +179,7 @@ int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::
     return 0;
 }
 
-int MsfStorageCore::setInputCommand(const TimeStamp time_stamp, const std::shared_ptr<InputCommandCore> input_command_core)
+int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shared_ptr<InputCommandCore> input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -253,7 +253,7 @@ int MsfStorageCore::setInputCommand(const TimeStamp time_stamp, const std::share
     return 0;
 }
 
-int MsfStorageCore::setInputCommandList(const TimeStamp time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core)
+int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -363,7 +363,7 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
 }
 
 
-int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
+int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -454,7 +454,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(TimeStamp ThePrev
 
 
 
-int MsfStorageCore::getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore> &TheElement)
+int MsfStorageCore::getElement(const TimeStamp &timeStamp, std::shared_ptr<StateEstimationCore> &TheElement)
 {
     //StateEstimationCore BufferElement;
 
@@ -467,7 +467,7 @@ int MsfStorageCore::getElement(const TimeStamp timeStamp, std::shared_ptr<StateE
     return error;
 }
 
-int MsfStorageCore::getNextTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& nextTimeStamp)
+int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& nextTimeStamp)
 {
 
     //std::cout<<"MsfStorageCore::getNextTimeStamp()"<<std::endl;
@@ -524,7 +524,7 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp currentTimeStamp, TimeStamp
     return 0;
 }
 
-int MsfStorageCore::getPreviousTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& previousTimeStamp)
+int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, TimeStamp& previousTimeStamp)
 {
     //StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
     TimeStamp bufferElementTimeStamp;
@@ -578,7 +578,7 @@ int MsfStorageCore::getPreviousTimeStamp(const TimeStamp currentTimeStamp, TimeS
     return 0;
 }
 
-int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core)
+int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
         {
@@ -701,7 +701,7 @@ int MsfStorageCore::getOldestTimeStamp(TimeStamp& oldest_time_stamp)
     return 0;
 }
 
-int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
+int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -797,7 +797,7 @@ int MsfStorageCore::addElement(const TimeStamp TheTimeStamp, const std::shared_p
 }
 
 
-int MsfStorageCore::displayStateEstimationElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
+int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
 {
 
     std::ostringstream logString;
@@ -1124,7 +1124,7 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 }
 
 
-int MsfStorageCore::purgeElementRingBuffer(const TimeStamp TheTimeStamp)
+int MsfStorageCore::purgeElementRingBuffer(const TimeStamp& TheTimeStamp)
 {
 
     TheRingBufferMutex.lock();
@@ -1138,7 +1138,7 @@ int MsfStorageCore::purgeElementRingBuffer(const TimeStamp TheTimeStamp)
 
 
 
-int MsfStorageCore::addOutdatedElement(TimeStamp TheTimeStamp)
+int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
 {
     // Search for duplicates
     std::list<TimeStamp>::iterator duplicate=std::find(outdatedBufferElements.begin(), outdatedBufferElements.end(), TheTimeStamp);

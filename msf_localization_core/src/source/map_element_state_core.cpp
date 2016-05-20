@@ -9,7 +9,7 @@ MapElementStateCore::MapElementStateCore() :
     return;
 }
 
-MapElementStateCore::MapElementStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+MapElementStateCore::MapElementStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     StateCore(msf_element_core_ptr)
 {
     init();

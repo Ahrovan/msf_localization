@@ -28,7 +28,7 @@ public:
 
 
 public:
-    int setInputRos(const sensor_msgs::ImuConstPtr& msg);
+    int setInputCommandRos(const sensor_msgs::ImuConstPtr& msg);
 
 
     // Subscriber
@@ -38,7 +38,7 @@ protected:
     ros::Subscriber imu_topic_subs_;
     void imuTopicCallback(const sensor_msgs::ImuConstPtr& msg);
 public:
-    int setImuTopicName(std::string imu_topic_name);
+    int setImuTopicName(const std::string imu_topic_name);
 
 
 public:
@@ -48,7 +48,7 @@ public:
     int publish();
 
 public:
-    int readConfig(pugi::xml_node input, std::shared_ptr<ImuInputStateCore>& init_state_core);
+    int readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInputStateCore>& init_state_core);
 
 
 

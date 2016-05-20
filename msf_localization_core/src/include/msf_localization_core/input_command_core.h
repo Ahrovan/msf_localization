@@ -16,6 +16,7 @@ enum class InputCommandTypes
 {
     undefined=0,
     imu=1,
+    absolute_pose
 };
 
 
@@ -23,7 +24,7 @@ class InputCommandCore
 {
 public:
     InputCommandCore();
-    InputCommandCore(std::weak_ptr<InputCore> input_core_ptr);
+    InputCommandCore(const std::weak_ptr<InputCore> input_core_ptr);
     ~InputCommandCore();
 
 protected:
@@ -33,7 +34,7 @@ protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer
     std::weak_ptr<InputCore> input_core_ptr_;
 public:
-    int setInputCorePtr(std::weak_ptr<InputCore> input_core_ptr);
+    int setInputCorePtr(const std::weak_ptr<InputCore> input_core_ptr);
     std::weak_ptr<InputCore> getInputCoreWeakPtr() const;
     std::shared_ptr<InputCore> getInputCoreSharedPtr() const;
 

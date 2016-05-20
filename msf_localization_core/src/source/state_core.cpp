@@ -9,7 +9,7 @@ StateCore::StateCore()
     return;
 }
 
-StateCore::StateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr)
+StateCore::StateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr)
 {
     init();
 
@@ -31,7 +31,7 @@ int StateCore::init()
     return 0;
 }
 
-int StateCore::setMsfElementCorePtr(std::weak_ptr<MsfElementCore> msf_element_core_ptr)
+int StateCore::setMsfElementCorePtr(const std::weak_ptr<MsfElementCore> msf_element_core_ptr)
 {
     this->msf_element_core_ptr_=msf_element_core_ptr;
     return 0;

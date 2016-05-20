@@ -32,7 +32,7 @@ class GlobalParametersCore : public MsfElementCore
 
 public:
     GlobalParametersCore();
-    GlobalParametersCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    GlobalParametersCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     virtual ~GlobalParametersCore();
 
 

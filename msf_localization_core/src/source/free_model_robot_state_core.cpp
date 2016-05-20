@@ -12,7 +12,7 @@ FreeModelRobotStateCore::FreeModelRobotStateCore() :
     return;
 }
 
-FreeModelRobotStateCore::FreeModelRobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+FreeModelRobotStateCore::FreeModelRobotStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     RobotStateCore(msf_element_core_ptr)
 {
     init();

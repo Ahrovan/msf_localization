@@ -16,7 +16,7 @@ class MapElementStateCore : public StateCore
 {
 public:
     MapElementStateCore();
-    MapElementStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    MapElementStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~MapElementStateCore();
 
 

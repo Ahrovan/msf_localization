@@ -16,7 +16,7 @@ class GlobalParametersStateCore : public StateCore
 
 public:
     GlobalParametersStateCore();
-    GlobalParametersStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    GlobalParametersStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~GlobalParametersStateCore();
 
 protected:

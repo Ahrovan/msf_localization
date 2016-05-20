@@ -26,7 +26,7 @@ class SensorMeasurementCore
 {
 public:
     SensorMeasurementCore();
-    SensorMeasurementCore(std::weak_ptr<SensorCore> sensor_core_ptr);
+    SensorMeasurementCore(const std::weak_ptr<SensorCore> sensor_core_ptr);
     ~SensorMeasurementCore();
 
 protected:
@@ -36,7 +36,7 @@ protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer
     std::weak_ptr<SensorCore> sensor_core_ptr_;
 public:
-    int setSensorCorePtr(std::weak_ptr<SensorCore> sensor_core_ptr);
+    int setSensorCorePtr(const std::weak_ptr<SensorCore> sensor_core_ptr);
     std::weak_ptr<SensorCore> getSensorCoreWeakPtr() const;
     std::shared_ptr<SensorCore> getSensorCoreSharedPtr() const;
 

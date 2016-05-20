@@ -10,7 +10,7 @@ FreeModelRobotCore::FreeModelRobotCore() :
     return;
 }
 
-FreeModelRobotCore::FreeModelRobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+FreeModelRobotCore::FreeModelRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     RobotCore(msf_storage_core_ptr)
 {
     init();

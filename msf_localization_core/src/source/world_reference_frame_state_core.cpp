@@ -13,7 +13,7 @@ WorldReferenceFrameStateCore::WorldReferenceFrameStateCore() :
     return;
 }
 
-WorldReferenceFrameStateCore::WorldReferenceFrameStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+WorldReferenceFrameStateCore::WorldReferenceFrameStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     MapElementStateCore(msf_element_core_ptr)
 {
     init();
@@ -37,7 +37,7 @@ Eigen::Vector3d WorldReferenceFrameStateCore::getPositionMocapWorldWrtWorld() co
     return this->position_mocap_world_wrt_world_;
 }
 
-int WorldReferenceFrameStateCore::setPositionMocapWorldWrtWorld(Eigen::Vector3d position_mocap_world_wrt_world)
+int WorldReferenceFrameStateCore::setPositionMocapWorldWrtWorld(const Eigen::Vector3d &position_mocap_world_wrt_world)
 {
     this->position_mocap_world_wrt_world_=position_mocap_world_wrt_world;
     return 0;
@@ -48,7 +48,7 @@ Eigen::Vector4d WorldReferenceFrameStateCore::getAttitudeMocapWorldWrtWorld() co
     return this->attitude_mocap_world_wrt_world_;
 }
 
-int WorldReferenceFrameStateCore::setAttitudeMocapWorldWrtWorld(Eigen::Vector4d attitude_mocap_world_wrt_world)
+int WorldReferenceFrameStateCore::setAttitudeMocapWorldWrtWorld(const Eigen::Vector4d& attitude_mocap_world_wrt_world)
 {
     this->attitude_mocap_world_wrt_world_=attitude_mocap_world_wrt_world;
     return 0;

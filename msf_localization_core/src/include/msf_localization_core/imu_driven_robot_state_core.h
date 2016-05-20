@@ -19,7 +19,7 @@ class ImuDrivenRobotStateCore : public RobotStateCore
 {
 public:
     ImuDrivenRobotStateCore();
-    ImuDrivenRobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    ImuDrivenRobotStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~ImuDrivenRobotStateCore();
 
 protected:

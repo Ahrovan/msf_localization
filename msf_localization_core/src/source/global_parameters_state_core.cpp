@@ -11,7 +11,7 @@ GlobalParametersStateCore::GlobalParametersStateCore() :
     return;
 }
 
-GlobalParametersStateCore::GlobalParametersStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+GlobalParametersStateCore::GlobalParametersStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     StateCore(msf_element_core_ptr)
 {
     init();

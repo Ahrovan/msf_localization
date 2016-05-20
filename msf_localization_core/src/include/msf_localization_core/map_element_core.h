@@ -57,7 +57,7 @@ class MapElementCore : public MsfElementCore
 
 public:
     MapElementCore();
-    MapElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    MapElementCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     ~MapElementCore();
 
 protected:

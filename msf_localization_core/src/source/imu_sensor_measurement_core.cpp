@@ -12,7 +12,7 @@ ImuSensorMeasurementCore::ImuSensorMeasurementCore() :
     return;
 }
 
-ImuSensorMeasurementCore::ImuSensorMeasurementCore(std::weak_ptr<SensorCore> TheSensorCorePtr) :
+ImuSensorMeasurementCore::ImuSensorMeasurementCore(const std::weak_ptr<SensorCore> TheSensorCorePtr) :
     SensorMeasurementCore(TheSensorCorePtr)
 {
     init();

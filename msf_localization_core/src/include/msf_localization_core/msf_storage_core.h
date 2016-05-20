@@ -112,7 +112,7 @@ protected:
 
     // Get element in the ring buffer (safe)
 public:
-    int getElement(const TimeStamp timeStamp, std::shared_ptr<StateEstimationCore>& TheElement);
+    int getElement(const TimeStamp& timeStamp, std::shared_ptr<StateEstimationCore>& TheElement);
 
     // Get the last element in the ring buffer which has a state estimate (safe)
     // Unuseful for the predict -> We need the previous to a defined timestamp!
@@ -121,19 +121,19 @@ public:
 
     // Get the previous element of a timestamp in the ring buffer which has a state estimate (safe)
 public:
-    int getPreviousElementWithStateEstimateByStamp(TimeStamp ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
+    int getPreviousElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
 
     // Get next timestap (safe)
 public:
-    int getNextTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& nextTimeStamp);
+    int getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& nextTimeStamp);
 
     // Get previous timestamp
 public:
-    int getPreviousTimeStamp(const TimeStamp currentTimeStamp, TimeStamp& previousTimeStamp);
+    int getPreviousTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& previousTimeStamp);
 
     // Get the previous input by stamp using the input core
 public:
-    int getPreviousInputCommandByStampAndInputCore(const TimeStamp time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core);
+    int getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core);
 
     // Get oldest time stamp
 public:
@@ -142,7 +142,7 @@ public:
 
     // Add element in the ring buffer by stamp (safe)
 public:
-    int addElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore);
+    int addElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore);
 
     // Set a measurement in the ring buffer with given time stamp (safe)
 public:
@@ -152,8 +152,8 @@ public:
 
     // Set an input command in the ring buffer with given time stamp (safe)
 public:
-    int setInputCommand(const TimeStamp time_stamp, const std::shared_ptr<InputCommandCore> input_command_core);
-    int setInputCommandList(const TimeStamp time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core);
+    int setInputCommand(const TimeStamp& time_stamp, const std::shared_ptr<InputCommandCore> input_command_core);
+    int setInputCommandList(const TimeStamp& time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core);
 
 
 
@@ -161,14 +161,14 @@ public:
 public:
     int purgeRingBuffer(int numElementsFrom);
 
-    int purgeElementRingBuffer(const TimeStamp TheTimeStamp);
+    int purgeElementRingBuffer(const TimeStamp& TheTimeStamp);
 
 
 
     // Display Elements in the ring buffer (safe)
 public:
     int displayRingBuffer();
-    int displayStateEstimationElement(const TimeStamp TheTimeStamp, const std::shared_ptr<StateEstimationCore>  TheStateEstimationCore);
+    int displayStateEstimationElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore>  TheStateEstimationCore);
 
 
 
@@ -177,7 +177,7 @@ public:
 protected:
     std::list<TimeStamp> outdatedBufferElements;
 public:
-    int addOutdatedElement(TimeStamp TheTimeStamp);
+    int addOutdatedElement(const TimeStamp& TheTimeStamp);
     int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp);
 public:
     int displayOutdatedBufferElements();

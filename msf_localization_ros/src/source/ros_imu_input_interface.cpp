@@ -15,7 +15,7 @@ RosImuInputInterface::~RosImuInputInterface()
     return;
 }
 
-int RosImuInputInterface::setInputRos(const sensor_msgs::ImuConstPtr& msg)
+int RosImuInputInterface::setInputCommandRos(const sensor_msgs::ImuConstPtr& msg)
 {
     if(!isInputEnabled())
         return 0;
@@ -82,12 +82,12 @@ int RosImuInputInterface::setInputRos(const sensor_msgs::ImuConstPtr& msg)
 
 void RosImuInputInterface::imuTopicCallback(const sensor_msgs::ImuConstPtr& msg)
 {
-    this->setInputRos(msg);
+    this->setInputCommandRos(msg);
 
     return;
 }
 
-int RosImuInputInterface::setImuTopicName(std::string imu_topic_name)
+int RosImuInputInterface::setImuTopicName(const std::string imu_topic_name)
 {
     this->imu_topic_name_=imu_topic_name;
     return 0;
@@ -108,7 +108,7 @@ int RosImuInputInterface::publish()
     return 0;
 }
 
-int RosImuInputInterface::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputStateCore>& init_state_core)
+int RosImuInputInterface::readConfig(const pugi::xml_node &input, std::shared_ptr<ImuInputStateCore>& init_state_core)
 {
     /// Imu Sensor Configs
     int error_read_config=this->ImuInputCore::readConfig(input, init_state_core);

@@ -17,7 +17,7 @@ class AbsolutePoseInputStateCore : public InputStateCore
 {
 public:
     AbsolutePoseInputStateCore();
-    AbsolutePoseInputStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    AbsolutePoseInputStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~AbsolutePoseInputStateCore();
 
 protected:
@@ -26,7 +26,31 @@ protected:
 
 
     ///// State and parameters
-    // none
+    // xI=[posi_Input_wrt_robot, atti_Input_wrt_robot]
+
+
+    // Input World
+
+
+
+    // Pose of the input wrt robot
+    // position of the input wrt robot
+protected:
+public:
+    Eigen::Vector3d position_input_wrt_robot_;
+public:
+    Eigen::Vector3d getPositionInputWrtRobot() const;
+    int setPositionInputWrtRobot(const Eigen::Vector3d& position_input_wrt_robot);
+
+
+    // attitude of the input wrt robot
+protected:
+public:
+    Eigen::Vector4d attitude_input_wrt_robot_;
+public:
+    Eigen::Vector4d getAttitudeInputWrtRobot() const;
+    int setAttitudeInputWrtRobot(const Eigen::Vector4d& attitude_input_wrt_robot);
+
 
 
 

@@ -25,7 +25,7 @@ class StateCore
 {
 public:
     StateCore();
-    StateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    StateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~StateCore();
 
 
@@ -39,7 +39,7 @@ protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer
     std::weak_ptr<MsfElementCore> msf_element_core_ptr_;
 public:
-    int setMsfElementCorePtr(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    int setMsfElementCorePtr(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     std::shared_ptr<MsfElementCore> getMsfElementCoreSharedPtr() const;
     std::weak_ptr<MsfElementCore> getMsfElementCoreWeakPtr() const;
 

@@ -11,7 +11,7 @@ class CodedVisualMarkerMeasurementCore : public SensorMeasurementCore
 {
 public:
     CodedVisualMarkerMeasurementCore();
-    CodedVisualMarkerMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core);
+    CodedVisualMarkerMeasurementCore(const std::weak_ptr<SensorCore> the_sensor_core);
 public:
     ~CodedVisualMarkerMeasurementCore();
 

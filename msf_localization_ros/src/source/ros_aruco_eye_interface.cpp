@@ -1,7 +1,7 @@
 #include "msf_localization_ros/ros_aruco_eye_interface.h"
 
 
-RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     RosSensorInterface(nh, tf_transform_broadcaster),
     CodedVisualMarkerEyeCore(the_msf_storage_core)
 {
@@ -10,7 +10,7 @@ RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBro
     return;
 }
 
-int RosArucoEyeInterface::setMarkerListTopicName(std::string marker_list_topic_name)
+int RosArucoEyeInterface::setMarkerListTopicName(const std::string marker_list_topic_name)
 {
     this->marker_list_topic_name_=marker_list_topic_name;
     return 0;
@@ -122,7 +122,7 @@ int RosArucoEyeInterface::open()
     return 0;
 }
 
-int RosArucoEyeInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
+int RosArucoEyeInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)
 {
     // tf pose sensor wrt robot
     this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);
@@ -131,7 +131,7 @@ int RosArucoEyeInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobot
     return 0;
 }
 
-int RosArucoEyeInterface::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore)
+int RosArucoEyeInterface::readConfig(const pugi::xml_node& sensor, unsigned int sensorId, std::shared_ptr<CodedVisualMarkerEyeStateCore>& SensorInitStateCore)
 {
     /// Sensor General Configs
     int errorReadConfig=this->CodedVisualMarkerEyeCore::readConfig(sensor, sensorId, SensorInitStateCore);

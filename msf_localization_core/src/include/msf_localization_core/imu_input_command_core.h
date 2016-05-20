@@ -16,7 +16,7 @@ class ImuInputCommandCore : public InputCommandCore
 {
 public:
     ImuInputCommandCore();
-    ImuInputCommandCore(std::weak_ptr<InputCore> input_core_ptr);
+    ImuInputCommandCore(const std::weak_ptr<InputCore> input_core_ptr);
     ~ImuInputCommandCore();
 
 protected:
@@ -29,7 +29,7 @@ protected:
 protected:
     Eigen::Vector4d orientation_;
 public:
-    int setOrientation(const Eigen::Vector4d orientation);
+    int setOrientation(const Eigen::Vector4d& orientation);
     Eigen::Vector4d getOrientation() const;
 
 
@@ -37,7 +37,7 @@ public:
 protected:
     Eigen::Vector3d angular_velocity_;
 public:
-    int setAngularVelocity(Eigen::Vector3d angular_velocity);
+    int setAngularVelocity(const Eigen::Vector3d& angular_velocity);
     Eigen::Vector3d getAngularVelocity() const;
 
 
@@ -45,7 +45,7 @@ public:
 protected:
     Eigen::Vector3d linear_acceleration_;
 public:
-    int setLinearAcceleration(Eigen::Vector3d linear_acceleration);
+    int setLinearAcceleration(const Eigen::Vector3d& linear_acceleration);
     Eigen::Vector3d getLinearAcceleration() const;
 
 

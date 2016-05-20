@@ -19,14 +19,14 @@ class ImuInputCore : public InputCore
 {
 public:
     ImuInputCore();
-    ImuInputCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    ImuInputCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
     ~ImuInputCore();
 
 protected:
     int init();
 
 public:
-    int readConfig(pugi::xml_node input, std::shared_ptr<ImuInputStateCore>& init_state_core);
+    int readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInputStateCore>& init_state_core);
 
 
 
@@ -60,7 +60,7 @@ protected:
     Eigen::Matrix3d noise_input_command_angular_velocity_;
 public:
     Eigen::Matrix3d getNoiseInputCommandAngularVelocity() const;
-    int setNoiseInputCommandAngularVelocity(Eigen::Matrix3d noise_input_command_angular_velocity);
+    int setNoiseInputCommandAngularVelocity(const Eigen::Matrix3d& noise_input_command_angular_velocity);
 
 
     /// Linear Acceleration Input Command
@@ -75,12 +75,12 @@ protected:
     Eigen::Matrix3d noise_input_command_linear_acceleration_;
 public:
     Eigen::Matrix3d getNoiseInputCommandLinearAcceleration() const;
-    int setNoiseInputCommandLinearAcceleration(Eigen::Matrix3d noise_input_command_linear_acceleration);
+    int setNoiseInputCommandLinearAcceleration(const Eigen::Matrix3d& noise_input_command_linear_acceleration);
 
 
     /// Store Input Command
 public:
-    int setInputCommand(const TimeStamp time_stamp, std::shared_ptr<ImuInputCommandCore> imu_input_command_core);
+    int setInputCommand(const TimeStamp& time_stamp, const std::shared_ptr<ImuInputCommandCore> imu_input_command_core);
 
 
 
@@ -106,7 +106,7 @@ protected:
     Eigen::Matrix3d noise_position_input_wrt_robot_;
 public:
     Eigen::Matrix3d getNoisePositionInputWrtRobot() const;
-    int setNoisePositionInputWrtRobot(Eigen::Matrix3d noise_position_input_wrt_robot);
+    int setNoisePositionInputWrtRobot(const Eigen::Matrix3d& noise_position_input_wrt_robot);
 
 
 
@@ -125,7 +125,7 @@ protected:
     Eigen::Matrix3d noise_attitude_input_wrt_robot_;
 public:
     Eigen::Matrix3d getNoiseAttitudeInputWrtRobot() const;
-    int setNoiseAttitudeInputWrtRobot(Eigen::Matrix3d noise_attitude_input_wrt_robot);
+    int setNoiseAttitudeInputWrtRobot(const Eigen::Matrix3d& noise_attitude_input_wrt_robot);
 
 
 
@@ -145,7 +145,7 @@ protected:
     Eigen::Matrix3d noise_bias_linear_acceleration_;
 public:
     Eigen::Matrix3d getNoiseBiasLinearAcceleration() const;
-    int setNoiseBiasLinearAcceleration(Eigen::Matrix3d noise_bias_linear_acceleration);
+    int setNoiseBiasLinearAcceleration(const Eigen::Matrix3d& noise_bias_linear_acceleration);
 
 
     // Linear Acceleration biases: estimation covariance (if enabled estimation -> used)
@@ -153,7 +153,7 @@ protected:
     Eigen::Matrix3d noise_estimation_bias_linear_acceleration_;
 public:
     Eigen::Matrix3d getNoiseEstimationBiasLinearAcceleration() const;
-    int setNoiseEstimationBiasLinearAcceleration(Eigen::Matrix3d noise_estimation_bias_linear_acceleration);
+    int setNoiseEstimationBiasLinearAcceleration(const Eigen::Matrix3d& noise_estimation_bias_linear_acceleration);
 
 
 
@@ -173,7 +173,7 @@ protected:
     Eigen::Matrix3d noise_bias_angular_velocity_;
 public:
     Eigen::Matrix3d getNoiseBiasAngularVelocity() const;
-    int setNoiseBiasAngularVelocity(Eigen::Matrix3d noise_bias_angular_velocity);
+    int setNoiseBiasAngularVelocity(const Eigen::Matrix3d& noise_bias_angular_velocity);
 
 
     // Angular Velocity biases: Estimation Covariance (if enabled estimation -> used)
@@ -181,7 +181,7 @@ protected:
     Eigen::Matrix3d noise_estimation_bias_angular_velocity_;
 public:
     Eigen::Matrix3d getNoiseEstimationBiasAngularVelocity() const;
-    int setNoiseEstimationBiasAngularVelocity(Eigen::Matrix3d noise_estimation_bias_angular_velocity);
+    int setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noise_estimation_bias_angular_velocity);
 
 
 
@@ -203,7 +203,7 @@ protected:
     Eigen::MatrixXd noise_sensitivity_linear_acceleration_;
 public:
     Eigen::MatrixXd getNoiseSensitivityLinearAcceleration() const;
-    int setNoiseSensitivityLinearAcceleration(Eigen::Matrix3d noise_sensitivity_linear_acceleration);
+    int setNoiseSensitivityLinearAcceleration(const Eigen::Matrix3d& noise_sensitivity_linear_acceleration);
 
 
     // Linear acceleration sensitivity: Estimation Covariance (if enabled estimation -> used)
@@ -229,7 +229,7 @@ protected:
     Eigen::Matrix3d noise_sensitivity_angular_velocity_;
 public:
     Eigen::Matrix3d getNoiseSensitivityAngularVelocity() const;
-    int setNoiseSensitivityAngularVelocity(Eigen::Matrix3d noise_sensitivity_angular_velocity);
+    int setNoiseSensitivityAngularVelocity(const Eigen::Matrix3d& noise_sensitivity_angular_velocity);
 
 
     // Angular Velocity sensitivity: Estimation Covariance (if enabled estimation -> used)

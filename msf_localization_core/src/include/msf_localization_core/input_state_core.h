@@ -15,7 +15,8 @@
 enum class InputStateCoreTypes
 {
     undefined=0,
-    imu=1
+    imu=1,
+    absolute_pose
 };
 
 
@@ -25,7 +26,7 @@ class InputStateCore : public StateCore
 {
 public:
     InputStateCore();
-    InputStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    InputStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~InputStateCore();
 
 

@@ -10,7 +10,7 @@ class AbsolutePoseSensorMeasurementCore : public SensorMeasurementCore
 {
 public:
     AbsolutePoseSensorMeasurementCore();
-    AbsolutePoseSensorMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core);
+    AbsolutePoseSensorMeasurementCore(const std::weak_ptr<SensorCore> the_sensor_core);
 public:
     ~AbsolutePoseSensorMeasurementCore();
 

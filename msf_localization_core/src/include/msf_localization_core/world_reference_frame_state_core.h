@@ -21,7 +21,7 @@ class WorldReferenceFrameStateCore : public MapElementStateCore
 {
 public:
     WorldReferenceFrameStateCore();
-    WorldReferenceFrameStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    WorldReferenceFrameStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~WorldReferenceFrameStateCore();
 
 protected:
@@ -35,7 +35,7 @@ public:
     Eigen::Vector3d position_mocap_world_wrt_world_;
 public:
     Eigen::Vector3d getPositionMocapWorldWrtWorld() const;
-    int setPositionMocapWorldWrtWorld(Eigen::Vector3d position_mocap_world_wrt_world);
+    int setPositionMocapWorldWrtWorld(const Eigen::Vector3d& position_mocap_world_wrt_world);
 
 
 
@@ -44,7 +44,7 @@ public:
     Eigen::Vector4d attitude_mocap_world_wrt_world_;
 public:
     Eigen::Vector4d getAttitudeMocapWorldWrtWorld() const;
-    int setAttitudeMocapWorldWrtWorld(Eigen::Vector4d attitudemocap_world_wrt_world);
+    int setAttitudeMocapWorldWrtWorld(const Eigen::Vector4d& attitudemocap_world_wrt_world);
 
 
 

@@ -16,7 +16,7 @@ SensorCore::SensorCore() :
     return;
 }
 
-SensorCore::SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+SensorCore::SensorCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     SensorBasics(),
     MsfElementCore(msf_storage_core_ptr)
 {
@@ -120,7 +120,7 @@ Eigen::Matrix3d SensorCore::getNoiseAttitudeSensorWrtRobot() const
     return this->noiseAttitudeSensorWrtRobot;
 }
 
-int SensorCore::setNoiseAttitudeSensorWrtRobot(Eigen::Matrix3d noiseAttitudeSensorWrtRobot)
+int SensorCore::setNoiseAttitudeSensorWrtRobot(const Eigen::Matrix3d &noiseAttitudeSensorWrtRobot)
 {
     this->noiseAttitudeSensorWrtRobot=noiseAttitudeSensorWrtRobot;
     return 0;
@@ -174,7 +174,7 @@ Eigen::Matrix3d SensorCore::getNoisePositionSensorWrtRobot() const
     return this->noisePositionSensorWrtRobot;
 }
 
-int SensorCore::setNoisePositionSensorWrtRobot(Eigen::Matrix3d noisePositionSensorWrtRobot)
+int SensorCore::setNoisePositionSensorWrtRobot(const Eigen::Matrix3d &noisePositionSensorWrtRobot)
 {
     this->noisePositionSensorWrtRobot=noisePositionSensorWrtRobot;
     return 0;

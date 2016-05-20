@@ -39,7 +39,8 @@
 enum class InputTypes
 {
     undefined=0,
-    imu=1
+    imu=1,
+    absolute_pose
 };
 
 
@@ -53,7 +54,7 @@ class InputCore : public MsfElementCore
 
 public:
     InputCore();
-    InputCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    InputCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     ~InputCore();
 
 protected:

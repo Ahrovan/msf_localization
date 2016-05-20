@@ -36,7 +36,7 @@ class ImuSensorCore : public SensorCore
 {
 public:
     ImuSensorCore();
-    ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    ImuSensorCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
     ~ImuSensorCore();
 
 

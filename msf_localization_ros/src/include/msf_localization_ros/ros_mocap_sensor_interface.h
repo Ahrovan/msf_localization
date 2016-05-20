@@ -29,7 +29,7 @@
 class RosMocapSensorInterface : public RosSensorInterface, public AbsolutePoseSensorCore
 {
 public:
-    RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 
 
 
@@ -44,7 +44,7 @@ protected:
     ros::Subscriber measurement_mocap_sensor_wrt_mocap_world_list_sub_;
     void measurementMocapSensorWrtMocapWorldCallback(const geometry_msgs::PoseStampedPtr& msg);
 public:
-    int setMeasurementMocapSensorWrtMocapWorldTopicName(std::string measurement_mocap_sensor_wrt_mocap_world_topic_name);
+    int setMeasurementMocapSensorWrtMocapWorldTopicName(const std::string measurement_mocap_sensor_wrt_mocap_world_topic_name);
 
 
 public:
@@ -52,11 +52,11 @@ public:
 
 
 public:
-    int publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core);
+    int publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core);
 
 
 public:
-    int readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore);
+    int readConfig(const pugi::xml_node& sensor, unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore);
 
 };
 

@@ -43,7 +43,7 @@
 class RosFreeModelRobotInterface : public RosRobotInterface, public FreeModelRobotCore
 {
 public:
-    RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
     ~RosFreeModelRobotInterface();
 
 
@@ -121,15 +121,15 @@ public:
 
 
 public:
-    int publish(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core, Eigen::MatrixXd covariance_robot_matrix);
+    int publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix);
 
 
 protected:
-    int publishTfPoseRobotWrtWorld(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core);
+    int publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore>& world_core, const std::shared_ptr<RobotStateCore>& robot_state_core);
 
 
 public:
-    int readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& robot_state_core);
+    int readConfig(const pugi::xml_node& robot, std::shared_ptr<FreeModelRobotStateCore>& robot_state_core);
 
 
 };

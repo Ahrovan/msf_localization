@@ -1,7 +1,7 @@
 #include "msf_localization_ros/ros_mocap_sensor_interface.h"
 
 
-RosMocapSensorInterface::RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosMocapSensorInterface::RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     RosSensorInterface(nh, tf_transform_broadcaster),
     AbsolutePoseSensorCore(the_msf_storage_core)
 {
@@ -96,7 +96,7 @@ int RosMocapSensorInterface::open()
     return 0;
 }
 
-int RosMocapSensorInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRobotInterface> robot_core, std::shared_ptr<SensorStateCore> sensor_state_core)
+int RosMocapSensorInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)
 {
     // tf pose sensor wrt robot
     this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);
@@ -105,7 +105,7 @@ int RosMocapSensorInterface::publish(TimeStamp time_stamp, std::shared_ptr<RosRo
     return 0;
 }
 
-int RosMocapSensorInterface::readConfig(pugi::xml_node sensor, unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore)
+int RosMocapSensorInterface::readConfig(const pugi::xml_node& sensor, unsigned int sensorId, std::shared_ptr<AbsolutePoseSensorStateCore>& SensorInitStateCore)
 {
     /// Sensor General Configs
     int errorReadConfig=this->AbsolutePoseSensorCore::readConfig(sensor, sensorId, SensorInitStateCore);

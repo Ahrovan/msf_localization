@@ -11,7 +11,7 @@ AbsolutePoseSensorMeasurementCore::AbsolutePoseSensorMeasurementCore() :
     return;
 }
 
-AbsolutePoseSensorMeasurementCore::AbsolutePoseSensorMeasurementCore(std::weak_ptr<SensorCore> the_sensor_core) :
+AbsolutePoseSensorMeasurementCore::AbsolutePoseSensorMeasurementCore(const std::weak_ptr<SensorCore> the_sensor_core) :
     SensorMeasurementCore(the_sensor_core)
 {
     init();

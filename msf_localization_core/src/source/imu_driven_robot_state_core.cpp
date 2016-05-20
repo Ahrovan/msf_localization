@@ -13,7 +13,7 @@ ImuDrivenRobotStateCore::ImuDrivenRobotStateCore() :
     return;
 }
 
-ImuDrivenRobotStateCore::ImuDrivenRobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+ImuDrivenRobotStateCore::ImuDrivenRobotStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     RobotStateCore(msf_element_core_ptr)
 {
     init();

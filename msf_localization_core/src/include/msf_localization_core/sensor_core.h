@@ -46,7 +46,7 @@ class SensorCore : public SensorBasics, public MsfElementCore
 {
 public:
     SensorCore();
-    SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    SensorCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     ~SensorCore();
 
 
@@ -90,7 +90,7 @@ protected:
     Eigen::Matrix3d noiseAttitudeSensorWrtRobot;
 public:
     Eigen::Matrix3d getNoiseAttitudeSensorWrtRobot() const;
-    int setNoiseAttitudeSensorWrtRobot(Eigen::Matrix3d noiseAttitudeSensorWrtRobot);
+    int setNoiseAttitudeSensorWrtRobot(const Eigen::Matrix3d& noiseAttitudeSensorWrtRobot);
 
 
 
@@ -109,7 +109,7 @@ protected:
     Eigen::Matrix3d noisePositionSensorWrtRobot;
 public:
     Eigen::Matrix3d getNoisePositionSensorWrtRobot() const;
-    int setNoisePositionSensorWrtRobot(Eigen::Matrix3d noisePositionSensorWrtRobot);
+    int setNoisePositionSensorWrtRobot(const Eigen::Matrix3d& noisePositionSensorWrtRobot);
 
 
 

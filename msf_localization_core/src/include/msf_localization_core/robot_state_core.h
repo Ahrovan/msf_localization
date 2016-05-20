@@ -26,7 +26,7 @@ class RobotStateCore : public StateCore
 {
 public:
     RobotStateCore();
-    RobotStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    RobotStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
     ~RobotStateCore();
 
 

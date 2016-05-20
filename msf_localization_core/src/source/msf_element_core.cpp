@@ -10,7 +10,7 @@ MsfElementCore::MsfElementCore()
     return;
 }
 
-MsfElementCore::MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
+MsfElementCore::MsfElementCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
 {
     //std::cout<<"MsfElementCore::MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
 
@@ -75,7 +75,7 @@ MsfElementCoreTypes MsfElementCore::getMsfElementCoreType() const
     return this->msf_element_core_type_;
 }
 
-int MsfElementCore::setMsfElementCorePtr(std::weak_ptr<MsfElementCore> msf_element_core_ptr)
+int MsfElementCore::setMsfElementCorePtr(const std::weak_ptr<MsfElementCore> msf_element_core_ptr)
 {
     this->msf_element_core_ptr_=msf_element_core_ptr;
     return 0;
@@ -92,7 +92,7 @@ std::shared_ptr<MsfElementCore> MsfElementCore::getMsfElementCoreSharedPtr() con
     return msf_element_core_ptr;
 }
 
-int MsfElementCore::setMsfStorageCorePtr(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
+int MsfElementCore::setMsfStorageCorePtr(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
 {
     this->msf_storage_core_ptr_=msf_storage_core_ptr;
     return 0;

@@ -13,7 +13,7 @@ ImuInputCore::ImuInputCore() :
     return;
 }
 
-ImuInputCore::ImuInputCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+ImuInputCore::ImuInputCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     InputCore(the_msf_storage_core)
 {
     init();
@@ -81,7 +81,7 @@ int ImuInputCore::init()
     return 0;
 }
 
-int ImuInputCore::readConfig(pugi::xml_node input, std::shared_ptr<ImuInputStateCore>& init_state_core)
+int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInputStateCore>& init_state_core)
 {
     // Create a class for the SensorStateCore
     if(!init_state_core)
@@ -419,7 +419,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseInputCommandAngularVelocity() const
     return this->noise_input_command_angular_velocity_;
 }
 
-int ImuInputCore::setNoiseInputCommandAngularVelocity(Eigen::Matrix3d noise_input_command_angular_velocity)
+int ImuInputCore::setNoiseInputCommandAngularVelocity(const Eigen::Matrix3d &noise_input_command_angular_velocity)
 {
     this->noise_input_command_angular_velocity_=noise_input_command_angular_velocity;
     return 0;
@@ -446,13 +446,13 @@ Eigen::Matrix3d ImuInputCore::getNoiseInputCommandLinearAcceleration() const
     return this->noise_input_command_linear_acceleration_;
 }
 
-int ImuInputCore::setNoiseInputCommandLinearAcceleration(Eigen::Matrix3d noise_input_command_linear_acceleration)
+int ImuInputCore::setNoiseInputCommandLinearAcceleration(const Eigen::Matrix3d &noise_input_command_linear_acceleration)
 {
     this->noise_input_command_linear_acceleration_=noise_input_command_linear_acceleration;
     return 0;
 }
 
-int ImuInputCore::setInputCommand(const TimeStamp time_stamp, std::shared_ptr<ImuInputCommandCore> imu_input_command_core)
+int ImuInputCore::setInputCommand(const TimeStamp& time_stamp, const std::shared_ptr<ImuInputCommandCore> imu_input_command_core)
 {
     if(!this->isInputEnabled())
         return 0;
@@ -519,7 +519,7 @@ Eigen::Matrix3d ImuInputCore::getNoisePositionInputWrtRobot() const
     return this->noise_position_input_wrt_robot_;
 }
 
-int ImuInputCore::setNoisePositionInputWrtRobot(Eigen::Matrix3d noise_position_input_wrt_robot)
+int ImuInputCore::setNoisePositionInputWrtRobot(const Eigen::Matrix3d& noise_position_input_wrt_robot)
 {
     this->noise_position_input_wrt_robot_=noise_position_input_wrt_robot;
     return 0;
@@ -575,7 +575,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseAttitudeInputWrtRobot() const
     return this->noise_attitude_input_wrt_robot_;
 }
 
-int ImuInputCore::setNoiseAttitudeInputWrtRobot(Eigen::Matrix3d noise_attitude_input_wrt_robot)
+int ImuInputCore::setNoiseAttitudeInputWrtRobot(const Eigen::Matrix3d& noise_attitude_input_wrt_robot)
 {
     this->noise_attitude_input_wrt_robot_=noise_attitude_input_wrt_robot;
     return 0;
@@ -631,7 +631,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseBiasLinearAcceleration() const
     return this->noise_bias_linear_acceleration_;
 }
 
-int ImuInputCore::setNoiseBiasLinearAcceleration(Eigen::Matrix3d noise_bias_linear_acceleration)
+int ImuInputCore::setNoiseBiasLinearAcceleration(const Eigen::Matrix3d &noise_bias_linear_acceleration)
 {
     this->noise_bias_linear_acceleration_=noise_bias_linear_acceleration;
     return 0;
@@ -642,7 +642,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseEstimationBiasLinearAcceleration() const
     return this->noise_estimation_bias_linear_acceleration_;
 }
 
-int ImuInputCore::setNoiseEstimationBiasLinearAcceleration(Eigen::Matrix3d noise_estimation_bias_linear_acceleration)
+int ImuInputCore::setNoiseEstimationBiasLinearAcceleration(const Eigen::Matrix3d &noise_estimation_bias_linear_acceleration)
 {
     this->noise_estimation_bias_linear_acceleration_=noise_estimation_bias_linear_acceleration;
     return 0;
@@ -698,7 +698,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseBiasAngularVelocity() const
     return this->noise_bias_angular_velocity_;
 }
 
-int ImuInputCore::setNoiseBiasAngularVelocity(Eigen::Matrix3d noise_bias_angular_velocity)
+int ImuInputCore::setNoiseBiasAngularVelocity(const Eigen::Matrix3d &noise_bias_angular_velocity)
 {
     this->noise_bias_angular_velocity_=noise_bias_angular_velocity;
     return 0;
@@ -709,7 +709,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseEstimationBiasAngularVelocity() const
     return this->noise_estimation_bias_angular_velocity_;
 }
 
-int ImuInputCore::setNoiseEstimationBiasAngularVelocity(Eigen::Matrix3d noise_estimation_bias_angular_velocity)
+int ImuInputCore::setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noise_estimation_bias_angular_velocity)
 {
     this->noise_estimation_bias_angular_velocity_=noise_estimation_bias_angular_velocity;
     return 0;
@@ -767,7 +767,7 @@ Eigen::MatrixXd ImuInputCore::getNoiseSensitivityLinearAcceleration() const
     return this->noise_sensitivity_linear_acceleration_;
 }
 
-int ImuInputCore::setNoiseSensitivityLinearAcceleration(Eigen::Matrix3d noise_sensitivity_linear_acceleration)
+int ImuInputCore::setNoiseSensitivityLinearAcceleration(const Eigen::Matrix3d& noise_sensitivity_linear_acceleration)
 {
     this->noise_sensitivity_linear_acceleration_=noise_sensitivity_linear_acceleration;
     return 0;
@@ -825,7 +825,7 @@ Eigen::Matrix3d ImuInputCore::getNoiseSensitivityAngularVelocity() const
     return this->noise_sensitivity_angular_velocity_;
 }
 
-int ImuInputCore::setNoiseSensitivityAngularVelocity(Eigen::Matrix3d noise_sensitivity_angular_velocity)
+int ImuInputCore::setNoiseSensitivityAngularVelocity(const Eigen::Matrix3d &noise_sensitivity_angular_velocity)
 {
     this->noise_sensitivity_angular_velocity_=noise_sensitivity_angular_velocity;
     return 0;

@@ -39,7 +39,7 @@ class AbsolutePoseSensorCore : public SensorCore
 {
 public:
     AbsolutePoseSensorCore();
-    AbsolutePoseSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    AbsolutePoseSensorCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 public:
     ~AbsolutePoseSensorCore();
 
@@ -189,7 +189,7 @@ protected:
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_parameters
                                            // Jacobians Noise: Hn
-                                           // TODO
+                                           // Nothing
                                            );
 protected:
     // TODO Fix!!
@@ -374,8 +374,8 @@ protected:
 
     /// Auxiliar functions
 protected:
-    int findSensorState(const std::list< std::shared_ptr<StateCore> >& list_sensors_state,
-                        std::shared_ptr<AbsolutePoseSensorStateCore>& sensor_state);
+    int findState(const std::list< std::shared_ptr<StateCore> >& list_state,
+                  std::shared_ptr<AbsolutePoseSensorStateCore>& found_state);
 
     int findMapElementCore(const std::list<std::shared_ptr<MapElementCore>>& list_map_elements_core,
                            const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement,

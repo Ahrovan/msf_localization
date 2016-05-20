@@ -13,7 +13,7 @@ ImuSensorStateCore::ImuSensorStateCore() :
     return;
 }
 
-ImuSensorStateCore::ImuSensorStateCore(std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
+ImuSensorStateCore::ImuSensorStateCore(const std::weak_ptr<MsfElementCore> msf_element_core_ptr) :
     SensorStateCore(msf_element_core_ptr)
 {
     init();

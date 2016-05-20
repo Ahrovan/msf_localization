@@ -2,7 +2,7 @@
 #include "msf_localization_ros/ros_free_model_robot_interface.h"
 
 
-RosFreeModelRobotInterface::RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosFreeModelRobotInterface::RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
     RosRobotInterface(nh, tf_transform_broadcaster),
     FreeModelRobotCore(the_msf_storage_core)
 {
@@ -102,7 +102,7 @@ int RosFreeModelRobotInterface::open()
     return 0;
 }
 
-int RosFreeModelRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core, Eigen::MatrixXd covariance_robot_matrix)
+int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
 {
     /// tf pose robot wrt world
     this->publishTfPoseRobotWrtWorld(time_stamp, world_core, robot_state_core);
@@ -370,7 +370,7 @@ int RosFreeModelRobotInterface::publish(TimeStamp time_stamp, std::shared_ptr<Gl
     return 0;
 }
 
-int RosFreeModelRobotInterface::publishTfPoseRobotWrtWorld(TimeStamp time_stamp, std::shared_ptr<GlobalParametersCore> world_core, std::shared_ptr<RobotStateCore> robot_state_core)
+int RosFreeModelRobotInterface::publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore>& world_core, const std::shared_ptr<RobotStateCore>& robot_state_core)
 {
     std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::dynamic_pointer_cast<FreeModelRobotStateCore>(robot_state_core);
 
@@ -389,7 +389,7 @@ int RosFreeModelRobotInterface::publishTfPoseRobotWrtWorld(TimeStamp time_stamp,
     return 0;
 }
 
-int RosFreeModelRobotInterface::readConfig(pugi::xml_node robot, std::shared_ptr<FreeModelRobotStateCore>& robot_state_core)
+int RosFreeModelRobotInterface::readConfig(const pugi::xml_node &robot, std::shared_ptr<FreeModelRobotStateCore>& robot_state_core)
 {
     /// Imu Sensor Configs
     int errorReadConfig=this->FreeModelRobotCore::readConfig(robot, robot_state_core);

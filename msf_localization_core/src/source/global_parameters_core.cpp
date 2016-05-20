@@ -14,7 +14,7 @@ GlobalParametersCore::GlobalParametersCore() :
     return;
 }
 
-GlobalParametersCore::GlobalParametersCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+GlobalParametersCore::GlobalParametersCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
     MsfElementCore(msf_storage_core_ptr)
 {
     init();

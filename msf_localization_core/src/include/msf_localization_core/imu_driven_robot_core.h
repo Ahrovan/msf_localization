@@ -32,7 +32,7 @@ class ImuDrivenRobotCore : public RobotCore
 
 public:
     ImuDrivenRobotCore();
-    ImuDrivenRobotCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    ImuDrivenRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
     ~ImuDrivenRobotCore();
 
 
@@ -41,7 +41,7 @@ protected:
 
 
 public:
-    int readConfig(pugi::xml_node robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_init_state);
+    int readConfig(const pugi::xml_node& robot, std::shared_ptr<ImuDrivenRobotStateCore>& robot_init_state);
 
 
     ///// Noise State / Parameters
@@ -50,7 +50,7 @@ public:
 protected:
     Eigen::Matrix3d noise_position_robot_wrt_world_;
 public:
-    int setNoisePositionRobotWrtWorld(Eigen::Matrix3d noise_position_robot_wrt_world);
+    int setNoisePositionRobotWrtWorld(const Eigen::Matrix3d& noise_position_robot_wrt_world);
     Eigen::Matrix3d getNoisePositionRobotWrtWorld();
 
 
@@ -59,7 +59,7 @@ public:
 protected:
     Eigen::Matrix3d noise_linear_speed_robot_wrt_world_;
 public:
-    int setNoiseLinearSpeedRobotWrtWorld(Eigen::Matrix3d noise_linear_speed_robot_wrt_world);
+    int setNoiseLinearSpeedRobotWrtWorld(const Eigen::Matrix3d& noise_linear_speed_robot_wrt_world);
     Eigen::Matrix3d getNoiseLinearSpeedRobotWrtWorld();
 
 
@@ -67,7 +67,7 @@ public:
 protected:
     Eigen::Matrix3d noise_linear_acceleration_robot_wrt_world_;
 public:
-    int setNoiseLinearAccelerationRobotWrtWorld(Eigen::Matrix3d noise_linear_acceleration_robot_wrt_world);
+    int setNoiseLinearAccelerationRobotWrtWorld(const Eigen::Matrix3d& noise_linear_acceleration_robot_wrt_world);
     Eigen::Matrix3d getNoiseLinearAccelerationRobotWrtWorld();
 
 
@@ -75,7 +75,7 @@ public:
 protected:
     Eigen::Matrix3d noise_attitude_robot_wrt_world_;
 public:
-    int setNoiseAttitudeRobotWrtWorld(Eigen::Matrix3d noise_attitude_robot_wrt_world);
+    int setNoiseAttitudeRobotWrtWorld(const Eigen::Matrix3d& noise_attitude_robot_wrt_world);
     Eigen::Matrix3d getNoiseAttitudeRobotWrtWorld();
 
 
@@ -83,7 +83,7 @@ public:
 protected:
     Eigen::Matrix3d noise_angular_velocity_robot_wrt_world_;
 public:
-    int setNoiseAngularVelocityRobotWrtWorld(Eigen::Matrix3d noise_angular_velocity_robot_wrt_world);
+    int setNoiseAngularVelocityRobotWrtWorld(const Eigen::Matrix3d& noise_angular_velocity_robot_wrt_world);
     Eigen::Matrix3d getNoiseAngularVelocityRobotWrtWorld();
 
 

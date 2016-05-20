@@ -13,7 +13,7 @@ SensorMeasurementCore::SensorMeasurementCore()
     return;
 }
 
-SensorMeasurementCore::SensorMeasurementCore(std::weak_ptr<SensorCore> sensor_core_ptr)
+SensorMeasurementCore::SensorMeasurementCore(const std::weak_ptr<SensorCore> sensor_core_ptr)
 {
     init();
 
@@ -39,7 +39,7 @@ int SensorMeasurementCore::init()
 }
 
 
-int SensorMeasurementCore::setSensorCorePtr(std::weak_ptr<SensorCore> sensor_core_ptr)
+int SensorMeasurementCore::setSensorCorePtr(const std::weak_ptr<SensorCore> sensor_core_ptr)
 {
     this->sensor_core_ptr_=sensor_core_ptr;
     return 0;

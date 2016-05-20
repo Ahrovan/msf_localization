@@ -5,6 +5,8 @@
 
 #include "msf_localization_ros/ros_interface.h"
 
+#include "msf_localization_ros/ros_robot_interface.h"
+
 
 class RosInputInterface : public RosInterface
 {
