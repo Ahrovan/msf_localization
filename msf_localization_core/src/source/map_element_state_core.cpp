@@ -46,7 +46,7 @@ Eigen::MatrixXd MapElementStateCore::getJacobianMappingSensorErrorState()
     return this->jacobian_mapping_error_state_.jacobian_mapping_sensor_error_state_;
 }
 
-Eigen::MatrixXd MapElementStateCore::getJacobianMappingErrorStateNoise()
+Eigen::SparseMatrix<double> MapElementStateCore::getJacobianMappingErrorStateNoise()
 {
     return this->jacobian_mapping_error_state_noise_;
 }

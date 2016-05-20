@@ -57,11 +57,11 @@ public:
 
 protected:
 public:
-    Eigen::MatrixXd jacobian_mapping_error_state_noise_;
+    Eigen::SparseMatrix<double> jacobian_mapping_error_state_noise_;
 
 
 public:
-    Eigen::MatrixXd getJacobianMappingErrorStateNoise();
+    Eigen::SparseMatrix<double> getJacobianMappingErrorStateNoise();
 
 
 

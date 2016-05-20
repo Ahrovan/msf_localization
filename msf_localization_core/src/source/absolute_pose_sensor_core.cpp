@@ -2635,11 +2635,13 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &the
 
     //// Jacobian Mapping Error-State Noise
 
-    TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.resize(dimension_map_new_element_error_state_total, dimension_map_new_element_measurement);
-    TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.setZero();
-
-
     {
+        TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.resize(dimension_map_new_element_error_state_total, dimension_map_new_element_measurement);
+
+        std::vector<Eigen::Triplet<double>> triplet_list_jacobian_mapping_error_state_wrt_error_measurement;
+
+
+
         int dimension_map_new_element_error_state_i=0;
 
         // tran landmark -> Enabled by default -> TODO Check
@@ -2648,8 +2650,10 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &the
             // tran meas
             if(TheSensorCore->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
             {
-                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
-                     jacobian_error_map_pos_wrt_error_meas_pos;
+//                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
+//                     jacobian_error_map_pos_wrt_error_meas_pos;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_mapping_error_state_wrt_error_measurement, jacobian_error_map_pos_wrt_error_meas_pos, dimension_map_new_element_error_state_i, dimension_measurement_i);
+
                 dimension_measurement_i+=3;
             }
 
@@ -2678,13 +2682,18 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &the
             // Atti meas
             if(TheSensorCore->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
             {
-                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
-                    jacobian_error_map_att_wrt_error_meas_att;
+//                TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.block<3,3>(dimension_map_new_element_error_state_i, dimension_measurement_i)=
+//                    jacobian_error_map_att_wrt_error_meas_att;
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_mapping_error_state_wrt_error_measurement, jacobian_error_map_att_wrt_error_meas_att, dimension_map_new_element_error_state_i, dimension_measurement_i);
+
                 dimension_measurement_i+=3;
             }
 
             dimension_map_new_element_error_state_i+=3;
         }
+
+        // Set From Triplets
+        TheCodedVisualMarkerLandmarkStateCore->jacobian_mapping_error_state_noise_.setFromTriplets(triplet_list_jacobian_mapping_error_state_wrt_error_measurement.begin(), triplet_list_jacobian_mapping_error_state_wrt_error_measurement.end());
     }
 
 
