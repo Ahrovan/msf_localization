@@ -58,7 +58,7 @@ int RosImuDrivenRobotInterface::open()
     return 0;
 }
 
-int RosImuDrivenRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
+int RosImuDrivenRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> &world_core, const std::shared_ptr<RobotStateCore> &robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
 {
     /// tf pose robot wrt world
     this->publishTfPoseRobotWrtWorld(time_stamp, world_core, robot_state_core);
@@ -187,7 +187,7 @@ int RosImuDrivenRobotInterface::publish(const TimeStamp& time_stamp, const std::
     return 0;
 }
 
-int RosImuDrivenRobotInterface::publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core)
+int RosImuDrivenRobotInterface::publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> &world_core, const std::shared_ptr<RobotStateCore> &robot_state_core)
 {
     std::shared_ptr<ImuDrivenRobotStateCore> TheRobotStateCore=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(robot_state_core);
 

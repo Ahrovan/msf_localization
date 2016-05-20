@@ -444,12 +444,12 @@ int FreeModelRobotCore::setInitErrorStateVarianceAngularAcceleration(const Eigen
 }
 
 int FreeModelRobotCore::predictState(//Time
-                                     const TimeStamp previousTimeStamp,
-                                     const TimeStamp currentTimeStamp,
+                                     const TimeStamp &previousTimeStamp,
+                                     const TimeStamp &currentTimeStamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore> pastState,
+                                     const std::shared_ptr<StateEstimationCore> &pastState,
                                      // Inputs
-                                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                                     const std::shared_ptr<InputCommandComponent> &inputCommand,
                                      // Predicted State
                                      std::shared_ptr<StateCore> &predictedState)
 {
@@ -462,16 +462,20 @@ int FreeModelRobotCore::predictState(//Time
 
 
     // Robot Predicted State
-    std::shared_ptr<FreeModelRobotStateCore> predictedRobotState;
+    FreeModelRobotStateCore* predictedRobotState(nullptr);
     if(!predictedState)
-        predictedRobotState=std::make_shared<FreeModelRobotStateCore>(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
+    {
+        predictedRobotState=new FreeModelRobotStateCore;
+        predictedRobotState->setMsfElementCorePtr(pastState->TheRobotStateCore->getMsfElementCoreWeakPtr());
+        predictedState=std::shared_ptr<StateCore>(predictedRobotState);
+    }
     else
-        predictedRobotState=std::dynamic_pointer_cast<FreeModelRobotStateCore>(predictedState);
+        predictedRobotState=dynamic_cast<FreeModelRobotStateCore*>(predictedState.get());
 
 
     // Predict State
     int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
-                                         std::dynamic_pointer_cast<FreeModelRobotStateCore>(pastState->TheRobotStateCore),
+                                         dynamic_cast<FreeModelRobotStateCore*>(pastState->TheRobotStateCore.get()),
                                          predictedRobotState);
 
     // Check error
@@ -479,15 +483,13 @@ int FreeModelRobotCore::predictState(//Time
         return error_predict_state;
 
 
-    // Set predicted state
-    predictedState=predictedRobotState;
-
-
     // End
     return 0;
 }
 
-int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp, const std::shared_ptr<FreeModelRobotStateCore> pastState, std::shared_ptr<FreeModelRobotStateCore>& predictedState)
+int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                             const FreeModelRobotStateCore *pastState,
+                                             FreeModelRobotStateCore *&predictedState)
 {
 
     // Checks in the past state
@@ -501,7 +503,8 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp,
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<FreeModelRobotStateCore>(pastState->getMsfElementCoreWeakPtr());
+        predictedState= new FreeModelRobotStateCore;
+        predictedState->setMsfElementCorePtr(pastState->getMsfElementCoreWeakPtr());
     }
 
 
@@ -600,11 +603,11 @@ int FreeModelRobotCore::predictStateSpecific(const TimeStamp &previousTimeStamp,
 
 // Jacobian
 int FreeModelRobotCore::predictErrorStateJacobian(//Time
-                                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                  // Previous State
-                                                 const std::shared_ptr<StateEstimationCore> past_state,
+                                                 const std::shared_ptr<StateEstimationCore>& past_state,
                                                   // Inputs
-                                                  const std::shared_ptr<InputCommandComponent> input_command,
+                                                  const std::shared_ptr<InputCommandComponent>& input_command,
                                                  // Predicted State
                                                  std::shared_ptr<StateCore>& predicted_state)
 {
@@ -634,7 +637,7 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
 
 
     /// Robot Predicted State
-    std::shared_ptr<FreeModelRobotStateCore> predicted_robot_state=std::dynamic_pointer_cast<FreeModelRobotStateCore>(predicted_state);
+    FreeModelRobotStateCore* predicted_robot_state=dynamic_cast<FreeModelRobotStateCore*>(predicted_state.get());
 
 
     /// Get iterators to fill jacobians
@@ -654,7 +657,7 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
 
     /// Predict State Jacobians
     int error_predict_state_jacobians=predictErrorStateJacobianSpecific(previousTimeStamp, currentTimeStamp,
-                                                                        std::dynamic_pointer_cast<FreeModelRobotStateCore>(past_state->TheRobotStateCore),
+                                                                        dynamic_cast<FreeModelRobotStateCore*>(past_state->TheRobotStateCore.get()),
                                                                         predicted_robot_state,
                                                                         // Jacobians Error State: Fx, Fp
                                                                         predicted_robot_state->jacobian_error_state_.robot,
@@ -668,17 +671,13 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
         return error_predict_state_jacobians;
 
 
-    // Set predicted state
-    predicted_state=predicted_robot_state;
-
-
     // End
     return 0;
 }
 
 int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                                          std::shared_ptr<FreeModelRobotStateCore> pastState,
-                                                          std::shared_ptr<FreeModelRobotStateCore>& predictedState,
+                                                          const FreeModelRobotStateCore *pastState,
+                                                          FreeModelRobotStateCore *&predictedState,
                                                           // Jacobians Error State: Fx, Fp
                                                           // Robot
                                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_robot_error_state,

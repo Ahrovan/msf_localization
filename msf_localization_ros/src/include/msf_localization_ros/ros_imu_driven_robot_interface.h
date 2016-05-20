@@ -77,11 +77,16 @@ public:
 
 
 public:
-    int publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix);
+    int publish(const TimeStamp& time_stamp,
+                const std::shared_ptr<GlobalParametersCore>& world_core,
+                const std::shared_ptr<RobotStateCore>& robot_state_core,
+                const Eigen::MatrixXd& covariance_robot_matrix);
 
 
 protected:
-    int publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core);
+    int publishTfPoseRobotWrtWorld(const TimeStamp& time_stamp,
+                                   const std::shared_ptr<GlobalParametersCore>& world_core,
+                                   const std::shared_ptr<RobotStateCore>& robot_state_core);
 
 
 public:

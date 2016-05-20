@@ -215,9 +215,9 @@ int MsfElementCore::log(std::string log_string)
 }
 
 int MsfElementCore::predictErrorStateJacobianInit(// Past State
-                                                  const std::shared_ptr<StateEstimationCore> past_state,
+                                                  const std::shared_ptr<StateEstimationCore> &past_state,
                                                   // Input Commands
-                                                  const std::shared_ptr<InputCommandComponent> input_commands,
+                                                  const std::shared_ptr<InputCommandComponent> &input_commands,
                                                   // Predicted State
                                                   std::shared_ptr<StateCore> &predicted_state)
 {

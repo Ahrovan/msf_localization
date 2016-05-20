@@ -296,7 +296,6 @@ Eigen::SparseMatrix<double> WorldReferenceFrameCore::getCovarianceParameters()
     Eigen::SparseMatrix<double> covariance;
 
     covariance.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
-    covariance.reserve(this->getDimensionErrorParameters());
 
     std::vector<Eigen::Triplet<double> > tripletCovarianceParameters;
 
@@ -338,11 +337,11 @@ Eigen::SparseMatrix<double> WorldReferenceFrameCore::getCovarianceNoise(const Ti
 }
 
 int WorldReferenceFrameCore::predictState(//Time
-                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                  // Previous State
-                 const std::shared_ptr<StateEstimationCore> pastState,
+                 const std::shared_ptr<StateEstimationCore>& pastState,
                  // Inputs
-                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                 const std::shared_ptr<InputCommandComponent>& inputCommand,
                  // Predicted State
                  std::shared_ptr<StateCore>& predictedState)
 {
@@ -408,8 +407,8 @@ int WorldReferenceFrameCore::predictState(//Time
     return 0;
 }
 
-int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                        const std::shared_ptr<WorldReferenceFrameStateCore> pastState,
+int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                                        const std::shared_ptr<WorldReferenceFrameStateCore> &pastState,
                                                         std::shared_ptr<WorldReferenceFrameStateCore>& predictedState)
 {
 
@@ -456,11 +455,11 @@ int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp previousTimeSt
 
 // Jacobian
 int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
-                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> past_state,
+                             const std::shared_ptr<StateEstimationCore> &past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> input_command,
+                            const std::shared_ptr<InputCommandComponent> &input_command,
                              // Predicted State
                              std::shared_ptr<StateCore> &predicted_state)
 {
@@ -562,8 +561,8 @@ int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                       const std::shared_ptr<WorldReferenceFrameStateCore> pastState,
+int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                                       const std::shared_ptr<WorldReferenceFrameStateCore>& pastState,
                                                        std::shared_ptr<WorldReferenceFrameStateCore>& predictedState,
                                                        // Jacobians Error State: Fx, Fp
                                                        // Map

@@ -82,7 +82,8 @@ Eigen::Vector4d AbsolutePoseSensorMeasurementCore::getAttitudeMocapSensorWrtMoca
     return this->attitude_mocap_sensor_wrt_mocap_world_;
 }
 
-Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
+Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getInnovation(const std::shared_ptr<SensorMeasurementCore> &theMatchedMeasurementI,
+                                                                 const std::shared_ptr<SensorMeasurementCore> &thePredictedMeasurementI)
 {
     // Create the Measurement
     Eigen::VectorXd the_innovation;

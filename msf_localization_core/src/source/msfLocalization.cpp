@@ -1105,9 +1105,9 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
 
 int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, const TimeStamp &ThePredictedTimeStamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore> ThePreviousState,
+                                     const std::shared_ptr<StateEstimationCore> &ThePreviousState,
                                      // Inputs
-                                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                                     const std::shared_ptr<InputCommandComponent> &inputCommand,
                                      // Predicted State
                                      std::shared_ptr<StateEstimationCore>& ThePredictedState)
 {
@@ -1472,11 +1472,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
         }
 #endif
 
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        TimeStamp beginTimePredictCoreCov=getTimeStamp();
-#endif
-
-
 
 
         // Delta Time Stamp
@@ -1551,6 +1546,12 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
         ///// Jacobians
 
         /// Jacobian Error State: Fx & Jacobian Error Parameters: Fp
+
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictedFxFp=getTimeStamp();
+#endif
+
         // Resize and init
         BlockMatrix::MatrixSparse block_jacobian_total_robot_error_state;
         block_jacobian_total_robot_error_state.resize(num_error_states, num_error_states);
@@ -1893,9 +1894,21 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
         }
 #endif
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Fx Fp: "<<(getTimeStamp()-beginTimePredictedFxFp).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
 
 
         /// Jacobian Error State wrt Error Input Commands: Fu
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictedFu=getTimeStamp();
+#endif
 
         BlockMatrix::MatrixSparse block_jacobian_total_robot_error_state_wrt_error_input_commands;
         block_jacobian_total_robot_error_state_wrt_error_input_commands.resize(num_error_states, num_input_commands);
@@ -2001,9 +2014,22 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
         }
 #endif
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Fu: "<<(getTimeStamp()-beginTimePredictedFu).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
 
 
         /// Jacobian Error State Noise Estimation: Fn
+
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictedFn=getTimeStamp();
+#endif
 
         BlockMatrix::MatrixSparse block_jacobian_total_robot_error_noise_estimation;
         block_jacobian_total_robot_error_noise_estimation.resize(num_error_states, num_error_states);
@@ -2064,9 +2090,17 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
         }
 #endif
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Fn: "<<(getTimeStamp()-beginTimePredictedFn).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
 
 
-        ///// Covariances Total Robot
+
+        ///// Covariances
 
 
         /// Covariance Error State: P
@@ -2086,7 +2120,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() predict covariance error state as block: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateAsBlock).nsec<<std::endl;
+            logString<<"MsfLocalizationCore::predictCore() predict covariance error state (P) as block: "<<(getTimeStamp()-beginTimePredictedCovarianceErrorStateAsBlock).nsec<<std::endl;
             this->log(logString.str());
         }
 #endif
@@ -2094,6 +2128,11 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
 
 
         /// Covariance Error Parameters: Qp
+
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictedQp=getTimeStamp();
+#endif
 
         BlockMatrix::MatrixSparse block_covariance_total_robot_error_parameters;
         block_covariance_total_robot_error_parameters.resize(num_error_states, num_error_states);
@@ -2155,8 +2194,21 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
     }
 #endif
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Qp: "<<(getTimeStamp()-beginTimePredictedQp).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
 
         /// Covariance Error Inputs: Qu
+
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictedQu=getTimeStamp();
+#endif
 
         BlockMatrix::MatrixSparse block_covariance_total_robot_error_inputs;
         block_covariance_total_robot_error_inputs.resize(num_input_commands, num_input_commands);
@@ -2188,9 +2240,21 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
     }
 #endif
 
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Qu: "<<(getTimeStamp()-beginTimePredictedQu).nsec<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
 
 
         /// Covariance Error State Noise Estimation: Qn
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        TimeStamp beginTimePredictedQn=getTimeStamp();
+#endif
 
         BlockMatrix::MatrixSparse block_covariance_total_robot_error_noise_estimation;
         block_covariance_total_robot_error_noise_estimation.resize(num_error_states, num_error_states);
@@ -2244,12 +2308,20 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error_noise_estimation for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
-        logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error_noise_estimation)<<std::endl;
-        this->log(logString.str());
-    }
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error_noise_estimation for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error_noise_estimation)<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictCore() predict Qn: "<<(getTimeStamp()-beginTimePredictedQn).nsec<<std::endl;
+            this->log(logString.str());
+        }
 #endif
 
 
@@ -2280,8 +2352,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                                                 block_jacobian_total_robot_error_parameters*block_covariance_total_robot_error_parameters*block_jacobian_total_robot_error_parameters.transpose();
 
 
-//            BlockMatrix::MatrixSparse aux;
-//            aux=block_jacobian_total_robot_error_noise_estimation.transpose();
 
 
             /*
@@ -2289,15 +2359,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
             std::cout<<"size_rows="<<block_jacobian_total_robot_error_noise_estimation.getRowsSize().transpose()<<std::endl;
             std::cout<<"size_cols="<<block_jacobian_total_robot_error_noise_estimation.getColsSize().transpose()<<std::endl;
 
-
             std::cout<<"block_covariance_total_robot_error_noise_estimation"<<std::endl;
             std::cout<<"size_rows="<<block_covariance_total_robot_error_noise_estimation.getRowsSize().transpose()<<std::endl;
             std::cout<<"size_cols="<<block_covariance_total_robot_error_noise_estimation.getColsSize().transpose()<<std::endl;
-
-            std::cout<<"aux"<<std::endl;
-            std::cout<<"size_rows="<<aux.getRowsSize().transpose()<<std::endl;
-            std::cout<<"size_cols="<<aux.getColsSize().transpose()<<std::endl;
-
 
             std::cout<<"block_covariance_total_robot_error"<<std::endl;
             std::cout<<"size_rows="<<block_covariance_total_robot_error.getRowsSize().transpose()<<std::endl;
@@ -2374,14 +2438,6 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
 
     }
 
-
-#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationCore::predictCore() predict Core time cov in: "<<(getTimeStamp()-beginTimePredictCoreCov).nsec<<std::endl;
-        this->log(logString.str());
-    }
-#endif
 
 
 
@@ -2579,7 +2635,7 @@ int MsfLocalizationCore::update(const TimeStamp &TheTimeStamp)
 
 
 int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
-                                    const std::shared_ptr<StateEstimationCore> OldState,
+                                    const std::shared_ptr<StateEstimationCore>& OldState,
                                     std::shared_ptr<StateEstimationCore>& UpdatedState)
 {
 

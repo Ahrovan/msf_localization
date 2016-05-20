@@ -891,11 +891,11 @@ Eigen::SparseMatrix<double> ImuInputCore::getCovarianceNoise(const TimeStamp del
 }
 
 int ImuInputCore::predictState(//Time
-                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 const std::shared_ptr<StateEstimationCore>& pastState,
                                  // Inputs
-                                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                                 const std::shared_ptr<InputCommandComponent>& inputCommand,
                                  // Predicted State
                                  std::shared_ptr<StateCore> &predictedState)
 {
@@ -950,8 +950,8 @@ int ImuInputCore::predictState(//Time
     return 0;
 }
 
-int ImuInputCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                         const std::shared_ptr<ImuInputStateCore> pastState,
+int ImuInputCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                         const std::shared_ptr<ImuInputStateCore> &pastState,
                          std::shared_ptr<ImuInputStateCore>& predictedState)
 {
 
@@ -962,11 +962,11 @@ int ImuInputCore::predictStateSpecific(const TimeStamp previousTimeStamp, const 
 }
 
 int ImuInputCore::predictErrorStateJacobian(//Time
-                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> pastState,
+                             const std::shared_ptr<StateEstimationCore> &pastState,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> inputCommand,
+                            const std::shared_ptr<InputCommandComponent> &inputCommand,
                              // Predicted State
                              std::shared_ptr<StateCore> &predictedState)
 {
@@ -974,8 +974,8 @@ int ImuInputCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int ImuInputCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                      const std::shared_ptr<ImuInputStateCore> pastState,
+int ImuInputCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                      const std::shared_ptr<ImuInputStateCore>& pastState,
                                       std::shared_ptr<ImuInputStateCore>& predictedState)
 {
 

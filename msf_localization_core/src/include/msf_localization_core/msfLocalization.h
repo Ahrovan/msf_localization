@@ -212,9 +212,9 @@ private:
 
     int predictCore(const TimeStamp& ThePreviousTimeStamp, const TimeStamp& ThePredictedTimeStamp,
                     // Previous State
-                    const std::shared_ptr<StateEstimationCore> ThePreviousState,
+                    const std::shared_ptr<StateEstimationCore>& ThePreviousState,
                     // Inputs
-                    const std::shared_ptr<InputCommandComponent> inputCommand,
+                    const std::shared_ptr<InputCommandComponent>& inputCommand,
                     // Predicted State
                     std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
@@ -226,7 +226,7 @@ protected:
 
 private:
     int updateCore(const TimeStamp& TheTimeStamp,
-                   const std::shared_ptr<StateEstimationCore> OldState,
+                   const std::shared_ptr<StateEstimationCore>& OldState,
                    std::shared_ptr<StateEstimationCore>& UpdatedState);
 
 

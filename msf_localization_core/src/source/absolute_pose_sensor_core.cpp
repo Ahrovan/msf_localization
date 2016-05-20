@@ -447,11 +447,11 @@ Eigen::SparseMatrix<double> AbsolutePoseSensorCore::getCovarianceNoise(const Tim
 }
 
 int AbsolutePoseSensorCore::predictState(//Time
-                                         const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                         const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                          // Previous State
-                                         const std::shared_ptr<StateEstimationCore> pastState,
+                                         const std::shared_ptr<StateEstimationCore> &pastState,
                                          // Inputs
-                                         const std::shared_ptr<InputCommandComponent> inputCommand,
+                                         const std::shared_ptr<InputCommandComponent> &inputCommand,
                                          // Predicted State
                                          std::shared_ptr<StateCore>& predictedState)
 {
@@ -594,11 +594,11 @@ int AbsolutePoseSensorCore::predictStateCore(// State k: Sensor
 // Jacobian
 
 int AbsolutePoseSensorCore::predictErrorStateJacobian(//Time
-                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> past_state,
+                             const std::shared_ptr<StateEstimationCore> &past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> input_command,
+                            const std::shared_ptr<InputCommandComponent> &input_command,
                              // Predicted State
                              std::shared_ptr<StateCore> &predicted_state)
 {
@@ -865,11 +865,11 @@ int AbsolutePoseSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
 }
 
 int AbsolutePoseSensorCore::predictMeasurement(// Time
-                                        const TimeStamp current_time_stamp,
+                                        const TimeStamp &current_time_stamp,
                                         // Current State
-                                        const std::shared_ptr<StateEstimationCore> current_state,
+                                        const std::shared_ptr<StateEstimationCore> &current_state,
                                         // Measurements
-                                        const std::shared_ptr<SensorMeasurementCore> measurement,
+                                        const std::shared_ptr<SensorMeasurementCore> &measurement,
                                         // Predicted Measurements
                                         std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
 {
@@ -1121,11 +1121,11 @@ int AbsolutePoseSensorCore::predictMeasurementCore(// State: Robot
 
 
 int AbsolutePoseSensorCore::predictErrorMeasurementJacobian(// Time
-                                    const TimeStamp current_time_stamp,
+                                    const TimeStamp& current_time_stamp,
                                     // Current State
-                                    const std::shared_ptr<StateEstimationCore> current_state,
+                                    const std::shared_ptr<StateEstimationCore>& current_state,
                                     // Measurements
-                                    const std::shared_ptr<SensorMeasurementCore> measurement,
+                                    const std::shared_ptr<SensorMeasurementCore>& measurement,
                                     // Predicted Measurements
                                     std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
 {
@@ -2008,11 +2008,11 @@ int AbsolutePoseSensorCore::resetErrorStateJacobian(// Time
 }
 
 int AbsolutePoseSensorCore::mapMeasurement(// Time
-                   const TimeStamp current_time_stamp,
+                   const TimeStamp& current_time_stamp,
                    // Current State
-                   const std::shared_ptr<StateEstimationCore> current_state,
+                   const std::shared_ptr<StateEstimationCore>& current_state,
                    // Current Measurement
-                   const std::shared_ptr<SensorMeasurementCore> current_measurement,
+                   const std::shared_ptr<SensorMeasurementCore>& current_measurement,
                    // List Map Element Core -> New will be added if not available
                    std::list< std::shared_ptr<MapElementCore> >& list_map_element_core,
                    // New Map Element State Core
@@ -2267,11 +2267,11 @@ int AbsolutePoseSensorCore::mapMeasurementCore(// robot wrt world (state)
 }
 
 int AbsolutePoseSensorCore::jacobiansMapMeasurement(// Time
-                   const TimeStamp current_time_stamp,
+                   const TimeStamp& current_time_stamp,
                    // Current State
-                   const std::shared_ptr<StateEstimationCore> current_state,
+                   const std::shared_ptr<StateEstimationCore>& current_state,
                    // Current Measurement
-                   const std::shared_ptr<SensorMeasurementCore> current_measurement,
+                   const std::shared_ptr<SensorMeasurementCore>& current_measurement,
                    // New Map Element State Core
                    std::shared_ptr<StateCore> &new_map_element_state)
 {
@@ -2810,7 +2810,7 @@ int AbsolutePoseSensorCore::findState(const std::list<std::shared_ptr<StateCore>
 }
 
 int AbsolutePoseSensorCore::findMapElementCore(const std::list<std::shared_ptr<MapElementCore> > &list_map_elements_core,
-                       const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement,
+                       const std::shared_ptr<AbsolutePoseSensorMeasurementCore>& sensor_measurement,
                        std::shared_ptr<WorldReferenceFrameCore>& map_element_core)
 {
     // Match with the map element
@@ -2842,7 +2842,7 @@ int AbsolutePoseSensorCore::findMapElementCore(const std::list<std::shared_ptr<M
 }
 
 int AbsolutePoseSensorCore::findMapElementState(const std::list<std::shared_ptr<StateCore> > &list_map_elements_state,
-                                                  const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement,
+                                                  const std::shared_ptr<AbsolutePoseSensorMeasurementCore> &sensor_measurement,
                                                   std::shared_ptr<WorldReferenceFrameStateCore> &map_element_state)
 {
     // Match with the map element

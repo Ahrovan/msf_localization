@@ -53,7 +53,7 @@ MsfStorageCore::~MsfStorageCore()
     return;
 }
 
-int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement)
+int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> &TheSensorMeasurement)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -119,7 +119,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp TheTimeStamp, const std::shar
     return 0;
 }
 
-int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::list<std::shared_ptr<SensorMeasurementCore>> TheListSensorMeasurement)
+int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std::list<std::shared_ptr<SensorMeasurementCore>>& TheListSensorMeasurement)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -179,7 +179,7 @@ int MsfStorageCore::setMeasurementList(const TimeStamp TheTimeStamp, const std::
     return 0;
 }
 
-int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shared_ptr<InputCommandCore> input_command_core)
+int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shared_ptr<InputCommandCore> &input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -253,7 +253,7 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
     return 0;
 }
 
-int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core)
+int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::list<std::shared_ptr<InputCommandCore> > &list_input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -578,7 +578,7 @@ int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, Time
     return 0;
 }
 
-int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core)
+int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp, const std::shared_ptr<InputCore>& input_core, std::shared_ptr<InputCommandCore>& input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
         {
@@ -701,7 +701,7 @@ int MsfStorageCore::getOldestTimeStamp(TimeStamp& oldest_time_stamp)
     return 0;
 }
 
-int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
+int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore)
 {
 #if _DEBUG_MSF_STORAGE
     {
@@ -797,7 +797,7 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
 }
 
 
-int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore)
+int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore> &TheStateEstimationCore)
 {
 
     std::ostringstream logString;

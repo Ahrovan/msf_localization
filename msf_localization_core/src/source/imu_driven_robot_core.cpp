@@ -278,12 +278,12 @@ int ImuDrivenRobotCore::prepareCovarianceInitErrorStateSpecific()
 }
 
 int ImuDrivenRobotCore::predictState(//Time
-                                     const TimeStamp previousTimeStamp,
-                                     const TimeStamp currentTimeStamp,
+                                     const TimeStamp &previousTimeStamp,
+                                     const TimeStamp &currentTimeStamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore> pastState,
+                                     const std::shared_ptr<StateEstimationCore> &pastState,
                                      // Inputs
-                                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                                     const std::shared_ptr<InputCommandComponent> &inputCommand,
                                      // Predicted State
                                      std::shared_ptr<StateCore> &predictedState)
 {
@@ -344,9 +344,9 @@ int ImuDrivenRobotCore::predictState(//Time
     return 0;
 }
 
-int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                             const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
-                                             const std::shared_ptr<ImuInputCommandCore> input,
+int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                             const std::shared_ptr<ImuDrivenRobotStateCore>& pastState,
+                                             const std::shared_ptr<ImuInputCommandCore>& input,
                                              std::shared_ptr<ImuDrivenRobotStateCore>& predictedState)
 {
     //std::cout<<"ImuDrivenRobotCore::predictStateSpecific"<<std::endl;
@@ -446,11 +446,11 @@ int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp previousTimeStamp, 
 }
 
 int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
-                                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                  // Previous State
-                                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                                 const std::shared_ptr<StateEstimationCore>& pastState,
                                                   // Inputs
-                                                  const std::shared_ptr<InputCommandComponent> inputCommand,
+                                                  const std::shared_ptr<InputCommandComponent>& inputCommand,
                                                  // Predicted State
                                                  std::shared_ptr<StateCore> &predictedState)
 {
@@ -501,9 +501,9 @@ int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                   const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
-                                                   const std::shared_ptr<ImuInputCommandCore> input,
+int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                                   const std::shared_ptr<ImuDrivenRobotStateCore>& pastState,
+                                                   const std::shared_ptr<ImuInputCommandCore>& input,
                                                    std::shared_ptr<ImuDrivenRobotStateCore>& predictedState)
 {
 

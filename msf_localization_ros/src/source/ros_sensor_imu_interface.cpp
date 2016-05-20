@@ -115,7 +115,7 @@ int RosSensorImuInterface::setEstimatedBiasLinearAccelerationTopicName(const std
     return 0;
 }
 
-int RosSensorImuInterface::publishEstimatedBiasLinearAcceleration(const TimeStamp& time_stamp, const std::shared_ptr<ImuSensorStateCore> sensor_state_core)
+int RosSensorImuInterface::publishEstimatedBiasLinearAcceleration(const TimeStamp& time_stamp, const std::shared_ptr<ImuSensorStateCore> &sensor_state_core)
 {
     if(estimated_bias_linear_acceleration_pub_.getNumSubscribers() > 0)
     {
@@ -150,7 +150,7 @@ int RosSensorImuInterface::open()
     return 0;
 }
 
-int RosSensorImuInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)
+int RosSensorImuInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> &robot_core, const std::shared_ptr<SensorStateCore> &sensor_state_core)
 {
     // tf pose sensor wrt robot
     this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);

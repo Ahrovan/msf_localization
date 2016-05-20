@@ -108,7 +108,7 @@ Eigen::Vector3d ImuSensorMeasurementCore::getLinearAcceleration() const
     return this->LinearAcceleration;
 }
 
-Eigen::VectorXd ImuSensorMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
+Eigen::VectorXd ImuSensorMeasurementCore::getInnovation(const std::shared_ptr<SensorMeasurementCore> &theMatchedMeasurementI, const std::shared_ptr<SensorMeasurementCore> &thePredictedMeasurementI)
 {
     // Create the Measurement
     Eigen::VectorXd TheInnovation;

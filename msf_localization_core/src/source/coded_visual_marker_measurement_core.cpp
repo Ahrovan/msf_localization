@@ -106,7 +106,7 @@ Eigen::Vector4d CodedVisualMarkerMeasurementCore::getVisualMarkerAttitude() cons
     return this->attitude_;
 }
 
-Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(std::shared_ptr<SensorMeasurementCore> theMatchedMeasurementI, std::shared_ptr<SensorMeasurementCore> thePredictedMeasurementI)
+Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(const std::shared_ptr<SensorMeasurementCore> &theMatchedMeasurementI, const std::shared_ptr<SensorMeasurementCore> &thePredictedMeasurementI)
 {
     // Create the Measurement
     Eigen::VectorXd the_innovation;

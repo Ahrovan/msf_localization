@@ -507,11 +507,11 @@ Eigen::SparseMatrix<double> AbsolutePoseInputCore::getCovarianceNoise(const Time
 }
 
 int AbsolutePoseInputCore::predictState(//Time
-                                         const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                         const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                          // Previous State
-                                         const std::shared_ptr<StateEstimationCore> pastState,
+                                         const std::shared_ptr<StateEstimationCore> &pastState,
                                          // Inputs
-                                         const std::shared_ptr<InputCommandComponent> inputCommand,
+                                         const std::shared_ptr<InputCommandComponent> &inputCommand,
                                          // Predicted State
                                          std::shared_ptr<StateCore>& predictedState)
 {
@@ -651,11 +651,11 @@ int AbsolutePoseInputCore::predictStateCore(// State k: Input
 }
 
 int AbsolutePoseInputCore::predictErrorStateJacobian(//Time
-                                                    const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                                    const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                     // Previous State
-                                                    const std::shared_ptr<StateEstimationCore> past_state,
+                                                    const std::shared_ptr<StateEstimationCore>& past_state,
                                                     // Inputs
-                                                    const std::shared_ptr<InputCommandComponent> input_command,
+                                                    const std::shared_ptr<InputCommandComponent>& input_command,
                                                     // Predicted State
                                                     std::shared_ptr<StateCore> &predicted_state)
 {

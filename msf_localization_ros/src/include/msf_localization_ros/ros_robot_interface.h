@@ -28,7 +28,10 @@ public:
 
 
 public:
-    virtual int publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)=0;
+    virtual int publish(const TimeStamp& time_stamp,
+                        const std::shared_ptr<GlobalParametersCore>& world_core,
+                        const std::shared_ptr<RobotStateCore>& robot_state_core,
+                        const Eigen::MatrixXd& covariance_robot_matrix)=0;
 
 
 };

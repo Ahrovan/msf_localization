@@ -122,7 +122,7 @@ int RosArucoEyeInterface::open()
     return 0;
 }
 
-int RosArucoEyeInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)
+int RosArucoEyeInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface>& robot_core, const std::shared_ptr<SensorStateCore>& sensor_state_core)
 {
     // tf pose sensor wrt robot
     this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);

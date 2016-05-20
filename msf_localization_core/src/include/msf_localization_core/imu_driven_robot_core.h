@@ -122,19 +122,19 @@ public:
 public:
     // TODO
     int predictState(//Time
-                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                      // Previous State
-                     const std::shared_ptr<StateEstimationCore> pastState,
+                     const std::shared_ptr<StateEstimationCore>& pastState,
                      // Inputs
-                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                     const std::shared_ptr<InputCommandComponent>& inputCommand,
                      // Predicted State
                      std::shared_ptr<StateCore>& predictedState);
 
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                             const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
-                             const std::shared_ptr<ImuInputCommandCore> input,
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                             const std::shared_ptr<ImuDrivenRobotStateCore>& pastState,
+                             const std::shared_ptr<ImuInputCommandCore>& input,
                              std::shared_ptr<ImuDrivenRobotStateCore>& predictedState);
     // int predictStateSpecificCore();
 
@@ -144,18 +144,18 @@ protected:
 public:
     // TODO
     int predictErrorStateJacobian(//Time
-                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 const std::shared_ptr<StateEstimationCore>& pastState,
                                   // Inputs
-                                  const std::shared_ptr<InputCommandComponent> inputCommand,
+                                  const std::shared_ptr<InputCommandComponent>& inputCommand,
                                  // Predicted State
                                  std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                           const std::shared_ptr<ImuDrivenRobotStateCore> pastState,
-                                           const std::shared_ptr<ImuInputCommandCore> input,
+    int predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                           const std::shared_ptr<ImuDrivenRobotStateCore>& pastState,
+                                           const std::shared_ptr<ImuInputCommandCore>& input,
                                            std::shared_ptr<ImuDrivenRobotStateCore>& predictedState);
 
 // int predictErrorStateJacobianSpecificCore();

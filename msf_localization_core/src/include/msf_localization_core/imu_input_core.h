@@ -268,17 +268,17 @@ public:
     // Prediction state function: f()
 public:
     int predictState(//Time
-                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                      // Previous State
-                     const std::shared_ptr<StateEstimationCore> pastState,
+                     const std::shared_ptr<StateEstimationCore>& pastState,
                      // Inputs
-                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                     const std::shared_ptr<InputCommandComponent>& inputCommand,
                      // Predicted State
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                             const std::shared_ptr<ImuInputStateCore> pastState,
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                             const std::shared_ptr<ImuInputStateCore>& pastState,
                              std::shared_ptr<ImuInputStateCore>& predictedState);
 
     // int predictStateSpecificCore();
@@ -289,17 +289,17 @@ protected:
 public:
     // TODO
     int predictErrorStateJacobian(//Time
-                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> pastState,
+                                 const std::shared_ptr<StateEstimationCore>& pastState,
                                   // Inputs
-                                  const std::shared_ptr<InputCommandComponent> inputCommand,
+                                  const std::shared_ptr<InputCommandComponent> &inputCommand,
                                  // Predicted State
                                  std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictErrorStateJacobianSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                          const std::shared_ptr<ImuInputStateCore> pastState,
+    int predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                          const std::shared_ptr<ImuInputStateCore>& pastState,
                                           std::shared_ptr<ImuInputStateCore>& predictedState);
 
     // int predictErrorStateJacobianSpecificCore();

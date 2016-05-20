@@ -141,11 +141,11 @@ public:
 
 public:
     virtual int predictMeasurement(// Time
-                                   const TimeStamp current_time_stamp,
+                                   const TimeStamp& current_time_stamp,
                                    // Current State
-                                   const std::shared_ptr<StateEstimationCore> current_state,
+                                   const std::shared_ptr<StateEstimationCore>& current_state,
                                    // Measurements
-                                   const std::shared_ptr<SensorMeasurementCore> measurement,
+                                   const std::shared_ptr<SensorMeasurementCore>& measurement,
                                    // Predicted Measurements
                                    std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
     {
@@ -156,11 +156,11 @@ public:
 
 public:
     virtual int predictErrorMeasurementJacobian(// Time
-                                                const TimeStamp current_time_stamp,
+                                                const TimeStamp& current_time_stamp,
                                                // Current State
-                                               const std::shared_ptr<StateEstimationCore> current_state,
+                                               const std::shared_ptr<StateEstimationCore>& current_state,
                                                // Measurements
-                                               const std::shared_ptr<SensorMeasurementCore> measurement,
+                                               const std::shared_ptr<SensorMeasurementCore>& measurement,
                                                // Predicted Measurements
                                                std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
     {
@@ -170,7 +170,7 @@ public:
 
 protected:
     int predictErrorMeasurementJacobianInit(// Current State
-                                            const std::shared_ptr<StateEstimationCore> current_state,
+                                            const std::shared_ptr<StateEstimationCore>& current_state,
                                             // Predicted Measurements
                                             std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
@@ -181,11 +181,11 @@ protected:
     // TODO
 public:
     virtual int mapMeasurement(// Time
-                       const TimeStamp current_time_stamp,
+                       const TimeStamp& current_time_stamp,
                        // Current State
-                       const std::shared_ptr<StateEstimationCore> current_state,
+                       const std::shared_ptr<StateEstimationCore>& current_state,
                        // Current Measurement
-                       const std::shared_ptr<SensorMeasurementCore> current_measurement,
+                       const std::shared_ptr<SensorMeasurementCore>& current_measurement,
                        // List Map Element Core -> New will be added if not available
                        std::list< std::shared_ptr<MapElementCore> >& list_map_element_core,
                        // New Map Element State Core
@@ -198,11 +198,11 @@ public:
 
 public:
     virtual int jacobiansMapMeasurement(// Time
-                       const TimeStamp current_time_stamp,
+                       const TimeStamp& current_time_stamp,
                        // Current State
-                       const std::shared_ptr<StateEstimationCore> current_state,
+                       const std::shared_ptr<StateEstimationCore>& current_state,
                        // Current Measurement
-                       const std::shared_ptr<SensorMeasurementCore> current_measurement,
+                       const std::shared_ptr<SensorMeasurementCore>& current_measurement,
                        // New Map Element State Core
                        std::shared_ptr<StateCore> &new_map_element_state)
     {

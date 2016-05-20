@@ -259,35 +259,35 @@ public:
     // Prediction state function: f
 public:
     int predictState(//Time
-                     const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                     const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                      // Previous State
-                     const std::shared_ptr<StateEstimationCore> pastState,
+                     const std::shared_ptr<StateEstimationCore>& pastState,
                      // Inputs
-                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                     const std::shared_ptr<InputCommandComponent>& inputCommand,
                      // Predicted State
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
     int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                     const std::shared_ptr<ImuSensorStateCore> pastState,
-                     std::shared_ptr<ImuSensorStateCore>& predictedState);
+                     const ImuSensorStateCore* pastState,
+                     ImuSensorStateCore*& predictedState);
 
     // Jacobian of the error state: F
 
 public:
     int predictErrorStateJacobian(//Time
-                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore> past_state,
+                                 const std::shared_ptr<StateEstimationCore>& past_state,
                                  // Inputs
-                                 const std::shared_ptr<InputCommandComponent> input_command,
+                                 const std::shared_ptr<InputCommandComponent>& input_command,
                                  // Predicted State
                                  std::shared_ptr<StateCore>& predicted_state);
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                            const std::shared_ptr<ImuSensorStateCore> pastState,
-                                            std::shared_ptr<ImuSensorStateCore>& predictedState,
+                                           const ImuSensorStateCore* pastState,
+                                           ImuSensorStateCore*& predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Sensor
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
@@ -322,39 +322,39 @@ protected:
     // Prediction measurements: h
 public:
     int predictMeasurement(// Time
-                           const TimeStamp current_time_stamp,
+                           const TimeStamp& current_time_stamp,
                            // Current State
-                           const std::shared_ptr<StateEstimationCore> current_state,
+                           const std::shared_ptr<StateEstimationCore>& current_state,
                            // Measurement to match
-                           const std::shared_ptr<SensorMeasurementCore> measurement,
+                           const std::shared_ptr<SensorMeasurementCore>& measurement,
                            // Predicted Measurements
                            std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
     int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
-                           const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
-                           const std::shared_ptr<RobotStateCore> currentRobotState,
-                           const std::shared_ptr<ImuSensorStateCore> currentImuState,
-                           std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement);
+                           const GlobalParametersStateCore* TheGlobalParametersStateCore,
+                           const RobotStateCore* currentRobotState,
+                           const ImuSensorStateCore* currentImuState,
+                           ImuSensorMeasurementCore*& predictedMeasurement);
 
 
     // Jacobian of the measurements: H
 public:
     int predictErrorMeasurementJacobian(// Time
-                                        const TimeStamp current_time_stamp,
+                                        const TimeStamp& current_time_stamp,
                                         // Current State
-                                        const std::shared_ptr<StateEstimationCore> current_state,
+                                        const std::shared_ptr<StateEstimationCore>& current_state,
                                         // Measurements
-                                        const std::shared_ptr<SensorMeasurementCore> measurement,
+                                        const std::shared_ptr<SensorMeasurementCore>& measurement,
                                         // Predicted Measurements
                                         std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
-                                                const std::shared_ptr<GlobalParametersStateCore> TheGlobalParametersStateCore,
-                                                const std::shared_ptr<RobotStateCore> TheRobotStateCore,
-                                                const std::shared_ptr<ImuSensorStateCore> TheImuStateCore,
-                                                std::shared_ptr<ImuSensorMeasurementCore>& predictedMeasurement,
+                                                const GlobalParametersStateCore* TheGlobalParametersStateCore,
+                                                const RobotStateCore* TheRobotStateCore,
+                                                const ImuSensorStateCore* TheImuStateCore,
+                                                ImuSensorMeasurementCore*& predictedMeasurement,
                                                 // Jacobians State / Parameters
                                                 // World
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_state,

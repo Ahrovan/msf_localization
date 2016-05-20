@@ -102,7 +102,7 @@ int RosFreeModelRobotInterface::open()
     return 0;
 }
 
-int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> world_core, const std::shared_ptr<RobotStateCore> robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
+int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> &world_core, const std::shared_ptr<RobotStateCore> &robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
 {
     /// tf pose robot wrt world
     this->publishTfPoseRobotWrtWorld(time_stamp, world_core, robot_state_core);

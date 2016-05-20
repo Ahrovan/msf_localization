@@ -20,10 +20,14 @@ public:
 
 
 public:
-    virtual int publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core)=0;
+    virtual int publish(const TimeStamp& time_stamp,
+                        const std::shared_ptr<RosRobotInterface>& robot_core,
+                        const std::shared_ptr<SensorStateCore>& sensor_state_core)=0;
 
 protected:
-    int publishTfPoseSensorWrtRobot(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core);
+    int publishTfPoseSensorWrtRobot(const TimeStamp& time_stamp,
+                                    const std::shared_ptr<RosRobotInterface>& robot_core,
+                                    const std::shared_ptr<SensorStateCore>& sensor_state_core);
 
 };
 

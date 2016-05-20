@@ -133,7 +133,9 @@ public:
 
     // Get the previous input by stamp using the input core
 public:
-    int getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp, const std::shared_ptr<InputCore> input_core, std::shared_ptr<InputCommandCore>& input_command_core);
+    int getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp,
+                                                   const std::shared_ptr<InputCore>& input_core,
+                                                   std::shared_ptr<InputCommandCore>& input_command_core);
 
     // Get oldest time stamp
 public:
@@ -142,18 +144,22 @@ public:
 
     // Add element in the ring buffer by stamp (safe)
 public:
-    int addElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore> TheStateEstimationCore);
+    int addElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore);
 
     // Set a measurement in the ring buffer with given time stamp (safe)
 public:
-    int setMeasurement(const TimeStamp TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> TheSensorMeasurement);
-    int setMeasurementList(const TimeStamp TheTimeStamp, const std::list< std::shared_ptr<SensorMeasurementCore> > TheListSensorMeasurement);
+    int setMeasurement(const TimeStamp& TheTimeStamp,
+                       const std::shared_ptr<SensorMeasurementCore>& TheSensorMeasurement);
+    int setMeasurementList(const TimeStamp& TheTimeStamp,
+                           const std::list< std::shared_ptr<SensorMeasurementCore> >& TheListSensorMeasurement);
 
 
     // Set an input command in the ring buffer with given time stamp (safe)
 public:
-    int setInputCommand(const TimeStamp& time_stamp, const std::shared_ptr<InputCommandCore> input_command_core);
-    int setInputCommandList(const TimeStamp& time_stamp, const std::list< std::shared_ptr<InputCommandCore> > list_input_command_core);
+    int setInputCommand(const TimeStamp& time_stamp,
+                        const std::shared_ptr<InputCommandCore>& input_command_core);
+    int setInputCommandList(const TimeStamp& time_stamp,
+                            const std::list< std::shared_ptr<InputCommandCore> >& list_input_command_core);
 
 
 
@@ -168,7 +174,8 @@ public:
     // Display Elements in the ring buffer (safe)
 public:
     int displayRingBuffer();
-    int displayStateEstimationElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore>  TheStateEstimationCore);
+    int displayStateEstimationElement(const TimeStamp& TheTimeStamp,
+                                      const std::shared_ptr<StateEstimationCore>&  TheStateEstimationCore);
 
 
 

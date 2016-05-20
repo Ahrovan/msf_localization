@@ -319,7 +319,6 @@ Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceParamete
     Eigen::SparseMatrix<double> covariance;
 
     covariance.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
-    covariance.reserve(this->getDimensionErrorParameters());
 
     std::vector<Eigen::Triplet<double> > tripletCovarianceParameters;
 
@@ -361,11 +360,11 @@ Eigen::SparseMatrix<double> CodedVisualMarkerLandmarkCore::getCovarianceNoise(co
 }
 
 int CodedVisualMarkerLandmarkCore::predictState(//Time
-                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                 const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                  // Previous State
-                 const std::shared_ptr<StateEstimationCore> pastState,
+                 const std::shared_ptr<StateEstimationCore> &pastState,
                  // Inputs
-                 const std::shared_ptr<InputCommandComponent> inputCommand,
+                 const std::shared_ptr<InputCommandComponent> &inputCommand,
                  // Predicted State
                  std::shared_ptr<StateCore>& predictedState)
 {
@@ -506,11 +505,11 @@ int CodedVisualMarkerLandmarkCore::predictStateSpecific(const TimeStamp previous
 
 // Jacobian
 int CodedVisualMarkerLandmarkCore::predictErrorStateJacobian(//Time
-                             const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
+                             const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> past_state,
+                             const std::shared_ptr<StateEstimationCore> &past_state,
                             // Inputs
-                            const std::shared_ptr<InputCommandComponent> input_command,
+                            const std::shared_ptr<InputCommandComponent> &input_command,
                              // Predicted State
                              std::shared_ptr<StateCore> &predicted_state)
 {

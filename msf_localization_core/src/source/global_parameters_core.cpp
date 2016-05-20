@@ -182,8 +182,6 @@ Eigen::SparseMatrix<double> GlobalParametersCore::getCovarianceParameters()
 {
     Eigen::SparseMatrix<double> covariances_matrix;
     covariances_matrix.resize(this->getDimensionErrorParameters(), this->getDimensionErrorParameters());
-    //covariances_matrix.setZero();
-    covariances_matrix.reserve(this->getDimensionErrorParameters());
 
     std::vector<Eigen::Triplet<double> > tripletCovarianceParameters;
 
@@ -233,12 +231,12 @@ Eigen::SparseMatrix<double> GlobalParametersCore::getCovarianceNoise(const TimeS
 }
 
 int GlobalParametersCore::predictState(//Time
-                                     const TimeStamp previousTimeStamp,
-                                     const TimeStamp currentTimeStamp,
+                                     const TimeStamp& previousTimeStamp,
+                                     const TimeStamp& currentTimeStamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore> pastState,
+                                     const std::shared_ptr<StateEstimationCore>& pastState,
                                      // Inputs
-                                     const std::shared_ptr<InputCommandComponent> inputCommand,
+                                     const std::shared_ptr<InputCommandComponent>& inputCommand,
                                      // Predicted State
                                      std::shared_ptr<StateCore> &predictedState)
 {
@@ -253,16 +251,20 @@ int GlobalParametersCore::predictState(//Time
 
 
     // World Predicted State
-    std::shared_ptr<GlobalParametersStateCore> predictedWorldState;
+    GlobalParametersStateCore* predictedWorldState;
     if(!predictedState)
-        predictedWorldState=std::make_shared<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore->getMsfElementCoreWeakPtr());
+    {
+        predictedWorldState=new GlobalParametersStateCore;
+        predictedWorldState->setMsfElementCorePtr(pastState->TheGlobalParametersStateCore->getMsfElementCoreWeakPtr());
+        predictedState=std::shared_ptr<GlobalParametersStateCore>(predictedWorldState);
+    }
     else
-        predictedWorldState=std::dynamic_pointer_cast<GlobalParametersStateCore>(predictedState);
+        predictedWorldState=dynamic_cast<GlobalParametersStateCore*>(predictedState.get());
 
 
     // Predict State
     int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
-                                         std::dynamic_pointer_cast<GlobalParametersStateCore>(pastState->TheGlobalParametersStateCore),
+                                         dynamic_cast<GlobalParametersStateCore*>(pastState->TheGlobalParametersStateCore.get()),
                                          predictedWorldState);
 
     // Check error
@@ -270,17 +272,13 @@ int GlobalParametersCore::predictState(//Time
         return error_predict_state;
 
 
-    // Set predicted state
-    predictedState=predictedWorldState;
-
-
     // End
     return 0;
 }
 
 int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
-                                               const std::shared_ptr<GlobalParametersStateCore> pastState,
-                                               std::shared_ptr<GlobalParametersStateCore>& predictedState)
+                                               const GlobalParametersStateCore *pastState,
+                                               GlobalParametersStateCore *&predictedState)
 {
 
     // Checks in the past state
@@ -294,7 +292,8 @@ int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStam
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<GlobalParametersStateCore>(pastState->getMsfElementCoreWeakPtr());
+        predictedState= new GlobalParametersStateCore;
+        predictedState->setMsfElementCorePtr(pastState->getMsfElementCoreWeakPtr());
     }
 
 
@@ -319,13 +318,13 @@ int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStam
 }
 
 int GlobalParametersCore::predictErrorStateJacobian(//Time
-                                                 const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                 // Previous State
-                                                 const std::shared_ptr<StateEstimationCore> past_state,
+                                                    const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                                     // Previous State
+                                                     const std::shared_ptr<StateEstimationCore>& past_state,
                                                     // Inputs
-                                                    const std::shared_ptr<InputCommandComponent> input_command,
-                                                 // Predicted State
-                                                 std::shared_ptr<StateCore> &predicted_state)
+                                                    const std::shared_ptr<InputCommandComponent>& input_command,
+                                                     // Predicted State
+                                                     std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
@@ -354,7 +353,7 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
 
 
     /// World Predicted State
-    std::shared_ptr<GlobalParametersStateCore> predicted_world_state=std::dynamic_pointer_cast<GlobalParametersStateCore>(predicted_state);
+    GlobalParametersStateCore* predicted_world_state=dynamic_cast<GlobalParametersStateCore*>(predicted_state.get());
 
 
     /// Get iterators to fill jacobians
@@ -375,7 +374,7 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
 
     /// Predict State Jacobians
     int error_predict_state_jacobians=predictErrorStateJacobianSpecific(previousTimeStamp, currentTimeStamp,
-                                                                        std::dynamic_pointer_cast<GlobalParametersStateCore>(past_state->TheGlobalParametersStateCore),
+                                                                        dynamic_cast<GlobalParametersStateCore*>(past_state->TheGlobalParametersStateCore.get()),
                                                                         predicted_world_state,
                                                                         // Jacobians Error State: Fx, Fp
                                                                         predicted_world_state->jacobian_error_state_.world,
@@ -389,17 +388,14 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
         return error_predict_state_jacobians;
 
 
-    /// Set predicted state
-    predicted_state=predicted_world_state;
-
 
     // End
     return 0;
 }
 
 int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                                            std::shared_ptr<GlobalParametersStateCore> pastState,
-                                                            std::shared_ptr<GlobalParametersStateCore>& predictedState,
+                                                            const GlobalParametersStateCore* pastState,
+                                                            GlobalParametersStateCore*& predictedState,
                                                             // Jacobians Error State: Fx, Fp
                                                             // World
                                                             Eigen::SparseMatrix<double>& jacobian_error_state_wrt_world_error_state,

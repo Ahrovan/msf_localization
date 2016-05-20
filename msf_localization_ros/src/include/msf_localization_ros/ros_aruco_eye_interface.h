@@ -56,7 +56,7 @@ public:
 
 
 public:
-    int publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface> robot_core, const std::shared_ptr<SensorStateCore> sensor_state_core);
+    int publish(const TimeStamp& time_stamp, const std::shared_ptr<RosRobotInterface>& robot_core, const std::shared_ptr<SensorStateCore>& sensor_state_core);
 
 
 public:
