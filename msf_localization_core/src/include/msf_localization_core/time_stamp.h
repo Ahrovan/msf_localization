@@ -64,7 +64,7 @@ public:
     }
 
 public:
-    bool operator==(const TimeStamp t2) const
+    bool operator==(const TimeStamp& t2) const
     {
         if(this->sec == t2.sec && this->nsec == t2.nsec)
             return true;
@@ -72,7 +72,7 @@ public:
             return false;
     }
 
-    bool operator>(const TimeStamp t2) const
+    bool operator>(const TimeStamp& t2) const
     {
         if(this->sec > t2.sec)
             return true;
@@ -82,7 +82,7 @@ public:
             return false;
     }
 
-    bool operator>=(const TimeStamp t2) const
+    bool operator>=(const TimeStamp& t2) const
     {
         if(this->operator>(t2) || this->operator==(t2))
             return true;
@@ -90,7 +90,7 @@ public:
             return false;
     }
 
-    bool operator<(const TimeStamp t2) const
+    bool operator<(const TimeStamp& t2) const
     {
         if(this->sec < t2.sec)
             return true;
@@ -100,7 +100,7 @@ public:
             return false;
     }
 
-    bool operator<=(const TimeStamp t2) const
+    bool operator<=(const TimeStamp& t2) const
     {
         if(this->operator<(t2) || this->operator==(t2))
             return true;
@@ -108,7 +108,7 @@ public:
             return false;
     }
 
-    TimeStamp operator-(const TimeStamp t2) const
+    TimeStamp operator-(const TimeStamp& t2) const
     {
         TimeStamp timeDiff;
 

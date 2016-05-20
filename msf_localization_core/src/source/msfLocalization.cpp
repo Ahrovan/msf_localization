@@ -358,7 +358,7 @@ int MsfLocalizationCore::bufferManagerThreadFunction()
 }
 
 
-int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
+int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 {
 #if _BUFFER_PROPAGATION_MULTI_THREADING
     num_buffer_propagation_threads++;
@@ -533,7 +533,7 @@ int MsfLocalizationCore::bufferPropagationStep(TimeStamp time_stamp)
     return 0;
 }
 
-int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(TimeStamp time_stamp)
+int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(const TimeStamp &time_stamp)
 {
     // Get current element (k)
     std::shared_ptr<StateEstimationCore> current_element;
@@ -608,7 +608,7 @@ int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(TimeStamp time_stamp)
     return -100;
 }
 
-int MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList(TimeStamp time_stamp)
+int MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList(const TimeStamp& time_stamp)
 {
     TimeStamp TheNewOutdatedTimeStamp;
 
@@ -665,7 +665,7 @@ int MsfLocalizationCore::startThreads()
 
 
 
-int MsfLocalizationCore::getPreviousState(TimeStamp TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState)
+int MsfLocalizationCore::getPreviousState(const TimeStamp &TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState)
 {
     // Get the previous not the last!
     if(TheMsfStorageCore->getPreviousElementWithStateEstimateByStamp(TheTimeStamp, ThePreviousTimeStamp, ThePreviousState))
@@ -698,7 +698,7 @@ int MsfLocalizationCore::getPreviousState(TimeStamp TheTimeStamp, TimeStamp& The
     return 0;
 }
 
-int MsfLocalizationCore::findInputCommands(const TimeStamp TheTimeStamp,
+int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
                                            //const std::shared_ptr<StateEstimationCore> ThePreviousState,
                                            std::shared_ptr<InputCommandComponent>& input_command)
 {
@@ -761,7 +761,7 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp TheTimeStamp,
 }
 
 
-int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
+int MsfLocalizationCore::predict(const TimeStamp &TheTimeStamp)
 {
     if(!isStateEstimationEnabled())
         return 0;
@@ -897,7 +897,7 @@ int MsfLocalizationCore::predict(TimeStamp TheTimeStamp)
 }
 
 
-int MsfLocalizationCore::predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState)
+int MsfLocalizationCore::predictNoAddBuffer(const TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState)
 {
     if(!isStateEstimationEnabled())
         return 0;
@@ -1014,7 +1014,7 @@ int MsfLocalizationCore::predictNoAddBuffer(TimeStamp TheTimeStamp, std::shared_
 
 
 
-int MsfLocalizationCore::predictSemiCore(TimeStamp ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState)
+int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState)
 {
 
 
@@ -1103,7 +1103,7 @@ int MsfLocalizationCore::predictSemiCore(TimeStamp ThePredictedTimeStamp, std::s
 
 
 
-int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const TimeStamp ThePredictedTimeStamp,
+int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, const TimeStamp &ThePredictedTimeStamp,
                                      // Previous State
                                      const std::shared_ptr<StateEstimationCore> ThePreviousState,
                                      // Inputs
@@ -2412,7 +2412,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp ThePreviousTimeStamp, const
 
 
 
-int MsfLocalizationCore::update(const TimeStamp TheTimeStamp)
+int MsfLocalizationCore::update(const TimeStamp &TheTimeStamp)
 {
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
@@ -2578,7 +2578,7 @@ int MsfLocalizationCore::update(const TimeStamp TheTimeStamp)
 
 
 
-int MsfLocalizationCore::updateCore(const TimeStamp TheTimeStamp,
+int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
                                     const std::shared_ptr<StateEstimationCore> OldState,
                                     std::shared_ptr<StateEstimationCore>& UpdatedState)
 {

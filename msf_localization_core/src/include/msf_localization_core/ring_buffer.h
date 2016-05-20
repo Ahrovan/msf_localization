@@ -43,7 +43,7 @@ public:
 
 public:
     // Add element in the top of the buffer
-    int addElementTop(const BufferObjectType TheElement)
+    int addElementTop(const BufferObjectType& TheElement)
     {
         // There are no available elements in the empty elements list. Create elements in the lists
         TheElementsList.push_front(TheElement);
@@ -54,7 +54,7 @@ public:
     }
 
     // Add element in the end of the buffer
-    int addElementEnd(const BufferObjectType TheElement)
+    int addElementEnd(const BufferObjectType& TheElement)
     {
         TheElementsList.push_back(TheElement);
 
@@ -64,14 +64,14 @@ public:
 
 
     // Add element in the middle of the buffer, before element I
-    int addElementBeforeI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    int addElementBeforeI(const BufferObjectType& TheElement, const typename std::list<BufferObjectType>::iterator& itElement)
     {
         TheElementsList.insert(itElement, TheElement);
         return 0;
     }
 
     // Add element in the middle of the buffer, after element I
-    int addElementAfterI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    int addElementAfterI(const BufferObjectType& TheElement, typename std::list<BufferObjectType>::iterator itElement)
     {
         if(itElement==TheElementsList.end())
         {
@@ -87,7 +87,7 @@ public:
         return 0;
     }
 
-    int addElementInI(const BufferObjectType TheElement, typename std::list<BufferObjectType>::iterator itElement)
+    int addElementInI(const BufferObjectType& TheElement, typename std::list<BufferObjectType>::iterator itElement)
     {
         // Previous
         //typename std::list<BufferObjectType>::iterator previousIt=itElement;
@@ -115,7 +115,7 @@ public:
         return 0;
     }
 
-    int getElementI(BufferObjectType& TheElement, typename std::list<BufferObjectType>::const_iterator itElement) const
+    int getElementI(BufferObjectType& TheElement, const typename std::list<BufferObjectType>::const_iterator& itElement) const
     {
         if(itElement==TheElementsList.end())
             return 1;
@@ -191,7 +191,7 @@ public:
     }
 
 
-    int purgeLastElementsFromI(typename std::list<BufferObjectType>::iterator itElement)
+    int purgeLastElementsFromI(const typename std::list<BufferObjectType>::const_iterator& itElement)
     {
         //std::cout<<"Cleaning buffer. It has "<<this->getSize()<<" elements"<<std::endl;
 
@@ -212,7 +212,7 @@ public:
     }
 
     // Purge element
-    int purgeElement(typename std::list<BufferObjectType>::iterator itElement)
+    int purgeElement(const typename std::list<BufferObjectType>::iterator& itElement)
     {
         TheElementsList.erase(itElement);
 

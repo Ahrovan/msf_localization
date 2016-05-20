@@ -67,7 +67,7 @@ MeasurementTypes SensorMeasurementCore::getMeasurementType() const
     return this->measurementType;
 }
 
-bool SensorMeasurementCore::isCorrect()
+bool SensorMeasurementCore::isCorrect() const
 {
     if(this->sensor_core_ptr_.expired())
         return false;

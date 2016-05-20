@@ -42,7 +42,7 @@ template <class BufferObjectType>
 class StampedRingBuffer : public RingBuffer< StampedBufferObjectType<BufferObjectType> >
 {
 public:
-    int searchElementByStamp(StampedBufferObjectType<BufferObjectType>& TheElement, TimeStamp timeStamp) const
+    int searchElementByStamp(StampedBufferObjectType<BufferObjectType>& TheElement, const TimeStamp& timeStamp) const
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator ListIterator=this->TheElementsList.begin();
 
@@ -72,7 +72,7 @@ public:
     }
 
 
-    int searchPreIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, TimeStamp timeStamp)
+    int searchPreIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, const TimeStamp& timeStamp)
     {
 
         // The List Doesn't have any elements
@@ -146,7 +146,7 @@ public:
     }
 
     // TODO FIX!!!
-    int searchPostIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, TimeStamp timeStamp)
+    int searchPostIElementByStamp(typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator& itElement, const TimeStamp& timeStamp)
     {
         int result=searchPreIElementByStamp(itElement, timeStamp);
         if(result==0)
@@ -178,7 +178,7 @@ public:
 
 
 public:
-    int searchPreIStampByStamp(TimeStamp oldTimeStamp, TimeStamp& newTimeStamp) const
+    int searchPreIStampByStamp(const TimeStamp& oldTimeStamp, TimeStamp& newTimeStamp) const
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator itElement;
 
@@ -204,7 +204,7 @@ public:
 
 public:
 
-    int addElementByStamp(const StampedBufferObjectType<BufferObjectType> TheElement)
+    int addElementByStamp(const StampedBufferObjectType<BufferObjectType>& TheElement)
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
         int searchResult=this->searchPreIElementByStamp(itElement, TheElement.timeStamp);
@@ -264,7 +264,7 @@ public:
 
 
 public:
-    int getElementByStamp(TimeStamp timeStamp, BufferObjectType& TheElement)
+    int getElementByStamp(const TimeStamp& timeStamp, BufferObjectType& TheElement)
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
         if(this->searchIElementByStamp(itElement, timeStamp))
@@ -280,7 +280,7 @@ public:
     }
 
 public:
-    int getElementITimeStamp(TimeStamp& timeStamp, typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator itElement) const
+    int getElementITimeStamp(TimeStamp& timeStamp, const typename std::list< StampedBufferObjectType<BufferObjectType> >::const_iterator& itElement) const
     {
         if(itElement==this->TheElementsList.end())
             return 1;
@@ -293,7 +293,7 @@ public:
 
 
 public:
-    int purgeOlderThanStamp(TimeStamp timeStamp)
+    int purgeOlderThanStamp(const TimeStamp& timeStamp)
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
         int result=this->searchPostIElementByStamp(itElement,timeStamp);
@@ -317,7 +317,7 @@ public:
         return -1;
     }
 
-    int purgeElementByStamp(TimeStamp timeStamp)
+    int purgeElementByStamp(const TimeStamp& timeStamp)
     {
         typename std::list< StampedBufferObjectType<BufferObjectType> >::iterator itElement;
         int resultSearch=this->searchIElementByStamp(itElement,timeStamp);

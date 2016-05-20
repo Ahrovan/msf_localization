@@ -59,7 +59,7 @@ StateCoreTypes StateCore::getStateCoreType() const
     return this->state_core_type_;
 }
 
-bool StateCore::isCorrect()
+bool StateCore::isCorrect() const
 {
     if(this->msf_element_core_ptr_.expired())
         return false;

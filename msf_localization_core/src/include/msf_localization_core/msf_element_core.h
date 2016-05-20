@@ -113,7 +113,7 @@ public:
 
     // Check
 public:
-    virtual bool isCorrect();
+    virtual bool isCorrect() const;
 
 
 

@@ -187,13 +187,13 @@ public:
 
     // Get previous state
 protected:
-    int getPreviousState(TimeStamp TheTimeStamp,
+    int getPreviousState(const TimeStamp& TheTimeStamp,
                          TimeStamp& ThePreviousTimeStamp,
                          std::shared_ptr<StateEstimationCore>& ThePreviousState);
 
     // Fill inputs
 protected:
-    int findInputCommands(const TimeStamp TheTimeStamp,
+    int findInputCommands(const TimeStamp& TheTimeStamp,
                           //const std::shared_ptr<StateEstimationCore> ThePreviousState,
                           std::shared_ptr<InputCommandComponent>& input_command);
 
@@ -201,16 +201,16 @@ protected:
 
     /// Predict Step Functions
 protected:
-    int predict(TimeStamp TheTimeStamp);
+    int predict(const TimeStamp& TheTimeStamp);
 
-    int predictNoAddBuffer(TimeStamp TheTimeStamp,
+    int predictNoAddBuffer(const TimeStamp& TheTimeStamp,
                            std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
 private:
-    int predictSemiCore(TimeStamp ThePredictedTimeStamp,
+    int predictSemiCore(const TimeStamp& ThePredictedTimeStamp,
                         std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
-    int predictCore(const TimeStamp ThePreviousTimeStamp, const TimeStamp ThePredictedTimeStamp,
+    int predictCore(const TimeStamp& ThePreviousTimeStamp, const TimeStamp& ThePredictedTimeStamp,
                     // Previous State
                     const std::shared_ptr<StateEstimationCore> ThePreviousState,
                     // Inputs
@@ -222,10 +222,10 @@ private:
 
     /// Update Step functions
 protected:
-    int update(const TimeStamp TheTimeStamp);
+    int update(const TimeStamp& TheTimeStamp);
 
 private:
-    int updateCore(const TimeStamp TheTimeStamp,
+    int updateCore(const TimeStamp& TheTimeStamp,
                    const std::shared_ptr<StateEstimationCore> OldState,
                    std::shared_ptr<StateEstimationCore>& UpdatedState);
 
@@ -236,12 +236,12 @@ private:
 
     // Remove unneded current state
 public:
-    int removeUnnecessaryStateFromBuffer(TimeStamp time_stamp);
+    int removeUnnecessaryStateFromBuffer(const TimeStamp& time_stamp);
 
 
     // Find next element in buffer and add to outdated list
 public:
-    int findNextElementInBufferAndAddOutdatedList(TimeStamp time_stamp);
+    int findNextElementInBufferAndAddOutdatedList(const TimeStamp& time_stamp);
 
 
 
@@ -270,7 +270,7 @@ protected:
 protected:
     int bufferManagerThreadFunction();
 protected:
-    int bufferPropagationStep(TimeStamp time_stamp);
+    int bufferPropagationStep(const TimeStamp& time_stamp);
 
 #if _BUFFER_PROPAGATION_MULTI_THREADING
 protected:
@@ -285,16 +285,6 @@ public:
 
 
 
-    //// Helper functions
-
-
-    // Helper data type
-protected:
-    struct MatrixPoint
-    {
-        unsigned int row;
-        unsigned int col;
-    };
 
 
 

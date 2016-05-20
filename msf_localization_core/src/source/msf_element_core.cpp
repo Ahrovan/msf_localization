@@ -109,7 +109,7 @@ std::shared_ptr<MsfStorageCore> MsfElementCore::getMsfStorageCoreSharedPtr() con
     return msf_storage_core_ptr;
 }
 
-bool MsfElementCore::isCorrect()
+bool MsfElementCore::isCorrect() const
 {
     if(this->msf_storage_core_ptr_.expired())
     {

@@ -53,7 +53,7 @@ public:
 
 
 public:
-    virtual bool isCorrect();
+    virtual bool isCorrect() const;
 
 
 
