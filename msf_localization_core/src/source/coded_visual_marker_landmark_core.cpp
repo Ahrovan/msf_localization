@@ -378,7 +378,7 @@ int CodedVisualMarkerLandmarkCore::predictState(//Time
     // TODO
 
     // Search for the past map State Core
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> past_map_state;
+    CodedVisualMarkerLandmarkStateCore* past_map_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
         it_map_state!=pastState->TheListMapElementStateCore.end();
@@ -386,7 +386,7 @@ int CodedVisualMarkerLandmarkCore::predictState(//Time
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_map_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*it_map_state);
+            past_map_state=dynamic_cast<CodedVisualMarkerLandmarkStateCore*>((*it_map_state).get());
             break;
         }
     }
@@ -398,11 +398,15 @@ int CodedVisualMarkerLandmarkCore::predictState(//Time
 
 
     // Predicted State
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> predicted_map_state;
+    CodedVisualMarkerLandmarkStateCore* predicted_map_state(nullptr);
     if(!predictedState)
-        predicted_map_state=std::make_shared<CodedVisualMarkerLandmarkStateCore>(past_map_state->getMsfElementCoreWeakPtr());
+    {
+        predicted_map_state=new CodedVisualMarkerLandmarkStateCore;
+        predicted_map_state->setMsfElementCorePtr(past_map_state->getMsfElementCoreWeakPtr());
+        predictedState=std::shared_ptr<CodedVisualMarkerLandmarkStateCore>(predicted_map_state);
+    }
     else
-        predicted_map_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(predictedState);
+        predicted_map_state=dynamic_cast<CodedVisualMarkerLandmarkStateCore*>(predictedState.get());
 
 
 
@@ -421,46 +425,28 @@ int CodedVisualMarkerLandmarkCore::predictState(//Time
     }
 
 
-    // Set predicted state
-    predictedState=predicted_map_state;
-
-
-
     // End
     return 0;
 }
 
-int CodedVisualMarkerLandmarkCore::predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                        const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
-                                                        std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState)
+int CodedVisualMarkerLandmarkCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                                        const CodedVisualMarkerLandmarkStateCore *pastState,
+                                                        CodedVisualMarkerLandmarkStateCore *&predictedState)
 {
-    //std::cout<<"CodedVisualMarkerLandmarkCore::predictState()"<<std::endl;
-
-    // Poly
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState=std::static_pointer_cast<CodedVisualMarkerLandmarkStateCore>(pastStateI);
-    //std::shared_ptr<CodedVisualMarkerLandmarkStateCore> predictedState=std::static_pointer_cast<CodedVisualMarkerLandmarkStateCore>(predictedStateI);
-
-
 
     // Checks in the past state
     if(!pastState->isCorrect())
     {
         return -5;
-        std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+        std::cout<<"CodedVisualMarkerLandmarkCore::predictStateSpecific() error"<<std::endl;
     }
 
 
-    // Create the predicted state if it doesn't exist
+    // Checks
     if(!predictedState)
     {
-        predictedState=std::make_shared<CodedVisualMarkerLandmarkStateCore>(pastState->getMsfElementCoreWeakPtr());
+        return -3;
     }
-
-//    // Set The robot core if it doesn't exist
-//    if(predictedState->getTheMapElementCoreWeak().expired())
-//    {
-//        predictedState->setTheMapElementCore(pastState->getTheMapElementCoreWeak());
-//    }
 
 
     // Equations
@@ -480,26 +466,12 @@ int CodedVisualMarkerLandmarkCore::predictStateSpecific(const TimeStamp previous
 
     /// Attitude
     if(flag_estimation_attitude_visual_marker_wrt_world)
-//        if(pastState->attitude_[0]<0)
-//        {
-//            predictedState->attitude_=-pastState->attitude_;
-//            std::cout<<"CodedVisualMarkerLandmarkCore::predictState() quaternion!!"<<std::endl;
-//        }
-//        else
-            predictedState->attitude_=pastState->attitude_;
+        predictedState->attitude_=pastState->attitude_;
     else
-//        if(pastState->attitude_[0]<0)
-//        {
-//            predictedState->attitude_=-pastState->attitude_;
-//            std::cout<<"CodedVisualMarkerLandmarkCore::predictState() quaternion!!"<<std::endl;
-//        }
-//        else
-            predictedState->attitude_=pastState->attitude_;
+        predictedState->attitude_=pastState->attitude_;
 
 
-    // Finish
-    //predictedStateI=predictedState;
-
+    // End
     return 0;
 }
 
@@ -527,7 +499,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobian(//Time
 
 
     // Search for the past map State Core
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> past_map_state;
+    CodedVisualMarkerLandmarkStateCore* past_map_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=past_state->TheListMapElementStateCore.begin();
         it_map_state!=past_state->TheListMapElementStateCore.end();
@@ -535,7 +507,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobian(//Time
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_map_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*it_map_state);
+            past_map_state=dynamic_cast<CodedVisualMarkerLandmarkStateCore*>((*it_map_state).get());
             break;
         }
     }
@@ -556,7 +528,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobian(//Time
 
 
     /// predicted map  State
-    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> predicted_map_state=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(predicted_state);
+    CodedVisualMarkerLandmarkStateCore* predicted_map_state=dynamic_cast<CodedVisualMarkerLandmarkStateCore*>(predicted_state.get());
 
 
 
@@ -575,7 +547,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobian(//Time
         ++itMapElementStateCore, ++it_jacobian_error_state_wrt_map_error_state, ++it_jacobian_error_state_wrt_map_error_parameters
         )
     {
-        if( std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>((*itMapElementStateCore)) == past_map_state )
+        if( dynamic_cast<CodedVisualMarkerLandmarkStateCore*>((*itMapElementStateCore).get()) == past_map_state )
             break;
     }
 
@@ -605,17 +577,13 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobian(//Time
         return error_predict_state_jacobians;
 
 
-    /// Set predicted state
-    predicted_state=predicted_map_state;
-
-
     // End
     return 0;
 }
 
-int CodedVisualMarkerLandmarkCore::predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                                                      const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
-                                                                      std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState,
+int CodedVisualMarkerLandmarkCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                                                      const CodedVisualMarkerLandmarkStateCore *pastState,
+                                                                      const CodedVisualMarkerLandmarkStateCore *predictedState,
                                                                       // Jacobians Error State: Fx, Fp
                                                                       // Map
                                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,

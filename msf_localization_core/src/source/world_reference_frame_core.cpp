@@ -106,7 +106,7 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        MapElementInitStateCore->setPositionMocapWorldWrtWorld(init_estimation);
+        MapElementInitStateCore->setPositionReferenceFrameWorldWrtWorld(init_estimation);
     }
 
     // Attitude of the visual marker wrt world
@@ -115,7 +115,7 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
-        MapElementInitStateCore->setAttitudeMocapWorldWrtWorld(init_estimation);
+        MapElementInitStateCore->setAttitudeReferenceFrameWorldWrtWorld(init_estimation);
     }
 
 
@@ -355,7 +355,7 @@ int WorldReferenceFrameCore::predictState(//Time
     // TODO
 
     // Search for the past map State Core
-    std::shared_ptr<WorldReferenceFrameStateCore> past_map_state;
+    WorldReferenceFrameStateCore* past_map_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=pastState->TheListMapElementStateCore.begin();
         it_map_state!=pastState->TheListMapElementStateCore.end();
@@ -363,7 +363,7 @@ int WorldReferenceFrameCore::predictState(//Time
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(*it_map_state);
+            past_map_state=dynamic_cast<WorldReferenceFrameStateCore*>((*it_map_state).get());
             break;
         }
     }
@@ -375,11 +375,15 @@ int WorldReferenceFrameCore::predictState(//Time
 
 
     // Predicted State
-    std::shared_ptr<WorldReferenceFrameStateCore> predicted_map_state;
+    WorldReferenceFrameStateCore* predicted_map_state(nullptr);
     if(!predictedState)
-        predicted_map_state=std::make_shared<WorldReferenceFrameStateCore>(past_map_state->getMsfElementCoreWeakPtr());
+    {
+        predicted_map_state=new WorldReferenceFrameStateCore;
+        predicted_map_state->setMsfElementCorePtr(past_map_state->getMsfElementCoreWeakPtr());
+        predictedState=std::shared_ptr<WorldReferenceFrameStateCore>(predicted_map_state);
+    }
     else
-        predicted_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(predictedState);
+        predicted_map_state=dynamic_cast<WorldReferenceFrameStateCore*>(predictedState.get());
 
 
 
@@ -398,32 +402,27 @@ int WorldReferenceFrameCore::predictState(//Time
     }
 
 
-    // Set predicted state
-    predictedState=predicted_map_state;
-
-
-
     // End
     return 0;
 }
 
 int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
-                                                        const std::shared_ptr<WorldReferenceFrameStateCore> &pastState,
-                                                        std::shared_ptr<WorldReferenceFrameStateCore>& predictedState)
+                                                  const WorldReferenceFrameStateCore *pastState,
+                                                  WorldReferenceFrameStateCore *&predictedState)
 {
 
     // Checks in the past state
     if(!pastState->isCorrect())
     {
-        return -5;
         std::cout<<"WorldReferenceFrameCore::predictState() error"<<std::endl;
+        return -5;
     }
 
 
     // Create the predicted state if it doesn't exist
     if(!predictedState)
     {
-        predictedState=std::make_shared<WorldReferenceFrameStateCore>(pastState->getMsfElementCoreWeakPtr());
+        return -3;
     }
 
 
@@ -437,16 +436,16 @@ int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp &previousTimeS
 
     /// Position
     if(flag_estimation_position_mocap_world_wrt_world_)
-        predictedState->position_mocap_world_wrt_world_=pastState->position_mocap_world_wrt_world_;
+        predictedState->position_reference_frame_world_wrt_world_=pastState->position_reference_frame_world_wrt_world_;
     else
-        predictedState->position_mocap_world_wrt_world_=pastState->position_mocap_world_wrt_world_;
+        predictedState->position_reference_frame_world_wrt_world_=pastState->position_reference_frame_world_wrt_world_;
 
 
     /// Attitude
     if(flag_estimation_attitude_mocap_world_wrt_world_)
-        predictedState->attitude_mocap_world_wrt_world_=pastState->attitude_mocap_world_wrt_world_;
+        predictedState->attitude_reference_frame_world_wrt_world_=pastState->attitude_reference_frame_world_wrt_world_;
     else
-        predictedState->attitude_mocap_world_wrt_world_=pastState->attitude_mocap_world_wrt_world_;
+        predictedState->attitude_reference_frame_world_wrt_world_=pastState->attitude_reference_frame_world_wrt_world_;
 
 
 
@@ -477,7 +476,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
 
 
     // Search for the past map State Core
-    std::shared_ptr<WorldReferenceFrameStateCore> past_map_state;
+    WorldReferenceFrameStateCore* past_map_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_map_state=past_state->TheListMapElementStateCore.begin();
         it_map_state!=past_state->TheListMapElementStateCore.end();
@@ -485,7 +484,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
     {
         if((*it_map_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(*it_map_state);
+            past_map_state=dynamic_cast<WorldReferenceFrameStateCore*>((*it_map_state).get());
             break;
         }
     }
@@ -506,7 +505,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
 
 
     /// predicted map State
-    std::shared_ptr<WorldReferenceFrameStateCore> predicted_map_state=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(predicted_state);
+    WorldReferenceFrameStateCore* predicted_map_state=dynamic_cast<WorldReferenceFrameStateCore*>(predicted_state.get());
 
 
     /// Get iterators to fill jacobians
@@ -524,7 +523,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
         ++itMapElementStateCore, ++it_jacobian_error_state_wrt_map_error_state, ++it_jacobian_error_state_wrt_map_error_parameters
         )
     {
-        if( std::dynamic_pointer_cast<WorldReferenceFrameStateCore>((*itMapElementStateCore)) == past_map_state )
+        if( dynamic_cast<WorldReferenceFrameStateCore*>((*itMapElementStateCore).get()) == past_map_state )
             break;
     }
 
@@ -554,23 +553,20 @@ int WorldReferenceFrameCore::predictErrorStateJacobian(//Time
         return error_predict_state_jacobians;
 
 
-    /// Set predicted state
-    predicted_state=predicted_map_state;
-
     // End
     return 0;
 }
 
 int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                                       const std::shared_ptr<WorldReferenceFrameStateCore>& pastState,
-                                                       std::shared_ptr<WorldReferenceFrameStateCore>& predictedState,
-                                                       // Jacobians Error State: Fx, Fp
-                                                       // Map
-                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,
-                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_parameters
-                                                       // Jacobians Noise: Hn
-                                                       // TODO
-                                                       )
+                                                               const WorldReferenceFrameStateCore *pastState,
+                                                               WorldReferenceFrameStateCore *&predictedState,
+                                                               // Jacobians Error State: Fx, Fp
+                                                               // Map
+                                                               Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,
+                                                               Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_parameters
+                                                               // Jacobians Noise: Hn
+                                                               // TODO
+                                                               )
 {
     // Create the predicted state if it doesn't exist
     if(!predictedState)

@@ -1043,8 +1043,8 @@ int AbsolutePoseSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeS
 
 
     // Map Element
-    position_map_element_wrt_world=currentMapElementState->getPositionMocapWorldWrtWorld();
-    attitude_map_element_wrt_world=currentMapElementState->getAttitudeMocapWorldWrtWorld();
+    position_map_element_wrt_world=currentMapElementState->getPositionReferenceFrameWorldWrtWorld();
+    attitude_map_element_wrt_world=currentMapElementState->getAttitudeReferenceFrameWorldWrtWorld();
 
 
 
@@ -1322,8 +1322,8 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
     // Cast
     std::shared_ptr<WorldReferenceFrameCore> TheMapElementCore=std::dynamic_pointer_cast<WorldReferenceFrameCore>(currentMapElementState->getMsfElementCoreSharedPtr());
 
-    position_map_element_wrt_world=currentMapElementState->getPositionMocapWorldWrtWorld();
-    attitude_map_element_wrt_world=currentMapElementState->getAttitudeMocapWorldWrtWorld();
+    position_map_element_wrt_world=currentMapElementState->getPositionReferenceFrameWorldWrtWorld();
+    attitude_map_element_wrt_world=currentMapElementState->getAttitudeReferenceFrameWorldWrtWorld();
 
 
     // Matched measurement
@@ -2224,8 +2224,8 @@ int AbsolutePoseSensorCore::mapMeasurementSpecific(const TimeStamp &theTimeStamp
 
     /// Set values
 
-    TheCodedVisualMarkerLandmarkStateCore->position_mocap_world_wrt_world_=position_map_element_wrt_world;
-    TheCodedVisualMarkerLandmarkStateCore->attitude_mocap_world_wrt_world_=attitude_map_element_wrt_world;
+    TheCodedVisualMarkerLandmarkStateCore->position_reference_frame_world_wrt_world_=position_map_element_wrt_world;
+    TheCodedVisualMarkerLandmarkStateCore->attitude_reference_frame_world_wrt_world_=attitude_map_element_wrt_world;
 
 
     /// Polymorph
@@ -2392,8 +2392,8 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &the
     std::shared_ptr<WorldReferenceFrameCore> TheCodeCodedVisualMarkerLandmarkCore=std::dynamic_pointer_cast<WorldReferenceFrameCore>(newMapElementState->getMsfElementCoreSharedPtr());
 
 
-    position_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getPositionMocapWorldWrtWorld();
-    attitude_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getAttitudeMocapWorldWrtWorld();
+    position_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getPositionReferenceFrameWorldWrtWorld();
+    attitude_map_element_wrt_world=TheCodedVisualMarkerLandmarkStateCore->getAttitudeReferenceFrameWorldWrtWorld();
 
 
     //// Core

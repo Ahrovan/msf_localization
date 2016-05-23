@@ -395,7 +395,7 @@ int GlobalParametersCore::predictErrorStateJacobian(//Time
 
 int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                             const GlobalParametersStateCore* pastState,
-                                                            GlobalParametersStateCore*& predictedState,
+                                                            const GlobalParametersStateCore *predictedState,
                                                             // Jacobians Error State: Fx, Fp
                                                             // World
                                                             Eigen::SparseMatrix<double>& jacobian_error_state_wrt_world_error_state,

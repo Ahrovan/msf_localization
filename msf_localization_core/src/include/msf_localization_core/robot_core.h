@@ -44,7 +44,8 @@ enum class RobotCoreTypes
 {
     undefined=0,
     free_model=1,
-    imu_driven
+    imu_driven,
+    absolute_pose_driven
 };
 
 

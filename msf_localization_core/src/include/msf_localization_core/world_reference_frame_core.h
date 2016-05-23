@@ -135,8 +135,8 @@ public:
 
 protected:
     int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                             const std::shared_ptr<WorldReferenceFrameStateCore>& pastState,
-                             std::shared_ptr<WorldReferenceFrameStateCore>& predictedState);
+                             const WorldReferenceFrameStateCore* pastState,
+                             WorldReferenceFrameStateCore*& predictedState);
 
 
     // Jacobian: F
@@ -152,8 +152,8 @@ public:
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                           const std::shared_ptr<WorldReferenceFrameStateCore>& pastState,
-                                           std::shared_ptr<WorldReferenceFrameStateCore>& predictedState,
+                                           const WorldReferenceFrameStateCore* pastState,
+                                           WorldReferenceFrameStateCore*& predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Map
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,

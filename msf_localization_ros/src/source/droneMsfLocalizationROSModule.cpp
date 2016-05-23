@@ -158,7 +158,7 @@ int MsfLocalizationROS::readConfigFile()
             break;
         }
 
-        /// Free Model Type
+        /// Imu Driven Type
         if(robotType=="imu_driven")
         {
             std::cout<<"robot = imu_driven"<<std::endl;
@@ -172,6 +172,42 @@ int MsfLocalizationROS::readConfigFile()
             if(!TheRobotCoreAux)
             {
                 TheRobotCoreAux=std::make_shared<RosImuDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+            }
+
+            // Set the pointer to itself
+            TheRobotCoreAux->setMsfElementCorePtr(TheRobotCoreAux);
+
+
+            // Read configs
+            if(TheRobotCoreAux->readConfig(robot, RobotInitStateCore))
+                return -2;
+
+            // Finish
+
+            // Push the robot core
+            TheRobotCore=TheRobotCoreAux;
+
+            // Push the init state of the robot
+            InitialState->TheRobotStateCore=RobotInitStateCore;
+
+            // break to ensure than only one robot model is read
+            break;
+        }
+
+        /// Free Model Type
+        if(robotType=="absolute_pose_driven")
+        {
+            std::cout<<"robot = absolute_pose_driven"<<std::endl;
+
+            // Create the RobotCoreAux
+            std::shared_ptr<RosAbsolutePoseDrivenRobotInterface> TheRobotCoreAux;
+            // Create a class for the RobotStateCore
+            std::shared_ptr<AbsolutePoseDrivenRobotStateCore> RobotInitStateCore;
+
+            // Create the RobotCoreAux
+            if(!TheRobotCoreAux)
+            {
+                TheRobotCoreAux=std::make_shared<RosAbsolutePoseDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
             }
 
             // Set the pointer to itself
@@ -430,7 +466,7 @@ int MsfLocalizationROS::readConfigFile()
             InitialState->TheListMapElementStateCore.push_back(MapElementInitStateCore);
         }
 
-        /// Mocap World
+        /// World Ref Frame
         if(mapElementType=="world_ref_frame")
         {
             std::cout<<"map element = world_ref_frame"<<std::endl;
@@ -727,8 +763,8 @@ try
                 // Cast
                 std::shared_ptr<WorldReferenceFrameStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<WorldReferenceFrameStateCore>(*itMapElementState);
 
-                Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPositionMocapWorldWrtWorld();
-                Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitudeMocapWorldWrtWorld();
+                Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPositionReferenceFrameWorldWrtWorld();
+                Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitudeReferenceFrameWorldWrtWorld();
 
 
 

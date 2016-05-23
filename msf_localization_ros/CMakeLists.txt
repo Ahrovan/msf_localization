@@ -55,6 +55,7 @@ set(MSF_LOCALIZATION_ROS_SOURCE_FILES
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_robot_interface.cpp
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_free_model_robot_interface.cpp
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_imu_driven_robot_interface.cpp
+	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/ros_absolute_pose_driven_robot_interface.cpp
 
 	${MSF_LOCALIZATION_ROS_SOURCE_DIR}/droneMsfLocalizationROSModule.cpp 
 
@@ -75,6 +76,7 @@ set(MSF_LOCALIZATION_ROS_HEADER_FILES
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_robot_interface.h
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_free_model_robot_interface.h
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_imu_driven_robot_interface.h
+	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/ros_absolute_pose_driven_robot_interface.h
 
 	${MSF_LOCALIZATION_ROS_INCLUDE_DIR}/msf_localization_ros/droneMsfLocalizationROSModule.h
 )

@@ -32,25 +32,25 @@ WorldReferenceFrameStateCore::~WorldReferenceFrameStateCore()
     return;
 }
 
-Eigen::Vector3d WorldReferenceFrameStateCore::getPositionMocapWorldWrtWorld() const
+Eigen::Vector3d WorldReferenceFrameStateCore::getPositionReferenceFrameWorldWrtWorld() const
 {
-    return this->position_mocap_world_wrt_world_;
+    return this->position_reference_frame_world_wrt_world_;
 }
 
-int WorldReferenceFrameStateCore::setPositionMocapWorldWrtWorld(const Eigen::Vector3d &position_mocap_world_wrt_world)
+int WorldReferenceFrameStateCore::setPositionReferenceFrameWorldWrtWorld(const Eigen::Vector3d &position_reference_frame_world_wrt_world)
 {
-    this->position_mocap_world_wrt_world_=position_mocap_world_wrt_world;
+    this->position_reference_frame_world_wrt_world_=position_reference_frame_world_wrt_world;
     return 0;
 }
 
-Eigen::Vector4d WorldReferenceFrameStateCore::getAttitudeMocapWorldWrtWorld() const
+Eigen::Vector4d WorldReferenceFrameStateCore::getAttitudeReferenceFrameWorldWrtWorld() const
 {
-    return this->attitude_mocap_world_wrt_world_;
+    return this->attitude_reference_frame_world_wrt_world_;
 }
 
-int WorldReferenceFrameStateCore::setAttitudeMocapWorldWrtWorld(const Eigen::Vector4d& attitude_mocap_world_wrt_world)
+int WorldReferenceFrameStateCore::setAttitudeReferenceFrameWorldWrtWorld(const Eigen::Vector4d& attitude_reference_frame_world_wrt_world)
 {
-    this->attitude_mocap_world_wrt_world_=attitude_mocap_world_wrt_world;
+    this->attitude_reference_frame_world_wrt_world_=attitude_reference_frame_world_wrt_world;
     return 0;
 }
 
@@ -63,7 +63,7 @@ int WorldReferenceFrameStateCore::updateStateFromIncrementErrorState(const Eigen
     // Position
     if(map_element_core->isEstimationPositionMocapWorldWrtWorldEnabled())
     {
-        position_mocap_world_wrt_world_+=increment_error_state.block<3,1>(dimension_error_state_i,0);
+        position_reference_frame_world_wrt_world_+=increment_error_state.block<3,1>(dimension_error_state_i,0);
         dimension_error_state_i+=3;
     }
 
@@ -77,9 +77,9 @@ int WorldReferenceFrameStateCore::updateStateFromIncrementErrorState(const Eigen
         NormDeltaQuatAux=DeltaQuatAux.norm();
         DeltaQuat=DeltaQuatAux/NormDeltaQuatAux;
 
-        Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_mocap_world_wrt_world_, DeltaQuat);
+        Eigen::Vector4d attitude_aux=Quaternion::cross(attitude_reference_frame_world_wrt_world_, DeltaQuat);
 
-        attitude_mocap_world_wrt_world_=attitude_aux;
+        attitude_reference_frame_world_wrt_world_=attitude_aux;
 
         dimension_error_state_i+=3;
     }

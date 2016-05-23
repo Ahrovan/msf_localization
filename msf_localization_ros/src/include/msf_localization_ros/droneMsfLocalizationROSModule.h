@@ -82,7 +82,7 @@
 // Robot
 #include "msf_localization_ros/ros_free_model_robot_interface.h"
 #include "msf_localization_ros/ros_imu_driven_robot_interface.h"
-#include "msf_localization_core/free_model_robot_state_core.h"
+#include "msf_localization_ros/ros_absolute_pose_driven_robot_interface.h"
 
 
 /// ROS Sensors

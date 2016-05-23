@@ -176,7 +176,7 @@ public:
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                            const CodedVisualMarkerEyeStateCore* pastState,
-                                           CodedVisualMarkerEyeStateCore*& predictedState,
+                                           const CodedVisualMarkerEyeStateCore* predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Sensor
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,

@@ -32,19 +32,19 @@ protected:
 
 protected:
 public:
-    Eigen::Vector3d position_mocap_world_wrt_world_;
+    Eigen::Vector3d position_reference_frame_world_wrt_world_;
 public:
-    Eigen::Vector3d getPositionMocapWorldWrtWorld() const;
-    int setPositionMocapWorldWrtWorld(const Eigen::Vector3d& position_mocap_world_wrt_world);
+    Eigen::Vector3d getPositionReferenceFrameWorldWrtWorld() const;
+    int setPositionReferenceFrameWorldWrtWorld(const Eigen::Vector3d& position_reference_frame_world_wrt_world);
 
 
 
 protected:
 public:
-    Eigen::Vector4d attitude_mocap_world_wrt_world_;
+    Eigen::Vector4d attitude_reference_frame_world_wrt_world_;
 public:
-    Eigen::Vector4d getAttitudeMocapWorldWrtWorld() const;
-    int setAttitudeMocapWorldWrtWorld(const Eigen::Vector4d& attitudemocap_world_wrt_world);
+    Eigen::Vector4d getAttitudeReferenceFrameWorldWrtWorld() const;
+    int setAttitudeReferenceFrameWorldWrtWorld(const Eigen::Vector4d& attitude_reference_frame_world_wrt_world);
 
 
 

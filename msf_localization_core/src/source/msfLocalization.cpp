@@ -1599,10 +1599,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                     itSensorState2!=ThePredictedState->TheListSensorStateCore.end();
                     ++itSensorState2, num_sensor_i++)
                 {
-//                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateSensor(num_sensor_i);
-//                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorParametersSensor(num_sensor_i);
+                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateSensor(num_sensor_i);
+                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorParametersSensor(num_sensor_i);
                     jacobian_column++;
                 }
 
@@ -1612,10 +1612,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                     itMapElementState2!=ThePredictedState->TheListMapElementStateCore.end();
                     ++itMapElementState2, num_map_element_i++)
                 {
-//                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateMapElement(num_map_element_i);
-//                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorParametersMapElement(num_map_element_i);
+                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorStateMapElement(num_map_element_i);
+                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheGlobalParametersStateCore->getJacobianErrorParametersMapElement(num_map_element_i);
                     jacobian_column++;
                 }
 
@@ -1659,10 +1659,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                     itSensorState2!=ThePredictedState->TheListSensorStateCore.end();
                     ++itSensorState2, num_sensor_i++)
                 {
-//                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheRobotStateCore->getJacobianErrorStateSensor(num_sensor_i);
-//                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheRobotStateCore->getJacobianErrorParametersSensor(num_sensor_i);
+                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheRobotStateCore->getJacobianErrorStateSensor(num_sensor_i);
+                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheRobotStateCore->getJacobianErrorParametersSensor(num_sensor_i);
                     jacobian_column++;
                 }
 
@@ -1672,10 +1672,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                     itMapElementState2!=ThePredictedState->TheListMapElementStateCore.end();
                     ++itMapElementState2, num_map_element_i++)
                 {
-//                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheRobotStateCore->getJacobianErrorStateMapElement(num_map_element_i);
-//                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
-//                            ThePredictedState->TheRobotStateCore->getJacobianErrorParametersMapElement(num_map_element_i);
+                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheRobotStateCore->getJacobianErrorStateMapElement(num_map_element_i);
+                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
+                            ThePredictedState->TheRobotStateCore->getJacobianErrorParametersMapElement(num_map_element_i);
                     jacobian_column++;
                 }
 
@@ -1722,10 +1722,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                     itSensorState2!=ThePredictedState->TheListSensorStateCore.end();
                     ++itSensorState2, num_sensor_i++)
                 {
-//                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
-//                            (*itInputState)->getJacobianErrorStateSensor(num_sensor_i);
-//                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
-//                            (*itInputState)->getJacobianErrorParametersSensor(num_sensor_i);
+                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                            (*itInputState)->getJacobianErrorStateSensor(num_sensor_i);
+                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
+                            (*itInputState)->getJacobianErrorParametersSensor(num_sensor_i);
                     jacobian_column++;
                 }
 
@@ -1735,10 +1735,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
                     itMapElementState2!=ThePredictedState->TheListMapElementStateCore.end();
                     ++itMapElementState2, num_map_element_i++)
                 {
-//                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
-//                            (*itInputState)->getJacobianErrorStateMapElement(num_map_element_i);
-//                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
-//                            (*itInputState)->getJacobianErrorParametersMapElement(num_map_element_i);
+                    block_jacobian_total_robot_error_state(jacobian_row, jacobian_column)=
+                            (*itInputState)->getJacobianErrorStateMapElement(num_map_element_i);
+                    block_jacobian_total_robot_error_parameters(jacobian_row, jacobian_column)=
+                            (*itInputState)->getJacobianErrorParametersMapElement(num_map_element_i);
                     jacobian_column++;
                 }
 

@@ -677,7 +677,7 @@ int FreeModelRobotCore::predictErrorStateJacobian(//Time
 
 int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                           const FreeModelRobotStateCore *pastState,
-                                                          FreeModelRobotStateCore *&predictedState,
+                                                          const FreeModelRobotStateCore *predictedState,
                                                           // Jacobians Error State: Fx, Fp
                                                           // Robot
                                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_robot_error_state,
@@ -989,7 +989,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
         // Nothing to do
     }
 
-    /// World
+    /// Map Elements
     {
         // Nothing to do
     }

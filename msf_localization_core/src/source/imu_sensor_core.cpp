@@ -1210,7 +1210,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
 
 int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                                       const ImuSensorStateCore *pastState,
-                                                      ImuSensorStateCore *&predictedState,
+                                                      const ImuSensorStateCore *predictedState,
                                                       // Jacobians Error State: Fx, Fp
                                                       // Sensor
                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,

@@ -129,9 +129,9 @@ public:
                      std::shared_ptr<StateCore>& predictedState);
 
 protected:
-    int predictStateSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                             const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
-                             std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState);
+    int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                             const CodedVisualMarkerLandmarkStateCore* pastState,
+                             CodedVisualMarkerLandmarkStateCore*& predictedState);
 
 
     // Jacobian: F
@@ -146,9 +146,9 @@ public:
                                  std::shared_ptr<StateCore>& predicted_state);
 
 protected:
-    int predictErrorStateJacobiansSpecific(const TimeStamp previousTimeStamp, const TimeStamp currentTimeStamp,
-                                           const std::shared_ptr<CodedVisualMarkerLandmarkStateCore> pastState,
-                                           std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& predictedState,
+    int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                           const CodedVisualMarkerLandmarkStateCore* pastState,
+                                           const CodedVisualMarkerLandmarkStateCore* predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Map
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_map_error_state,
