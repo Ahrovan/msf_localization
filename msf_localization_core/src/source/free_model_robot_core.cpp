@@ -57,8 +57,6 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
     // Set pointer to the RobotCore
     //this->setTheRobotCore(TheRobotCoreCore);
 
-    // Set robot type
-    //this->setRobotType(RobotTypes::free_model);
 
     // Set the access to the Storage core
     //this->setTheMsfStorageCore(TheMsfStorageCore);

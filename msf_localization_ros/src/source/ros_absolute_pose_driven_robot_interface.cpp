@@ -113,7 +113,7 @@ int RosAbsolutePoseDrivenRobotInterface::publish(const TimeStamp& time_stamp, co
     Eigen::MatrixXd robotPoseCovariance(6,6);
     robotPoseCovariance.setZero();
     robotPoseCovariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(0,0);
-    robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(9,9);
+    robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(3,3);
     double robotPoseCovarianceArray[36];
     Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
     for(unsigned int i=0; i<36; i++)

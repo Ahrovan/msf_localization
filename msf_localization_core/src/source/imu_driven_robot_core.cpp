@@ -375,7 +375,7 @@ int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp& previousTimeStamp,
     // Checks in the past state
     if(!pastState->isCorrect())
     {
-        std::cout<<"FreeModelRobotCore::predictState() error !pastState->getTheRobotCore()"<<std::endl;
+        std::cout<<"ImuDrivenRobotCore::predictStateSpecific() error !pastState"<<std::endl;
         return -5;
     }
 

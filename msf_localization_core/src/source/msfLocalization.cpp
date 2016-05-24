@@ -4034,7 +4034,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             {
                 std::ostringstream logString;
                 logString<<"MsfLocalizationCore::update() jacobian_mapping_new_error_state_wrt_error_measurement for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                logString<<jacobian_mapping_new_error_state_wrt_error_measurement<<std::endl;
+                logString<<Eigen::MatrixXd(jacobian_mapping_new_error_state_wrt_error_measurement)<<std::endl;
                 this->log(logString.str());
             }
  #endif
@@ -4083,7 +4083,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             {
                 std::ostringstream logString;
                 logString<<"MsfLocalizationCore::update() covariance_unmatched_measurements for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                logString<<covariance_unmatched_measurements<<std::endl;
+                logString<<Eigen::MatrixXd(covariance_unmatched_measurements)<<std::endl;
                 this->log(logString.str());
             }
  #endif

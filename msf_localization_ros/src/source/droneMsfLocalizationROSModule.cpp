@@ -194,7 +194,7 @@ int MsfLocalizationROS::readConfigFile()
             break;
         }
 
-        /// Free Model Type
+        /// Absolute Pose Driven Model Type
         if(robotType=="absolute_pose_driven")
         {
             std::cout<<"robot = absolute_pose_driven"<<std::endl;

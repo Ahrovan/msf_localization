@@ -316,10 +316,13 @@ int AbsolutePoseDrivenRobotCore::predictState(//Time
         it_map_element_state!=past_state->TheListMapElementStateCore.end();
         ++it_map_element_state)
     {
-        if( std::dynamic_pointer_cast<AbsolutePoseInputCore>(past_input_state->getMsfElementCoreSharedPtr())->getWorldReferenceFrameId() == std::dynamic_pointer_cast<WorldReferenceFrameCore>((*it_map_element_state)->getMsfElementCoreSharedPtr())->getId() )
+        if(std::dynamic_pointer_cast<MapElementCore>((*it_map_element_state)->getMsfElementCoreSharedPtr())->getMapElementType() == MapElementTypes::world_ref_frame )
         {
-            past_map_element_state=static_cast<WorldReferenceFrameStateCore*>((*it_map_element_state).get());
-            break;
+            if( std::dynamic_pointer_cast<AbsolutePoseInputCore>(past_input_state->getMsfElementCoreSharedPtr())->getWorldReferenceFrameId() == std::dynamic_pointer_cast<WorldReferenceFrameCore>((*it_map_element_state)->getMsfElementCoreSharedPtr())->getId() )
+            {
+                past_map_element_state=static_cast<WorldReferenceFrameStateCore*>((*it_map_element_state).get());
+                break;
+            }
         }
     }
     // Check if it was found
@@ -498,10 +501,13 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobian(//Time
         it_map_element_state!=past_state->TheListMapElementStateCore.end();
         ++it_map_element_state)
     {
-        if( std::dynamic_pointer_cast<AbsolutePoseInputCore>(past_input_state->getMsfElementCoreSharedPtr())->getWorldReferenceFrameId() == std::dynamic_pointer_cast<WorldReferenceFrameCore>((*it_map_element_state)->getMsfElementCoreSharedPtr())->getId() )
+        if( std::dynamic_pointer_cast<MapElementCore>((*it_map_element_state)->getMsfElementCoreSharedPtr())->getMapElementType() == MapElementTypes::world_ref_frame )
         {
-            past_map_element_state=static_cast<WorldReferenceFrameStateCore*>((*it_map_element_state).get());
-            break;
+            if( std::dynamic_pointer_cast<AbsolutePoseInputCore>(past_input_state->getMsfElementCoreSharedPtr())->getWorldReferenceFrameId() == std::dynamic_pointer_cast<WorldReferenceFrameCore>((*it_map_element_state)->getMsfElementCoreSharedPtr())->getId() )
+            {
+                past_map_element_state=static_cast<WorldReferenceFrameStateCore*>((*it_map_element_state).get());
+                break;
+            }
         }
     }
     // Check if it was found
@@ -557,8 +563,8 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobian(//Time
     it_jacobian_error_state_wrt_map_element_error_state=predicted_robot_state->jacobian_error_state_.map_elements.begin();
     std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_map_element_error_parameters;
     it_jacobian_error_state_wrt_map_element_error_parameters=predicted_robot_state->jacobian_error_parameters_.map_elements.begin();
-    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementStateCore=past_state->TheListInputStateCore.begin();
-        itMapElementStateCore!=past_state->TheListInputStateCore.end();
+    for(std::list< std::shared_ptr<StateCore> >::iterator itMapElementStateCore=past_state->TheListMapElementStateCore.begin();
+        itMapElementStateCore!=past_state->TheListMapElementStateCore.end();
         ++itMapElementStateCore, ++it_jacobian_error_state_wrt_map_element_error_state, ++it_jacobian_error_state_wrt_map_element_error_parameters
         )
     {
@@ -641,7 +647,7 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeSta
     if(!predictedState)
     {
         std::cout<<"AbsolutePoseDrivenRobotCore::predictErrorStateJacobians error en predictedState"<<std::endl;
-        return 1;
+        return -1;
     }
 
 
@@ -672,8 +678,8 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeSta
 
     // State k+1
     // Robot
-    Eigen::Vector3d estim_position_robot_wrt_world;
-    Eigen::Vector4d estim_attitude_robot_wrt_world;
+    Eigen::Vector3d estim_position_robot_wrt_world=predictedState->getPositionRobotWrtWorld();
+    Eigen::Vector4d estim_attitude_robot_wrt_world=predictedState->getAttitudeRobotWrtWorld();
 
 
 
@@ -855,8 +861,9 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeSta
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_state_wrt_error_parameters;
 
+
         // Map Element Core
-        std::shared_ptr<WorldReferenceFrameCore> map_element_core=std::dynamic_pointer_cast<WorldReferenceFrameCore>(past_input_state->getMsfElementCoreSharedPtr());
+        std::shared_ptr<WorldReferenceFrameCore> map_element_core=std::dynamic_pointer_cast<WorldReferenceFrameCore>(past_map_element_state->getMsfElementCoreSharedPtr());
 
 
         // Fill
@@ -879,7 +886,6 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeSta
                 BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_parameters, jacobian_error_state_robot_pos_wrt_map_element_error_state_pos, dimension_error_state_i, dimension_error_parameters_j);
                 dimension_error_parameters_j+=3;
             }
-
             // Map Element Attitude
             if(map_element_core->isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
             {
@@ -928,14 +934,11 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeSta
             dimension_error_state_i+=3;
         }
 
-
-
         // Set From Triplets
         jacobian_error_state_wrt_map_element_error_state.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_state.begin(), triplet_list_jacobian_error_state_wrt_error_state.end());
         jacobian_error_state_wrt_map_element_error_parameters.setFromTriplets(triplet_list_jacobian_error_state_wrt_error_parameters.begin(), triplet_list_jacobian_error_state_wrt_error_parameters.end());
 
     }
-
 
 
     //// Jacobian Error State - Error Input Command

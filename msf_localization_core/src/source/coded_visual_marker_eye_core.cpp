@@ -1464,6 +1464,23 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
                     break;
                 }
 
+                // Absolute Pose Driven robot
+                case RobotCoreTypes::absolute_pose_driven:
+                {
+                    // pos
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,0)=
+//                            jacobian_error_meas_pos_wrt_error_state_robot_pos;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_robot_pos, dimension_error_measurement_i, 0);
+
+                    // attit
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+//                            jacobian_error_meas_pos_wrt_error_state_robot_att;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_pos_wrt_error_state_robot_att, dimension_error_measurement_i, 3);
+
+
+                    break;
+                }
+
                 // Default
                 default:
                     return -1000;
@@ -1522,6 +1539,20 @@ int CodedVisualMarkerEyeCore::predictErrorMeasurementJacobianSpecific(const Time
 
                     // ang_vel
                     // zeros
+
+                    break;
+                }
+                // Absolute Pose Driven robot
+                case RobotCoreTypes::absolute_pose_driven:
+                {
+                    // pos
+                    // zeros
+
+                    // attit
+//                    predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementRobotErrorState.block<3,3>(dimension_error_measurement_i,9)=
+//                            jacobian_error_meas_att_wrt_error_state_robot_att;
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_att_wrt_error_state_robot_att, dimension_error_measurement_i, 3);
+
 
                     break;
                 }
@@ -2453,6 +2484,19 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp &t
 
                 break;
             }
+            // Absolute pose driven robot
+            case RobotCoreTypes::absolute_pose_driven:
+            {
+                // tran robot
+                newMapElementState->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.block<3,3>(0,0)=
+                        jacobian_error_map_pos_wrt_error_state_robot_pos;
+
+                // attitude robot
+                newMapElementState->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.block<3,3>(0,3)=
+                        jacobian_error_map_pos_wrt_error_state_robot_att;
+
+                break;
+            }
             // Default
             default:
                 return -1000;
@@ -2506,6 +2550,19 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementSpecific(const TimeStamp &t
 
                 // ang vel robot
                 // Zeros
+
+                break;
+            }
+            // Absolute Pose Driven robot
+            case RobotCoreTypes::absolute_pose_driven:
+            {
+                // tran robot
+                // Zeros
+
+                // attitude robot
+                newMapElementState->jacobian_mapping_error_state_.jacobian_mapping_robot_error_state_.block<3,3>(3,3)=
+                    jacobian_error_map_att_wrt_error_state_robot_att;
+
 
                 break;
             }
