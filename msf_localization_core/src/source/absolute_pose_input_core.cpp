@@ -94,9 +94,16 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
 
     /// Input Name
-    std::string sensor_name=input.child_value("name");
-    this->setInputName(sensor_name);
+    std::string input_name=input.child_value("name");
+    this->setInputName(input_name);
 
+    /// Input id
+    std::string input_id_string=input.child_value("id");
+    if(!input_id_string.empty())
+    {
+        int input_id=std::stoi(input_id_string);
+        this->setInputId(input_id);
+    }
 
 
     /// Pose of the sensor wrt robot

@@ -62,6 +62,19 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
     std::string readingValue;
 
 
+    /// Inputs
+    readingValue=robot.child_value("input_list");
+    {
+        std::istringstream stm(readingValue);
+        std::list<int> input_ids;
+        int read_id;
+        while(stm>>read_id)
+        {
+            input_ids.push_back(read_id);
+        }
+        this->setInputIds(input_ids);
+    }
+
 
     /// Init State
 

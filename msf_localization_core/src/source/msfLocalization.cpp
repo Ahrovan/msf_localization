@@ -1068,12 +1068,12 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
 
 
     // Set inputs
-    std::shared_ptr<InputCommandComponent> inputs;
+    std::shared_ptr<InputCommandComponent> input_commands;
 
 
     int error_find_input_commands = findInputCommands(ThePredictedTimeStamp,
                                                       //PreviousState,
-                                                      inputs);
+                                                      input_commands);
 
     if(error_find_input_commands)
     {
@@ -1089,7 +1089,7 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
     // Predict Core
     int error=predictCore(PreviousTimeStamp, ThePredictedTimeStamp,
                           PreviousState,
-                          inputs,
+                          input_commands,
                           ThePredictedState);
 
     if(error)

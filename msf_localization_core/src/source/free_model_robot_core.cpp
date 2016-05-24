@@ -78,6 +78,8 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 //    readingValue=robot.child_value("name");
 //    this->setRobotName(readingValue);
 
+    /// Inputs
+    // No inputs
 
     /// Init State
 

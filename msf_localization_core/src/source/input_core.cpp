@@ -38,6 +38,9 @@ int InputCore::init()
     // Flags
     flag_input_enabled_=false;
 
+    // Id
+    id_=-1;
+
     // Dimensions
     dimension_input_command_=0;
     dimension_error_input_command_=0;
@@ -66,6 +69,17 @@ int InputCore::setInputName(std::string input_name)
 std::string InputCore::getInputName() const
 {
     return this->input_name_;
+}
+
+void InputCore::setInputId(int id)
+{
+    this->id_=id;
+    return;
+}
+
+int InputCore::getInputId() const
+{
+    return this->id_;
 }
 
 bool InputCore::isInputEnabled() const

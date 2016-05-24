@@ -61,14 +61,14 @@ int WorldReferenceFrameStateCore::updateStateFromIncrementErrorState(const Eigen
     int dimension_error_state_i=0;
 
     // Position
-    if(map_element_core->isEstimationPositionMocapWorldWrtWorldEnabled())
+    if(map_element_core->isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
     {
         position_reference_frame_world_wrt_world_+=increment_error_state.block<3,1>(dimension_error_state_i,0);
         dimension_error_state_i+=3;
     }
 
     // Attitude
-    if(map_element_core->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+    if(map_element_core->isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
     {
         Eigen::Vector4d DeltaQuat, DeltaQuatAux;
         double NormDeltaQuatAux;

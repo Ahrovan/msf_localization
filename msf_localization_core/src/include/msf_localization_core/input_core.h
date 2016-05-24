@@ -76,6 +76,13 @@ public:
     int setInputName(std::string input_name);
     std::string getInputName() const;
 
+    // Input Id
+protected:
+    int id_;
+public:
+    void setInputId(int id);
+    int getInputId() const;
+
 
 protected:
     bool flag_input_enabled_;

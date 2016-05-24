@@ -107,11 +107,11 @@ public:
     int predictState(//Time
                      const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                      // Previous State
-                     const std::shared_ptr<StateEstimationCore>& pastState,
+                     const std::shared_ptr<StateEstimationCore>& past_state,
                      // Inputs
-                     const std::shared_ptr<InputCommandComponent>& inputCommand,
+                     const std::shared_ptr<InputCommandComponent>& input_command,
                      // Predicted State
-                     std::shared_ptr<StateCore>& predictedState);
+                     std::shared_ptr<StateCore>& predicted_state);
 
 protected:
     int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
@@ -137,7 +137,7 @@ public:
 
 protected:
     int predictErrorStateJacobianSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                          const AbsolutePoseDrivenRobotStateCore* pastState,
+                                          const AbsolutePoseDrivenRobotStateCore* past_robot_state,
                                           const AbsolutePoseInputStateCore* past_input_state,
                                           const WorldReferenceFrameStateCore* past_map_element_state,
                                           const AbsolutePoseInputCommandCore* past_input_command,
@@ -159,7 +159,40 @@ protected:
                                           Eigen::SparseMatrix<double>& jacobian_error_state_wrt_noise
                                           );
 
-    // int predictErrorStateJacobianSpecificCore();
+    // TODO FINISH!!
+    int predictErrorStateJacobianSpecificCore(// State k
+                                              // Robot
+                                              const Eigen::Vector3d& position_robot_wrt_world,
+                                              const Eigen::Vector4d& attitude_robot_wrt_world,
+                                              // Input State
+                                              const Eigen::Vector3d& position_input_wrt_robot,
+                                              const Eigen::Vector4d& attitude_input_wrt_robot,
+                                              // Map Element State
+                                              const Eigen::Vector3d& position_input_world_wrt_world,
+                                              const Eigen::Vector4d& attitude_input_world_wrt_world,
+                                              // Input Command
+                                              const Eigen::Vector3d& position_input_wrt_input_world,
+                                              const Eigen::Vector4d& attitude_input_wrt_input_world,
+                                              // State k+1
+                                              const Eigen::Vector3d& estim_position_robot_wrt_world,
+                                              const Eigen::Vector4d& estim_attitude_robot_wrt_world,
+                                              // Jacobians Error State: Fx, Fp
+                                              // Input
+                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_error_state_pos,
+                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_error_state_att,
+                                              Eigen::MatrixXd &jacobian_error_state_robot_att_wrt_input_error_state_att,
+                                              // Map Element
+                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_map_element_error_state_pos,
+                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_map_element_error_state_att,
+                                              Eigen::MatrixXd &jacobian_error_state_robot_att_wrt_map_element_error_state_att,
+                                              // Jacobian Input: Fu
+                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_command_pos,
+                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_command_att,
+                                              Eigen::MatrixXd &jacobian_error_state_robot_att_wrt_input_command_att,
+                                              // Jacobians Noise: Fn
+                                              Eigen::MatrixXd& jacobian_error_state_pos_wrt_noise_pos,
+                                              Eigen::MatrixXd& jacobian_error_state_att_wrt_noise_att
+                                              );
 
 
     //// Update Step Functions

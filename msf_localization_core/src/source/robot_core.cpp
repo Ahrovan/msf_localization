@@ -58,4 +58,36 @@ RobotCoreTypes RobotCore::getRobotCoreType() const
     return robot_core_type_;
 }
 
+void RobotCore::setInputIds(const std::list<int>& input_ids)
+{
+    this->input_ids_=input_ids;
+    return;
+}
+
+std::list<int> RobotCore::getInputIds() const
+{
+    return this->input_ids_;
+}
+
+int RobotCore::getNumInputs() const
+{
+    return this->input_ids_.size();
+}
+
+int RobotCore::getInputIdI(const int input_i) const
+{
+    if(input_i>=this->input_ids_.size())
+        return -2;
+    int search_input_i=0;
+    for(std::list<int>::const_iterator it_input_ids=this->input_ids_.begin();
+        it_input_ids!=this->input_ids_.end();
+        ++it_input_ids, search_input_i++)
+    {
+        if(search_input_i == input_i)
+        {
+            return (*it_input_ids);
+        }
+    }
+    return -1;
+}
 

@@ -1693,7 +1693,7 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
             int dimension_map_element_error_state_i=0;
 
             // pos
-            if(TheMapElementCore->isEstimationPositionMocapWorldWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
             {
 //                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
 //                        jacobian_error_meas_pos_wrt_error_state_map_elem_pos;
@@ -1711,7 +1711,7 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
             }
 
             // att
-            if(TheMapElementCore->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
             {
 //                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
 //                        jacobian_error_meas_pos_wrt_error_state_map_elem_att;
@@ -1738,7 +1738,7 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
             int dimension_map_element_error_state_i=0;
 
             // pos
-            if(TheMapElementCore->isEstimationPositionMocapWorldWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
             {
                 // Zeros
                 dimension_map_element_error_state_i+=3;
@@ -1750,7 +1750,7 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
             }
 
             // att
-            if(TheMapElementCore->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+            if(TheMapElementCore->isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
             {
 //                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementMapElementErrorState.block<3,3>(dimension_error_measurement_i, dimension_map_element_error_state_i)=
 //                        jacobian_error_meas_att_wrt_error_state_map_elem_att;
@@ -2185,16 +2185,16 @@ int AbsolutePoseSensorCore::mapMeasurementSpecific(const TimeStamp &theTimeStamp
         // Enable Estimation Position if measurement pos is enabled
         // TODO Check!
         if(TheSensorCore->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
-            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationPositionMocapWorldWrtWorld();
+            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationPositionWorldReferenceFrameWrtWorld();
         else
-            TheCodeCodedVisualMarkerLandmarkCore->enableParameterPositionMocapWorldWrtWorld();
+            TheCodeCodedVisualMarkerLandmarkCore->enableParameterPositionWorldReferenceFrameWrtWorld();
 
         // Enable Estimation Attitude if measurement att is enabled
         // TODO Check!
         if(TheSensorCore->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
-            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationAttitudeMocapWorldWrtWorld();
+            TheCodeCodedVisualMarkerLandmarkCore->enableEstimationAttitudeWorldReferenceFrameWrtWorld();
         else
-            TheCodeCodedVisualMarkerLandmarkCore->enableParameterAttitudeMocapWorldWrtWorld();
+            TheCodeCodedVisualMarkerLandmarkCore->enableParameterAttitudeWorldReferenceFrameWrtWorld();
 
         // Covariances not needed because are included in P.
         // TODO check!

@@ -92,9 +92,17 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
     std::string readingValue;
 
 
-    // Name
+    /// Name
     readingValue=input.child_value("name");
     this->setInputName(readingValue);
+
+    /// Input id
+    std::string input_id_string=input.child_value("id");
+    if(!input_id_string.empty())
+    {
+        int input_id=std::stoi(input_id_string);
+        this->setInputId(input_id);
+    }
 
 
     //// Input configurations

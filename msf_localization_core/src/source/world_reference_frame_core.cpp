@@ -87,12 +87,12 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
     // Position of the sensor wrt robot
     readingValue=pose_in_world.child("position").child_value("enabled");
     if(std::stoi(readingValue))
-        this->enableEstimationPositionMocapWorldWrtWorld();
+        this->enableEstimationPositionWorldReferenceFrameWrtWorld();
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_world.child("attitude").child_value("enabled");
     if(std::stoi(readingValue))
-        this->enableEstimationAttitudeMocapWorldWrtWorld();
+        this->enableEstimationAttitudeWorldReferenceFrameWrtWorld();
 
 
 
@@ -182,12 +182,12 @@ int WorldReferenceFrameCore::getId() const
     return id_;
 }
 
-bool WorldReferenceFrameCore::isEstimationPositionMocapWorldWrtWorldEnabled()
+bool WorldReferenceFrameCore::isEstimationPositionWorldReferenceFrameWrtWorldEnabled()
 {
     return flag_estimation_position_mocap_world_wrt_world_;
 }
 
-int WorldReferenceFrameCore::enableEstimationPositionMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableEstimationPositionWorldReferenceFrameWrtWorld()
 {
     if(!flag_estimation_position_mocap_world_wrt_world_)
     {
@@ -200,7 +200,7 @@ int WorldReferenceFrameCore::enableEstimationPositionMocapWorldWrtWorld()
     return 0;
 }
 
-int WorldReferenceFrameCore::enableParameterPositionMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableParameterPositionWorldReferenceFrameWrtWorld()
 {
     if(flag_estimation_position_mocap_world_wrt_world_)
     {
@@ -225,12 +225,12 @@ int WorldReferenceFrameCore::setCovariancePositionMocapWorldWrtWorld(const Eigen
 }
 
 
-bool WorldReferenceFrameCore::isEstimationAttitudeMocapWorldWrtWorldEnabled()
+bool WorldReferenceFrameCore::isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled()
 {
     return this->flag_estimation_attitude_mocap_world_wrt_world_;
 }
 
-int WorldReferenceFrameCore::enableEstimationAttitudeMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableEstimationAttitudeWorldReferenceFrameWrtWorld()
 {
     if(!flag_estimation_attitude_mocap_world_wrt_world_)
     {
@@ -244,7 +244,7 @@ int WorldReferenceFrameCore::enableEstimationAttitudeMocapWorldWrtWorld()
     return 0;
 }
 
-int WorldReferenceFrameCore::enableParameterAttitudeMocapWorldWrtWorld()
+int WorldReferenceFrameCore::enableParameterAttitudeWorldReferenceFrameWrtWorld()
 {
     if(flag_estimation_attitude_mocap_world_wrt_world_)
     {
@@ -276,13 +276,13 @@ int WorldReferenceFrameCore::prepareCovarianceInitErrorStateSpecific()
 {
     int dimension_i=0;
 
-    if(isEstimationPositionMocapWorldWrtWorldEnabled())
+    if(isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
     {
         this->covariance_init_error_state_.block<3,3>(dimension_i, dimension_i)=getCovariancePositionMocapWorldWrtWorld();
         dimension_i+=3;
     }
 
-    if(isEstimationAttitudeMocapWorldWrtWorldEnabled())
+    if(isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
     {
         this->covariance_init_error_state_.block<3,3>(dimension_i, dimension_i)=getCovarianceAttitudeMocapWorldWrtWorld();
         dimension_i+=3;
@@ -301,14 +301,14 @@ Eigen::SparseMatrix<double> WorldReferenceFrameCore::getCovarianceParameters()
 
 
     unsigned int dimension=0;
-    if(!this->isEstimationPositionMocapWorldWrtWorldEnabled())
+    if(!this->isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
     {
         for(int i=0; i<3; i++)
             tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,covariance_position_mocap_world_wrt_world_(i,i)));
 
         dimension+=3;
     }
-    if(!this->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+    if(!this->isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
     {
         for(int i=0; i<3; i++)
             tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,covariance_attitude_mocap_world_wrt_world_(i,i)));
@@ -621,7 +621,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp&
 
 
         // posi / posi
-        if(isEstimationPositionMocapWorldWrtWorldEnabled())
+        if(isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
         {
             //Eigen::MatrixXd::Identity(3,3);
             for(int i=0; i<3; i++)
@@ -631,7 +631,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp&
 
 
         // att / att
-        if(isEstimationAttitudeMocapWorldWrtWorldEnabled())
+        if(isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
         {
             //Eigen::MatrixXd::Identity(3,3);
             for(int i=0; i<3; i++)
@@ -690,7 +690,7 @@ int WorldReferenceFrameCore::resetErrorStateJacobian(// Time
     int dimension_error_state_i=0;
 
     // Position Sensor World wrt World
-    if(this->isEstimationPositionMocapWorldWrtWorldEnabled())
+    if(this->isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
     {
         for(int i=0; i<3; i++)
             triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
@@ -699,7 +699,7 @@ int WorldReferenceFrameCore::resetErrorStateJacobian(// Time
     }
 
     // Attitude Sensor World wrt World
-    if(this->isEstimationAttitudeMocapWorldWrtWorldEnabled())
+    if(this->isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
     {
         // Error Reset Matrixes
         Eigen::Matrix3d G_update_theta_robot=Eigen::Matrix3d::Identity(3,3);

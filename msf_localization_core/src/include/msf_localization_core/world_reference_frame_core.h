@@ -64,9 +64,9 @@ public:
 protected:
     bool flag_estimation_position_mocap_world_wrt_world_;
 public:
-    bool isEstimationPositionMocapWorldWrtWorldEnabled();
-    int enableEstimationPositionMocapWorldWrtWorld();
-    int enableParameterPositionMocapWorldWrtWorld();
+    bool isEstimationPositionWorldReferenceFrameWrtWorldEnabled();
+    int enableEstimationPositionWorldReferenceFrameWrtWorld();
+    int enableParameterPositionWorldReferenceFrameWrtWorld();
 
 
     // Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
@@ -82,9 +82,9 @@ public:
 protected:
     bool flag_estimation_attitude_mocap_world_wrt_world_;
 public:
-    bool isEstimationAttitudeMocapWorldWrtWorldEnabled();
-    int enableEstimationAttitudeMocapWorldWrtWorld();
-    int enableParameterAttitudeMocapWorldWrtWorld();
+    bool isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled();
+    int enableEstimationAttitudeWorldReferenceFrameWrtWorld();
+    int enableParameterAttitudeWorldReferenceFrameWrtWorld();
 
 
     // Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)

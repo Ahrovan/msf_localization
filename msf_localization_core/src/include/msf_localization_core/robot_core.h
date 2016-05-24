@@ -74,6 +74,14 @@ public:
     int setRobotCoreType(RobotCoreTypes robotType);
     RobotCoreTypes getRobotCoreType() const;
 
+    // Input Lists
+protected:
+    std::list<int> input_ids_;
+public:
+    void setInputIds(const std::list<int>& input_ids);
+    std::list<int> getInputIds() const;
+    int getNumInputs() const;
+    int getInputIdI(const int input_i) const;
 
 
 
