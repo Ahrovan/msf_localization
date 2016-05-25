@@ -210,13 +210,13 @@ private:
     int predictSemiCore(const TimeStamp& ThePredictedTimeStamp,
                         std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
-    int predictCore(const TimeStamp& ThePreviousTimeStamp, const TimeStamp& ThePredictedTimeStamp,
+    int predictCore(const TimeStamp& previous_time_stamp, const TimeStamp& predicted_time_stamp,
                     // Previous State
-                    const std::shared_ptr<StateEstimationCore>& ThePreviousState,
+                    const std::shared_ptr<StateEstimationCore>& previous_state,
                     // Inputs
-                    const std::shared_ptr<InputCommandComponent>& inputCommand,
+                    const std::shared_ptr<InputCommandComponent>& input_commands,
                     // Predicted State
-                    std::shared_ptr<StateEstimationCore>& ThePredictedState);
+                    std::shared_ptr<StateEstimationCore>& predicted_state);
 
 
 
