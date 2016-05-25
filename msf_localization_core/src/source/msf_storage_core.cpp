@@ -682,7 +682,7 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 #endif
 
     if(!input_command_core)
-        return 1;
+        return -1;
 
     return 0;
 }

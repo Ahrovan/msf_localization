@@ -24,9 +24,12 @@ MsfLocalizationROS::~MsfLocalizationROS()
     close();
 
     // Delete
-    delete tf_transform_broadcaster_;
-
-    delete nh;
+    if(tf_transform_broadcaster_)
+        delete tf_transform_broadcaster_;
+    if(nh)
+        delete nh;
+    if(publish_rate_)
+        delete publish_rate_;
 
     return;
 }
@@ -537,8 +540,8 @@ int MsfLocalizationROS::readParameters()
 
     // Others configs
     //
-    ros::param::param<double>("~robot_pose_rate", robotPoseRateVal, 50);
-    std::cout<<"robot_pose_rate="<<robotPoseRateVal<<std::endl;
+    ros::param::param<double>("~robot_pose_rate", publish_rate_val_, 50);
+    std::cout<<"robot_pose_rate="<<publish_rate_val_<<std::endl;
 
     return 0;
 }
@@ -590,12 +593,12 @@ bool MsfLocalizationROS::setStateEstimationEnabledCallback(msf_localization_ros_
 }
 
 
-int MsfLocalizationROS::robotPoseThreadFunction()
+int MsfLocalizationROS::publishThreadFunction()
 {
 #if _DEBUG_MSF_LOCALIZATION_CORE
     {
         std::ostringstream logString;
-        logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+        logString<<"MsfLocalizationROS::publishThreadFunction()"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -604,160 +607,208 @@ int MsfLocalizationROS::robotPoseThreadFunction()
     return 0;
 #endif
 
-    robotPoseRate=new ros::Rate(robotPoseRateVal);
-try
-{
-    while(ros::ok())
+    ///// Syncro
+    if( publish_rate_val_ > 0 )
     {
+        // ROS rate
+        publish_rate_=new ros::Rate(publish_rate_val_);
+
+        // Loop
+        while(ros::ok())
+        {
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationROS::robotPoseThreadFunction() loop init"<<std::endl;
-            this->log(logString.str());
-        }
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationROS::publishThreadFunction() loop init"<<std::endl;
+                this->log(logString.str());
+            }
 #endif
 
-        // Get Robot Pose
-        // TODO
-        TimeStamp TheTimeStamp;
-        std::shared_ptr<StateEstimationCore> PredictedState;
+            // Get current_state
+            TimeStamp current_time_stamp;
+            std::shared_ptr<StateEstimationCore> current_state;
 
-
-
-        if(this->isStateEstimationEnabled())
-        {
-
-            TheTimeStamp=getTimeStamp();
-
-            this->TheMsfStorageCore->getElement(TheTimeStamp, PredictedState);
-
-            if(!PredictedState)
+            // State estimation enabled
+            if(this->isStateEstimationEnabled())
             {
 
+                current_time_stamp=getTimeStamp();
+
+                this->TheMsfStorageCore->getElement(current_time_stamp, current_state);
+
+                // If no current_state -> predict state but no add buffer
+                if(!current_state)
+                {
+
 #if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
+                        this->log(logString.str());
+                    }
+#endif
+
+                    if(this->predictNoAddBuffer(current_time_stamp, current_state))
+                    {
+                        // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                        {
+                            std::ostringstream logString;
+                            logString<<"MsfLocalizationROS::publishThreadFunction() error in predict()"<<std::endl;
+                            this->log(logString.str());
+                        }
+#endif
+                        continue;
+                    }
+                }
+            }
+            // State Estimation disabled
+            else
+            {
+                // Get the last state estimation
+                this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state);
+
+
+                // Time Stamp is null, put the current one
+                if(current_time_stamp==TimeStamp(0,0))
+                {
+                    current_time_stamp=getTimeStamp();
+                }
+
+            }
+
+
+            // Error with predicted state
+            if(!current_state)
+            {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                 {
                     std::ostringstream logString;
-                    logString<<"MsfLocalizationROS::robotPoseThreadFunction() predicting TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<"MsfLocalizationROS::publishThreadFunction() error 1!"<<std::endl;
                     this->log(logString.str());
                 }
 #endif
-
-                // TODO this should be a while and being carefully with the memory
-                if(this->predictNoAddBuffer(TheTimeStamp, PredictedState))
-                {
-                    // Error
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::robotPoseThreadFunction() error in predict()"<<std::endl;
-                        this->log(logString.str());
-                    }
-#endif
-                    continue;
-                }
-
+                continue;
             }
 
-        }
-        else
-        {
-            // Get the last state estimation
-            this->TheMsfStorageCore->getLastElementWithStateEstimate(TheTimeStamp, PredictedState);
 
 
-            // Time Stamp is null, put the current one
-            if(TheTimeStamp==TimeStamp(0,0))
-            {
-                TheTimeStamp=getTimeStamp();
-            }
-
-        }
+            // Publish
+            if(publishState(current_time_stamp, current_state))
+                continue;
 
 
-        // Error with predicted state
-        if(!PredictedState)
-        {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+            // Free the ownership of current_state (not really needed)
+            if(current_state)
+                current_state.reset();
+
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
             {
                 std::ostringstream logString;
-                logString<<"MsfLocalizationROS::robotPoseThreadFunction() error 1!"<<std::endl;
+                logString<<"MsfLocalizationROS::publishThreadFunction() loop end"<<std::endl;
                 this->log(logString.str());
             }
-
 #endif
-            continue;
+
+
+            // Sleep
+            publish_rate_->sleep();
         }
 
 
-
-
-        // Robot
-        int covRobotPointInit=this->TheGlobalParametersCore->getDimensionErrorState();
-        int covRobotSize=this->TheRobotCore->getDimensionErrorState();
-        std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore)->publish(TheTimeStamp,
-                                                                                  this->TheGlobalParametersCore,
-                                                                                  std::dynamic_pointer_cast<RobotStateCore>(PredictedState->TheRobotStateCore),
-                                                                                  PredictedState->covarianceMatrix->block(covRobotPointInit, covRobotPointInit, covRobotSize, covRobotSize));
-
-
-
-
-        // Sensors
-        for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensorState=PredictedState->TheListSensorStateCore.begin();
-            itSensorState!=PredictedState->TheListSensorStateCore.end();
-            ++itSensorState)
+    }
+    /// Async
+    else
+    {
+        // Loop
+        while(ros::ok())
         {
-            std::dynamic_pointer_cast<RosSensorInterface>((*itSensorState)->getMsfElementCoreSharedPtr())->publish(TheTimeStamp,
-                                                                                                                   std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore),
-                                                                                                                   std::dynamic_pointer_cast<SensorStateCore>((*itSensorState)));
+            // Sleep until we have an updated state
+            // TODO
+
+            // Get updated state
+            TimeStamp current_time_stamp;
+            std::shared_ptr<StateEstimationCore> current_state;
+
+            // Publish
+            if(publishState(current_time_stamp, current_state))
+                continue;
+
+            // Free the ownership of current_state (not really needed)
+            if(current_state)
+                current_state.reset();
+
         }
+    }
 
 
-        // TF Map elements
-        for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElementState=PredictedState->TheListMapElementStateCore.begin();
-            itMapElementState!=PredictedState->TheListMapElementStateCore.end();
-            ++itMapElementState)
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationROS::publishThreadFunction() ended"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    return 0;
+}
+
+
+int MsfLocalizationROS::publishState(const TimeStamp& current_time_stamp,
+                                    const std::shared_ptr<StateEstimationCore> &current_state)
+{
+    // Robot
+    int covRobotPointInit=this->TheGlobalParametersCore->getDimensionErrorState();
+    int covRobotSize=this->TheRobotCore->getDimensionErrorState();
+    std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore)->publish(current_time_stamp,
+                                                                              this->TheGlobalParametersCore,
+                                                                              std::dynamic_pointer_cast<RobotStateCore>(current_state->TheRobotStateCore),
+                                                                              current_state->covarianceMatrix->block(covRobotPointInit, covRobotPointInit, covRobotSize, covRobotSize));
+
+
+
+
+    // Sensors
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itSensorState=current_state->TheListSensorStateCore.begin();
+        itSensorState!=current_state->TheListSensorStateCore.end();
+        ++itSensorState)
+    {
+        std::dynamic_pointer_cast<RosSensorInterface>((*itSensorState)->getMsfElementCoreSharedPtr())->publish(current_time_stamp,
+                                                                                                               std::dynamic_pointer_cast<RosRobotInterface>(this->TheRobotCore),
+                                                                                                               std::dynamic_pointer_cast<SensorStateCore>((*itSensorState)));
+    }
+
+
+    // TF Map elements
+    for(std::list< std::shared_ptr<StateCore> >::const_iterator itMapElementState=current_state->TheListMapElementStateCore.begin();
+        itMapElementState!=current_state->TheListMapElementStateCore.end();
+        ++itMapElementState)
+    {
+
+        switch(std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementType())
         {
-
-            switch(std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementType())
+            case MapElementTypes::coded_visual_marker:
             {
-                case MapElementTypes::coded_visual_marker:
-                {
-                    // Cast
-                    std::shared_ptr<CodedVisualMarkerLandmarkStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*itMapElementState);
+                // Cast
+                std::shared_ptr<CodedVisualMarkerLandmarkStateCore> theCodedVisualMarkersLandamarkState=std::dynamic_pointer_cast<CodedVisualMarkerLandmarkStateCore>(*itMapElementState);
 
-                    Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPosition();
-                    Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitude();
+                Eigen::Vector3d mapElementPosition=theCodedVisualMarkersLandamarkState->getPosition();
+                Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitude();
 
 
-#if _DEBUG_MSF_LOCALIZATION_ROBOT_POSE_THREAD
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::robotPoseThreadFunction()"<<std::endl;
+                tf::Quaternion tf_rot(mapElementAttitude[1], mapElementAttitude[2], mapElementAttitude[3], mapElementAttitude[0]);
+                tf::Vector3 tf_tran(mapElementPosition[0], mapElementPosition[1], mapElementPosition[2]);
 
-                        logString<<"Visual Marker id="<<std::dynamic_pointer_cast<CodedVisualMarkerLandmarkCore>(theCodedVisualMarkersLandamarkState->getTheMapElementCore())->getId()<<std::endl;
-                        logString<<"  - Position: "<<mapElementPosition.transpose()<<std::endl;
-                        logString<<"  - Attitude: "<<mapElementAttitude.transpose()<<std::endl;
+                tf::Transform transform(tf_rot, tf_tran);
 
 
-                        this->log(logString.str());
-                    }
-#endif
+                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(current_time_stamp.sec, current_time_stamp.nsec),
+                                                      this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
-
-
-                    tf::Quaternion tf_rot(mapElementAttitude[1], mapElementAttitude[2], mapElementAttitude[3], mapElementAttitude[0]);
-                    tf::Vector3 tf_tran(mapElementPosition[0], mapElementPosition[1], mapElementPosition[2]);
-
-                    tf::Transform transform(tf_rot, tf_tran);
-
-
-                    tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
-                                                          this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
-
-                    break;
-                }
+                break;
+            }
             case MapElementTypes::world_ref_frame:
             {
                 // Cast
@@ -767,63 +818,26 @@ try
                 Eigen::Vector4d mapElementAttitude=theCodedVisualMarkersLandamarkState->getAttitudeReferenceFrameWorldWrtWorld();
 
 
-
-
                 tf::Quaternion tf_rot(mapElementAttitude[1], mapElementAttitude[2], mapElementAttitude[3], mapElementAttitude[0]);
                 tf::Vector3 tf_tran(mapElementPosition[0], mapElementPosition[1], mapElementPosition[2]);
 
                 tf::Transform transform(tf_rot, tf_tran);
 
 
-                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(TheTimeStamp.sec, TheTimeStamp.nsec),
+                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(current_time_stamp.sec, current_time_stamp.nsec),
                                                       this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
                 break;
             }
-            }
         }
-
-
-
-
-        // Free the ownership
-        if(PredictedState)
-            PredictedState.reset();
-
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationROS::robotPoseThreadFunction() loop end"<<std::endl;
-            this->log(logString.str());
-        }
-#endif
-
-
-        // Sleep
-        robotPoseRate->sleep();
     }
 
-}
-catch(std::exception &ex)
-{
-    std::cout<<"[ROSNODE] Exception :"<<ex.what()<<std::endl;
-}
-catch(...)
-{
-    std::cout<<"EXCEPTION ON Get robot pose Thread"<<std::endl;
-}
 
-#if _DEBUG_MSF_LOCALIZATION_CORE
-    {
-        std::ostringstream logString;
-        logString<<"MsfLocalizationROS::robotPoseThreadFunction() ended"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
+
 
     return 0;
 }
+
 
 TimeStamp MsfLocalizationROS::getTimeStamp()
 {
@@ -893,9 +907,6 @@ int MsfLocalizationROS::run()
 {
     // Core threads
     startThreads();
-
-    // Start ROS threads
-    robotPoseThread=new std::thread(&MsfLocalizationROS::robotPoseThreadFunction, this);
 
 
     // Loop to get measurements

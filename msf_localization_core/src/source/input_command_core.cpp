@@ -58,3 +58,8 @@ InputCommandTypes InputCommandCore::getInputCommandType() const
 {
     return this->input_command_type_;
 }
+
+Eigen::SparseMatrix<double> InputCommandCore::getCovarianceInputs(const TimeStamp& deltaTimeStamp)
+{
+    return this->getInputCoreSharedPtr()->getCovarianceInputs(deltaTimeStamp);
+}

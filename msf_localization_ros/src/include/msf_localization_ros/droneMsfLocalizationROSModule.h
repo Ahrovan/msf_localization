@@ -137,14 +137,6 @@ protected:
 
 
 
-protected:
-    double robotPoseRateVal;
-    ros::Rate* robotPoseRate;
-protected:
-    std::thread* robotPoseThread;
-protected:
-    int robotPoseThreadFunction();
-
 
     // Service to start state estimation
 protected:
@@ -162,9 +154,20 @@ public:
     bool isAlive();
 
 
-    // Algorithm Core threads with ROS time
+    // Predict Thread
 protected:
     int predictThreadFunction();
+
+
+    // Publish Thread
+protected:
+    ros::Rate* publish_rate_;
+protected:
+    int publishThreadFunction();
+
+protected:
+    int publishState(const TimeStamp& current_time_stamp, const std::shared_ptr<StateEstimationCore>& current_state);
+
 
 
 

@@ -255,7 +255,6 @@ protected:
 protected:
     std::thread* predictThread;
 protected:
-    // TODO Finish
     virtual int predictThreadFunction();
 
 protected:
@@ -276,6 +275,16 @@ protected:
 protected:
     int num_buffer_propagation_threads=0;
 #endif
+
+
+
+    // Publish Thread
+protected:
+    double publish_rate_val_;
+protected:
+    std::thread* publish_thread_;
+protected:
+    virtual int publishThreadFunction();
 
 
 

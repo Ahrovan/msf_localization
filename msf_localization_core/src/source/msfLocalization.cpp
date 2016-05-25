@@ -650,6 +650,11 @@ int MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList(const TimeSta
     return 0;
 }
 
+int MsfLocalizationCore::publishThreadFunction()
+{
+
+}
+
 
 int MsfLocalizationCore::startThreads()
 {
@@ -658,6 +663,9 @@ int MsfLocalizationCore::startThreads()
 
     // Buffer Manager thread
     bufferManagerThread=new std::thread(&MsfLocalizationCore::bufferManagerThreadFunction, this);
+
+    // Publish thread
+    publish_thread_=new std::thread(&MsfLocalizationCore::publishThreadFunction, this);
 
 
     return 0;
@@ -742,14 +750,18 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
         std::shared_ptr<InputCommandCore> input_command_core;
         int error_get_previous_input_command=TheMsfStorageCore->getPreviousInputCommandByStampAndInputCore(TheTimeStamp, *itInputCore, input_command_core);
 
-        if(error_get_previous_input_command)
+
+        if(error_get_previous_input_command || !input_command_core)
         {
             //std::cout<<"MsfLocalizationCore::findInputCommands error_get_previous_input_command"<<std::endl;
-            return error_get_previous_input_command;
+            //return error_get_previous_input_command;
+
+            // Create empty for reference
+            input_command_core=std::make_shared<InputCommandCore>(std::dynamic_pointer_cast<InputCore>((*itInputCore)->getMsfElementCoreSharedPtr()));
+
         }
 
-        if(!input_command_core)
-            return -1;
+
 
         // Set in the variable ThePreviousState
         input_command->TheListInputCommandCore.push_back(input_command_core);
@@ -1538,9 +1550,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
         }
 
 
-
         // Size input commands
         int num_input_commands=inputCommand->getNumberInputCommand();
+
 
 
         ///// Jacobians

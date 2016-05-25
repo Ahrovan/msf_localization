@@ -53,7 +53,7 @@ public:
 
     // Covariance Error Inputs: Qu
 public:
-    virtual Eigen::SparseMatrix<double> getCovarianceInputs(const TimeStamp& deltaTimeStamp)=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceInputs(const TimeStamp& deltaTimeStamp);
 
 
 
