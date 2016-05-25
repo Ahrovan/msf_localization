@@ -5,17 +5,40 @@
 
   <arg name="msf_localization_config_file" default="$(find msf_localization_ros)/configs/msf_localization_config_file.xml" />
 
-	<arg name="robot_pose_with_cov_topic_name" 	default="msf_localization/robot_pose_cov" />
+  <arg name="set_state_estimation_enabled_service_name" default="msf_localization/set_state_estimation_enabled" />
+
   <arg name="robot_pose_rate" 	default="50" />
+
+  <arg name="robot_pose_topic_name" 	default="msf_localization/robot_pose" />
+  <arg name="robot_pose_with_cov_topic_name" 	default="msf_localization/robot_pose_cov" />
+  <arg name="robot_velocities_stamped_topic_name" 	default="msf_localization/robot_velocity" />
+  <arg name="robot_velocities_with_covariance_stamped_topic_name" 	default="msf_localization/robot_velocity_cov" />
+  <arg name="robot_linear_speed_topic_name" 	default="msf_localization/robot_linear_speed" />
+  <arg name="robot_angular_velocity_topic_name" 	default="msf_localization/robot_angular_velocity" />
+  <arg name="robot_accelerations_stamped_topic_name" 	default="msf_localization/robot_acceleration" />
+  <arg name="robot_accelerations_with_covariance_stamped_topic_name" 	default="msf_localization/robot_acceleration_cov" />
+  <arg name="robot_linear_acceleration_topic_name" 	default="msf_localization/robot_linear_acceleration" />
+  <arg name="robot_angular_acceleration_topic_name" 	default="msf_localization/robot_angular_acceleration" />
 
 
   <node name="$(arg msf_localization_ros_node_name)" pkg="msf_localization_ros" type="msf_localization_ros" output="screen" launch-prefix="nice -n -20">
 
     <param name="msf_localization_config_file" value="$(arg msf_localization_config_file)" type="string"/>
 
-    <param name="robot_pose_with_cov_topic_name" value="$(arg robot_pose_with_cov_topic_name)" type="string"/>
+    <param name="set_state_estimation_enabled_service_name" value="$(arg set_state_estimation_enabled_service_name)" type="string"/>
+
     <param name="robot_pose_rate" value="$(arg robot_pose_rate)" type="double"/>
 
+    <param name="robot_pose_topic_name" value="$(arg robot_pose_topic_name)" type="string" />
+    <param name="robot_pose_with_cov_topic_name" value="$(arg robot_pose_with_cov_topic_name)" type="string"/>
+    <param name="robot_velocities_stamped_topic_name" value="$(arg robot_velocities_stamped_topic_name)" type="string"/>
+    <param name="robot_velocities_with_covariance_stamped_topic_name" value="$(arg robot_velocities_with_covariance_stamped_topic_name)" type="string"/>
+    <param name="robot_linear_speed_topic_name" value="$(arg robot_linear_speed_topic_name)" type="string"/>
+    <param name="robot_angular_velocity_topic_name" value="$(arg robot_angular_velocity_topic_name)" type="string"/>
+    <param name="robot_accelerations_stamped_topic_name" value="$(arg robot_accelerations_stamped_topic_name)" type="string"/>
+    <param name="robot_accelerations_with_covariance_stamped_topic_name" value="$(arg robot_accelerations_with_covariance_stamped_topic_name)" type="string"/>
+    <param name="robot_linear_acceleration_topic_name" value="$(arg robot_linear_acceleration_topic_name)" type="string"/>
+    <param name="robot_angular_acceleration_topic_name" value="$(arg robot_angular_acceleration_topic_name)" type="string"/>
   </node>
 
 

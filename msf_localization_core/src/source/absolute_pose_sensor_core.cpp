@@ -42,6 +42,7 @@ int AbsolutePoseSensorCore::init()
     world_reference_frame_id_=-1;
 
     // Flags measurement
+    flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance_=false;
     flag_measurement_position_mocap_sensor_wrt_mocap_world_=false;
     flag_measurement_attitude_mocap_sensor_wrt_mocap_world_=false;
 
@@ -162,6 +163,11 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
         stm>>variance[0]>>variance[1]>>variance[2];
         this->setNoiseMeasurementPositionMocapSensorWrtMocapWorld(variance.asDiagonal());
     }
+
+    /// Subscribed covariance of the command
+    readingValue=measurements.child_value("use_subscribed_cov");
+    if(std::stoi(readingValue))
+        this->setSensorMeasurementPoseSensorWrtSensorWorldHasCovariance(true);
 
 
     //// Init State
@@ -304,6 +310,16 @@ int AbsolutePoseSensorCore::setNoiseMeasurementAttitudeMocapSensorWrtMocapWorld(
     return 0;
 }
 
+bool AbsolutePoseSensorCore::hasSensorMeasurementPoseSensorWrtSensorWorldCovariance() const
+{
+    return this->flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance_;
+}
+
+void AbsolutePoseSensorCore::setSensorMeasurementPoseSensorWrtSensorWorldHasCovariance(bool flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance)
+{
+    this->flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance_=flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance;
+    return;
+}
 
 int AbsolutePoseSensorCore::setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement)
 {

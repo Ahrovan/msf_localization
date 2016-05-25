@@ -35,6 +35,14 @@ public:
     Eigen::Vector4d getAttitudeMocapSensorWrtMocapWorld() const;
 
 
+    // Noise Sensor Measurement
+protected:
+    Eigen::MatrixXd noise_sensor_measurement_pose_sensor_wrt_sensor_world_;
+public:
+    void setNoiseSensorMeasurementPoseSensorWrtSensorWorld(const Eigen::MatrixXd& noise_sensor_measurement_pose_sensor_wrt_sensor_world);
+    Eigen::MatrixXd  getNoiseSensorMeasurementPoseSensorWrtSensorWorld() const;
+
+
 
 
     //// Get the innovation vector as an Eigen::VectorXd
@@ -46,6 +54,15 @@ public:
     //// Get the full measurement as an Eigen::VectorXd
 public:
     Eigen::VectorXd getMeasurement();
+
+
+
+    ///// Covariances getters
+
+    // Covariance Sensor Error Measurements: Rn
+public:
+    Eigen::SparseMatrix<double> getCovarianceMeasurement();
+
 };
 
 

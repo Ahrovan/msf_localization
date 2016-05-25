@@ -391,16 +391,12 @@ public:
     }
 
 
-    Matrix operator+=(const Matrix& sum1)
+    Matrix& operator+=(const Matrix& sum1)
     {
-        //
-        Matrix sum_result;
-
+        *this = *this + sum1;
+        return *this;
         // Operator+()
-        sum_result=this->operator+(sum1);
-
-        // End
-        return sum_result;
+        //return this->operator+(sum1);
     }
 
 

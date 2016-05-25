@@ -29,11 +29,11 @@ int RosFreeModelRobotInterface::readParameters()
 
     // Velocities
     //
-    ros::param::param<std::string>("~robot_velocities_stamped_topic_name_", robot_velocities_stamped_topic_name_, "msf_localization/robot_velocity");
-    std::cout<<"\t robot_velocities_stamped_topic_name_="<<robot_velocities_stamped_topic_name_<<std::endl;
+    ros::param::param<std::string>("~robot_velocities_stamped_topic_name", robot_velocities_stamped_topic_name_, "msf_localization/robot_velocity");
+    std::cout<<"\t robot_velocities_stamped_topic_name="<<robot_velocities_stamped_topic_name_<<std::endl;
     //
-    ros::param::param<std::string>("~robot_velocities_with_covariance_stamped_topic_name_", robot_velocities_with_covariance_stamped_topic_name_, "msf_localization/robot_velocity_cov");
-    std::cout<<"\t robot_velocities_with_covariance_stamped_topic_name_="<<robot_velocities_with_covariance_stamped_topic_name_<<std::endl;
+    ros::param::param<std::string>("~robot_velocities_with_covariance_stamped_topic_name", robot_velocities_with_covariance_stamped_topic_name_, "msf_localization/robot_velocity_cov");
+    std::cout<<"\t robot_velocities_with_covariance_stamped_topic_name="<<robot_velocities_with_covariance_stamped_topic_name_<<std::endl;
     //
     ros::param::param<std::string>("~robot_linear_speed_topic_name", robotLinearSpeedStampedTopicName, "msf_localization/robot_linear_speed");
     std::cout<<"\t robot_linear_speed_topic_name="<<robotLinearSpeedStampedTopicName<<std::endl;
@@ -43,11 +43,11 @@ int RosFreeModelRobotInterface::readParameters()
 
     // Accelerations
     //
-    ros::param::param<std::string>("~robot_accelerations_stamped_topic_name_", robot_accelerations_stamped_topic_name_, "msf_localization/robot_acceleration");
+    ros::param::param<std::string>("~robot_accelerations_stamped_topic_name", robot_accelerations_stamped_topic_name_, "msf_localization/robot_acceleration");
     std::cout<<"\t robot_accelerations_stamped_topic_name_="<<robot_accelerations_stamped_topic_name_<<std::endl;
     //
-    ros::param::param<std::string>("~robot_accelerations_with_covariance_stamped_topic_name_", robot_accelerations_with_covariance_stamped_topic_name_, "msf_localization/robot_acceleration_cov");
-    std::cout<<"\t robot_accelerations_with_covariance_stamped_topic_name_="<<robot_accelerations_with_covariance_stamped_topic_name_<<std::endl;
+    ros::param::param<std::string>("~robot_accelerations_with_covariance_stamped_topic_name", robot_accelerations_with_covariance_stamped_topic_name_, "msf_localization/robot_acceleration_cov");
+    std::cout<<"\t robot_accelerations_with_covariance_stamped_topic_name="<<robot_accelerations_with_covariance_stamped_topic_name_<<std::endl;
     //
     ros::param::param<std::string>("~robot_linear_acceleration_topic_name", robotLinearAccelerationStampedTopicName, "msf_localization/robot_linear_acceleration");
     std::cout<<"\t robot_linear_acceleration_topic_name="<<robotLinearAccelerationStampedTopicName<<std::endl;

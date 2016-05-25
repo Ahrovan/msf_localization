@@ -82,6 +82,17 @@ Eigen::Vector4d AbsolutePoseSensorMeasurementCore::getAttitudeMocapSensorWrtMoca
     return this->attitude_mocap_sensor_wrt_mocap_world_;
 }
 
+void AbsolutePoseSensorMeasurementCore::setNoiseSensorMeasurementPoseSensorWrtSensorWorld(const Eigen::MatrixXd& noise_sensor_measurement_pose_sensor_wrt_sensor_world)
+{
+    this->noise_sensor_measurement_pose_sensor_wrt_sensor_world_=noise_sensor_measurement_pose_sensor_wrt_sensor_world;
+    return;
+}
+
+Eigen::MatrixXd  AbsolutePoseSensorMeasurementCore::getNoiseSensorMeasurementPoseSensorWrtSensorWorld() const
+{
+    return this->noise_sensor_measurement_pose_sensor_wrt_sensor_world_;
+}
+
 Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getInnovation(const std::shared_ptr<SensorMeasurementCore> &theMatchedMeasurementI,
                                                                  const std::shared_ptr<SensorMeasurementCore> &thePredictedMeasurementI)
 {
@@ -147,4 +158,16 @@ Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getMeasurement()
     }
 
     return the_measurement;
+}
+
+Eigen::SparseMatrix<double> AbsolutePoseSensorMeasurementCore::getCovarianceMeasurement()
+{
+    if(std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getSensorCoreSharedPtr())->hasSensorMeasurementPoseSensorWrtSensorWorldCovariance())
+    {
+        return this->noise_sensor_measurement_pose_sensor_wrt_sensor_world_.sparseView();
+    }
+    else
+    {
+        return this->getSensorCoreSharedPtr()->getCovarianceMeasurement();
+    }
 }

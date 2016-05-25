@@ -5,6 +5,7 @@ RosMocapSensorInterface::RosMocapSensorInterface(ros::NodeHandle* nh, tf::Transf
     RosSensorInterface(nh, tf_transform_broadcaster),
     AbsolutePoseSensorCore(the_msf_storage_core)
 {
+    this->sensor_measurement_message_type_=AbsolutePoseSensorMeasurementMessageTypes::undefined;
 
 
     return;
@@ -69,6 +70,9 @@ int RosMocapSensorInterface::setMeasurementRos(const geometry_msgs::PoseStampedP
             std::cout<<"Error setting orientation"<<std::endl;
     }
 
+    // Covariance
+    // No covariance subscribed
+
 
     // Set
     this->setMeasurement(the_time_stamp, measurement_core);
@@ -78,19 +82,116 @@ int RosMocapSensorInterface::setMeasurementRos(const geometry_msgs::PoseStampedP
     return 0;
 }
 
+int RosMocapSensorInterface::setMeasurementRos(const geometry_msgs::PoseWithCovarianceStampedPtr& msg)
+{
+    if(!isSensorEnabled())
+        return 0;
 
-void RosMocapSensorInterface::measurementMocapSensorWrtMocapWorldCallback(const geometry_msgs::PoseStampedPtr& msg)
+    if(msg->header.seq  % 4 != 0)
+        return 0;
+
+
+    // Time Stamp
+    TimeStamp the_time_stamp(msg->header.stamp.sec, msg->header.stamp.nsec);
+
+
+    // Value with sensor core
+    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorMeasurementCore> measurement_core=std::make_shared<AbsolutePoseSensorMeasurementCore>(sensor_core);
+
+
+    // Measurement Position
+    if(this->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
+    {
+        Eigen::Vector3d position(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+
+        if(measurement_core->setPositionMocapSensorWrtMocapWorld(position))
+            std::cout<<"Error setting position"<<std::endl;
+
+    }
+
+    // Measurement Attitude
+    if(this->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
+    {
+        Eigen::Vector4d orientation;
+        Eigen::Vector4d orientation_aux;
+
+        orientation_aux<<msg->pose.pose.orientation.w,
+                    msg->pose.pose.orientation.x,
+                    msg->pose.pose.orientation.y,
+                    msg->pose.pose.orientation.z;
+
+        if(orientation_aux[0]<0)
+        {
+            orientation=-orientation_aux;
+        }
+        else
+        {
+            orientation=orientation_aux;
+        }
+
+        if(measurement_core->setAttitudeMocapSensorWrtMocapWorld(orientation))
+            std::cout<<"Error setting orientation"<<std::endl;
+    }
+
+    // Covariance
+    if(this->hasSensorMeasurementPoseSensorWrtSensorWorldCovariance())
+    {
+        Eigen::MatrixXd noise_sensor_measurement_pose_sensor_wrt_sensor_world=
+                Eigen::Map<Eigen::MatrixXd>(msg->pose.covariance.c_array(), 6, 6);
+        measurement_core->setNoiseSensorMeasurementPoseSensorWrtSensorWorld(noise_sensor_measurement_pose_sensor_wrt_sensor_world);
+    }
+
+    // Set
+    this->setMeasurement(the_time_stamp, measurement_core);
+
+
+
+    return 0;
+}
+
+void RosMocapSensorInterface::setSensorMeasurementMessageType(AbsolutePoseSensorMeasurementMessageTypes sensor_measurement_message_type)
+{
+    this->sensor_measurement_message_type_=sensor_measurement_message_type;
+    return;
+}
+
+void RosMocapSensorInterface::measurementMocapSensorWrtMocapWorldCallbackPoseStamped(const geometry_msgs::PoseStampedPtr& msg)
 {
     this->setMeasurementRos(msg);
 
     return;
 }
 
+void RosMocapSensorInterface::measurementMocapSensorWrtMocapWorldCallbackPoseWithCovarianceStamped(const geometry_msgs::PoseWithCovarianceStampedPtr& msg)
+{
+    this->setMeasurementRos(msg);
+
+    return;
+}
 
 int RosMocapSensorInterface::open()
 {
-    // Subscriber
-    measurement_mocap_sensor_wrt_mocap_world_list_sub_=nh->subscribe(measurement_mocap_sensor_wrt_mocap_world_topic_name_, 10, &RosMocapSensorInterface::measurementMocapSensorWrtMocapWorldCallback, this);
+    // Sensor Measurement
+    switch(sensor_measurement_message_type_)
+    {
+        case AbsolutePoseSensorMeasurementMessageTypes::geometry_msgs_PoseStamped:
+        {
+            measurement_mocap_sensor_wrt_mocap_world_list_sub_=nh->subscribe(measurement_mocap_sensor_wrt_mocap_world_topic_name_, 10, &RosMocapSensorInterface::measurementMocapSensorWrtMocapWorldCallbackPoseStamped, this);
+            break;
+        }
+        case AbsolutePoseSensorMeasurementMessageTypes::geometry_msgs_PoseWithCovarianceStamped:
+        {
+            measurement_mocap_sensor_wrt_mocap_world_list_sub_=nh->subscribe(measurement_mocap_sensor_wrt_mocap_world_topic_name_, 10, &RosMocapSensorInterface::measurementMocapSensorWrtMocapWorldCallbackPoseWithCovarianceStamped, this);
+            break;
+        }
+        default:
+        {
+            return -1;
+            break;
+        }
+    }
+
 
 
     return 0;
@@ -120,6 +221,14 @@ int RosMocapSensorInterface::readConfig(const pugi::xml_node& sensor, unsigned i
     // Sensor Topic
     std::string sensor_topic=sensor.child_value("ros_topic");
     this->setMeasurementMocapSensorWrtMocapWorldTopicName(sensor_topic);
+
+
+    // Message Type Sensor Measurement Topic
+    std::string type_sensor_measurement_topic=sensor.child_value("ros_topic_type");
+    if(type_sensor_measurement_topic=="geometry_msgs::PoseStamped")
+        this->setSensorMeasurementMessageType(AbsolutePoseSensorMeasurementMessageTypes::geometry_msgs_PoseStamped);
+    else if(type_sensor_measurement_topic=="geometry_msgs::PoseWithCovarianceStamped")
+        this->setSensorMeasurementMessageType(AbsolutePoseSensorMeasurementMessageTypes::geometry_msgs_PoseWithCovarianceStamped);
 
 
 

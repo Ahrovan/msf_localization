@@ -2369,19 +2369,54 @@ int MsfLocalizationCore::predictCore(const TimeStamp &ThePreviousTimeStamp, cons
             */
 
 
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error pre inputs for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+                logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error)<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
 
             if(num_input_commands > 0)
+            {
                 block_covariance_total_robot_error+=// Fu * Qu * Fu^t
                                                     block_jacobian_total_robot_error_state_wrt_error_input_commands*block_covariance_total_robot_error_inputs*block_jacobian_total_robot_error_state_wrt_error_input_commands.transpose();
+
+
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error only inputs for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+                    logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_state_wrt_error_input_commands*block_covariance_total_robot_error_inputs*block_jacobian_total_robot_error_state_wrt_error_input_commands.transpose())<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+
+            }
 
 
             //Eigen::MatrixXd covariance_total_robot_error=BlockMatrix::convertToEigenDense(block_covariance_total_robot_error);
 
 
 
+
+
+#if _DEBUG_MSF_LOCALIZATION_ALGORITHM
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationCore::predictCore() block_covariance_total_robot_error for TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+                logString<<BlockMatrix::convertToEigenDense(block_covariance_total_robot_error)<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
+
+
             // P(k+1|k)
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
-        TimeStamp beginTimePredictedCovarianceErrorStateLastSum=getTimeStamp();
+            TimeStamp beginTimePredictedCovarianceErrorStateLastSum=getTimeStamp();
 #endif
 
             block_predicted_covariance_error_state= // Fx * P * Fx^t

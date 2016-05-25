@@ -6,6 +6,7 @@
 
 // ROS Msg
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 
 // Time Stamp
@@ -25,6 +26,13 @@
 #include "pugixml/pugixml.hpp"
 
 
+enum class AbsolutePoseSensorMeasurementMessageTypes
+{
+    undefined=0,
+    geometry_msgs_PoseStamped=1,
+    geometry_msgs_PoseWithCovarianceStamped
+};
+
 
 class RosMocapSensorInterface : public RosSensorInterface, public AbsolutePoseSensorCore
 {
@@ -35,16 +43,27 @@ public:
 
 public:
     int setMeasurementRos(const geometry_msgs::PoseStampedPtr& msg);
+    int setMeasurementRos(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
 
+
+    // Message Type
+protected:
+    AbsolutePoseSensorMeasurementMessageTypes sensor_measurement_message_type_;
+protected:
+    void setSensorMeasurementMessageType(AbsolutePoseSensorMeasurementMessageTypes sensor_measurement_message_type);
 
     // Subscriber
 protected:
     std::string measurement_mocap_sensor_wrt_mocap_world_topic_name_;
-protected:
-    ros::Subscriber measurement_mocap_sensor_wrt_mocap_world_list_sub_;
-    void measurementMocapSensorWrtMocapWorldCallback(const geometry_msgs::PoseStampedPtr& msg);
 public:
     int setMeasurementMocapSensorWrtMocapWorldTopicName(const std::string measurement_mocap_sensor_wrt_mocap_world_topic_name);
+protected:
+    ros::Subscriber measurement_mocap_sensor_wrt_mocap_world_list_sub_;
+protected:
+    // Callback for geometry_msgs::PoseStamped
+    void measurementMocapSensorWrtMocapWorldCallbackPoseStamped(const geometry_msgs::PoseStampedPtr& msg);
+    // Callback for geometry_msgs::PoseWithCovarianceStamped
+    void measurementMocapSensorWrtMocapWorldCallbackPoseWithCovarianceStamped(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
 
 
 public:

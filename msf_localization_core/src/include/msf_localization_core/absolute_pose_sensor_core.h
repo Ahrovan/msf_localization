@@ -58,7 +58,7 @@ public:
     // z=[{z_posi_vmi__wrt_aruco_eye, z_attit_vmi_wrt_aruco_eye}]'
 
 
-    // World Reference Frame id
+    /// World Reference Frame id
 protected:
     int world_reference_frame_id_;
 public:
@@ -66,7 +66,7 @@ public:
     int getWorldReferenceFrameId() const;
 
 
-    // Position Measurement
+    /// Position Measurement
 protected:
     bool flag_measurement_position_mocap_sensor_wrt_mocap_world_;
 public:
@@ -82,7 +82,7 @@ public:
 
 
 
-    // Attitude Measurement
+    /// Attitude Measurement
 protected:
     bool flag_measurement_attitude_mocap_sensor_wrt_mocap_world_;
 public:
@@ -98,8 +98,17 @@ public:
 
 
 
+    /// Noise Sensor Measurement Pose Sensor Wrt Sensor World
+    // The noise of the sensor measurement is not set externally, but it comes with the sensor measurement
+protected:
+    bool flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance_;
+public:
+    bool hasSensorMeasurementPoseSensorWrtSensorWorldCovariance() const;
+    void setSensorMeasurementPoseSensorWrtSensorWorldHasCovariance(bool flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance);
 
-    // Store Measurement
+
+
+    /// Store Measurement
 public:
     int setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement);
     //int setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > sensor_measurement_list);

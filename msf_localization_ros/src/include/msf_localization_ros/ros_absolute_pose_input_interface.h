@@ -49,6 +49,12 @@ public:
     int setInputCommandRos(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
 
 
+    // Message Type
+protected:
+    AbsolutePoseInputCommandMessageTypes input_command_message_type_;
+protected:
+    void setInputCommandMessageType(AbsolutePoseInputCommandMessageTypes input_command_message_type);
+
     // Subscriber
 protected:
     std::string input_command_pose_input_wrt_input_world_topic_name_;
@@ -56,10 +62,6 @@ public:
     void setInputCommandPoseInputWrtInputWorldTopicName(const std::string input_command_pose_input_wrt_input_world_topic_name);
 protected:
     ros::Subscriber input_command_pose_input_wrt_input_world_sub_;
-protected:
-    AbsolutePoseInputCommandMessageTypes input_command_message_type_;
-protected:
-    void setInputCommandMessageType(AbsolutePoseInputCommandMessageTypes input_command_message_type);
 protected:
     // Callback for geometry_msgs::PoseStamped
     void inputCommandPoseInputWrtInputWorldCallbackPoseStamped(const geometry_msgs::PoseStampedPtr& msg);
