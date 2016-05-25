@@ -1,8 +1,8 @@
 
 
 
-#ifndef _ROS_SENSOR_IMU_INTEFACE_H
-#define _ROS_SENSOR_IMU_INTEFACE_H
+#ifndef _ROS_IMU_SENSOR_INTEFACE_H
+#define _ROS_IMU_SENSOR_INTEFACE_H
 
 
 
@@ -33,10 +33,10 @@
 
 
 
-class RosSensorImuInterface : public RosSensorInterface, public ImuSensorCore
+class RosImuSensorInterface : public RosSensorInterface, public ImuSensorCore
 {
 public:
-    RosSensorImuInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosImuSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 
 
 

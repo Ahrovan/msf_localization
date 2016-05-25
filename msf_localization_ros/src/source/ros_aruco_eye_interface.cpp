@@ -100,20 +100,16 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
 
 void RosArucoEyeInterface::markerListCallback(const aruco_eye_msgs::MarkerListPtr& msg)
 {
-    //logFile<<"RosSensorImuInterface::imuTopicCallback()"<<std::endl;
 
     this->setMeasurementRos(msg);
 
 
-    //logFile<<"RosSensorImuInterface::imuTopicCallback() ended"<<std::endl;
     return;
 }
 
 
 int RosArucoEyeInterface::open()
 {
-
-    //std::cout<<"RosSensorImuInterface::open()"<<std::endl;
 
     // Subscriber
     marker_list_sub_=nh->subscribe(marker_list_topic_name_, 10, &RosArucoEyeInterface::markerListCallback, this);

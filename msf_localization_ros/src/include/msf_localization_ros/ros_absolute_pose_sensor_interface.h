@@ -1,6 +1,6 @@
 
-#ifndef _ROS_MOCAP_SENSOR_INTERFACE_H
-#define _ROS_MOCAP_SENSOR_INTERFACE_H
+#ifndef _ROS_ABSOLUTE_POSE_SENSOR_INTERFACE_H
+#define _ROS_ABSOLUTE_POSE_SENSOR_INTERFACE_H
 
 
 
@@ -34,10 +34,10 @@ enum class AbsolutePoseSensorMeasurementMessageTypes
 };
 
 
-class RosMocapSensorInterface : public RosSensorInterface, public AbsolutePoseSensorCore
+class RosAbsolutePoseSensorInterface : public RosSensorInterface, public AbsolutePoseSensorCore
 {
 public:
-    RosMocapSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosAbsolutePoseSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
 
 
 

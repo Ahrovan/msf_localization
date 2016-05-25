@@ -247,14 +247,14 @@ int MsfLocalizationROS::readConfigFile()
             std::cout<<"sensor = imu"<<std::endl;
 
             // Create a class for the SensoreCore
-            std::shared_ptr<RosSensorImuInterface> TheRosSensorInterface;
+            std::shared_ptr<RosImuSensorInterface> TheRosSensorInterface;
             // Create a class for the SensorStateCore
             std::shared_ptr<ImuSensorStateCore> TheSensorStateCore;
 
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
             {
-                TheRosSensorInterface=std::make_shared<RosSensorImuInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosImuSensorInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
             }
 
             // Set the pointer to itself
@@ -317,13 +317,13 @@ int MsfLocalizationROS::readConfigFile()
             std::cout<<"sensor = absolute_pose"<<std::endl;
 
             // Create a class for the SensoreCore
-            std::shared_ptr<RosMocapSensorInterface> TheRosSensorInterface;
+            std::shared_ptr<RosAbsolutePoseSensorInterface> TheRosSensorInterface;
             // Create a class for the SensorStateCore
             std::shared_ptr<AbsolutePoseSensorStateCore> TheSensorStateCore;
 
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
-                TheRosSensorInterface=std::make_shared<RosMocapSensorInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosAbsolutePoseSensorInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
 
             // Set the pointer to itself
             TheRosSensorInterface->setMsfElementCorePtr(TheRosSensorInterface);
