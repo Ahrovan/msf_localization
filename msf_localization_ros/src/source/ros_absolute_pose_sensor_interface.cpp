@@ -23,7 +23,7 @@ int RosAbsolutePoseSensorInterface::setMeasurementRos(const geometry_msgs::PoseS
     if(!isSensorEnabled())
         return 0;
 
-    if(msg->header.seq  % 4 != 0)
+    if(msg->header.seq  % 3 != 0)
         return 0;
 
 
@@ -87,7 +87,7 @@ int RosAbsolutePoseSensorInterface::setMeasurementRos(const geometry_msgs::PoseW
     if(!isSensorEnabled())
         return 0;
 
-    if(msg->header.seq  % 4 != 0)
+    if(msg->header.seq  % 3 != 0)
         return 0;
 
 

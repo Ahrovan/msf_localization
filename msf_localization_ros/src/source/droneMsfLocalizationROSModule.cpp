@@ -607,141 +607,149 @@ int MsfLocalizationROS::publishThreadFunction()
     return 0;
 #endif
 
-    ///// Syncro
+    // Syncro Rate
     if( publish_rate_val_ > 0 )
     {
         // ROS rate
         publish_rate_=new ros::Rate(publish_rate_val_);
+    }
 
-        // Loop
-        while(ros::ok())
-        {
+    // variables for current_state
+    TimeStamp current_time_stamp;
+    std::shared_ptr<StateEstimationCore> current_state;
+
+
+    // Loop
+    while(ros::ok())
+    {
 
 #if _DEBUG_MSF_LOCALIZATION_CORE
-            {
-                std::ostringstream logString;
-                logString<<"MsfLocalizationROS::publishThreadFunction() loop init"<<std::endl;
-                this->log(logString.str());
-            }
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::publishThreadFunction() loop init"<<std::endl;
+            this->log(logString.str());
+        }
 #endif
 
-            // Get current_state
-            TimeStamp current_time_stamp;
-            std::shared_ptr<StateEstimationCore> current_state;
+        // Free the ownership of current_state (if any)
+        if(current_state)
+            current_state.reset();
 
-            // State estimation enabled
-            if(this->isStateEstimationEnabled())
+
+
+        // State estimation enabled
+        if(this->isStateEstimationEnabled())
+        {
+            // Async wait
+            if( publish_rate_val_ <= 0 )
             {
-
-                current_time_stamp=getTimeStamp();
-
-                this->TheMsfStorageCore->getElement(current_time_stamp, current_state);
-
-                // If no current_state -> predict state but no add buffer
-                if(!current_state)
-                {
-
-#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
-                        this->log(logString.str());
-                    }
-#endif
-
-                    if(this->predictNoAddBuffer(current_time_stamp, current_state))
-                    {
-                        // Error
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-                        {
-                            std::ostringstream logString;
-                            logString<<"MsfLocalizationROS::publishThreadFunction() error in predict()"<<std::endl;
-                            this->log(logString.str());
-                        }
-#endif
-                        continue;
-                    }
-                }
-            }
-            // State Estimation disabled
-            else
-            {
-                // Get the last state estimation
-                this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state);
-
-
-                // Time Stamp is null, put the current one
-                if(current_time_stamp==TimeStamp(0,0))
-                {
-                    current_time_stamp=getTimeStamp();
-                }
-
+                // Sleep until we have an updated state
+                this->TheMsfStorageCore->semaphoreBufferUpdated();
             }
 
 
-            // Error with predicted state
+            // Get current element
+            current_time_stamp=getTimeStamp();
+            this->TheMsfStorageCore->getElement(current_time_stamp, current_state);
+
+
+            // If no current_state -> predict state but no add buffer
             if(!current_state)
             {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
                 {
                     std::ostringstream logString;
-                    logString<<"MsfLocalizationROS::publishThreadFunction() error 1!"<<std::endl;
+                    logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
                     this->log(logString.str());
                 }
 #endif
-                continue;
+
+                if(this->predictNoAddBuffer(current_time_stamp, current_state))
+                {
+                    // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfLocalizationROS::publishThreadFunction() error in predict()"<<std::endl;
+                        this->log(logString.str());
+                    }
+#endif
+                    continue;
+                }
+            }
+        }
+        // State Estimation disabled
+        else
+        {
+            // Get the last state estimation
+            this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state);
+
+
+            // Time Stamp is null, put the current one
+            if(current_time_stamp==TimeStamp(0,0))
+            {
+                current_time_stamp=getTimeStamp();
             }
 
+        }
 
 
-            // Publish
-            if(publishState(current_time_stamp, current_state))
-                continue;
-
-
-            // Free the ownership of current_state (not really needed)
-            if(current_state)
-                current_state.reset();
-
-
-#if _DEBUG_MSF_LOCALIZATION_CORE
+        // Error with predicted state
+        if(!current_state)
+        {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             {
                 std::ostringstream logString;
-                logString<<"MsfLocalizationROS::publishThreadFunction() loop end"<<std::endl;
+                logString<<"MsfLocalizationROS::publishThreadFunction() error 1!"<<std::endl;
                 this->log(logString.str());
             }
 #endif
-
-
-            // Sleep
-            publish_rate_->sleep();
+            continue;
         }
 
 
-    }
-    /// Async
-    else
-    {
-        // Loop
-        while(ros::ok())
+
+        // Publish
+        if(publishState(current_time_stamp, current_state))
+            continue;
+
+
+        // Free the ownership of current_state (not really needed)
+        if(current_state)
+            current_state.reset();
+
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
         {
-            // Sleep until we have an updated state
-            // TODO
+            std::ostringstream logString;
+            logString<<"MsfLocalizationROS::publishThreadFunction() loop end"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
 
-            // Get updated state
-            TimeStamp current_time_stamp;
-            std::shared_ptr<StateEstimationCore> current_state;
-
-            // Publish
-            if(publishState(current_time_stamp, current_state))
-                continue;
-
-            // Free the ownership of current_state (not really needed)
-            if(current_state)
-                current_state.reset();
-
+        // Wait for the next iteration
+        if(this->isStateEstimationEnabled())
+        {
+            // Sync
+            if( publish_rate_val_ > 0 )
+            {
+                // Sleep
+                publish_rate_->sleep();
+            }
+            // Asyn
+            else
+            {
+                // Do nothing
+            }
+        }
+        else
+        {
+            // Sleep
+            ros::Rate(20).sleep();
         }
     }
+
 
 
 #if _DEBUG_MSF_LOCALIZATION_CORE

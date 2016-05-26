@@ -302,6 +302,10 @@ int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp& the_time_stamp
     if(!isSensorEnabled())
         return 0;
 
+    // Check if there are measurements
+    if(the_visual_marker_measurement_list.size() == 0)
+        return 0;
+
     if(this->getMsfStorageCoreSharedPtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
     {
         std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;

@@ -189,10 +189,19 @@ public:
 public:
     int displayOutdatedBufferElements();
     std::string getDisplayOutdatedElements();
+    // Buffer waiting
 protected:
     std::mutex outdatedBufferElementsMutex;             // mutex for critical section
     std::condition_variable outdatedBufferElementsConditionVariable; // condition variable for critical section
     std::unique_lock<std::mutex>* outdatedBufferElementsLock;
+
+    // Buffer updated: Async publishing
+public:
+    int semaphoreBufferUpdated();
+protected:
+    std::mutex updated_buffer_mutex_;             // mutex for critical section
+    std::condition_variable updated_buffer_condition_variable_; // condition variable for critical section
+    std::unique_lock<std::mutex>* updated_buffer_lock_;
 
 
 

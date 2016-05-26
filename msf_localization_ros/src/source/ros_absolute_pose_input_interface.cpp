@@ -17,7 +17,7 @@ int RosAbsolutePoseInputInterface::setInputCommandRos(const geometry_msgs::PoseS
         return 0;
 
     // PROVISIONAL! -> Dischart part of the input commands
-    if(msg->header.seq  % 4 != 0)
+    if(msg->header.seq  % 3 != 0)
         return 0;
 
 
@@ -61,7 +61,7 @@ int RosAbsolutePoseInputInterface::setInputCommandRos(const geometry_msgs::PoseW
         return 0;
 
     // PROVISIONAL! -> Dischart part of the input commands
-    if(msg->header.seq  % 4 != 0)
+    if(msg->header.seq  % 3 != 0)
         return 0;
 
 

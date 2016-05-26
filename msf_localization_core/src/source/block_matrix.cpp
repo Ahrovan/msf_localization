@@ -286,7 +286,8 @@ MatrixDense operator+(const MatrixDense &sum1, const MatrixSparse &sum2)
                 sum_result(i,j).resize(sum1(i,j).rows(), sum1(i,j).cols());
 
                 // Sum
-                sum_result(i,j)=sum1(i,j)+Eigen::MatrixXd(sum2(i,j));
+                sum_result(i,j)=sum1(i,j);
+                sum_result(i,j)+=sum2(i,j);
 
                 continue;
             }
@@ -306,9 +307,10 @@ MatrixDense operator+(const MatrixDense &sum1, const MatrixSparse &sum2)
             {
                 // Resize
                 sum_result(i,j).resize(sum2(i,j).rows(), sum2(i,j).cols());
+                sum_result(i,j).setZero();
 
                 // Sum
-                sum_result(i,j)=Eigen::MatrixXd(sum2(i,j));
+                sum_result(i,j)+=sum2(i,j);
             }
             // The two blocks zero
             else
@@ -364,7 +366,8 @@ MatrixDense operator+(const MatrixSparse &sum1, const MatrixDense &sum2)
                 sum_result(i,j).resize(sum1(i,j).rows(), sum1(i,j).cols());
 
                 // Sum
-                sum_result(i,j)=Eigen::MatrixXd(sum1(i,j))+sum2(i,j);
+                sum_result(i,j)=sum2(i,j);
+                sum_result(i,j)+=sum1(i,j);
 
                 continue;
             }
@@ -374,9 +377,10 @@ MatrixDense operator+(const MatrixSparse &sum1, const MatrixDense &sum2)
             {
                 // Resize
                 sum_result(i,j).resize(sum1(i,j).rows(), sum1(i,j).cols());
+                sum_result(i,j).setZero();
 
                 // Sum
-                sum_result(i,j)=Eigen::MatrixXd(sum1(i,j));
+                sum_result(i,j)+=sum1(i,j);
             }
             // sum1(i,j) block zero
             else if( ( sum2(i,j).cols() != 0 && sum2(i,j).rows() != 0 )

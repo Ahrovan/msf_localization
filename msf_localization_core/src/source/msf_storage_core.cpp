@@ -19,6 +19,8 @@ MsfStorageCore::MsfStorageCore()
     // Mutex
     outdatedBufferElementsLock=new std::unique_lock<std::mutex>(outdatedBufferElementsMutex);
 
+    updated_buffer_lock_=new std::unique_lock<std::mutex>(updated_buffer_mutex_);
+
 
     // Log
     const char* env_p = std::getenv("FUSEON_STACK");
@@ -49,6 +51,7 @@ MsfStorageCore::~MsfStorageCore()
 
     // Delete
     delete outdatedBufferElementsLock;
+    delete updated_buffer_lock_;
 
     return;
 }
@@ -1162,6 +1165,11 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
     // Check the list size
     while(outdatedBufferElements.size()==0)
     {
+        // Buffer is clean -> We are updated!
+        // notify to wake up
+        updated_buffer_condition_variable_.notify_all();
+
+        // Wait until a new element is pushed in the buffer
         //cv.wait(lck);
         outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
     }
@@ -1210,6 +1218,15 @@ std::string MsfStorageCore::getDisplayOutdatedElements()
 
 
     return logString.str();
+}
+
+
+int MsfStorageCore::semaphoreBufferUpdated()
+{
+    // Wait until buffer is updated
+    updated_buffer_condition_variable_.wait(*updated_buffer_lock_);
+
+    return 0;
 }
 
 
