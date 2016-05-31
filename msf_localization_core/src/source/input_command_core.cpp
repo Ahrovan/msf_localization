@@ -44,8 +44,7 @@ std::weak_ptr<InputCore> InputCommandCore::getInputCoreWeakPtr() const
 
 std::shared_ptr<InputCore> InputCommandCore::getInputCoreSharedPtr() const
 {
-    std::shared_ptr<InputCore> input_core_ptr=this->input_core_ptr_.lock();
-    return input_core_ptr;
+    return this->input_core_ptr_.lock();
 }
 
 int InputCommandCore::setInputCommandType(InputCommandTypes input_command_type)

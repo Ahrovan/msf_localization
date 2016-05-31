@@ -2,8 +2,8 @@
 #include "msf_localization_core/imu_input_core.h"
 
 // Circular Dependency
-#include "msf_localization_core/msf_storage_core.h"
-
+//#include "msf_localization_core/msf_storage_core.h"
+#include "msf_localization_core/msfLocalization.h"
 
 ImuInputCore::ImuInputCore() :
     InputCore()
@@ -13,8 +13,8 @@ ImuInputCore::ImuInputCore() :
     return;
 }
 
-ImuInputCore::ImuInputCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    InputCore(the_msf_storage_core)
+ImuInputCore::ImuInputCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    InputCore(msf_localization_core_ptr)
 {
     init();
 
@@ -471,7 +471,7 @@ int ImuInputCore::setInputCommand(const TimeStamp& time_stamp, const std::shared
         return -1;
     }
 
-    if(this->getMsfStorageCoreSharedPtr()->setInputCommand(time_stamp, imu_input_command_core))
+    if(this->getMsfLocalizationCorePtr()->setInputCommand(time_stamp, imu_input_command_core))
         return 1;
 
     return 0;

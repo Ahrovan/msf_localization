@@ -13,8 +13,8 @@ WorldReferenceFrameCore::WorldReferenceFrameCore():
     return;
 }
 
-WorldReferenceFrameCore::WorldReferenceFrameCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
-    MapElementCore(TheMsfStorageCore)
+WorldReferenceFrameCore::WorldReferenceFrameCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    MapElementCore(msf_localization_core_ptr)
 {
     init();
 

@@ -3,7 +3,9 @@
 
 
 // Circular Dependency
-#include "msf_localization_core/msf_storage_core.h"
+//#include "msf_localization_core/msf_storage_core.h"
+
+#include "msf_localization_core/msfLocalization.h"
 
 
 AbsolutePoseSensorCore::AbsolutePoseSensorCore() :
@@ -16,8 +18,8 @@ AbsolutePoseSensorCore::AbsolutePoseSensorCore() :
     return;
 }
 
-AbsolutePoseSensorCore::AbsolutePoseSensorCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    SensorCore(the_msf_storage_core)
+AbsolutePoseSensorCore::AbsolutePoseSensorCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    SensorCore(msf_localization_core_ptr)
 {
     //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
 
@@ -326,7 +328,7 @@ int AbsolutePoseSensorCore::setMeasurement(const TimeStamp& the_time_stamp, cons
     if(!isSensorEnabled())
         return 0;
 
-    if(this->getMsfStorageCoreSharedPtr()->setMeasurement(the_time_stamp, sensor_measurement))
+    if(this->getMsfLocalizationCorePtr()->setMeasurement(the_time_stamp, sensor_measurement))
     {
         std::cout<<"AbsolutePoseSensorCore::setMeasurement() error"<<std::endl;
         return 1;
@@ -2172,7 +2174,7 @@ int AbsolutePoseSensorCore::mapMeasurementSpecific(const TimeStamp &theTimeStamp
     if(!TheCodeCodedVisualMarkerLandmarkCore)
     {
         // Map element core
-        TheCodeCodedVisualMarkerLandmarkCore=std::make_shared<WorldReferenceFrameCore>(this->getMsfStorageCoreWeakPtr());
+        TheCodeCodedVisualMarkerLandmarkCore=std::make_shared<WorldReferenceFrameCore>(this->getMsfLocalizationCorePtr());
 
         // Set the map core
         TheCodeCodedVisualMarkerLandmarkCore->setMsfElementCorePtr(TheCodeCodedVisualMarkerLandmarkCore);

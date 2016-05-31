@@ -30,7 +30,7 @@
 class RosAbsolutePoseDrivenRobotInterface : public RosRobotInterface, public AbsolutePoseDrivenRobotCore
 {
 public:
-    RosAbsolutePoseDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosAbsolutePoseDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr);
     ~RosAbsolutePoseDrivenRobotInterface();
 
 

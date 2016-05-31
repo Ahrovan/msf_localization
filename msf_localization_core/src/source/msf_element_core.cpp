@@ -1,6 +1,17 @@
 #include "msf_localization_core/msf_element_core.h"
 
-#include "msf_localization_core/msf_storage_core.h"
+//#include "msf_localization_core/msf_storage_core.h"
+
+
+// State
+#include "msf_localization_core/state_core.h"
+
+// Measurement
+#include "msf_localization_core/sensor_measurement_core.h"
+
+// Input Command
+#include "msf_localization_core/input_command_core.h"
+
 
 
 MsfElementCore::MsfElementCore()
@@ -10,14 +21,14 @@ MsfElementCore::MsfElementCore()
     return;
 }
 
-MsfElementCore::MsfElementCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
+MsfElementCore::MsfElementCore(MsfLocalizationCore *msf_localization_core_ptr)
 {
     //std::cout<<"MsfElementCore::MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
 
     init();
 
     //this->msf_element_core_ptr_=msf_element_core_ptr;
-    this->msf_storage_core_ptr_=msf_storage_core_ptr;
+    this->msf_localization_core_ptr_=msf_localization_core_ptr;
 
     return;
 }
@@ -31,6 +42,9 @@ MsfElementCore::~MsfElementCore()
 
 int MsfElementCore::init()
 {
+    // Init ptr to null
+    msf_localization_core_ptr_=nullptr;
+
     // Type
     msf_element_core_type_=MsfElementCoreTypes::undefined;
 
@@ -88,10 +102,21 @@ std::weak_ptr<MsfElementCore> MsfElementCore::getMsfElementCoreWeakPtr() const
 
 std::shared_ptr<MsfElementCore> MsfElementCore::getMsfElementCoreSharedPtr() const
 {
-    std::shared_ptr<MsfElementCore> msf_element_core_ptr=this->msf_element_core_ptr_.lock();
-    return msf_element_core_ptr;
+    return this->msf_element_core_ptr_.lock();
 }
 
+void MsfElementCore::setMsfLocalizationCorePtr(MsfLocalizationCore* msf_localization_core_ptr)
+{
+    this->msf_localization_core_ptr_=msf_localization_core_ptr;
+    return;
+}
+
+MsfLocalizationCore* MsfElementCore::getMsfLocalizationCorePtr() const
+{
+    return this->msf_localization_core_ptr_;
+}
+
+/*
 int MsfElementCore::setMsfStorageCorePtr(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
 {
     this->msf_storage_core_ptr_=msf_storage_core_ptr;
@@ -105,15 +130,23 @@ std::weak_ptr<MsfStorageCore> MsfElementCore::getMsfStorageCoreWeakPtr() const
 
 std::shared_ptr<MsfStorageCore> MsfElementCore::getMsfStorageCoreSharedPtr() const
 {
-    std::shared_ptr<MsfStorageCore> msf_storage_core_ptr=this->msf_storage_core_ptr_.lock();
-    return msf_storage_core_ptr;
+    return this->msf_storage_core_ptr_.lock();
 }
+*/
 
 bool MsfElementCore::isCorrect() const
 {
+    /*
     if(this->msf_storage_core_ptr_.expired())
     {
         std::cout<<"error in msf_storage_core_ptr_"<<std::endl;
+        return false;
+    }
+    */
+
+    if(!this->msf_localization_core_ptr_)
+    {
+        std::cout<<"error in msf_localization_core_ptr_"<<std::endl;
         return false;
     }
 

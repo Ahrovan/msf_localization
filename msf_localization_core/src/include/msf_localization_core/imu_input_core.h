@@ -19,7 +19,7 @@ class ImuInputCore : public InputCore
 {
 public:
     ImuInputCore();
-    ImuInputCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    ImuInputCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~ImuInputCore();
 
 protected:

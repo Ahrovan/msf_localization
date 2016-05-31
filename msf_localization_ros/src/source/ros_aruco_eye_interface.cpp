@@ -1,9 +1,9 @@
 #include "msf_localization_ros/ros_aruco_eye_interface.h"
 
 
-RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosSensorInterface(nh, tf_transform_broadcaster),
-    CodedVisualMarkerEyeCore(the_msf_storage_core)
+    CodedVisualMarkerEyeCore(msf_localization_core_ptr)
 {
 
 

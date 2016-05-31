@@ -1,10 +1,12 @@
 
 #include "msf_localization_ros/ros_free_model_robot_interface.h"
 
+#include "msf_localization_core/msfLocalization.h"
 
-RosFreeModelRobotInterface::RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+
+RosFreeModelRobotInterface::RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosRobotInterface(nh, tf_transform_broadcaster),
-    FreeModelRobotCore(the_msf_storage_core)
+    FreeModelRobotCore(msf_localization_core_ptr)
 {
 
     return;
@@ -13,6 +15,53 @@ RosFreeModelRobotInterface::RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::
 RosFreeModelRobotInterface::~RosFreeModelRobotInterface()
 {
     return;
+}
+
+bool RosFreeModelRobotInterface::getPoseWithCovarianceByStamp(msf_localization_ros_srvs::GetPoseWithCovarianceByStamp::Request  &req,
+                                                              msf_localization_ros_srvs::GetPoseWithCovarianceByStamp::Response &res)
+{
+    // Variables
+    TimeStamp requested_time_stamp;
+    TimeStamp received_time_stamp;
+    std::shared_ptr<StateEstimationCore> received_state;
+
+    // Fill request
+    requested_time_stamp=TimeStamp(req.requested_stamp.sec, req.requested_stamp.nsec);
+
+    if(!this->getMsfLocalizationCorePtr())
+    {
+        std::cout<<"Error!"<<std::endl;
+        return false;
+    }
+
+    // Do the request
+    int error=this->getMsfLocalizationCorePtr()->getStateByStamp(requested_time_stamp,
+                                                       received_time_stamp, received_state);
+
+    // Fill response
+
+    // Success
+    if(error)
+    {
+        res.success=false;
+        return true;
+    }
+    else
+    {
+        res.success=true;
+    }
+
+    // Received TimeStamp
+    res.received_stamp=ros::Time(received_time_stamp.sec, received_time_stamp.nsec);
+
+
+    // Received State
+    this->setRobotPoseWithCovarianceMsg(std::dynamic_pointer_cast<RobotStateCore>(received_state->TheRobotStateCore), *received_state->covarianceMatrix,
+                                        res.received_pose);
+
+
+    // End
+    return true;
 }
 
 int RosFreeModelRobotInterface::readParameters()
@@ -26,6 +75,9 @@ int RosFreeModelRobotInterface::readParameters()
     //
     ros::param::param<std::string>("~robot_pose_topic_name", robotPoseStampedTopicName, "msf_localization/robot_pose");
     std::cout<<"\t robot_pose_topic_name="<<robotPoseStampedTopicName<<std::endl;
+    //
+    ros::param::param<std::string>("~robot_pose_with_covariance_stamped_srv_name", robot_pose_with_covariance_stamped_srv_name_, "msf_localization/robot_pose_cov");
+    std::cout<<"\t robot_pose_with_covariance_stamped_srv_name="<<robot_pose_with_covariance_stamped_srv_name_<<std::endl;
 
     // Velocities
     //
@@ -74,6 +126,9 @@ int RosFreeModelRobotInterface::open()
     //
     robotPoseWithCovarianceStampedPub = nh->advertise<geometry_msgs::PoseWithCovarianceStamped>(robotPoseWithCovarianceStampedTopicName, 1, true);
 
+    //
+    robot_pose_with_covariance_stamped_srv_ = nh->advertiseService(robot_pose_with_covariance_stamped_srv_name_, &RosFreeModelRobotInterface::getPoseWithCovarianceByStamp, this);
+
 
     // Velocities
 
@@ -102,6 +157,55 @@ int RosFreeModelRobotInterface::open()
     return 0;
 }
 
+
+int RosFreeModelRobotInterface::setRobotPoseMsg(const std::shared_ptr<RobotStateCore>& robot_state_core,
+                                                geometry_msgs::Pose& robot_pose_msg)
+{
+
+    std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::static_pointer_cast<FreeModelRobotStateCore>(robot_state_core);
+
+    Eigen::Vector3d robotPosition=TheRobotStateCore->getPositionRobotWrtWorld();
+    Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitudeRobotWrtWorld();
+
+    // Position
+    robot_pose_msg.position.x=robotPosition[0];
+    robot_pose_msg.position.y=robotPosition[1];
+    robot_pose_msg.position.z=robotPosition[2];
+
+    // Attitude
+    robot_pose_msg.orientation.w=robotAttitude[0];
+    robot_pose_msg.orientation.x=robotAttitude[1];
+    robot_pose_msg.orientation.y=robotAttitude[2];
+    robot_pose_msg.orientation.z=robotAttitude[3];
+
+
+    return 0;
+}
+
+
+int RosFreeModelRobotInterface::setRobotPoseWithCovarianceMsg(const std::shared_ptr<RobotStateCore>& robot_state_core, const Eigen::MatrixXd &covariance_robot_matrix,
+                                                              geometry_msgs::PoseWithCovariance& robot_pose_msg)
+{
+    // Pose
+    setRobotPoseMsg(robot_state_core, robot_pose_msg.pose);
+
+
+    // Covariance
+    // TODO fix! Covariance of the attitude is not ok!
+    Eigen::MatrixXd robotPoseCovariance(6,6);
+    robotPoseCovariance.setZero();
+    robotPoseCovariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(0,0);
+    robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(9,9);
+    double robotPoseCovarianceArray[36];
+    Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
+    for(unsigned int i=0; i<36; i++)
+    {
+        robot_pose_msg.covariance[i]=robotPoseCovarianceArray[i];
+    }
+
+}
+
+
 int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::shared_ptr<GlobalParametersCore> &world_core, const std::shared_ptr<RobotStateCore> &robot_state_core, const Eigen::MatrixXd& covariance_robot_matrix)
 {
     /// tf pose robot wrt world
@@ -114,8 +218,6 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
     std::shared_ptr<FreeModelRobotStateCore> TheRobotStateCore=std::static_pointer_cast<FreeModelRobotStateCore>(robot_state_core);
 
-    Eigen::Vector3d robotPosition=TheRobotStateCore->getPositionRobotWrtWorld();
-    Eigen::Vector4d robotAttitude=TheRobotStateCore->getAttitudeRobotWrtWorld();
     Eigen::Vector3d robotLinearSpeed=TheRobotStateCore->getLinearSpeedRobotWrtWorld();
     Eigen::Vector3d robotLinearAcceleration=TheRobotStateCore->getLinearAccelerationRobotWrtWorld();
     Eigen::Vector3d robotAngularVelocity=TheRobotStateCore->getAngularVelocityRobotWrtWorld();
@@ -190,42 +292,14 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
 
     /// Pose
-    geometry_msgs::Pose RobotPose;
-
-    // Position
-    RobotPose.position.x=robotPosition[0];
-    RobotPose.position.y=robotPosition[1];
-    RobotPose.position.z=robotPosition[2];
-
-    // Attitude
-    RobotPose.orientation.w=robotAttitude[0];
-    RobotPose.orientation.x=robotAttitude[1];
-    RobotPose.orientation.y=robotAttitude[2];
-    RobotPose.orientation.z=robotAttitude[3];
-
-
-    // Fill Message
 
     //
-    robotPoseWithCovarianceStampedMsg.pose.pose=RobotPose;
-
-
-    // Covariance
-    // TODO fix! Covariance of the attitude is not ok!
-    Eigen::MatrixXd robotPoseCovariance(6,6);
-    robotPoseCovariance.setZero();
-    robotPoseCovariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(0,0);
-    robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(9,9);
-    double robotPoseCovarianceArray[36];
-    Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
-    for(unsigned int i=0; i<36; i++)
-    {
-        robotPoseWithCovarianceStampedMsg.pose.covariance[i]=robotPoseCovarianceArray[i];
-    }
-
+    this->setRobotPoseWithCovarianceMsg(robot_state_core, covariance_robot_matrix,
+                                        robotPoseWithCovarianceStampedMsg.pose);
 
     //
-   robotPoseStampedMsg.pose=RobotPose;
+    this->setRobotPoseMsg(robot_state_core,
+                          robotPoseStampedMsg.pose);
 
 
 

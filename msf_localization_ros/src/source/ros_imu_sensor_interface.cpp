@@ -5,9 +5,9 @@
 
 
 
-RosImuSensorInterface::RosImuSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosImuSensorInterface::RosImuSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosSensorInterface(nh, tf_transform_broadcaster),
-    ImuSensorCore(the_msf_storage_core)
+    ImuSensorCore(msf_localization_core_ptr)
 {
 
     return;

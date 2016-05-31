@@ -76,8 +76,7 @@ int MsfLocalizationROS::readConfigFile()
 
     // Reading Configs
     // TODO
-    predict_model_time_=0.02; // In seconds
-
+    //predict_model_time_=0.02; // In seconds
 
 
     //// Global Parameters [world]
@@ -95,7 +94,7 @@ int MsfLocalizationROS::readConfigFile()
 
         // Create the GlobalParameters
         if(!TheGlobalParametersCoreAux)
-            TheGlobalParametersCoreAux=std::make_shared<GlobalParametersCore>(this->TheMsfStorageCore);
+            TheGlobalParametersCoreAux=std::make_shared<GlobalParametersCore>(this);
 
         // Set the pointer to itself
         TheGlobalParametersCoreAux->setMsfElementCorePtr(TheGlobalParametersCoreAux);
@@ -138,7 +137,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create the RobotCoreAux
             if(!TheRobotCoreAux)
             {
-                TheRobotCoreAux=std::make_shared<RosFreeModelRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRobotCoreAux=std::make_shared<RosFreeModelRobotInterface>(nh, this->tf_transform_broadcaster_, this);
             }
 
             // Set the pointer to itself
@@ -174,7 +173,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create the RobotCoreAux
             if(!TheRobotCoreAux)
             {
-                TheRobotCoreAux=std::make_shared<RosImuDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRobotCoreAux=std::make_shared<RosImuDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this);
             }
 
             // Set the pointer to itself
@@ -210,7 +209,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create the RobotCoreAux
             if(!TheRobotCoreAux)
             {
-                TheRobotCoreAux=std::make_shared<RosAbsolutePoseDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRobotCoreAux=std::make_shared<RosAbsolutePoseDrivenRobotInterface>(nh, this->tf_transform_broadcaster_, this);
             }
 
             // Set the pointer to itself
@@ -257,7 +256,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
             {
-                TheRosSensorInterface=std::make_shared<RosImuSensorInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosImuSensorInterface>(nh, this->tf_transform_broadcaster_, this);
             }
 
             // Set the pointer to itself
@@ -292,7 +291,7 @@ int MsfLocalizationROS::readConfigFile()
 
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
-                TheRosSensorInterface=std::make_shared<RosArucoEyeInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosArucoEyeInterface>(nh, this->tf_transform_broadcaster_, this);
 
             // Set the pointer to itself
             TheRosSensorInterface->setMsfElementCorePtr(TheRosSensorInterface);
@@ -326,7 +325,7 @@ int MsfLocalizationROS::readConfigFile()
 
             // Create a class for the SensoreCore
             if(!TheRosSensorInterface)
-                TheRosSensorInterface=std::make_shared<RosAbsolutePoseSensorInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                TheRosSensorInterface=std::make_shared<RosAbsolutePoseSensorInterface>(nh, this->tf_transform_broadcaster_, this);
 
             // Set the pointer to itself
             TheRosSensorInterface->setMsfElementCorePtr(TheRosSensorInterface);
@@ -372,7 +371,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class for the SensoreCore
             if(!ros_input_interface)
             {
-                ros_input_interface=std::make_shared<RosImuInputInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                ros_input_interface=std::make_shared<RosImuInputInterface>(nh, this->tf_transform_broadcaster_, this);
             }
 
             // Set the pointer to itself
@@ -405,7 +404,7 @@ int MsfLocalizationROS::readConfigFile()
             // Create a class for the SensoreCore
             if(!ros_input_interface)
             {
-                ros_input_interface=std::make_shared<RosAbsolutePoseInputInterface>(nh, this->tf_transform_broadcaster_, this->TheMsfStorageCore);
+                ros_input_interface=std::make_shared<RosAbsolutePoseInputInterface>(nh, this->tf_transform_broadcaster_, this);
             }
 
             // Set the pointer to itself
@@ -451,7 +450,7 @@ int MsfLocalizationROS::readConfigFile()
 
             // Create a class for the MapElementCore
             if(!TheMapElementCore)
-                TheMapElementCore=std::make_shared<CodedVisualMarkerLandmarkCore>(this->TheMsfStorageCore);
+                TheMapElementCore=std::make_shared<CodedVisualMarkerLandmarkCore>(this);
 
             // Set the pointer to itself
             TheMapElementCore->setMsfElementCorePtr(TheMapElementCore);
@@ -482,7 +481,7 @@ int MsfLocalizationROS::readConfigFile()
 
             // Create a class for the MapElementCore
             if(!TheMapElementCore)
-                TheMapElementCore=std::make_shared<WorldReferenceFrameCore>(this->TheMsfStorageCore);
+                TheMapElementCore=std::make_shared<WorldReferenceFrameCore>(this);
 
             // Set the pointer to itself
             TheMapElementCore->setMsfElementCorePtr(TheMapElementCore);
@@ -542,6 +541,10 @@ int MsfLocalizationROS::readParameters()
     //
     ros::param::param<double>("~robot_pose_rate", publish_rate_val_, 50);
     std::cout<<"robot_pose_rate="<<publish_rate_val_<<std::endl;
+    //
+    ros::param::param<double>("~predict_model_time", predict_model_time_, 0.02);
+    std::cout<<"predict_model_time="<<predict_model_time_<<std::endl;
+
 
     return 0;
 }
@@ -645,17 +648,24 @@ int MsfLocalizationROS::publishThreadFunction()
             {
                 // Sleep until we have an updated state
                 this->TheMsfStorageCore->semaphoreBufferUpdated();
+
+                // Get last element with state -> Do not do the predict
+                this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state);
+
+
+
             }
-
-
-            // Get current element
-            current_time_stamp=getTimeStamp();
-            this->TheMsfStorageCore->getElement(current_time_stamp, current_state);
-
-
-            // If no current_state -> predict state but no add buffer
-            if(!current_state)
+            else
             {
+
+                // Get current element
+                current_time_stamp=getTimeStamp();
+                this->TheMsfStorageCore->getElement(current_time_stamp, current_state);
+
+
+                // If no current_state -> predict state but no add buffer
+                if(!current_state)
+                {
 
 #if 1 || _DEBUG_MSF_LOCALIZATION_CORE
                 {
@@ -665,7 +675,7 @@ int MsfLocalizationROS::publishThreadFunction()
                 }
 #endif
 
-                if(this->predictNoAddBuffer(current_time_stamp, current_state))
+                    if(this->predictNoAddBuffer(current_time_stamp, current_state))
                 {
                     // Error
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
@@ -677,6 +687,8 @@ int MsfLocalizationROS::publishThreadFunction()
 #endif
                     continue;
                 }
+                }
+
             }
         }
         // State Estimation disabled
@@ -872,6 +884,11 @@ int MsfLocalizationROS::predictThreadFunction()
 #if _DEBUG_MODE
     return 0;
 #endif
+
+    // Check if prediction is needed
+    if(predict_model_time_ <= 0)
+        return 0;
+
 
     ros::Rate predictRate(1/predict_model_time_);
 

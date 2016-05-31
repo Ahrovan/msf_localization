@@ -57,6 +57,7 @@ public:
 
     // Check
 public:
+    bool checkState() const;
     bool hasState() const;
 
     // Dimension total of state and error state

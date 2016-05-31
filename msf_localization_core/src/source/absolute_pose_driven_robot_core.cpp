@@ -13,8 +13,8 @@ AbsolutePoseDrivenRobotCore::AbsolutePoseDrivenRobotCore() :
     return;
 }
 
-AbsolutePoseDrivenRobotCore::AbsolutePoseDrivenRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
-    RobotCore(msf_storage_core_ptr)
+AbsolutePoseDrivenRobotCore::AbsolutePoseDrivenRobotCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    RobotCore(msf_localization_core_ptr)
 {
     init();
 

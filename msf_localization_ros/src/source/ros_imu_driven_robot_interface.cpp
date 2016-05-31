@@ -1,9 +1,9 @@
 
 #include "msf_localization_ros/ros_imu_driven_robot_interface.h"
 
-RosImuDrivenRobotInterface::RosImuDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosImuDrivenRobotInterface::RosImuDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosRobotInterface(nh, tf_transform_broadcaster),
-    ImuDrivenRobotCore(the_msf_storage_core)
+    ImuDrivenRobotCore(msf_localization_core_ptr)
 {
 
     return;

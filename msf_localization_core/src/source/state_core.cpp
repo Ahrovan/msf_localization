@@ -2,6 +2,9 @@
 #include "msf_localization_core/state_core.h"
 
 
+#include "msf_localization_core/msf_element_core.h"
+
+
 StateCore::StateCore()
 {
     init();
@@ -39,8 +42,7 @@ int StateCore::setMsfElementCorePtr(const std::weak_ptr<MsfElementCore> msf_elem
 
 std::shared_ptr<MsfElementCore> StateCore::getMsfElementCoreSharedPtr() const
 {
-    std::shared_ptr<MsfElementCore> msf_element_core_ptr=this->msf_element_core_ptr_.lock();
-    return msf_element_core_ptr;
+    return this->msf_element_core_ptr_.lock();
 }
 
 std::weak_ptr<MsfElementCore> StateCore::getMsfElementCoreWeakPtr() const

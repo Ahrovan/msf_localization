@@ -4,7 +4,7 @@
 //#include "state_estimation_core.h"
 
 #include "msf_localization_core/msf_storage_core.h"
-
+#include "msf_localization_core/msfLocalization.h"
 
 
 SensorCore::SensorCore() :
@@ -16,9 +16,9 @@ SensorCore::SensorCore() :
     return;
 }
 
-SensorCore::SensorCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr) :
+SensorCore::SensorCore(MsfLocalizationCore* msf_localization_core_ptr) :
     SensorBasics(),
-    MsfElementCore(msf_storage_core_ptr)
+    MsfElementCore(msf_localization_core_ptr)
 {
     //std::cout<<"SensorCore::SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
 

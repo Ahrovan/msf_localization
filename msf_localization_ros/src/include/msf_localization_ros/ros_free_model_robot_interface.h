@@ -6,6 +6,7 @@
 // Pose
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include "msf_localization_ros_srvs/GetPoseWithCovarianceByStamp.h"
 
 // Velocities
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
@@ -43,12 +44,12 @@
 class RosFreeModelRobotInterface : public RosRobotInterface, public FreeModelRobotCore
 {
 public:
-    RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosFreeModelRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr);
     ~RosFreeModelRobotInterface();
 
 
 
-    // Output -> Publishers
+    // Output -> Publishers and service servers
 protected:
     /// Pose
 
@@ -61,6 +62,13 @@ protected:
     ros::Publisher robotPoseStampedPub;
     std::string robotPoseStampedTopicName;
     geometry_msgs::PoseStamped robotPoseStampedMsg;
+
+    // Robot Pose With Covariance Stamped Srv
+    ros::ServiceServer robot_pose_with_covariance_stamped_srv_;
+    std::string robot_pose_with_covariance_stamped_srv_name_;
+    msf_localization_ros_srvs::GetPoseWithCovarianceByStamp robot_pose_with_covariance_stamped_srv_msg_;
+    bool getPoseWithCovarianceByStamp(msf_localization_ros_srvs::GetPoseWithCovarianceByStamp::Request  &req,
+                                      msf_localization_ros_srvs::GetPoseWithCovarianceByStamp::Response &res);
 
 
     /// Velocities
@@ -118,6 +126,14 @@ protected:
 
 public:
     int open();
+
+
+protected:
+    int setRobotPoseMsg(const std::shared_ptr<RobotStateCore>& robot_state_core,
+                        geometry_msgs::Pose& robot_pose_msg);
+    int setRobotPoseWithCovarianceMsg(const std::shared_ptr<RobotStateCore>& robot_state_core,
+                                      const Eigen::MatrixXd& covariance_robot_matrix,
+                                      geometry_msgs::PoseWithCovariance& robot_pose_msg);
 
 
 public:

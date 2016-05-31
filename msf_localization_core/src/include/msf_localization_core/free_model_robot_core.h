@@ -28,7 +28,7 @@ class FreeModelRobotCore : public RobotCore
 
 public:
     FreeModelRobotCore();
-    FreeModelRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    FreeModelRobotCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~FreeModelRobotCore();
 
 

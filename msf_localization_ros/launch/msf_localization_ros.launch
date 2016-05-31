@@ -9,6 +9,8 @@
 
   <arg name="robot_pose_rate" 	default="50" />
 
+  <arg name="predict_model_time" 	default="0.02" />
+
   <arg name="robot_pose_topic_name" 	default="msf_localization/robot_pose" />
   <arg name="robot_pose_with_cov_topic_name" 	default="msf_localization/robot_pose_cov" />
   <arg name="robot_velocities_stamped_topic_name" 	default="msf_localization/robot_velocity" />
@@ -28,6 +30,8 @@
     <param name="set_state_estimation_enabled_service_name" value="$(arg set_state_estimation_enabled_service_name)" type="string"/>
 
     <param name="robot_pose_rate" value="$(arg robot_pose_rate)" type="double"/>
+
+    <param name="predict_model_time" value="$(arg predict_model_time)" type="double"/>
 
     <param name="robot_pose_topic_name" value="$(arg robot_pose_topic_name)" type="string" />
     <param name="robot_pose_with_cov_topic_name" value="$(arg robot_pose_with_cov_topic_name)" type="string"/>

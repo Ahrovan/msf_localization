@@ -2,7 +2,8 @@
 #include "msf_localization_core/coded_visual_marker_eye_core.h"
 
 // Circular Dependency
-#include "msf_localization_core/msf_storage_core.h"
+//#include "msf_localization_core/msf_storage_core.h"
+#include "msf_localization_core/msfLocalization.h"
 
 
 CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
@@ -15,8 +16,8 @@ CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
     return;
 }
 
-CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    SensorCore(the_msf_storage_core)
+CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    SensorCore(msf_localization_core_ptr)
 {
     //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
 
@@ -306,7 +307,7 @@ int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp& the_time_stamp
     if(the_visual_marker_measurement_list.size() == 0)
         return 0;
 
-    if(this->getMsfStorageCoreSharedPtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
+    if(this->getMsfLocalizationCorePtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
     {
         std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
         return 1;
@@ -2069,7 +2070,7 @@ int CodedVisualMarkerEyeCore::mapMeasurement(// Time
         new_map_element_core=new CodedVisualMarkerLandmarkCore;
 
         // Set the storage core
-        new_map_element_core->setMsfStorageCorePtr(this->getMsfStorageCoreWeakPtr());
+        new_map_element_core->setMsfLocalizationCorePtr(this->getMsfLocalizationCorePtr());
 
         // Set the map core shared_ptr
         std::shared_ptr<MapElementCore> new_map_element_core_shared_ptr=std::shared_ptr<MapElementCore>(new_map_element_core);

@@ -33,7 +33,7 @@ endif()
 
 
 find_package(catkin REQUIRED
-                COMPONENTS message_generation std_srvs std_msgs)
+                COMPONENTS message_generation std_srvs std_msgs geometry_msgs)
 
 
 add_service_files(
@@ -41,18 +41,19 @@ add_service_files(
         srv
     FILES
         SetBool.srv
+        GetPoseWithCovarianceByStamp.srv
 
 
 )
 
 
 
-generate_messages(DEPENDENCIES std_srvs std_msgs)
+generate_messages(DEPENDENCIES std_srvs std_msgs geometry_msgs)
 
 
 
 catkin_package(
-    CATKIN_DEPENDS message_runtime std_srvs std_msgs
+    CATKIN_DEPENDS message_runtime std_srvs std_msgs geometry_msgs
   )
 
 

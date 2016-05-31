@@ -32,7 +32,7 @@ class ImuDrivenRobotCore : public RobotCore
 
 public:
     ImuDrivenRobotCore();
-    ImuDrivenRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    ImuDrivenRobotCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~ImuDrivenRobotCore();
 
 

@@ -18,7 +18,7 @@ class AbsolutePoseInputCore : public InputCore
 {
 public:
     AbsolutePoseInputCore();
-    AbsolutePoseInputCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    AbsolutePoseInputCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~AbsolutePoseInputCore();
 
 protected:

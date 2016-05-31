@@ -37,7 +37,7 @@ class AbsolutePoseDrivenRobotCore : public RobotCore
 
 public:
     AbsolutePoseDrivenRobotCore();
-    AbsolutePoseDrivenRobotCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    AbsolutePoseDrivenRobotCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~AbsolutePoseDrivenRobotCore();
 
 

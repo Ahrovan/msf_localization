@@ -2,7 +2,8 @@
 #include "msf_localization_core/absolute_pose_input_core.h"
 
 // Circular dependency
-#include "msf_localization_core/msf_storage_core.h"
+//#include "msf_localization_core/msf_storage_core.h"
+#include "msf_localization_core/msfLocalization.h"
 
 
 AbsolutePoseInputCore::AbsolutePoseInputCore() :
@@ -12,8 +13,8 @@ AbsolutePoseInputCore::AbsolutePoseInputCore() :
     return;
 }
 
-AbsolutePoseInputCore::AbsolutePoseInputCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    InputCore(the_msf_storage_core)
+AbsolutePoseInputCore::AbsolutePoseInputCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    InputCore(msf_localization_core_ptr)
 {
     init();
     return;
@@ -329,7 +330,7 @@ int AbsolutePoseInputCore::setInputCommand(const TimeStamp& time_stamp, const st
         return -1;
     }
 
-    if(this->getMsfStorageCoreSharedPtr()->setInputCommand(time_stamp, input_command_core))
+    if(this->getMsfLocalizationCorePtr()->setInputCommand(time_stamp, input_command_core))
         return 1;
 
     return 0;

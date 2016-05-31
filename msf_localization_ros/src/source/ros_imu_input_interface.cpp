@@ -2,9 +2,9 @@
 #include "msf_localization_ros/ros_imu_input_interface.h"
 
 
-RosImuInputInterface::RosImuInputInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosImuInputInterface::RosImuInputInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosInputInterface(nh, tf_transform_broadcaster),
-    ImuInputCore(the_msf_storage_core)
+    ImuInputCore(msf_localization_core_ptr)
 {
 
     return;

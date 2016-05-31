@@ -31,7 +31,7 @@ class WorldReferenceFrameCore : public MapElementCore
 
 public:
     WorldReferenceFrameCore();
-    WorldReferenceFrameCore(std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+    WorldReferenceFrameCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~WorldReferenceFrameCore();
 
 

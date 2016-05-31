@@ -37,7 +37,7 @@ enum class AbsolutePoseSensorMeasurementMessageTypes
 class RosAbsolutePoseSensorInterface : public RosSensorInterface, public AbsolutePoseSensorCore
 {
 public:
-    RosAbsolutePoseSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosAbsolutePoseSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr);
 
 
 

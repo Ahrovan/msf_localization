@@ -52,8 +52,7 @@ std::weak_ptr<SensorCore> SensorMeasurementCore::getSensorCoreWeakPtr() const
 
 std::shared_ptr<SensorCore> SensorMeasurementCore::getSensorCoreSharedPtr() const
 {
-    std::shared_ptr<SensorCore> sensor_core_ptr=this->sensor_core_ptr_.lock();
-    return sensor_core_ptr;
+    return this->sensor_core_ptr_.lock();
 }
 
 int SensorMeasurementCore::setMeasurementType(MeasurementTypes measurementType)

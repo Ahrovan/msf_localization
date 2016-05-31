@@ -13,8 +13,8 @@ CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore():
     return;
 }
 
-CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore(const std::weak_ptr<MsfStorageCore> TheMsfStorageCore) :
-    MapElementCore(TheMsfStorageCore)
+CodedVisualMarkerLandmarkCore::CodedVisualMarkerLandmarkCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    MapElementCore(msf_localization_core_ptr)
 {
     init();
 

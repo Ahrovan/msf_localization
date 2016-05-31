@@ -27,7 +27,7 @@ class CodedVisualMarkerLandmarkCore : public MapElementCore
 
 public:
     CodedVisualMarkerLandmarkCore();
-    CodedVisualMarkerLandmarkCore(const std::weak_ptr<MsfStorageCore> TheMsfStorageCore);
+    CodedVisualMarkerLandmarkCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~CodedVisualMarkerLandmarkCore();
 
 

@@ -2,9 +2,9 @@
 #include "msf_localization_ros/ros_absolute_pose_driven_robot_interface.h"
 
 
-RosAbsolutePoseDrivenRobotInterface::RosAbsolutePoseDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosAbsolutePoseDrivenRobotInterface::RosAbsolutePoseDrivenRobotInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosRobotInterface(nh, tf_transform_broadcaster),
-    AbsolutePoseDrivenRobotCore(the_msf_storage_core)
+    AbsolutePoseDrivenRobotCore(msf_localization_core_ptr)
 {
 
     return;

@@ -22,6 +22,10 @@ MsfStorageCore::MsfStorageCore()
     updated_buffer_lock_=new std::unique_lock<std::mutex>(updated_buffer_mutex_);
 
 
+    // Flags
+    flag_new_measurement_=false;
+
+
     // Log
     const char* env_p = std::getenv("FUSEON_STACK");
 
@@ -119,6 +123,10 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 #endif
 
 
+    // Set flag
+    flag_new_measurement_=true;
+
+
     return 0;
 }
 
@@ -178,7 +186,10 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
     }
 #endif
 
+    // Set flag
+    flag_new_measurement_=true;
 
+    // End
     return 0;
 }
 
@@ -365,6 +376,95 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
     return 0;
 }
 
+int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
+{
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() TS: sec="<<ThePreviousTimeStamp.sec<<"; nsec="<<ThePreviousTimeStamp.nsec<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    // Reset time stamp
+    PreviousState.reset();
+
+    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
+
+    // Find
+    TheRingBufferMutex.lock();
+    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+        itElement!=this->getEnd();
+        ++itElement)
+    {
+        // Get the element
+        int errorGetElement=this->getElementI(BufferElement, itElement);
+
+        if(errorGetElement)
+            continue;
+
+#if _DEBUG_MSF_STORAGE
+        {
+            std::ostringstream logString;
+            logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+
+        // Check the time stamp
+        if(BufferElement.timeStamp>ThePreviousTimeStamp)
+        {
+            continue;
+        }
+        else
+        {
+            //logFile<<"found by time stamp!"<<std::endl;
+
+            // Check if it has state
+            if(BufferElement.object->hasState())
+            {
+#if _DEBUG_MSF_STORAGE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+
+                TheTimeStamp=BufferElement.timeStamp;
+                PreviousState=BufferElement.object;
+                //logFile<<"found with state!"<<std::endl;
+
+#if _DEBUG_MSF_STORAGE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+
+                break;
+            }
+        }
+    }
+    TheRingBufferMutex.unlock();
+
+#if _DEBUG_MSF_STORAGE
+    {
+        std::ostringstream logString;
+        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() ended"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    if(!PreviousState)
+        return -1;
+
+    return 0;
+
+}
+
 
 int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
@@ -377,7 +477,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 #endif
 
     // Reset time stamp
-    PreviousState=nullptr;
+    PreviousState.reset();;
 
     StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
@@ -1165,16 +1265,25 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
     // Check the list size
     while(outdatedBufferElements.size()==0)
     {
-        // Buffer is clean -> We are updated!
-        // notify to wake up
-        updated_buffer_condition_variable_.notify_all();
+        // No new outdated measurement
+        if(flag_new_measurement_)
+        {
+            // Unset flag
+            flag_new_measurement_=false;
+
+            // Buffer is clean -> We are updated!
+            // notify to wake up
+            updated_buffer_condition_variable_.notify_all();
+
+        }
 
         // Wait until a new element is pushed in the buffer
         //cv.wait(lck);
         outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
+
     }
 
-#if 0 || _DEBUG_MSF_STORAGE
+#if _DEBUG_MSF_STORAGE
     // Display
     this->displayOutdatedBufferElements();
 #endif

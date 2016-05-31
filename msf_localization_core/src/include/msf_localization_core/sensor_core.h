@@ -46,13 +46,12 @@ class SensorCore : public SensorBasics, public MsfElementCore
 {
 public:
     SensorCore();
-    SensorCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    SensorCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~SensorCore();
 
 
 protected:
     int init();
-
 
 
 

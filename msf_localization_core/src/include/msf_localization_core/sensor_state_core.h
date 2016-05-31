@@ -8,8 +8,6 @@
 
 #include "msf_localization_core/state_core.h"
 
-//#include "msf_localization_core/sensor_core.h"
-
 
 
 enum class SensorStateCoreTypes

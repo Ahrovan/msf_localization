@@ -1,9 +1,9 @@
 #include "msf_localization_ros/ros_absolute_pose_sensor_interface.h"
 
 
-RosAbsolutePoseSensorInterface::RosAbsolutePoseSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosAbsolutePoseSensorInterface::RosAbsolutePoseSensorInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosSensorInterface(nh, tf_transform_broadcaster),
-    AbsolutePoseSensorCore(the_msf_storage_core)
+    AbsolutePoseSensorCore(msf_localization_core_ptr)
 {
     this->sensor_measurement_message_type_=AbsolutePoseSensorMeasurementMessageTypes::undefined;
 

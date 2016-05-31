@@ -32,7 +32,20 @@ MsfLocalizationCore::MsfLocalizationCore()
     // LOG
     const char* env_p = std::getenv("FUSEON_STACK");
 
-    logPath=std::string(env_p)+"/logs/"+"logMsfLocalizationCoreFile.txt";
+
+    time_t rawtime;
+      struct tm * timeinfo;
+      char buffer[80];
+
+      time (&rawtime);
+      timeinfo = localtime(&rawtime);
+
+      strftime(buffer,80,"%d-%m-%Y_%I:%M:%S",timeinfo);
+      std::string str(buffer);
+
+
+
+    logPath=std::string(env_p)+"/logs/"+"logMsfLocalizationCoreFile"+str+".txt";
 
     //std::cout<<"logPath: "<<logPath<<std::endl;
 
@@ -168,6 +181,34 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
 bool MsfLocalizationCore::isStateEstimationEnabled() const
 {
     return this->stateEstimationEnabled;
+}
+
+int MsfLocalizationCore::setMeasurement(const TimeStamp& time_stamp,
+                                        const std::shared_ptr<SensorMeasurementCore>& sensor_measurement)
+{
+    this->TheMsfStorageCore->setMeasurement(time_stamp, sensor_measurement);
+    return 0;
+}
+
+int MsfLocalizationCore::setMeasurementList(const TimeStamp& time_stamp,
+                                            const std::list< std::shared_ptr<SensorMeasurementCore> >& list_sensor_measurement)
+{
+    this->TheMsfStorageCore->setMeasurementList(time_stamp, list_sensor_measurement);
+    return 0;
+}
+
+int MsfLocalizationCore::setInputCommand(const TimeStamp& time_stamp,
+                                        const std::shared_ptr<InputCommandCore>& input_command)
+{
+    this->TheMsfStorageCore->setInputCommand(time_stamp, input_command);
+    return 0;
+}
+
+int MsfLocalizationCore::setInputCommandList(const TimeStamp& time_stamp,
+                        const std::list< std::shared_ptr<InputCommandCore> >& list_input_command)
+{
+    this->TheMsfStorageCore->setInputCommandList(time_stamp, list_input_command);
+    return 0;
 }
 
 TimeStamp MsfLocalizationCore::getTimeStamp()
@@ -394,6 +435,7 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
         TimeStamp begin = this->getTimeStamp();
 #endif
 
+
         int errorPredict=this->predict(time_stamp);
 
         if(errorPredict)
@@ -423,8 +465,6 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
         std::ostringstream logString;
         logString<<"MsfLocalizationCore::bufferPropagationStep() -> predict() time: "<<(getTimeStamp()-begin).toNSec()<<" ns"<<std::endl;
         this->log(logString.str());
-
-
 #endif
     }
 
@@ -535,6 +575,12 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 
 int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(const TimeStamp &time_stamp)
 {
+    // Element cannot be removed and need to be processed
+    if(predict_model_time_<0)
+    {
+        return 1;
+    }
+
     // Get current element (k)
     std::shared_ptr<StateEstimationCore> current_element;
     int error_get_current_element=this->TheMsfStorageCore->getElement(time_stamp, current_element);
@@ -544,6 +590,19 @@ int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(const TimeStamp &time_
         return -10;
     }
     //std::cout<<"time_stamp: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+
+    // No prediction requested. Only if it has measurements
+    if(predict_model_time_==0)
+    {
+        if( current_element->hasInputCommand() && !current_element->hasMeasurement() )
+        {
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
 
     // Checks if has input commands or measurements
     if( current_element->hasInputCommand() || current_element->hasMeasurement() )
@@ -671,7 +730,100 @@ int MsfLocalizationCore::startThreads()
     return 0;
 }
 
+int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
+                                        TimeStamp& received_time_stamp,
+                                        std::shared_ptr<StateEstimationCore>& received_state)
+{
+    // Check if state estimation is enabled
+    if(this->isStateEstimationEnabled())
+    {
 
+        // Get previous element with state
+        int error_get_element=this->TheMsfStorageCore->getElementWithStateEstimateByStamp(requested_time_stamp,
+                                                                                          received_time_stamp, received_state);
+
+        // Check
+        if(error_get_element || !received_state)
+            return -1;
+
+
+        // Check time stamps
+        if( received_time_stamp < requested_time_stamp )
+        {
+            // Do not predict
+            if( predict_model_time_ <= 0 )
+            {
+                // Do nothing
+            }
+            // Predict to adjust
+            else
+            {
+                // Reset received_state
+                received_state.reset();
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+                {
+                    std::ostringstream logString;
+                    logString<<"MsfLocalizationCore::getStateByStamp() predicting TS: sec="<<requested_time_stamp.sec<<" s; nsec="<<requested_time_stamp.nsec<<" ns"<<std::endl;
+                    this->log(logString.str());
+                }
+#endif
+
+                // Predict
+                if(this->predictNoAddBuffer(requested_time_stamp, received_state))
+                {
+                    // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfLocalizationROS::publishThreadFunction() error in predictNoAddBuffer()"<<std::endl;
+                        this->log(logString.str());
+                    }
+#endif
+                    return -2;
+                }
+
+                // Set the time stamp
+                received_time_stamp=requested_time_stamp;
+
+            }
+
+        }
+    }
+    // State Estimation disabled
+    else
+    {
+        // Get the last state estimation
+        this->TheMsfStorageCore->getLastElementWithStateEstimate(received_time_stamp, received_state);
+
+        // Time Stamp is null, put the current one
+        if(received_time_stamp==TimeStamp(0,0))
+        {
+            received_time_stamp=requested_time_stamp;
+        }
+
+    }
+
+    // Error with received state
+    if(!received_state)
+    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::getStateByStamp() error !received_state"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+        return -3;
+    }
+
+
+    std::cout<<"req time: sec="<<requested_time_stamp.sec<<"s; nsec="<<requested_time_stamp.nsec<<std::endl;
+    std::cout<<"rec time: sec="<<received_time_stamp.sec<<"s; nsec="<<received_time_stamp.nsec<<std::endl;
+
+    // End ok
+    return 0;
+}
 
 int MsfLocalizationCore::getPreviousState(const TimeStamp &TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState)
 {
@@ -1029,7 +1181,6 @@ int MsfLocalizationCore::predictNoAddBuffer(const TimeStamp& TheTimeStamp, std::
 int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp, std::shared_ptr<StateEstimationCore>& ThePredictedState)
 {
 
-
     // Get the last predicted state from the buffer
     TimeStamp PreviousTimeStamp;
     std::shared_ptr<StateEstimationCore> PreviousState;
@@ -1038,7 +1189,11 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
     if(error_get_previous_state)
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        logFile<<"MsfLocalizationCore::predictSemiCore() error getPreviousState() "<<error_get_previous_state<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictSemiCore() error error_get_previous_state TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
 #endif
         return -10;
     }
@@ -1047,7 +1202,11 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
     if(!PreviousState)
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        logFile<<"MsfLocalizationCore::predictSemiCore() error !PreviousState"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictSemiCore() error !PreviousState TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
 #endif
         return -20;
     }
@@ -1057,7 +1216,11 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
     if(!PreviousState->hasState())
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        logFile<<"MsfLocalizationCore::predictSemiCore() error !PreviousState->hasState()"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictSemiCore() error !PreviousState->hasState() TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
 #endif
         return -1;
     }
@@ -1082,15 +1245,32 @@ int MsfLocalizationCore::predictSemiCore(const TimeStamp &ThePredictedTimeStamp,
     // Set inputs
     std::shared_ptr<InputCommandComponent> input_commands;
 
-
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictSemiCore() findInputCommands() pre TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
     int error_find_input_commands = findInputCommands(ThePredictedTimeStamp,
                                                       //PreviousState,
                                                       input_commands);
 
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictSemiCore() findInputCommands() post TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
     if(error_find_input_commands)
     {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        logFile<<"MsfLocalizationCore::predictSemiCore() error find_input_commands"<<std::endl;
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::predictSemiCore() error find_input_commands TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+        this->log(logString.str());
+    }
 #endif
         return error_find_input_commands;
     }
@@ -1127,6 +1307,15 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
     TimeStamp beginTimePredictCore=getTimeStamp();
 #endif
+
+    // Checks
+    if(!previous_state)
+        return -1;
+    if(!previous_state->checkState())
+        return -1;
+
+    if(!predicted_state)
+        return -2;
 
 
     /////// State

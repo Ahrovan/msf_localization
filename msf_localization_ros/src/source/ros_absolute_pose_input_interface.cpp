@@ -2,9 +2,9 @@
 #include "msf_localization_ros/ros_absolute_pose_input_interface.h"
 
 
-RosAbsolutePoseInputInterface::RosAbsolutePoseInputInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
+RosAbsolutePoseInputInterface::RosAbsolutePoseInputInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr) :
     RosInputInterface(nh, tf_transform_broadcaster),
-    AbsolutePoseInputCore(the_msf_storage_core)
+    AbsolutePoseInputCore(msf_localization_core_ptr)
 {
     this->input_command_message_type_=AbsolutePoseInputCommandMessageTypes::undefined;
 

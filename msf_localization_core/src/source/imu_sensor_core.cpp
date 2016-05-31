@@ -2,7 +2,8 @@
 #include "msf_localization_core/imu_sensor_core.h"
 
 // Circular Dependency
-#include "msf_localization_core/msf_storage_core.h"
+//#include "msf_localization_core/msf_storage_core.h"
+#include "msf_localization_core/msfLocalization.h"
 
 
 ImuSensorCore::ImuSensorCore() :
@@ -13,8 +14,8 @@ ImuSensorCore::ImuSensorCore() :
     return;
 }
 
-ImuSensorCore::ImuSensorCore(const std::weak_ptr<MsfStorageCore> the_msf_storage_core) :
-    SensorCore(the_msf_storage_core)
+ImuSensorCore::ImuSensorCore(MsfLocalizationCore *msf_localization_core_ptr) :
+    SensorCore(msf_localization_core_ptr)
 {
     //std::cout<<"ImuSensorCore::ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
 
@@ -453,7 +454,7 @@ int ImuSensorCore::setMeasurement(const TimeStamp& TheTimeStamp, const std::shar
 //    if(!TheMsfStorageCoreAux)
 //        std::cout<<"Unable to lock TheMsfStorageCore"<<std::endl;
 
-    this->getMsfStorageCoreSharedPtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+    this->getMsfLocalizationCorePtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
 
     return 0;
 }

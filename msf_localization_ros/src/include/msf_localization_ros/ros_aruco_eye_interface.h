@@ -33,7 +33,7 @@
 class RosArucoEyeInterface : public RosSensorInterface, public CodedVisualMarkerEyeCore
 {
 public:
-    RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, const std::weak_ptr<MsfStorageCore> the_msf_storage_core);
+    RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr);
 
 
 

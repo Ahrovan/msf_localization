@@ -54,7 +54,7 @@ class InputCore : public MsfElementCore
 
 public:
     InputCore();
-    InputCore(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
+    InputCore(MsfLocalizationCore* msf_localization_core_ptr);
     ~InputCore();
 
 protected:

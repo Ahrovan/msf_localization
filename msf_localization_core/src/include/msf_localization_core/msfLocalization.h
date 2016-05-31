@@ -55,6 +55,10 @@
 #include <cmath>        // std::abs
 
 
+#include <iomanip>
+#include <ctime>
+
+
 
 #include "msf_localization_core/block_matrix.h"
 
@@ -68,6 +72,9 @@
 
 
 //// Estimator Cores
+
+//
+#include "msf_localization_core/msf_element_core.h"
 
 /// Robot
 #include "msf_localization_core/robot_core.h"
@@ -125,8 +132,8 @@ public:
     int run();
 
 
-    // Storage
-public:
+    // Storage for states, measurements and input commands
+protected:
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
 
 
@@ -137,23 +144,19 @@ public:
 protected:
     std::shared_ptr<GlobalParametersCore> TheGlobalParametersCore;
 
-
     // Robot Component
 protected:
     std::shared_ptr<RobotCore> TheRobotCore;
 
-
     // Inputs
 protected:
     std::list< std::shared_ptr<InputCore> > TheListOfInputCore;
-
 
     // Sensors Components
 protected:
     std::list< std::shared_ptr<SensorCore> > TheListOfSensorCore;
 protected:
     unsigned int firstAvailableSensorId;
-
 
     // Map Elements
 protected:
@@ -163,10 +166,7 @@ protected:
 
 
 
-
-
-
-    // Time Stamps. Pure virtual function
+    // Time Stamp getter
 public:
     virtual TimeStamp getTimeStamp();
 
@@ -184,6 +184,30 @@ public:
 
 
 
+    //// Buffer Querries
+
+    // Set a measurement in the buffer with given time stamp
+public:
+    int setMeasurement(const TimeStamp& time_stamp,
+                       const std::shared_ptr<SensorMeasurementCore>& sensor_measurement);
+    int setMeasurementList(const TimeStamp& time_stamp,
+                           const std::list< std::shared_ptr<SensorMeasurementCore> >& list_sensor_measurement);
+
+
+    // Set an input command in the buffer with given time stamp
+public:
+    int setInputCommand(const TimeStamp& time_stamp,
+                        const std::shared_ptr<InputCommandCore>& input_command);
+    int setInputCommandList(const TimeStamp& time_stamp,
+                            const std::list< std::shared_ptr<InputCommandCore> >& list_input_command);
+
+
+    // Get state
+public:
+    int getStateByStamp(const TimeStamp& requested_time_stamp,
+                        TimeStamp& received_time_stamp,
+                        std::shared_ptr<StateEstimationCore>& received_state);
+
 
     // Get previous state
 protected:
@@ -196,6 +220,20 @@ protected:
     int findInputCommands(const TimeStamp& TheTimeStamp,
                           //const std::shared_ptr<StateEstimationCore> ThePreviousState,
                           std::shared_ptr<InputCommandComponent>& input_command);
+
+
+
+
+
+    // Remove unneded current state
+public:
+    int removeUnnecessaryStateFromBuffer(const TimeStamp& time_stamp);
+
+
+    // Find next element in buffer and add to outdated list
+public:
+    int findNextElementInBufferAndAddOutdatedList(const TimeStamp& time_stamp);
+
 
 
 
@@ -220,6 +258,7 @@ private:
 
 
 
+
     /// Update Step functions
 protected:
     int update(const TimeStamp& TheTimeStamp);
@@ -232,23 +271,14 @@ private:
 
 
 
+    /////
 
-
-    // Remove unneded current state
-public:
-    int removeUnnecessaryStateFromBuffer(const TimeStamp& time_stamp);
-
-
-    // Find next element in buffer and add to outdated list
-public:
-    int findNextElementInBufferAndAddOutdatedList(const TimeStamp& time_stamp);
-
-
-
-
-    // Time what is required betwwwn two prediction steps
+    // Time what is required between two prediction steps
 protected:
     double predict_model_time_; // in seconds
+    // if > 0 -> predict with period
+    // if == 0 -> predict only if measurements of input commands
+    // if < 0 -> predict only if measurements
 
 
     // Predict Thread

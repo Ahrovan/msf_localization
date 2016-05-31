@@ -42,6 +42,19 @@ StateEstimationCore::~StateEstimationCore()
     return;
 }
 
+bool StateEstimationCore::checkState() const
+{
+    if(!TheGlobalParametersStateCore)
+        return false;
+    if(!TheRobotStateCore)
+        return false;
+    // The rest are optional!
+
+    if(!covarianceMatrix)
+        return false;
+
+    return true;
+}
 
 bool StateEstimationCore::hasState() const
 {

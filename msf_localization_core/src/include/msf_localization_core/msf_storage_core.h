@@ -119,6 +119,10 @@ public:
 public:
     int getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
 
+    // Get the element of a timestamp in the ring buffer which has a state estimate (safe)
+public:
+    int getElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
+
     // Get the previous element of a timestamp in the ring buffer which has a state estimate (safe)
 public:
     int getPreviousElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState);
@@ -177,6 +181,12 @@ public:
     int displayStateEstimationElement(const TimeStamp& TheTimeStamp,
                                       const std::shared_ptr<StateEstimationCore>&  TheStateEstimationCore);
 
+
+
+    // Flag new measurement
+    // TODO posible race problem!
+protected:
+    bool flag_new_measurement_;
 
 
 

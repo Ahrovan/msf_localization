@@ -3,9 +3,13 @@
 #define _STATE_CORE_H
 
 
-#include <Eigen/Dense>
+#include <memory>
 
-#include "msf_localization_core/msf_element_core.h"
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
+
+#include "msf_localization_core/time_stamp.h"
 
 
 
@@ -19,6 +23,10 @@ enum class StateCoreTypes
     world
 };
 
+
+
+// Formward
+class MsfElementCore;
 
 
 class StateCore
