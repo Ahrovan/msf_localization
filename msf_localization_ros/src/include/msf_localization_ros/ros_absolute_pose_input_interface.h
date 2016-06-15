@@ -9,6 +9,9 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
+// ROS Srvs
+#include "msf_localization_ros_srvs/GetPoseWithCovarianceByStamp.h"
+
 
 // Time Stamp
 #include "msf_localization_core/time_stamp.h"
@@ -55,11 +58,14 @@ protected:
 protected:
     void setInputCommandMessageType(AbsolutePoseInputCommandMessageTypes input_command_message_type);
 
-    // Subscriber
+    // Topic Subscriber / Service Client
 protected:
     std::string input_command_pose_input_wrt_input_world_topic_name_;
 public:
     void setInputCommandPoseInputWrtInputWorldTopicName(const std::string input_command_pose_input_wrt_input_world_topic_name);
+
+
+    // Subscriber
 protected:
     ros::Subscriber input_command_pose_input_wrt_input_world_sub_;
 protected:
@@ -67,6 +73,22 @@ protected:
     void inputCommandPoseInputWrtInputWorldCallbackPoseStamped(const geometry_msgs::PoseStampedPtr& msg);
     // Callback for geometry_msgs::PoseWithCovarianceStamped
     void inputCommandPoseInputWrtInputWorldCallbackPoseWithCovarianceStamped(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
+
+
+    // Service client
+protected:
+    ros::ServiceClient input_command_pose_input_wrt_input_world_srv_cli_;
+protected:
+    msf_localization_ros_srvs::GetPoseWithCovarianceByStamp input_command_pose_with_covariance_input_wrt_input_world_srv_;
+
+
+
+    // Active input command
+public:
+    int getInputCommand(const TimeStamp& requested_time_stamp,
+                        TimeStamp& received_time_stamp,
+                        std::shared_ptr<InputCommandCore>& received_input_command);
+
 
 
 public:

@@ -106,8 +106,16 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
         this->setInputId(input_id);
     }
 
+    /// Input Active Request
+    std::string input_active_request_string=input.child_value("active_request");
+    if(!input_active_request_string.empty())
+    {
+        int input_active_request=std::stoi(input_active_request_string);
+        this->setInputActiveRequest(input_active_request);
+    }
 
-    /// Pose of the sensor wrt robot
+
+    /// Pose of the input wrt robot
     pugi::xml_node pose_in_robot=input.child("pose_in_robot");
 
     // Position of the sensor wrt robot
@@ -170,9 +178,9 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     //// Init State
 
-    /// Pose of the sensor wrt robot
+    /// Pose of the input wrt robot
 
-    // Position of the sensor wrt robot
+    // Position of the input wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_estimation");
     {
         std::istringstream stm(readingValue);
@@ -181,7 +189,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
         init_state_core->setPositionInputWrtRobot(init_estimation);
     }
 
-    // Attitude of the sensor wrt robot
+    // Attitude of the input wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
     {
         std::istringstream stm(readingValue);
@@ -200,9 +208,9 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
     //// Init Variances
 
 
-    /// Pose of the sensor wrt robot
+    /// Pose of the input wrt robot
 
-    // Position of the sensor wrt robot
+    // Position of the input wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_var");
     {
         std::istringstream stm(readingValue);
@@ -211,7 +219,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
         this->setNoisePositionInputWrtRobot(variance.asDiagonal());
     }
 
-    // Attitude of the sensor wrt robot
+    // Attitude of the input wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_var");
     {
         std::istringstream stm(readingValue);

@@ -37,6 +37,7 @@ int InputCore::init()
 
     // Flags
     flag_input_enabled_=false;
+    flag_input_active_request_=false; // By default is pasive
 
     // Id
     id_=-1;
@@ -90,6 +91,17 @@ bool InputCore::isInputEnabled() const
 int InputCore::setInputEnabled(bool flag_input_enabled)
 {
     this->flag_input_enabled_=flag_input_enabled;
+    return 0;
+}
+
+bool InputCore::isInputActiveRequest() const
+{
+    return this->flag_input_active_request_;
+}
+
+int InputCore::setInputActiveRequest(bool flag_input_active_request)
+{
+    this->flag_input_active_request_=flag_input_active_request;
     return 0;
 }
 

@@ -818,8 +818,8 @@ int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
     }
 
 
-    std::cout<<"req time: sec="<<requested_time_stamp.sec<<"s; nsec="<<requested_time_stamp.nsec<<std::endl;
-    std::cout<<"rec time: sec="<<received_time_stamp.sec<<"s; nsec="<<received_time_stamp.nsec<<std::endl;
+//    std::cout<<"req time: sec="<<requested_time_stamp.sec<<"s; nsec="<<requested_time_stamp.nsec<<std::endl;
+//    std::cout<<"rec time: sec="<<received_time_stamp.sec<<"s; nsec="<<received_time_stamp.nsec<<std::endl;
 
     // End ok
     return 0;
@@ -898,11 +898,34 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
             continue;
         */
 
-        // Search the last input command in the buffer
+
+        // Command
         std::shared_ptr<InputCommandCore> input_command_core;
-        int error_get_previous_input_command=TheMsfStorageCore->getPreviousInputCommandByStampAndInputCore(TheTimeStamp, *itInputCore, input_command_core);
+        int error_get_previous_input_command;
 
 
+        // Check if input core stores commands automatically in the buffer, or if it needs to request it
+        if((*itInputCore)->isInputActiveRequest())
+        {
+            // Request input command
+            TimeStamp received_time_stamp;
+
+            error_get_previous_input_command=(*itInputCore)->getInputCommand(TheTimeStamp,
+                                                                             received_time_stamp,
+                                                                             input_command_core);
+
+        }
+        else
+        {
+            // Search input command in buffer
+
+            error_get_previous_input_command=TheMsfStorageCore->getPreviousInputCommandByStampAndInputCore(TheTimeStamp, *itInputCore, input_command_core);
+
+        }
+
+
+
+        // Check if acquired
         if(error_get_previous_input_command || !input_command_core)
         {
             //std::cout<<"MsfLocalizationCore::findInputCommands error_get_previous_input_command"<<std::endl;

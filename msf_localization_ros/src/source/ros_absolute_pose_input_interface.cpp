@@ -127,26 +127,105 @@ void RosAbsolutePoseInputInterface::inputCommandPoseInputWrtInputWorldCallbackPo
     this->setInputCommandRos(msg);
 }
 
+int RosAbsolutePoseInputInterface::getInputCommand(const TimeStamp& requested_time_stamp,
+                                                    TimeStamp& received_time_stamp,
+                                                    std::shared_ptr<InputCommandCore> &received_input_command)
+{
+    // Fill the service request
+    input_command_pose_with_covariance_input_wrt_input_world_srv_.request.requested_stamp=ros::Time(requested_time_stamp.sec, requested_time_stamp.nsec);
+
+
+    // Call the service
+    input_command_pose_input_wrt_input_world_srv_cli_.call(input_command_pose_with_covariance_input_wrt_input_world_srv_);
+
+
+    // Analyse the service response
+    // Success
+    if(!input_command_pose_with_covariance_input_wrt_input_world_srv_.response.success)
+        return -10;
+
+    // Received Time Stamp
+    received_time_stamp=TimeStamp(input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_stamp.sec,
+                                  input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_stamp.nsec);
+
+    // Received Input Command
+    AbsolutePoseInputCommandCore* input_command(nullptr);
+    if(!received_input_command)
+    {
+        input_command=new AbsolutePoseInputCommandCore;
+        input_command->setInputCorePtr(std::dynamic_pointer_cast<InputCore>(this->getMsfElementCoreSharedPtr()));
+        received_input_command=std::shared_ptr<InputCommandCore>(input_command);
+    }
+    else
+    {
+        input_command=dynamic_cast<AbsolutePoseInputCommandCore*>(received_input_command.get());
+    }
+
+
+    // Covariance
+    if(this->hasInputCommandPoseInputWrtInputWorldCovariance())
+    {
+        Eigen::MatrixXd noise_input_command_pose_input_wrt_input_world=
+                Eigen::Map<Eigen::MatrixXd>(input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.covariance.c_array(), 6, 6);
+        input_command->setNoiseInputCommandPoseInputWrtInputWorld(noise_input_command_pose_input_wrt_input_world);
+    }
+
+
+    // Position if enabled
+    if(this->isInputCommandPositionInputWrtInputWorldEnabled())
+    {
+        Eigen::Vector3d position_input_wrt_input_world(input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.position.x,
+                                                       input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.position.y,
+                                                       input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.position.z);
+        input_command->setPositionInputWrtInputWorld(position_input_wrt_input_world);
+    }
+
+    // Attitude if enabled
+    if(this->isInputCommandAttitudeInputWrtInputWorldEnabled())
+    {
+        Eigen::Vector4d attitude_input_wrt_input_world(input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.orientation.w,
+                                                       input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.orientation.x,
+                                                       input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.orientation.y,
+                                                       input_command_pose_with_covariance_input_wrt_input_world_srv_.response.received_pose.pose.orientation.z);
+        input_command->setAttitudeInputWrtInputWorld(attitude_input_wrt_input_world);
+    }
+
+
+
+    return 0;
+}
+
 int RosAbsolutePoseInputInterface::open()
 {
-    // Input Command
-    switch(input_command_message_type_)
+    if(!this->isInputActiveRequest())
     {
-        case AbsolutePoseInputCommandMessageTypes::geometry_msgs_PoseStamped:
+        // Input is not active request
+
+        // Input Command
+        switch(input_command_message_type_)
         {
-            input_command_pose_input_wrt_input_world_sub_=nh->subscribe(input_command_pose_input_wrt_input_world_topic_name_, 10, &RosAbsolutePoseInputInterface::inputCommandPoseInputWrtInputWorldCallbackPoseStamped, this);
-            break;
+            case AbsolutePoseInputCommandMessageTypes::geometry_msgs_PoseStamped:
+            {
+                input_command_pose_input_wrt_input_world_sub_=nh->subscribe(input_command_pose_input_wrt_input_world_topic_name_, 10, &RosAbsolutePoseInputInterface::inputCommandPoseInputWrtInputWorldCallbackPoseStamped, this);
+                break;
+            }
+            case AbsolutePoseInputCommandMessageTypes::geometry_msgs_PoseWithCovarianceStamped:
+            {
+                input_command_pose_input_wrt_input_world_sub_=nh->subscribe(input_command_pose_input_wrt_input_world_topic_name_, 10, &RosAbsolutePoseInputInterface::inputCommandPoseInputWrtInputWorldCallbackPoseWithCovarianceStamped, this);
+                break;
+            }
+            default:
+            {
+                return -1;
+                break;
+            }
         }
-        case AbsolutePoseInputCommandMessageTypes::geometry_msgs_PoseWithCovarianceStamped:
-        {
-            input_command_pose_input_wrt_input_world_sub_=nh->subscribe(input_command_pose_input_wrt_input_world_topic_name_, 10, &RosAbsolutePoseInputInterface::inputCommandPoseInputWrtInputWorldCallbackPoseWithCovarianceStamped, this);
-            break;
-        }
-        default:
-        {
-            return -1;
-            break;
-        }
+    }
+    else
+    {
+        // Input is active request
+
+        input_command_pose_input_wrt_input_world_srv_cli_=nh->serviceClient<msf_localization_ros_srvs::GetPoseWithCovarianceByStamp>(input_command_pose_input_wrt_input_world_topic_name_);
     }
 
 

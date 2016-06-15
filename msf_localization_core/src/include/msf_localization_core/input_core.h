@@ -83,12 +83,19 @@ public:
     void setInputId(int id);
     int getInputId() const;
 
-
+    // Input Enabled
 protected:
     bool flag_input_enabled_;
 public:
     bool isInputEnabled() const;
     int setInputEnabled(bool flag_input_enabled);
+
+    // Input Active Request
+protected:
+    bool flag_input_active_request_;
+public:
+    bool isInputActiveRequest() const;
+    int setInputActiveRequest(bool flag_input_active_request);
 
 
     // Dimension input
@@ -113,6 +120,16 @@ public:
     // Covariance Error Inputs: Qu
 public:
     virtual Eigen::SparseMatrix<double> getCovarianceInputs(const TimeStamp deltaTimeStamp)=0;
+
+
+
+    //// Input Command
+
+    // Getters for inputs with active request (inputs that request the command)
+public:
+    virtual int getInputCommand(const TimeStamp& requested_time_stamp,
+                                TimeStamp& received_time_stamp,
+                                std::shared_ptr<InputCommandCore>& received_input_command) {return -1;}
 
 
 

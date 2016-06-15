@@ -10,6 +10,10 @@ RosImuSensorInterface::RosImuSensorInterface(ros::NodeHandle* nh, tf::TransformB
     ImuSensorCore(msf_localization_core_ptr)
 {
 
+    // Frequencies
+    frequency_desired_=100.0; // Hz
+    previous_time_stamp_=ros::Time(0,0);
+
     return;
 }
 
@@ -27,9 +31,24 @@ int RosImuSensorInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
     if(!isSensorEnabled())
         return 0;
 
-    // PROVISIONAL! -> Dischart part of the measurements
-    if(msg->header.seq  % 4 != 0)
+
+    // Set time stamps
+    ros::Time current_time_stamp=msg->header.stamp;
+
+    ros::Duration diference_time_stamps=current_time_stamp-previous_time_stamp_;
+
+
+    if(diference_time_stamps.toSec() < 1/frequency_desired_)
         return 0;
+
+    // Update for the next iteration
+    previous_time_stamp_=current_time_stamp;
+
+
+    // PROVISIONAL! -> Dischart part of the measurements
+    // Remainder operator: header.seq % num == 0 (se descartan 1 de cada num mensajes)
+//    if(msg->header.seq  % 2 == 0)
+//        return 0;
 
     //std::cout<<"ROS Imu Measured"<<std::endl;
 

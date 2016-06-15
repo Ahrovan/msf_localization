@@ -44,6 +44,12 @@ public:
     int setMeasurementRos(const sensor_msgs::ImuConstPtr& msg);
 
 
+    // Frequencies
+protected:
+    ros::Time previous_time_stamp_;
+    double frequency_desired_;
+
+
     // Subscriber
 protected:
     std::string ImuTopicName;
