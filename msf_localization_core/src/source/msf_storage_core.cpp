@@ -81,7 +81,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 
     // If the new element is older than the oldest time stamp in buffer, we discard the element
     if(TheTimeStamp<oldest_time_stamp)
-        return 0;
+        return 1;
 
 
     // This is already safe
@@ -126,7 +126,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
     // Set flag
     flag_new_measurement_=true;
 
-
+    // End
     return 0;
 }
 
@@ -1260,7 +1260,7 @@ int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
     return 0;
 }
 
-int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
+int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bool sleep_if_empty)
 {
     // Check the list size
     while(outdatedBufferElements.size()==0)
@@ -1278,8 +1278,10 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp)
         }
 
         // Wait until a new element is pushed in the buffer
-        //cv.wait(lck);
-        outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
+        if(sleep_if_empty)
+            outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
+        else
+            break;
 
     }
 

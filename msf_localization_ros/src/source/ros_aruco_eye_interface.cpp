@@ -23,6 +23,10 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
         return 0;
 
 
+    // Publish ack
+    // TODO
+
+
     // Time Stamp
     TimeStamp the_time_stamp(msg->header.stamp.sec, msg->header.stamp.nsec);
 

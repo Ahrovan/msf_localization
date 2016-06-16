@@ -190,6 +190,9 @@ int RosAbsolutePoseInputInterface::getInputCommand(const TimeStamp& requested_ti
         input_command->setAttitudeInputWrtInputWorld(attitude_input_wrt_input_world);
     }
 
+//    std::cout<<"TimeStamp: sec="<<received_time_stamp.sec<<"s; nsec="<<received_time_stamp.nsec<<"ns"<<std::endl;
+//    std::cout<<"input_command->getNoiseInputCommandPoseInputWrtInputWorld()"<<std::endl;
+//    std::cout<<input_command->getNoiseInputCommandPoseInputWrtInputWorld()<<std::endl;
 
 
     return 0;

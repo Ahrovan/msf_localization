@@ -150,6 +150,10 @@ public:
 public:
     int addElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore);
 
+
+    /// Measurements
+
+    // New Measurement Set
     // Set a measurement in the ring buffer with given time stamp (safe)
 public:
     int setMeasurement(const TimeStamp& TheTimeStamp,
@@ -158,6 +162,17 @@ public:
                            const std::list< std::shared_ptr<SensorMeasurementCore> >& TheListSensorMeasurement);
 
 
+
+
+
+    // New measurement Flag
+    // TODO posible race problem!
+protected:
+    bool flag_new_measurement_;
+
+
+
+    /// Input Commands
     // Set an input command in the ring buffer with given time stamp (safe)
 public:
     int setInputCommand(const TimeStamp& time_stamp,
@@ -167,6 +182,7 @@ public:
 
 
 
+    /// Purge buffer
     // Purge Ring Buffer (safe)
 public:
     int purgeRingBuffer(int numElementsFrom);
@@ -175,6 +191,7 @@ public:
 
 
 
+    /// Display buffer
     // Display Elements in the ring buffer (safe)
 public:
     int displayRingBuffer();
@@ -183,10 +200,7 @@ public:
 
 
 
-    // Flag new measurement
-    // TODO posible race problem!
-protected:
-    bool flag_new_measurement_;
+
 
 
 
@@ -195,7 +209,7 @@ protected:
     std::list<TimeStamp> outdatedBufferElements;
 public:
     int addOutdatedElement(const TimeStamp& TheTimeStamp);
-    int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp);
+    int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bool sleep_if_empty=true);
 public:
     int displayOutdatedBufferElements();
     std::string getDisplayOutdatedElements();

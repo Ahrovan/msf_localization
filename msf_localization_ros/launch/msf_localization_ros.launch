@@ -11,6 +11,8 @@
 
   <arg name="predict_model_time" 	default="0.02" />
 
+  <arg name="new_measurement_notification_topic_name" 	default="msf_localization/new_measurement_notification" />
+
   <arg name="robot_pose_topic_name" 	default="msf_localization/robot_pose" />
   <arg name="robot_pose_with_cov_topic_name" 	default="msf_localization/robot_pose_cov" />
   <arg name="robot_velocities_stamped_topic_name" 	default="msf_localization/robot_velocity" />
@@ -32,6 +34,8 @@
     <param name="robot_pose_rate" value="$(arg robot_pose_rate)" type="double"/>
 
     <param name="predict_model_time" value="$(arg predict_model_time)" type="double"/>
+
+    <param name="new_measurement_notification_topic_name" value="$(arg new_measurement_notification_topic_name)" type="string"/>
 
     <param name="robot_pose_topic_name" value="$(arg robot_pose_topic_name)" type="string" />
     <param name="robot_pose_with_cov_topic_name" value="$(arg robot_pose_with_cov_topic_name)" type="string"/>

@@ -536,6 +536,10 @@ int MsfLocalizationROS::readParameters()
     ros::param::param<std::string>("~set_state_estimation_enabled_service_name", setStateEstimationEnabledServiceName, "msf_localization/set_state_estimation_enabled");
     std::cout<<"set_state_estimation_enabled_service_name="<<setStateEstimationEnabledServiceName<<std::endl;
 
+    // Publishers Topics
+    //
+    ros::param::param<std::string>("~new_measurement_notification_topic_name", new_measurement_notification_topic_name_, "msf_localization/new_measurement_notification");
+    std::cout<<"new_measurement_notification_topic_name="<<new_measurement_notification_topic_name_<<std::endl;
 
     // Others configs
     //
@@ -575,6 +579,8 @@ int MsfLocalizationROS::open()
     // Service
     setStateEstimationEnabledSrv = nh->advertiseService(setStateEstimationEnabledServiceName, &MsfLocalizationROS::setStateEstimationEnabledCallback, this);
 
+    // Publishers
+    new_measurement_notification_pub_ = nh->advertise<std_msgs::Time>(new_measurement_notification_topic_name_, 10);
 
     return 0;
 }
@@ -644,7 +650,7 @@ int MsfLocalizationROS::publishThreadFunction()
         if(this->isStateEstimationEnabled())
         {
             // Async wait
-            if( publish_rate_val_ <= 0 )
+            if( publish_rate_val_ == 0 )
             {
                 // Sleep until we have an updated state
                 this->TheMsfStorageCore->semaphoreBufferUpdated();
@@ -655,7 +661,7 @@ int MsfLocalizationROS::publishThreadFunction()
 
 
             }
-            else
+            else if( publish_rate_val_ > 0 )
             {
 
                 // Get current element
@@ -688,6 +694,11 @@ int MsfLocalizationROS::publishThreadFunction()
                     continue;
                 }
                 }
+
+            }
+            else
+            {
+                // Do nothing: Sleep
 
             }
         }
@@ -947,6 +958,21 @@ int MsfLocalizationROS::run()
     {
         std::cout<<"EXCEPTION ON main thread"<<std::endl;
     }
+
+    return 0;
+}
+
+int MsfLocalizationROS::setNewMeasurementNotificationTopicName(std::string new_measurement_notification_topic_name)
+{
+    new_measurement_notification_topic_name_=new_measurement_notification_topic_name;
+    return 0;
+}
+
+int MsfLocalizationROS::publishNewMeasurementNotification(const TimeStamp& measurement_time_stamp)
+{
+    new_measurement_notification_msgs_.data=ros::Time(measurement_time_stamp.sec, measurement_time_stamp.nsec);
+
+    new_measurement_notification_pub_.publish(new_measurement_notification_msgs_);
 
     return 0;
 }

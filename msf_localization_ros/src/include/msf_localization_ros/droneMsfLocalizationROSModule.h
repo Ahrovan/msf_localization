@@ -59,6 +59,8 @@
 #include <ros/ros.h>
 
 
+// ROS Messages
+#include <std_msgs/Time.h>
 
 // Ros service
 #include <msf_localization_ros_srvs/SetBool.h>
@@ -169,6 +171,17 @@ protected:
     int publishState(const TimeStamp& current_time_stamp, const std::shared_ptr<StateEstimationCore>& current_state);
 
 
+
+    // New measurement notification
+protected:
+    std::string new_measurement_notification_topic_name_;
+public:
+    int setNewMeasurementNotificationTopicName(std::string new_measurement_notification_topic_name);
+protected:
+    ros::Publisher new_measurement_notification_pub_;
+    std_msgs::Time new_measurement_notification_msgs_;
+public:
+    int publishNewMeasurementNotification(const TimeStamp& measurement_time_stamp);
 
 
 };

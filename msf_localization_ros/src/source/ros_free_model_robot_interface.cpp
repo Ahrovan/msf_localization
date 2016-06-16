@@ -196,6 +196,8 @@ int RosFreeModelRobotInterface::setRobotPoseWithCovarianceMsg(const std::shared_
     robotPoseCovariance.setZero();
     robotPoseCovariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(0,0);
     robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(9,9);
+    robotPoseCovariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(0,9);
+    robotPoseCovariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(9,0);
     double robotPoseCovarianceArray[36];
     Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
     for(unsigned int i=0; i<36; i++)
@@ -332,6 +334,8 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
         covariance.setZero();
         covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(3,3);
         covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(12,12);
+        covariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(12,3);
+        covariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(3,12);
         double covarianceArray[36];
         Eigen::Map<Eigen::MatrixXd>(covarianceArray, 6, 6) = covariance;
         for(unsigned int i=0; i<36; i++)
@@ -381,6 +385,8 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
         covariance.setZero();
         covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(6,6);
         covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(15,15);
+        covariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(15,6);
+        covariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(6,15);
         double covarianceArray[36];
         Eigen::Map<Eigen::MatrixXd>(covarianceArray, 6, 6) = covariance;
         for(unsigned int i=0; i<36; i++)

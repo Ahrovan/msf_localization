@@ -106,7 +106,9 @@
 
 
 #define _DEBUG_MSF_LOCALIZATION_CORE 0
-#define _DEBUG_MSF_LOCALIZATION_ALGORITHM 0
+#define _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT 0
+#define _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE 0
+#define _DEBUG_MSF_LOCALIZATION_ALGORITHM_MAPPING 0
 
 #define _DEBUG_TIME_MSF_LOCALIZATION_CORE 0
 #define _DEBUG_TIME_MSF_LOCALIZATION_THREAD 1
@@ -186,6 +188,8 @@ public:
 
     //// Buffer Querries
 
+    /// Measurements
+
     // Set a measurement in the buffer with given time stamp
 public:
     int setMeasurement(const TimeStamp& time_stamp,
@@ -193,6 +197,20 @@ public:
     int setMeasurementList(const TimeStamp& time_stamp,
                            const std::list< std::shared_ptr<SensorMeasurementCore> >& list_sensor_measurement);
 
+    // New measurement notification
+public:
+    int semaphoreNewMeasurementWait(TimeStamp& new_measurement_time_stamp);
+    int semaphoreNewMeasurementNotify(const TimeStamp &new_measurement_time_stamp);
+protected:
+    // TODO Posible race problem
+    TimeStamp new_measurement_time_stamp_;
+protected:
+    std::mutex new_measurement_mutex_;             // mutex for critical section
+    std::condition_variable new_measurement_condition_variable_; // condition variable for critical section
+    std::unique_lock<std::mutex>* new_measurement_lock_;
+
+
+    /// Input Command
 
     // Set an input command in the buffer with given time stamp
 public:
@@ -277,7 +295,7 @@ private:
 protected:
     double predict_model_time_; // in seconds
     // if > 0 -> predict with period
-    // if == 0 -> predict only if measurements of input commands
+    // if == 0 -> predict only if measurements or input commands
     // if < 0 -> predict only if measurements
 
 
@@ -310,7 +328,10 @@ protected:
 
     // Publish Thread
 protected:
-    double publish_rate_val_;
+    double publish_rate_val_; // in Hz
+    // if > 0 -> publish at constant rate
+    // if == 0 -> publish only when the buffer is updated
+
 protected:
     std::thread* publish_thread_;
 protected:
@@ -318,11 +339,20 @@ protected:
 
 
 
+    // New measurement notification thread
+protected:
+    std::thread* new_measurement_notification_thread_;
+protected:
+    int publishNewMeasurementNotificationThreadFunction();
+protected:
+    virtual int publishNewMeasurementNotification(const TimeStamp& measurement_time_stamp);
 
-    // Start threads
+
+
+    // Start/Stop threads
 public:
     int startThreads();
-
+    int stopThreads(); // TODO FIX!
 
 
 
