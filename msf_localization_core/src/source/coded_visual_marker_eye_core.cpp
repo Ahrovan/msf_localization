@@ -129,6 +129,7 @@ int CodedVisualMarkerEyeCore::readConfig(const pugi::xml_node& sensor, unsigned 
         this->enableMeasurementAttitude();
 
     readingValue=meas_orientation.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -145,6 +146,7 @@ int CodedVisualMarkerEyeCore::readConfig(const pugi::xml_node& sensor, unsigned 
         this->enableMeasurementPosition();
 
     readingValue=meas_position.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -159,6 +161,7 @@ int CodedVisualMarkerEyeCore::readConfig(const pugi::xml_node& sensor, unsigned 
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -168,6 +171,7 @@ int CodedVisualMarkerEyeCore::readConfig(const pugi::xml_node& sensor, unsigned 
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
@@ -189,6 +193,7 @@ int CodedVisualMarkerEyeCore::readConfig(const pugi::xml_node& sensor, unsigned 
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -198,6 +203,7 @@ int CodedVisualMarkerEyeCore::readConfig(const pugi::xml_node& sensor, unsigned 
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -2792,7 +2798,6 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
             mat_diff_vector_wrt_vector_amp* mat_quat_plus_att_visual_marker_eye_wrt_world* mat_quat_minus_att_world_wrt_visual_marker_eye *mat_diff_vector_wrt_vector_amp.transpose();
     jacobian_error_map_att_wrt_error_meas_att=
             mat_diff_error_quat_wrt_error_theta.transpose()*mat_inv_quat_plus_att_visual_marker_wrt_world*mat_quat_plus_att_visual_marker_eye_wrt_world*mat_quat_plus_att_visual_marker_wrt_visual_marker_eye  *mat_diff_error_quat_wrt_error_theta;
-
 
     // end
     return 0;

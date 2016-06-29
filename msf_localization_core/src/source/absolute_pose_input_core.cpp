@@ -120,12 +120,12 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("enabled");
-    if(std::stoi(readingValue))
+    if(!readingValue.empty() && std::stoi(readingValue))
         this->enableEstimationPositionInputWrtRobot();
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("enabled");
-    if(std::stoi(readingValue))
+    if(!readingValue.empty() && std::stoi(readingValue))
         this->enableEstimationAttitudeInputWrtRobot();
 
 
@@ -143,10 +143,11 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
     pugi::xml_node meas_orientation = commands.child("orientation");
 
     readingValue=meas_orientation.child_value("enabled");
-    if(std::stoi(readingValue))
+    if(!readingValue.empty() && std::stoi(readingValue))
         this->enableInputCommandAttitudeInputWrtInputWorld();
 
     readingValue=meas_orientation.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -159,10 +160,11 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
     pugi::xml_node meas_position = commands.child("position");
 
     readingValue=meas_position.child_value("enabled");
-    if(std::stoi(readingValue))
+    if(!readingValue.empty() && std::stoi(readingValue))
         this->enableInputCommandPositionInputWrtInputWorld();
 
     readingValue=meas_position.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -172,7 +174,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     /// Subscribed covariance of the command
     readingValue=commands.child_value("use_subscribed_cov");
-    if(std::stoi(readingValue))
+    if(!readingValue.empty() && std::stoi(readingValue))
         this->setInputCommandPoseInputWrtInputWorldHasCovariance(true);
 
 
@@ -182,6 +184,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     // Position of the input wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -191,6 +194,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     // Attitude of the input wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
@@ -212,6 +216,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     // Position of the input wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -221,6 +226,7 @@ int AbsolutePoseInputCore::readConfig(const pugi::xml_node &input, std::shared_p
 
     // Attitude of the input wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

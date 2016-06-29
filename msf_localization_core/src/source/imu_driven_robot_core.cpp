@@ -64,6 +64,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     /// Inputs
     readingValue=robot.child_value("input_list");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         std::list<int> input_ids;
@@ -80,6 +81,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Position
     readingValue=robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d position;
@@ -89,6 +91,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Linear Speed
     readingValue=robot.child("lin_speed").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d lin_speed;
@@ -98,6 +101,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Linear Acceleration
     readingValue=robot.child("lin_accel").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d lin_accel;
@@ -107,6 +111,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Attitude
     readingValue=robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d attitude;
@@ -116,6 +121,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Angular Velocity
     readingValue=robot.child("ang_velocity").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d ang_velocity;
@@ -129,6 +135,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Position
     readingValue=robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -138,6 +145,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Linear Speed
     readingValue=robot.child("lin_speed").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -147,6 +155,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Linear Acceleration
     readingValue=robot.child("lin_accel").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -156,6 +165,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Attitude
     readingValue=robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -165,6 +175,7 @@ int ImuDrivenRobotCore::readConfig(const pugi::xml_node& robot, std::shared_ptr<
 
     // Angular Velocity
     readingValue=robot.child("ang_velocity").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

@@ -102,6 +102,7 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
 
     // Position of the visual marker wrt world
     readingValue=pose_in_world.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -111,6 +112,7 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
 
     // Attitude of the visual marker wrt world
     readingValue=pose_in_world.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
@@ -131,6 +133,7 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
 
     // Position of the visual marker wrt world
     readingValue=pose_in_world.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -141,6 +144,7 @@ int WorldReferenceFrameCore::readConfig(const pugi::xml_node& map_element, std::
 
     // Attitude of the visual marker wrt world
     readingValue=pose_in_world.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

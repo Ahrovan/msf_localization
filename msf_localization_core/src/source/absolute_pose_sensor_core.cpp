@@ -143,6 +143,7 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
         this->enableMeasurementAttitudeMocapSensorWrtMocapWorld();
 
     readingValue=meas_orientation.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -159,6 +160,7 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
         this->enableMeasurementPositionMocapSensorWrtMocapWorld();
 
     readingValue=meas_position.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -178,6 +180,7 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -187,6 +190,7 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
@@ -208,6 +212,7 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -217,6 +222,7 @@ int AbsolutePoseSensorCore::readConfig(const pugi::xml_node& sensor, const unsig
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

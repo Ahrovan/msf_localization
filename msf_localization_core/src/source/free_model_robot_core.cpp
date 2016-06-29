@@ -83,6 +83,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Position
     readingValue=robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d position;
@@ -92,6 +93,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear Speed
     readingValue=robot.child("lin_speed").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d lin_speed;
@@ -101,6 +103,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear Acceleration
     readingValue=robot.child("lin_accel").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d lin_accel;
@@ -110,6 +113,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Attitude
     readingValue=robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d attitude;
@@ -119,6 +123,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Angular Velocity
     readingValue=robot.child("ang_velocity").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d ang_velocity;
@@ -128,6 +133,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Angular Acceleration
     readingValue=robot.child("ang_accel").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d auxVec;
@@ -143,6 +149,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Position
     readingValue=robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -152,6 +159,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear Speed
     readingValue=robot.child("lin_speed").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -161,6 +169,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear acceleration
     readingValue=robot.child("lin_accel").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -170,6 +179,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Attitude
     readingValue=robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -179,6 +189,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Angular velocity
     readingValue=robot.child("ang_velocity").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -188,6 +199,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Angular acceleration
     readingValue=robot.child("ang_accel").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -201,6 +213,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear acceleration
     readingValue=robot.child("position").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -210,6 +223,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear velocity
     readingValue=robot.child("lin_speed").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -219,6 +233,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Linear acceleration
     readingValue=robot.child("lin_accel").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -228,6 +243,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Attitude
     readingValue=robot.child("attitude").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -237,6 +253,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Angular velocity
     readingValue=robot.child("ang_velocity").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -246,6 +263,7 @@ int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<
 
     // Angular acceleration
     readingValue=robot.child("ang_accel").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

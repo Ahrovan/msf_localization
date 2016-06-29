@@ -49,7 +49,7 @@ MatrixSparse operator*(const MatrixSparse &prod1, const MatrixSparse &prod2)
             #pragma omp parallel for
             for(int k=0; k<prod1.cols(); k++)
             {
-                if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
+                if( prod1(i,k).cols() == prod2(k,j).rows() && prod1(i,k).rows() == row_block && prod2(k,j).cols() == col_block )
                     product_matrix(i,j)+= prod1(i,k)*prod2(k,j);
 
             }
@@ -104,7 +104,7 @@ MatrixDense operator*(const MatrixDense &prod1, const MatrixSparse &prod2)
             #pragma omp parallel for
             for(int k=0; k<prod1.cols(); k++)
             {
-                if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
+                if( prod1(i,k).cols() == prod2(k,j).rows() && prod1(i,k).rows() == row_block && prod2(k,j).cols() == col_block )
                     product_matrix(i,j)+= prod1(i,k)*prod2(k,j);
 
             }
@@ -159,7 +159,7 @@ MatrixDense operator*(const MatrixSparse &prod1, const MatrixDense &prod2)
             #pragma omp parallel for
             for(int k=0; k<prod1.cols(); k++)
             {
-                if(prod1(i,k).cols() == row_block && prod2(k,j).rows() == col_block)
+                if( prod1(i,k).cols() == prod2(k,j).rows() && prod1(i,k).rows() == row_block && prod2(k,j).cols() == col_block )
                     product_matrix(i,j)+= prod1(i,k)*prod2(k,j);
 
             }

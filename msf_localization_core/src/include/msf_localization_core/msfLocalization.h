@@ -258,6 +258,8 @@ public:
     /// Predict Step Functions
 protected:
     int predict(const TimeStamp& TheTimeStamp);
+    int predictAddBuffer(const TimeStamp& TheTimeStamp,
+                         std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
     int predictNoAddBuffer(const TimeStamp& TheTimeStamp,
                            std::shared_ptr<StateEstimationCore>& ThePredictedState);

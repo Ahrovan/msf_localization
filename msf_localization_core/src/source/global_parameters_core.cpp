@@ -81,6 +81,7 @@ int GlobalParametersCore::readConfig(const pugi::xml_node& global_parameters, st
 
     // Gravity
     readingValue=global_parameters.child("gravity").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_state;
@@ -95,6 +96,7 @@ int GlobalParametersCore::readConfig(const pugi::xml_node& global_parameters, st
 
     // Gravity
     readingValue=global_parameters.child("gravity").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

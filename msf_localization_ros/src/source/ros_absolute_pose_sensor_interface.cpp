@@ -140,7 +140,11 @@ int RosAbsolutePoseSensorInterface::setMeasurementRos(const geometry_msgs::PoseW
         Eigen::MatrixXd noise_sensor_measurement_pose_sensor_wrt_sensor_world=
                 Eigen::Map<Eigen::MatrixXd>(msg->pose.covariance.c_array(), 6, 6);
         measurement_core->setNoiseSensorMeasurementPoseSensorWrtSensorWorld(noise_sensor_measurement_pose_sensor_wrt_sensor_world);
+
+        //std::cout<<"noise_sensor_measurement_pose_sensor_wrt_sensor_world="<<std::endl;
+        //std::cout<<noise_sensor_measurement_pose_sensor_wrt_sensor_world<<std::endl;
     }
+
 
     // Set
     this->setMeasurement(the_time_stamp, measurement_core);

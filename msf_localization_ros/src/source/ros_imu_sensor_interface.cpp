@@ -11,7 +11,7 @@ RosImuSensorInterface::RosImuSensorInterface(ros::NodeHandle* nh, tf::TransformB
 {
 
     // Frequencies
-    frequency_desired_=100.0; // Hz
+    frequency_desired_=30.0; // Hz
     previous_time_stamp_=ros::Time(0,0);
 
     return;
@@ -32,17 +32,21 @@ int RosImuSensorInterface::setMeasurementRos(const sensor_msgs::ImuConstPtr& msg
         return 0;
 
 
-    // Set time stamps
-    ros::Time current_time_stamp=msg->header.stamp;
+    // Frequency
+    if(frequency_desired_>0)
+    {
+        // Set time stamps
+        ros::Time current_time_stamp=msg->header.stamp;
 
-    ros::Duration diference_time_stamps=current_time_stamp-previous_time_stamp_;
+        ros::Duration diference_time_stamps=current_time_stamp-previous_time_stamp_;
 
 
-    if(diference_time_stamps.toSec() < 1/frequency_desired_)
-        return 0;
+        if(diference_time_stamps.toSec() < 1/frequency_desired_)
+            return 0;
 
-    // Update for the next iteration
-    previous_time_stamp_=current_time_stamp;
+        // Update for the next iteration
+        previous_time_stamp_=current_time_stamp;
+    }
 
 
     // PROVISIONAL! -> Dischart part of the measurements

@@ -68,6 +68,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     /// Inputs
     readingValue=robot.child_value("input_list");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         std::list<int> input_ids;
@@ -91,6 +92,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     // Position
     readingValue=robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d position;
@@ -100,6 +102,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     // Attitude
     readingValue=robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d attitude;
@@ -115,6 +118,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     // Position
     readingValue=robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -124,6 +128,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     // Attitude
     readingValue=robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -137,6 +142,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     // Linear acceleration
     readingValue=robot.child("position").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -147,6 +153,7 @@ int AbsolutePoseDrivenRobotCore::readConfig(const pugi::xml_node &robot, std::sh
 
     // Attitude
     readingValue=robot.child("attitude").child_value("noise");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;

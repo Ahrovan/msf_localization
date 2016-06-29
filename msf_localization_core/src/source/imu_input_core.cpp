@@ -171,6 +171,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
         this->enableInputCommandLinearAcceleration();
 
     readingValue=command_linear_acceleration.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -198,6 +199,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
         this->enableInputCommandAngularVelocity();
 
     readingValue=command_angular_velocity.child_value("var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -216,6 +218,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -225,6 +228,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
@@ -237,6 +241,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Bias Angular Velocity
     readingValue=param_angular_velocity.child("biases").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -246,6 +251,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Sensitivity Angular Velocity
     readingValue=param_angular_velocity.child("sensitivity").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Matrix3d init_estimation;
@@ -258,6 +264,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Bias Linear Acceleration
     readingValue=param_linear_acceleration.child("biases").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
@@ -267,6 +274,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Scale Linear Acceleration
     readingValue=param_linear_acceleration.child("sensitivity").child_value("init_estimation");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Matrix3d init_estimation;
@@ -287,6 +295,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Position of the sensor wrt robot
     readingValue=pose_in_robot.child("position").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -297,6 +306,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Attitude of the sensor wrt robot
     readingValue=pose_in_robot.child("attitude").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -310,6 +320,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Bias Linear Acceleration
     readingValue=param_linear_acceleration.child("biases").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -321,6 +332,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
     // TODO
     /*
     readingValue=param_linear_acceleration.child("sensitivity").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -331,6 +343,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
 
     // Bias Angular Velocity
     readingValue=param_angular_velocity.child("biases").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -342,6 +355,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
     // TODO
     /*
     readingValue=param_angular_velocity.child("sensitivity").child_value("init_var");
+    if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d variance;
@@ -357,6 +371,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
     if(this->isEstimationBiasLinearAccelerationEnabled())
     {
         readingValue=param_linear_acceleration.child("biases").child_value("noise");
+        if(!readingValue.empty())
         {
             std::istringstream stm(readingValue);
             Eigen::Vector3d variance;
@@ -369,6 +384,7 @@ int ImuInputCore::readConfig(const pugi::xml_node& input, std::shared_ptr<ImuInp
     if(this->isEstimationBiasAngularVelocityEnabled())
     {
         readingValue=param_angular_velocity.child("biases").child_value("noise");
+        if(!readingValue.empty())
         {
             std::istringstream stm(readingValue);
             Eigen::Vector3d variance;

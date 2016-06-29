@@ -6,6 +6,10 @@ RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBro
     CodedVisualMarkerEyeCore(msf_localization_core_ptr)
 {
 
+    // Frequencies
+    frequency_desired_=-10.0; // Hz
+    previous_time_stamp_=ros::Time(0,0);
+
 
     return;
 }
@@ -21,6 +25,24 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
 {
     if(!isSensorEnabled())
         return 0;
+
+
+    // Frequency
+    if(frequency_desired_>0)
+    {
+        // Set time stamps
+        ros::Time current_time_stamp=msg->header.stamp;
+
+        ros::Duration diference_time_stamps=current_time_stamp-previous_time_stamp_;
+
+
+        if(diference_time_stamps.toSec() < 1/frequency_desired_)
+            return 0;
+
+        // Update for the next iteration
+        previous_time_stamp_=current_time_stamp;
+    }
+
 
 
     // Publish ack

@@ -36,6 +36,11 @@ public:
     RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBroadcaster *tf_transform_broadcaster, MsfLocalizationCore* msf_localization_core_ptr);
 
 
+    // Frequencies
+protected:
+    ros::Time previous_time_stamp_;
+    double frequency_desired_;
+
 
 public:
     int setMeasurementRos(const aruco_eye_msgs::MarkerListPtr& msg);
