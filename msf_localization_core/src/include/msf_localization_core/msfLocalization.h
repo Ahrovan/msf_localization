@@ -141,6 +141,16 @@ public:
 #if _USE_BUFFER_IN_STATE_ESTIMATION
 protected:
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
+#else
+protected:
+    // Previous State
+    const TimeStamp previous_time_stamp_;
+    const std::shared_ptr<StateEstimationCore> previous_state_;
+    // Inputs (if any)
+    const std::shared_ptr<InputCommandComponent> input_commands_;
+    // Measurements
+    // TODO
+    // std::list<std::shared_ptr<SensorMeasurementCore> > sensor_mesurements_;
 #endif
 
 
@@ -261,6 +271,7 @@ public:
 
 
     /// Predict Step Functions
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 protected:
     int predictInBuffer(const TimeStamp& TheTimeStamp);
 protected:
@@ -272,6 +283,7 @@ protected:
 private:
     int predictInBufferSemiCore(const TimeStamp& ThePredictedTimeStamp,
                                 std::shared_ptr<StateEstimationCore>& ThePredictedState);
+#endif
 
 private:
     int predictCore(const TimeStamp& previous_time_stamp, const TimeStamp& predicted_time_stamp,
@@ -286,12 +298,16 @@ private:
 
 
     /// Update Step functions
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 protected:
     int updateInBuffer(const TimeStamp& TheTimeStamp);
+#endif
 
 private:
     int updateCore(const TimeStamp& TheTimeStamp,
                    const std::shared_ptr<StateEstimationCore>& OldState,
+                   const std::shared_ptr<SensorMeasurementComponent>& sensor_measurement_component,
                    std::shared_ptr<StateEstimationCore>& UpdatedState);
 
 

@@ -80,6 +80,7 @@
 
 
 /// Measurement
+#include "msf_localization_core/sensor_measurement_component.h"
 #include "msf_localization_core/sensor_measurement_core.h"
 // Imu
 //#include "msf_localization_core/imu_sensor_measurement_core.h"

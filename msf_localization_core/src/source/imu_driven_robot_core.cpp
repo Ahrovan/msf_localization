@@ -331,8 +331,8 @@ int ImuDrivenRobotCore::predictState(//Time
     // Search for the command
     std::shared_ptr<ImuInputCommandCore> imu_input_command;
     // TODO Improve
-    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=inputCommand->TheListInputCommandCore.begin();
-        itInputCommand != inputCommand->TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=inputCommand->list_input_command_core_.begin();
+        itInputCommand != inputCommand->list_input_command_core_.end();
         ++itInputCommand)
     {
         if((*itInputCommand)->getInputCommandType()==InputCommandTypes::imu)

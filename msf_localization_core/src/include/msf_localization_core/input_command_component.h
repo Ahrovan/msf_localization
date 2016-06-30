@@ -68,7 +68,7 @@ public:
 
     // Avaliable Inputs
 public:
-    std::list< std::shared_ptr<InputCommandCore> > TheListInputCommandCore;
+    std::list< std::shared_ptr<InputCommandCore> > list_input_command_core_;
 
 
 

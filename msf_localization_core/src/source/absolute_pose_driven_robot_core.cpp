@@ -340,8 +340,8 @@ int AbsolutePoseDrivenRobotCore::predictState(//Time
     /// Input Command
     AbsolutePoseInputCommandCore* past_input_command(nullptr);
     // Search
-    for(std::list< std::shared_ptr<InputCommandCore> >::iterator it_input_command=input_command->TheListInputCommandCore.begin();
-        it_input_command!=input_command->TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator it_input_command=input_command->list_input_command_core_.begin();
+        it_input_command!=input_command->list_input_command_core_.end();
         ++it_input_command)
         {
             if( this->getInputIdI(0) == std::dynamic_pointer_cast<InputCore>((*it_input_command)->getInputCoreSharedPtr())->getInputId() )
@@ -525,8 +525,8 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobian(//Time
     /// Input Command
     AbsolutePoseInputCommandCore* past_input_command(nullptr);
     // Search
-    for(std::list< std::shared_ptr<InputCommandCore> >::iterator it_input_command=input_command->TheListInputCommandCore.begin();
-        it_input_command!=input_command->TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator it_input_command=input_command->list_input_command_core_.begin();
+        it_input_command!=input_command->list_input_command_core_.end();
         ++it_input_command)
         {
             if( this->getInputIdI(0) == std::dynamic_pointer_cast<InputCore>((*it_input_command)->getInputCoreSharedPtr())->getInputId() )
@@ -582,8 +582,8 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobian(//Time
     // Fu
     std::vector<Eigen::SparseMatrix<double> >::iterator it_jacobian_error_state_wrt_input_command;
     it_jacobian_error_state_wrt_input_command=predicted_robot_state->jacobian_error_input_commands_.input_commands.begin();
-    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommandCore=input_command->TheListInputCommandCore.begin();
-        itInputCommandCore!=input_command->TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommandCore=input_command->list_input_command_core_.begin();
+        itInputCommandCore!=input_command->list_input_command_core_.end();
         ++itInputCommandCore, ++it_jacobian_error_state_wrt_input_command
         )
     {

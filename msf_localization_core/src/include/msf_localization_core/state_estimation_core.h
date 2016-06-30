@@ -28,7 +28,8 @@
 #include <Eigen/Dense>
 
 
-
+#include "msf_localization_core/sensor_measurement_component.h"
+#include "msf_localization_core/input_command_component.h"
 
 
 
@@ -37,11 +38,6 @@
 // States
 class StateCore;
 
-// Inputs
-class InputCommandCore;
-
-// Measurement
-class SensorMeasurementCore;
 
 
 // Class that stores the information for every time instant
@@ -114,35 +110,18 @@ public:
 public:
     bool hasInputCommand() const;
 
-
-    // Dimension total of input and error input
 public:
-    int getDimensionInputCommand() const;
-    int getDimensionErrorInputCommand() const;
-
-
-    // Avaliable Inputs
-public:
-    std::list< std::shared_ptr<InputCommandCore> > TheListInputCommandCore;
+    std::shared_ptr<InputCommandComponent> input_command_component_;
 
 
 
     /// Measurements
 
-    // Check
 public:
-    bool hasMeasurement() const;
+    bool hasMeasurement();
 
-
-    // Dimension total of measurement and error measurement
 public:
-    int getDimensionMeasurement() const;
-    int getDimensionErrorMeasurement() const;
-
-
-    // Available Measurements
-public:
-    std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
+    std::shared_ptr<SensorMeasurementComponent> sensor_measurement_component_;
 
 
 

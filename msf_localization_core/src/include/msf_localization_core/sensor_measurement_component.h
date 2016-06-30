@@ -46,17 +46,17 @@ public:
 
 
 
-    /// Input Commands
+    /// Sensor Measurement Component
 
     // Check
 public:
-    bool hasSensorMeasurement() const;
+    bool hasMeasurement() const;
 
 
     // Dimension total of measurement and error measurement
 public:
-    int getDimensionSensorMeasurement() const;
-    int getDimensionErrorSensorMeasurement() const;
+    int getDimensionMeasurement() const;
+    int getDimensionErrorMeasurement() const;
 
 
     // Avaliable Inputs

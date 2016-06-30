@@ -343,8 +343,8 @@ int MsfElementCore::predictErrorStateJacobianInit(// Past State
 
     /// Fu
     predicted_state->jacobian_error_input_commands_.input_commands.reserve(input_commands->getNumberInputCommand());
-    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommands=input_commands->TheListInputCommandCore.begin();
-        itInputCommands!=input_commands->TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommands=input_commands->list_input_command_core_.begin();
+        itInputCommands!=input_commands->list_input_command_core_.end();
         ++itInputCommands)
     {
         predicted_state->jacobian_error_input_commands_.input_commands.push_back(Eigen::SparseMatrix<double>(dimension_error_state, (*itInputCommands)->getInputCoreSharedPtr()->getDimensionErrorInputCommand()));

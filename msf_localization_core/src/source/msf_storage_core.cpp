@@ -94,7 +94,9 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 
 
     // Measure
-    TheStateEstimationCore->TheListMeasurementCore.push_back(TheSensorMeasurement);
+    if(!TheStateEstimationCore->sensor_measurement_component_)
+        TheStateEstimationCore->sensor_measurement_component_=std::make_shared<SensorMeasurementComponent>();
+    TheStateEstimationCore->sensor_measurement_component_->list_sensor_measurement_core_.push_back(TheSensorMeasurement);
     //TheMeasurementToTheBuffer.object.flagHasMeasurement=true;
 
 
@@ -164,11 +166,14 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
 
 
     // Measurements
+    if(!TheStateEstimationCore->sensor_measurement_component_)
+        TheStateEstimationCore->sensor_measurement_component_=std::make_shared<SensorMeasurementComponent>();
+
     for(std::list<std::shared_ptr<SensorMeasurementCore>>::const_iterator itSensorMeasurements=TheListSensorMeasurement.begin();
         itSensorMeasurements!=TheListSensorMeasurement.end();
         ++itSensorMeasurements)
     {
-        TheStateEstimationCore->TheListMeasurementCore.push_back((*itSensorMeasurements));
+        TheStateEstimationCore->sensor_measurement_component_->list_sensor_measurement_core_.push_back((*itSensorMeasurements));
     }
 
     // This is already safe
@@ -225,10 +230,18 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
         TheStateEstimationCore=std::make_shared<StateEstimationCore>();
     }
 
+    // Check
+    if(!TheStateEstimationCore->input_command_component_)
+    {
+        TheStateEstimationCore->input_command_component_=std::make_shared<InputCommandComponent>();
+    }
+
     // Avoid duplicates
     bool flag_input_command_found=false;
-    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itComm=TheStateEstimationCore->TheListInputCommandCore.begin();
-        itComm!=TheStateEstimationCore->TheListInputCommandCore.end();
+
+
+    for(std::list< std::shared_ptr<InputCommandCore> >::iterator itComm=TheStateEstimationCore->input_command_component_->list_input_command_core_.begin();
+        itComm!=TheStateEstimationCore->input_command_component_->list_input_command_core_.end();
         ++itComm)
     {
         if((*itComm)->getInputCoreSharedPtr()==input_command_core->getInputCoreSharedPtr())
@@ -245,7 +258,7 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
     if(!flag_input_command_found)
     {
         // Not found, add new one
-        TheStateEstimationCore->TheListInputCommandCore.push_back(input_command_core);
+        TheStateEstimationCore->input_command_component_->list_input_command_core_.push_back(input_command_core);
     }
 
 
@@ -300,6 +313,12 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
     }
 
 
+    // Check
+    if(!TheStateEstimationCore->input_command_component_)
+    {
+        TheStateEstimationCore->input_command_component_=std::make_shared<InputCommandComponent>();
+    }
+
     // Inputs
     for(std::list<std::shared_ptr<InputCommandCore>>::const_iterator itInputCommand=list_input_command_core.begin();
         itInputCommand!=list_input_command_core.end();
@@ -308,8 +327,8 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
 
         // Avoid duplicates
         bool flag_input_command_found=false;
-        for(std::list< std::shared_ptr<InputCommandCore> >::iterator itComm=TheStateEstimationCore->TheListInputCommandCore.begin();
-            itComm!=TheStateEstimationCore->TheListInputCommandCore.end();
+        for(std::list< std::shared_ptr<InputCommandCore> >::iterator itComm=TheStateEstimationCore->input_command_component_->list_input_command_core_.begin();
+            itComm!=TheStateEstimationCore->input_command_component_->list_input_command_core_.end();
             ++itComm)
         {
             if((*itComm)->getInputCoreSharedPtr()==(*itInputCommand)->getInputCoreSharedPtr())
@@ -326,7 +345,7 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
         if(!flag_input_command_found)
         {
             // Not found, add new one
-            TheStateEstimationCore->TheListInputCommandCore.push_back((*itInputCommand));
+            TheStateEstimationCore->input_command_component_->list_input_command_core_.push_back((*itInputCommand));
         }
 
     }
@@ -735,8 +754,8 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 
                 // Check
                 bool flag_input_command_found=false;
-                for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=BufferElement.object->TheListInputCommandCore.begin();
-                    itInputCommand!=BufferElement.object->TheListInputCommandCore.end();
+                for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=BufferElement.object->input_command_component_->list_input_command_core_.begin();
+                    itInputCommand!=BufferElement.object->input_command_component_->list_input_command_core_.end();
                     ++itInputCommand)
                 {
                     if((*itInputCommand)->getInputCoreSharedPtr() == input_core)
@@ -1044,8 +1063,8 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
     /////// Measurements
     if(TheStateEstimationCore->hasMeasurement())
     {
-        for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=TheStateEstimationCore->TheListMeasurementCore.begin();
-            itMeas!=TheStateEstimationCore->TheListMeasurementCore.end();
+        for(std::list< std::shared_ptr<SensorMeasurementCore> >::iterator itMeas=TheStateEstimationCore->sensor_measurement_component_->list_sensor_measurement_core_.begin();
+            itMeas!=TheStateEstimationCore->sensor_measurement_component_->list_sensor_measurement_core_.end();
             ++itMeas)
         {
             logString<<"\t";
@@ -1101,8 +1120,8 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
     /////// Input
     if(TheStateEstimationCore->hasInputCommand())
     {
-        for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=TheStateEstimationCore->TheListInputCommandCore.begin();
-            itInputCommand!=TheStateEstimationCore->TheListInputCommandCore.end();
+        for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=TheStateEstimationCore->input_command_component_->list_input_command_core_.begin();
+            itInputCommand!=TheStateEstimationCore->input_command_component_->list_input_command_core_.end();
             ++itInputCommand)
         {
             logString<<"\t";

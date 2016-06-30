@@ -24,7 +24,7 @@ SensorMeasurementComponent::~SensorMeasurementComponent()
     return;
 }
 
-bool SensorMeasurementComponent::hasSensorMeasurement() const
+bool SensorMeasurementComponent::hasMeasurement() const
 {
     if(this->list_sensor_measurement_core_.size()!=0)
         return true;
@@ -32,7 +32,7 @@ bool SensorMeasurementComponent::hasSensorMeasurement() const
         return false;
 }
 
-int SensorMeasurementComponent::getDimensionSensorMeasurement() const
+int SensorMeasurementComponent::getDimensionMeasurement() const
 {
     int dimension_sensor_measurement=0;
 
@@ -46,7 +46,7 @@ int SensorMeasurementComponent::getDimensionSensorMeasurement() const
     return dimension_sensor_measurement;
 }
 
-int SensorMeasurementComponent::getDimensionErrorSensorMeasurement() const
+int SensorMeasurementComponent::getDimensionErrorMeasurement() const
 {
     int dimension_error_sensor_measurement=0;
 

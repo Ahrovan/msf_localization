@@ -32,11 +32,11 @@ StateEstimationCore::~StateEstimationCore()
     // TheListMapElementStateCore
     this->TheListMapElementStateCore.clear();
 
-    // TheListMeasurementCore
-    this->TheListMeasurementCore.clear();
+    // sensor_measurement_component_
+    this->sensor_measurement_component_.reset();
 
-    // TheListInputCommandCore
-    this->TheListInputCommandCore.clear();
+    // input_command_component_
+    this->input_command_component_.reset();
 
 
     return;
@@ -66,21 +66,7 @@ bool StateEstimationCore::hasState() const
         return false;
 }
 
-bool StateEstimationCore::hasMeasurement() const
-{
-    if(this->TheListMeasurementCore.size()!=0)
-        return true;
-    else
-        return false;
-}
 
-bool StateEstimationCore::hasInputCommand() const
-{
-    if(this->TheListInputCommandCore.size()!=0)
-        return true;
-    else
-        return false;
-}
 
 
 
@@ -241,62 +227,6 @@ int StateEstimationCore::getDimensionErrorParameters() const
     return dimension_error_parameters;
 }
 
-int StateEstimationCore::getDimensionMeasurement() const
-{
-    int dimension_measurement=0;
-
-    for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itSensorMeas=TheListMeasurementCore.begin();
-        itSensorMeas!=TheListMeasurementCore.end();
-        ++itSensorMeas)
-    {
-        dimension_measurement+=(*itSensorMeas)->getSensorCoreSharedPtr()->getDimensionMeasurement();
-    }
-
-    return dimension_measurement;
-}
-
-int StateEstimationCore::getDimensionErrorMeasurement() const
-{
-    int dimension_error_measurement=0;
-
-    for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator itSensorMeas=TheListMeasurementCore.begin();
-        itSensorMeas!=TheListMeasurementCore.end();
-        ++itSensorMeas)
-    {
-        dimension_error_measurement+=(*itSensorMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
-    }
-
-    return dimension_error_measurement;
-}
-
-int StateEstimationCore::getDimensionInputCommand() const
-{
-    int dimensionInputCommand=0;
-
-    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator itInputCommand=TheListInputCommandCore.begin();
-        itInputCommand!=TheListInputCommandCore.end();
-        ++itInputCommand)
-    {
-        dimensionInputCommand+=(*itInputCommand)->getInputCoreSharedPtr()->getDimensionInputCommand();
-    }
-
-    return dimensionInputCommand;
-}
-
-int StateEstimationCore::getDimensionErrorInputCommand() const
-{
-    int dimensionErrorInputCommand=0;
-
-    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator itInputCommand=TheListInputCommandCore.begin();
-        itInputCommand!=TheListInputCommandCore.end();
-        ++itInputCommand)
-    {
-        dimensionErrorInputCommand+=(*itInputCommand)->getInputCoreSharedPtr()->getDimensionErrorInputCommand();
-    }
-
-    return dimensionErrorInputCommand;
-}
-
 int StateEstimationCore::getNumberInputStates() const
 {
     return this->TheListInputStateCore.size();
@@ -375,4 +305,22 @@ int StateEstimationCore::prepareCovarianceInitErrorState()
 
     // End
     return 0;
+}
+
+bool StateEstimationCore::hasInputCommand() const
+{
+    if(!this->input_command_component_)
+        return false;
+    if(!this->input_command_component_->hasInputCommand())
+        return false;
+    return true;
+}
+
+bool StateEstimationCore::hasMeasurement()
+{
+    if(!this->sensor_measurement_component_)
+        return false;
+    if(!this->sensor_measurement_component_->hasMeasurement())
+        return false;
+    return true;
 }

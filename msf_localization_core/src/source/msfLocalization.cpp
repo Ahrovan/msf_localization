@@ -965,7 +965,7 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
         input_command=std::make_shared<InputCommandComponent>();
 
     // Clear the list -> Just in case
-    input_command->TheListInputCommandCore.clear();
+    input_command->list_input_command_core_.clear();
 
     // Iterate over the input cores
     for(std::list<std::shared_ptr<InputCore>>::iterator itInputCore=this->TheListOfInputCore.begin();
@@ -1033,7 +1033,7 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
 
 
         // Set in the variable ThePreviousState
-        input_command->TheListInputCommandCore.push_back(input_command_core);
+        input_command->list_input_command_core_.push_back(input_command_core);
 
     }
 
@@ -1041,7 +1041,7 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
     return 0;
 }
 
-
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::predictInBuffer(const TimeStamp &TheTimeStamp)
 {
     // The predicted state -> New element to be added to the buffer
@@ -1120,10 +1120,10 @@ int MsfLocalizationCore::predictInBufferAddBuffer(const TimeStamp& TheTimeStamp,
         // Copy elements
 
         // Measurements
-        PredictedState->TheListMeasurementCore=OldPredictedState->TheListMeasurementCore;
+        PredictedState->sensor_measurement_component_=OldPredictedState->sensor_measurement_component_;
 
         // Inputs
-        PredictedState->TheListInputCommandCore=OldPredictedState->TheListInputCommandCore;
+        PredictedState->input_command_component_=OldPredictedState->input_command_component_;
 
         // Nothing else needed
     }
@@ -1219,10 +1219,10 @@ int MsfLocalizationCore::predictInBufferNoAddBuffer(const TimeStamp& TheTimeStam
 
         // Measurements
         // std::list<std::shared_ptr<SensorMeasurementCore> > TheListMeasurementCore;
-        ThePredictedState->TheListMeasurementCore=OldPredictedState->TheListMeasurementCore;
+        ThePredictedState->sensor_measurement_component_=OldPredictedState->sensor_measurement_component_;
 
         // Inputs
-        ThePredictedState->TheListInputCommandCore=OldPredictedState->TheListInputCommandCore;
+        ThePredictedState->input_command_component_=OldPredictedState->input_command_component_;
 
         // Nothing else needed
     }
@@ -1363,7 +1363,7 @@ int MsfLocalizationCore::predictInBufferSemiCore(const TimeStamp &ThePredictedTi
     // End
     return 0;
 }
-
+#endif
 
 
 
@@ -2245,8 +2245,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             {
                 int jacobian_column=0;
                 int num_input_commands_i=0;
-                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->TheListInputCommandCore.begin();
-                    itInputCommand!=input_commands->TheListInputCommandCore.end();
+                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->list_input_command_core_.begin();
+                    itInputCommand!=input_commands->list_input_command_core_.end();
                     ++itInputCommand, num_input_commands_i++)
                 {
                     block_jacobian_total_robot_error_state_wrt_error_input_commands(jacobian_row, jacobian_column)=
@@ -2260,8 +2260,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             {
                 int jacobian_column=0;
                 int num_input_commands_i=0;
-                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->TheListInputCommandCore.begin();
-                    itInputCommand!=input_commands->TheListInputCommandCore.end();
+                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->list_input_command_core_.begin();
+                    itInputCommand!=input_commands->list_input_command_core_.end();
                     ++itInputCommand, num_input_commands_i++)
                 {
                     block_jacobian_total_robot_error_state_wrt_error_input_commands(jacobian_row, jacobian_column)=
@@ -2278,8 +2278,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             {
                 int jacobian_column=0;
                 int num_input_commands_i=0;
-                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->TheListInputCommandCore.begin();
-                    itInputCommand!=input_commands->TheListInputCommandCore.end();
+                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->list_input_command_core_.begin();
+                    itInputCommand!=input_commands->list_input_command_core_.end();
                     ++itInputCommand, num_input_commands_i++)
                 {
                     block_jacobian_total_robot_error_state_wrt_error_input_commands(jacobian_row, jacobian_column)=
@@ -2296,8 +2296,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             {
                 int jacobian_column=0;
                 int num_input_commands_i=0;
-                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->TheListInputCommandCore.begin();
-                    itInputCommand!=input_commands->TheListInputCommandCore.end();
+                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->list_input_command_core_.begin();
+                    itInputCommand!=input_commands->list_input_command_core_.end();
                     ++itInputCommand, num_input_commands_i++)
                 {
                     block_jacobian_total_robot_error_state_wrt_error_input_commands(jacobian_row, jacobian_column)=
@@ -2314,8 +2314,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             {
                 int jacobian_column=0;
                 int num_input_commands_i=0;
-                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->TheListInputCommandCore.begin();
-                    itInputCommand!=input_commands->TheListInputCommandCore.end();
+                for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->list_input_command_core_.begin();
+                    itInputCommand!=input_commands->list_input_command_core_.end();
                     ++itInputCommand, num_input_commands_i++)
                 {
                     block_jacobian_total_robot_error_state_wrt_error_input_commands(jacobian_row, jacobian_column)=
@@ -2551,8 +2551,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
         {
             int num_input_commands_i=0;
 
-            for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->TheListInputCommandCore.begin();
-                itInputCommand!=input_commands->TheListInputCommandCore.end();
+            for(std::list< std::shared_ptr<InputCommandCore> >::iterator itInputCommand=input_commands->list_input_command_core_.begin();
+                itInputCommand!=input_commands->list_input_command_core_.end();
                 ++itInputCommand++)
             {
                 block_covariance_total_robot_error_inputs(num_input_commands_i, num_input_commands_i)=
@@ -2867,7 +2867,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 }
 
 
-
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
 {
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -2912,7 +2912,7 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
 
 
     // Check if there are measurements
-    if(OldState->TheListMeasurementCore.size()==0)
+    if(!OldState->hasMeasurement())
     {
 #if _DEBUG_MSF_LOCALIZATION_CORE
         std::ostringstream logString;
@@ -2946,10 +2946,10 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
 
 
     // Measurements
-    UpdatedState->TheListMeasurementCore=OldState->TheListMeasurementCore;
+    UpdatedState->sensor_measurement_component_=OldState->sensor_measurement_component_;
 
     // Inputs
-    UpdatedState->TheListInputCommandCore=OldState->TheListInputCommandCore;
+    UpdatedState->input_command_component_=OldState->input_command_component_;
 
 
     // Covariance: Copy constructor
@@ -2986,7 +2986,7 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
 
 
     ///// Update Core
-    if(this->updateCore(TheTimeStamp, OldState, UpdatedState))
+    if(this->updateCore(TheTimeStamp, OldState, OldState->sensor_measurement_component_, UpdatedState))
     {
         std::cout<<"Error updating state"<<std::endl;
         return -10;
@@ -3031,11 +3031,12 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
     // End
     return 0;
 }
-
+#endif //_USE_BUFFER_IN_STATE_ESTIMATION
 
 
 int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
                                     const std::shared_ptr<StateEstimationCore>& OldState,
+                                    const std::shared_ptr<SensorMeasurementComponent> &sensor_measurement_component,
                                     std::shared_ptr<StateEstimationCore>& UpdatedState)
 {
 
@@ -3105,8 +3106,8 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
 
 
         // Predict Measurements and Jacobians
-        for(std::list<std::shared_ptr<SensorMeasurementCore> >::iterator itListMeas=UpdatedState->TheListMeasurementCore.begin();
-            itListMeas!=UpdatedState->TheListMeasurementCore.end();
+        for(std::list<std::shared_ptr<SensorMeasurementCore> >::iterator itListMeas=sensor_measurement_component->list_sensor_measurement_core_.begin();
+            itListMeas!=sensor_measurement_component->list_sensor_measurement_core_.end();
             ++itListMeas)
         {
             // Predicted Measurement
@@ -4139,11 +4140,11 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
 
 
             // Measurements
-            UpdatedState->TheListMeasurementCore=OldState->TheListMeasurementCore;
+            UpdatedState->sensor_measurement_component_=OldState->sensor_measurement_component_;
 
 
             // Inputs
-            UpdatedState->TheListInputCommandCore=OldState->TheListInputCommandCore;
+            UpdatedState->input_command_component_=OldState->input_command_component_;
 
 
             // Covariance of the error state
@@ -4600,10 +4601,10 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             // OldState <- Updated State
 
             // Measurements
-            OldState->TheListMeasurementCore=UpdatedState->TheListMeasurementCore;
+            OldState->sensor_measurement_component_=UpdatedState->sensor_measurement_component_;
 
             // Inputs
-            OldState->TheListInputCommandCore=UpdatedState->TheListInputCommandCore;
+            OldState->input_command_component_=UpdatedState->input_command_component_;
 
             // Covariance of error state
             *OldState->covarianceMatrix=*UpdatedState->covarianceMatrix;

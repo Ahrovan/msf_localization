@@ -19,7 +19,7 @@ InputCommandComponent::~InputCommandComponent()
     // Be tidy
 
     // TheListInputCommandCore
-    this->TheListInputCommandCore.clear();
+    this->list_input_command_core_.clear();
 
 
     return;
@@ -27,7 +27,7 @@ InputCommandComponent::~InputCommandComponent()
 
 bool InputCommandComponent::hasInputCommand() const
 {
-    if(this->TheListInputCommandCore.size()!=0)
+    if(this->list_input_command_core_.size()!=0)
         return true;
     else
         return false;
@@ -37,8 +37,8 @@ int InputCommandComponent::getDimensionInputCommand() const
 {
     int dimensionInputCommand=0;
 
-    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator itInputCommand=TheListInputCommandCore.begin();
-        itInputCommand!=TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator itInputCommand=list_input_command_core_.begin();
+        itInputCommand!=list_input_command_core_.end();
         ++itInputCommand)
     {
         dimensionInputCommand+=(*itInputCommand)->getInputCoreSharedPtr()->getDimensionInputCommand();
@@ -51,8 +51,8 @@ int InputCommandComponent::getDimensionErrorInputCommand() const
 {
     int dimensionErrorInputCommand=0;
 
-    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator itInputCommand=TheListInputCommandCore.begin();
-        itInputCommand!=TheListInputCommandCore.end();
+    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator itInputCommand=list_input_command_core_.begin();
+        itInputCommand!=list_input_command_core_.end();
         ++itInputCommand)
     {
         dimensionErrorInputCommand+=(*itInputCommand)->getInputCoreSharedPtr()->getDimensionErrorInputCommand();
@@ -63,5 +63,5 @@ int InputCommandComponent::getDimensionErrorInputCommand() const
 
 int InputCommandComponent::getNumberInputCommand() const
 {
-    return this->TheListInputCommandCore.size();
+    return this->list_input_command_core_.size();
 }
