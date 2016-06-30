@@ -466,9 +466,6 @@ int ImuSensorCore::setMeasurement(const TimeStamp& TheTimeStamp, const std::shar
     if(!this->isCorrect())
         std::cout<<"ERROR"<<std::endl;
 
-    //std::shared_ptr<MsfStorageCore> TheMsfStorageCoreAux=this->TheMsfStorageCore.lock();
-//    if(!TheMsfStorageCoreAux)
-//        std::cout<<"Unable to lock TheMsfStorageCore"<<std::endl;
 
     this->getMsfLocalizationCorePtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
 

@@ -50,16 +50,6 @@ int FreeModelRobotCore::init()
 
 int FreeModelRobotCore::readConfig(const pugi::xml_node &robot, std::shared_ptr<FreeModelRobotStateCore>& RobotInitStateCore)
 {
-    // Map Element Core Pointer
-    //std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore(this);
-    //std::shared_ptr<FreeModelRobotCore> TheRobotCoreCore=std::dynamic_pointer_cast<FreeModelRobotCore>(this->getMsfElementCoreSharedPtr());
-
-    // Set pointer to the RobotCore
-    //this->setTheRobotCore(TheRobotCoreCore);
-
-
-    // Set the access to the Storage core
-    //this->setTheMsfStorageCore(TheMsfStorageCore);
 
     // Create a class for the RobotStateCore
     if(!RobotInitStateCore)

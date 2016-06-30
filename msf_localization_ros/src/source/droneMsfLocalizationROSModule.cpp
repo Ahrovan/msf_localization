@@ -681,13 +681,13 @@ int MsfLocalizationROS::publishThreadFunction()
                 }
 #endif
 
-                    if(this->predictNoAddBuffer(current_time_stamp, current_state))
+                    if(this->predictInBufferNoAddBuffer(current_time_stamp, current_state))
                 {
                     // Error
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::publishThreadFunction() error in predict()"<<std::endl;
+                        logString<<"MsfLocalizationROS::publishThreadFunction() error in predictInBufferNoAddBuffer()"<<std::endl;
                         this->log(logString.str());
                     }
 #endif

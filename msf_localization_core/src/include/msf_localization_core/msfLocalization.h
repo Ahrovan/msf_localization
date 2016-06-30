@@ -105,6 +105,7 @@
 
 
 
+
 #define _DEBUG_MSF_LOCALIZATION_CORE 0
 #define _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT 0
 #define _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE 0
@@ -115,6 +116,8 @@
 
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 
+
+#define _USE_BUFFER_IN_STATE_ESTIMATION 1
 #define _BUFFER_PROPAGATION_MULTI_THREADING 0
 
 class MsfLocalizationCore
@@ -135,8 +138,10 @@ public:
 
 
     // Storage for states, measurements and input commands
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 protected:
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
+#endif
 
 
 
@@ -257,17 +262,18 @@ public:
 
     /// Predict Step Functions
 protected:
-    int predict(const TimeStamp& TheTimeStamp);
-    int predictAddBuffer(const TimeStamp& TheTimeStamp,
-                         std::shared_ptr<StateEstimationCore>& ThePredictedState);
+    int predictInBuffer(const TimeStamp& TheTimeStamp);
+protected:
+    int predictInBufferAddBuffer(const TimeStamp& TheTimeStamp,
+                                 std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
-    int predictNoAddBuffer(const TimeStamp& TheTimeStamp,
-                           std::shared_ptr<StateEstimationCore>& ThePredictedState);
+    int predictInBufferNoAddBuffer(const TimeStamp& TheTimeStamp,
+                                   std::shared_ptr<StateEstimationCore>& ThePredictedState);
+private:
+    int predictInBufferSemiCore(const TimeStamp& ThePredictedTimeStamp,
+                                std::shared_ptr<StateEstimationCore>& ThePredictedState);
 
 private:
-    int predictSemiCore(const TimeStamp& ThePredictedTimeStamp,
-                        std::shared_ptr<StateEstimationCore>& ThePredictedState);
-
     int predictCore(const TimeStamp& previous_time_stamp, const TimeStamp& predicted_time_stamp,
                     // Previous State
                     const std::shared_ptr<StateEstimationCore>& previous_state,
@@ -281,7 +287,7 @@ private:
 
     /// Update Step functions
 protected:
-    int update(const TimeStamp& TheTimeStamp);
+    int updateInBuffer(const TimeStamp& TheTimeStamp);
 
 private:
     int updateCore(const TimeStamp& TheTimeStamp,

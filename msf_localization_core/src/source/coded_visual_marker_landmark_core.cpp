@@ -66,24 +66,9 @@ int CodedVisualMarkerLandmarkCore::setId(int id)
 
 int CodedVisualMarkerLandmarkCore::readConfig(const pugi::xml_node& map_element, std::shared_ptr<CodedVisualMarkerLandmarkStateCore>& MapElementInitStateCore)
 {
-    // Map Element Core Pointer
-    //std::shared_ptr<MapElementCore> TheMapElementCore(this);
-    //std::shared_ptr<MapElementCore> TheMapElementCore=std::dynamic_pointer_cast<MapElementCore>(this->getMsfElementCoreSharedPtr());
-
-    // Set pointer to the SensorCore
-    //TheMapElementCore->setMsfElementCore(TheMapElementCore);
-
     // Create a class for the SensorStateCore
     if(!MapElementInitStateCore)
         MapElementInitStateCore=std::make_shared<CodedVisualMarkerLandmarkStateCore>(this->getMsfElementCoreSharedPtr());
-
-    // Set pointer to the SensorCore
-    //MapElementInitStateCore->setTheMapElementCore(TheMapElementCore);
-
-
-    // Set the access to the Storage core
-    //TheRosSensorImuInterface->setTheMsfStorageCore(std::make_shared<MsfStorageCore>(this->TheStateEstimationCore));
-    //TheMapElementCore->setMsfStorageCore(TheMsfStorageCore);
 
 
     // Visual landmark
