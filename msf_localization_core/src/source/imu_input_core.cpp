@@ -917,7 +917,7 @@ Eigen::SparseMatrix<double> ImuInputCore::getCovarianceNoise(const TimeStamp del
 int ImuInputCore::predictState(//Time
                                  const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore>& pastState,
+                                 const std::shared_ptr<StateComponent>& pastState,
                                  // Inputs
                                  const std::shared_ptr<InputCommandComponent>& inputCommand,
                                  // Predicted State
@@ -988,7 +988,7 @@ int ImuInputCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const
 int ImuInputCore::predictErrorStateJacobian(//Time
                              const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> &pastState,
+                             const std::shared_ptr<StateComponent> &pastState,
                             // Inputs
                             const std::shared_ptr<InputCommandComponent> &inputCommand,
                              // Predicted State

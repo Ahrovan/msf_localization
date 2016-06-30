@@ -1352,12 +1352,21 @@ int MsfLocalizationCore::predictInBufferSemiCore(const TimeStamp &ThePredictedTi
 
     // Predict Core
     int error=predictCore(PreviousTimeStamp, ThePredictedTimeStamp,
-                          PreviousState,
+                          PreviousState->state_component_,
                           input_commands,
-                          ThePredictedState);
+                          ThePredictedState->state_component_);
 
     if(error)
+    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::predictInBufferSemiCore() error predictCore() "<<error<<" TS: sec="<<ThePredictedTimeStamp.sec<<" s; nsec="<<ThePredictedTimeStamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
         return error;
+    }
 
 
     // End
@@ -1369,11 +1378,11 @@ int MsfLocalizationCore::predictInBufferSemiCore(const TimeStamp &ThePredictedTi
 
 int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const TimeStamp &predicted_time_stamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore> &previous_state,
+                                     const std::shared_ptr<StateComponent> &previous_state,
                                      // Inputs
                                      const std::shared_ptr<InputCommandComponent> &input_commands,
                                      // Predicted State
-                                     std::shared_ptr<StateEstimationCore>& predicted_state)
+                                     std::shared_ptr<StateComponent>& predicted_state)
 {
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
@@ -1386,8 +1395,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
     if(!previous_state->checkState())
         return -1;
 
+
+    // Predicted State
     if(!predicted_state)
-        return -2;
+        predicted_state=std::make_shared<StateComponent>();
 
 
     /////// State
@@ -2905,9 +2916,20 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
             logString<<"MsfLocalizationCore::updateInBuffer() error -11!"<<std::endl;
             this->log(logString.str());
         }
-
 #endif
         return -11;
+    }
+
+    if(!OldState->hasState())
+    {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::updateInBuffer() error -12!"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+        return -12;
     }
 
 
@@ -2927,14 +2949,6 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
     // TODO finish
 
 
-    // Check the Robot State Core -> Not really needed
-    if(!OldState->TheRobotStateCore)
-    {
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
-        std::cout<<"MsfLocalizationCore::updateInBuffer() error -12"<<std::endl;
-#endif
-        return -12;
-    }
 
 
 
@@ -2952,6 +2966,9 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
     UpdatedState->input_command_component_=OldState->input_command_component_;
 
 
+    // State
+    UpdatedState->state_component_=OldState->state_component_;
+    /*
     // Covariance: Copy constructor
     UpdatedState->covarianceMatrix=std::make_shared<Eigen::MatrixXd>();
     *UpdatedState->covarianceMatrix=*OldState->covarianceMatrix;
@@ -2981,12 +2998,12 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
     // Map State
     //std::list< std::shared_ptr<MapElementStateCore> > TheListMapElementStateCore;
     UpdatedState->TheListMapElementStateCore=OldState->TheListMapElementStateCore;
-
+    */
 
 
 
     ///// Update Core
-    if(this->updateCore(TheTimeStamp, OldState, OldState->sensor_measurement_component_, UpdatedState))
+    if(this->updateCore(TheTimeStamp, OldState->state_component_, OldState->sensor_measurement_component_, UpdatedState->state_component_))
     {
         std::cout<<"Error updating state"<<std::endl;
         return -10;
@@ -3035,9 +3052,9 @@ int MsfLocalizationCore::updateInBuffer(const TimeStamp &TheTimeStamp)
 
 
 int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
-                                    const std::shared_ptr<StateEstimationCore>& OldState,
+                                    const std::shared_ptr<StateComponent> &OldState,
                                     const std::shared_ptr<SensorMeasurementComponent> &sensor_measurement_component,
-                                    std::shared_ptr<StateEstimationCore>& UpdatedState)
+                                    std::shared_ptr<StateComponent> &UpdatedState)
 {
 
     // Iterative EKF Vars and preparation
@@ -4140,11 +4157,11 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
 
 
             // Measurements
-            UpdatedState->sensor_measurement_component_=OldState->sensor_measurement_component_;
+            //UpdatedState->sensor_measurement_component_=OldState->sensor_measurement_component_;
 
 
             // Inputs
-            UpdatedState->input_command_component_=OldState->input_command_component_;
+            //UpdatedState->input_command_component_=OldState->input_command_component_;
 
 
             // Covariance of the error state
@@ -4601,10 +4618,10 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             // OldState <- Updated State
 
             // Measurements
-            OldState->sensor_measurement_component_=UpdatedState->sensor_measurement_component_;
+            //OldState->sensor_measurement_component_=UpdatedState->sensor_measurement_component_;
 
             // Inputs
-            OldState->input_command_component_=UpdatedState->input_command_component_;
+            //OldState->input_command_component_=UpdatedState->input_command_component_;
 
             // Covariance of error state
             *OldState->covarianceMatrix=*UpdatedState->covarianceMatrix;

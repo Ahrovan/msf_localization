@@ -28,6 +28,7 @@
 #include <Eigen/Dense>
 
 
+#include "msf_localization_core/state_component.h"
 #include "msf_localization_core/sensor_measurement_component.h"
 #include "msf_localization_core/input_command_component.h"
 
@@ -51,62 +52,16 @@ public:
 
     /// State / Parameters
 
-    // Check
 public:
-    bool checkState() const;
     bool hasState() const;
 
-    // Dimension total of state and error state
 public:
-    int getDimensionState() const;
-    int getDimensionErrorState() const;
-
-
-    // Dimension total of parameters and error parameters
-public:
-    int getDimensionParameters() const;
-    int getDimensionErrorParameters() const;
-
-
-    // World (Global Parameters) State
-public:
-    std::shared_ptr<StateCore> TheGlobalParametersStateCore;
-
-    // Robot State
-public:
-    std::shared_ptr<StateCore> TheRobotStateCore;
-
-    // Inputs State
-public:
-    std::list< std::shared_ptr<StateCore> > TheListInputStateCore;
-    int getNumberInputStates() const;
-
-    // Sensors State
-public:
-    std::list< std::shared_ptr<StateCore> > TheListSensorStateCore;
-    int getNumberSensorStates() const;
-
-    // Map State
-public:
-    std::list< std::shared_ptr<StateCore> > TheListMapElementStateCore;
-    int getNumberMapElementStates() const;
-
-
-
-    // Covariances Matrixes
-public:
-    int prepareCovarianceInitErrorState();
-
-
-    // Covariances Matrixes of the error state
-public:
-    std::shared_ptr<Eigen::MatrixXd> covarianceMatrix;
+    std::shared_ptr<StateComponent> state_component_;
 
 
 
     /// Input Commands
 
-    // Check
 public:
     bool hasInputCommand() const;
 
@@ -122,11 +77,6 @@ public:
 
 public:
     std::shared_ptr<SensorMeasurementComponent> sensor_measurement_component_;
-
-
-
-
-
 
 
 

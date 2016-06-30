@@ -45,7 +45,8 @@
 #include "msf_localization_core/time_stamp.h"
 
 
-#include "msf_localization_core/state_estimation_core.h"
+//#include "msf_localization_core/state_estimation_core.h"
+#include "msf_localization_core/state_component.h"
 
 #include "msf_localization_core/input_command_component.h"
 
@@ -214,7 +215,7 @@ public:
     virtual int predictState(//Time
                              const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore>& pastState,
+                             const std::shared_ptr<StateComponent>& pastState,
                              // Inputs
                              const std::shared_ptr<InputCommandComponent>& inputCommand,
                              // Predicted State
@@ -229,7 +230,7 @@ public:
     virtual int predictErrorStateJacobian(//Time
                              const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore>& pastState,
+                             const std::shared_ptr<StateComponent>& pastState,
                              // Inputs
                              const std::shared_ptr<InputCommandComponent>& inputCommand,
                              // Predicted State
@@ -241,7 +242,7 @@ public:
 
 protected:
     int predictErrorStateJacobianInit(// Current State
-                                      const std::shared_ptr<StateEstimationCore>& past_state,
+                                      const std::shared_ptr<StateComponent>& past_state,
                                       // Input Commands
                                       const std::shared_ptr<InputCommandComponent>& input_commands,
                                       // Predicted State

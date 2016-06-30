@@ -948,9 +948,9 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
         logString<<"Robot ";
 
         // Robot State
-        std::shared_ptr<RobotStateCore> current_robot_state=std::dynamic_pointer_cast<RobotStateCore>(TheStateEstimationCore->TheRobotStateCore);
+        std::shared_ptr<RobotStateCore> current_robot_state=std::dynamic_pointer_cast<RobotStateCore>(TheStateEstimationCore->state_component_->TheRobotStateCore);
 
-        switch(std::dynamic_pointer_cast<RobotCore>(TheStateEstimationCore->TheRobotStateCore->getMsfElementCoreSharedPtr())->getRobotCoreType())
+        switch(std::dynamic_pointer_cast<RobotCore>(TheStateEstimationCore->state_component_->TheRobotStateCore->getMsfElementCoreSharedPtr())->getRobotCoreType())
         {
             case RobotCoreTypes::undefined:
             {
@@ -981,8 +981,8 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
 
 
         //// Sensors
-        for(std::list<std::shared_ptr<StateCore> >::iterator itSensorStateCore=TheStateEstimationCore->TheListSensorStateCore.begin();
-            itSensorStateCore!=TheStateEstimationCore->TheListSensorStateCore.end();
+        for(std::list<std::shared_ptr<StateCore> >::iterator itSensorStateCore=TheStateEstimationCore->state_component_->TheListSensorStateCore.begin();
+            itSensorStateCore!=TheStateEstimationCore->state_component_->TheListSensorStateCore.end();
             ++itSensorStateCore)
         {
             std::shared_ptr<SensorCore> SensorCorePtrAux=std::dynamic_pointer_cast<SensorCore>((*itSensorStateCore)->getMsfElementCoreSharedPtr());
@@ -1031,8 +1031,8 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
 
 
         //// Map
-        for(std::list<std::shared_ptr<StateCore> >::iterator itSensorStateCore=TheStateEstimationCore->TheListMapElementStateCore.begin();
-            itSensorStateCore!=TheStateEstimationCore->TheListMapElementStateCore.end();
+        for(std::list<std::shared_ptr<StateCore> >::iterator itSensorStateCore=TheStateEstimationCore->state_component_->TheListMapElementStateCore.begin();
+            itSensorStateCore!=TheStateEstimationCore->state_component_->TheListMapElementStateCore.end();
             ++itSensorStateCore)
         {
             //std::shared_ptr<SensorCore> SensorCorePtrAux=std::dynamic_pointer_cast<SensorCore>((*itSensorStateCore)->getMsfElementCoreSharedPtr());

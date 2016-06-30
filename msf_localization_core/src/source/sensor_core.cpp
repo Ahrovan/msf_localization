@@ -181,7 +181,7 @@ int SensorCore::setNoisePositionSensorWrtRobot(const Eigen::Matrix3d &noisePosit
 }
 
 int SensorCore::predictErrorMeasurementJacobianInit(// Current State
-                                                    const std::shared_ptr<StateEstimationCore> &current_state,
+                                                    const std::shared_ptr<StateComponent> &current_state,
                                                     // Predicted Measurements
                                                     std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
 {

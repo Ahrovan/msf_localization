@@ -305,7 +305,7 @@ int ImuDrivenRobotCore::predictState(//Time
                                      const TimeStamp &previousTimeStamp,
                                      const TimeStamp &currentTimeStamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore> &pastState,
+                                     const std::shared_ptr<StateComponent> &pastState,
                                      // Inputs
                                      const std::shared_ptr<InputCommandComponent> &inputCommand,
                                      // Predicted State
@@ -472,7 +472,7 @@ int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp& previousTimeStamp,
 int ImuDrivenRobotCore::predictErrorStateJacobian(//Time
                                                  const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                  // Previous State
-                                                 const std::shared_ptr<StateEstimationCore>& pastState,
+                                                 const std::shared_ptr<StateComponent>& pastState,
                                                   // Inputs
                                                   const std::shared_ptr<InputCommandComponent>& inputCommand,
                                                  // Predicted State

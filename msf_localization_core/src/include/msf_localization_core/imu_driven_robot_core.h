@@ -124,7 +124,7 @@ public:
     int predictState(//Time
                      const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                      // Previous State
-                     const std::shared_ptr<StateEstimationCore>& pastState,
+                     const std::shared_ptr<StateComponent>& pastState,
                      // Inputs
                      const std::shared_ptr<InputCommandComponent>& inputCommand,
                      // Predicted State
@@ -146,7 +146,7 @@ public:
     int predictErrorStateJacobian(//Time
                                  const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                  // Previous State
-                                 const std::shared_ptr<StateEstimationCore>& pastState,
+                                 const std::shared_ptr<StateComponent>& pastState,
                                   // Inputs
                                   const std::shared_ptr<InputCommandComponent>& inputCommand,
                                  // Predicted State

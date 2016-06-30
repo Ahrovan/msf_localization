@@ -56,7 +56,7 @@ bool RosFreeModelRobotInterface::getPoseWithCovarianceByStamp(msf_localization_r
 
 
     // Received State
-    this->setRobotPoseWithCovarianceMsg(std::dynamic_pointer_cast<RobotStateCore>(received_state->TheRobotStateCore), *received_state->covarianceMatrix,
+    this->setRobotPoseWithCovarianceMsg(std::dynamic_pointer_cast<RobotStateCore>(received_state->state_component_->TheRobotStateCore), *received_state->state_component_->covarianceMatrix,
                                         res.received_pose);
 
     // Free state ownership

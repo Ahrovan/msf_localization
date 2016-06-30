@@ -168,7 +168,7 @@ protected:
     int publishThreadFunction();
 
 protected:
-    int publishState(const TimeStamp& current_time_stamp, const std::shared_ptr<StateEstimationCore>& current_state);
+    int publishState(const TimeStamp& current_time_stamp, const std::shared_ptr<StateComponent> &current_state);
 
 
 

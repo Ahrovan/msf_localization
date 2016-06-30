@@ -236,7 +236,7 @@ int GlobalParametersCore::predictState(//Time
                                      const TimeStamp& previousTimeStamp,
                                      const TimeStamp& currentTimeStamp,
                                      // Previous State
-                                     const std::shared_ptr<StateEstimationCore>& pastState,
+                                     const std::shared_ptr<StateComponent>& pastState,
                                      // Inputs
                                      const std::shared_ptr<InputCommandComponent>& inputCommand,
                                      // Predicted State
@@ -322,7 +322,7 @@ int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStam
 int GlobalParametersCore::predictErrorStateJacobian(//Time
                                                     const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                      // Previous State
-                                                     const std::shared_ptr<StateEstimationCore>& past_state,
+                                                     const std::shared_ptr<StateComponent>& past_state,
                                                     // Inputs
                                                     const std::shared_ptr<InputCommandComponent>& input_command,
                                                      // Predicted State

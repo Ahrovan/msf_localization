@@ -70,7 +70,7 @@ int MsfLocalizationROS::readConfigFile()
 
 
     // Create Initial Element of the buffer with the initial state
-    std::shared_ptr<StateEstimationCore> InitialState=std::make_shared<StateEstimationCore>();
+    std::shared_ptr<StateComponent> InitialState=std::make_shared<StateComponent>();
 
 
 
@@ -518,7 +518,10 @@ int MsfLocalizationROS::readConfigFile()
 
 
     // Add init state to the buffer
-    TheMsfStorageCore->addElement(TimeStamp(0,0), InitialState);
+    std::shared_ptr<StateEstimationCore> init_state_estimation_core=std::make_shared<StateEstimationCore>();
+    init_state_estimation_core->state_component_=InitialState;
+
+    TheMsfStorageCore->addElement(TimeStamp(0,0), init_state_estimation_core);
 
     return 0;
 }
@@ -734,7 +737,7 @@ int MsfLocalizationROS::publishThreadFunction()
 
 
         // Publish
-        if(publishState(current_time_stamp, current_state))
+        if(publishState(current_time_stamp, current_state->state_component_))
             continue;
 
 
@@ -788,8 +791,14 @@ int MsfLocalizationROS::publishThreadFunction()
 
 
 int MsfLocalizationROS::publishState(const TimeStamp& current_time_stamp,
-                                    const std::shared_ptr<StateEstimationCore> &current_state)
+                                    const std::shared_ptr<StateComponent> &current_state)
 {
+    //Checks
+    if(!current_state)
+        return -1;
+    if(!current_state->hasState())
+        return -2;
+
     // Robot
     int covRobotPointInit=this->TheGlobalParametersCore->getDimensionErrorState();
     int covRobotSize=this->TheRobotCore->getDimensionErrorState();

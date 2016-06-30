@@ -48,6 +48,8 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/sensor_measurement_component.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/state_component.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/world_reference_frame_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/world_reference_frame_state_core.cpp
 
@@ -126,6 +128,8 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/input_command_component.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/sensor_measurement_component.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/state_component.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/world_reference_frame_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/world_reference_frame_state_core.h

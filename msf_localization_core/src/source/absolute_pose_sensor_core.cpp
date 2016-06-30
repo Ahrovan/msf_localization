@@ -473,7 +473,7 @@ Eigen::SparseMatrix<double> AbsolutePoseSensorCore::getCovarianceNoise(const Tim
 int AbsolutePoseSensorCore::predictState(//Time
                                          const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                                          // Previous State
-                                         const std::shared_ptr<StateEstimationCore> &pastState,
+                                         const std::shared_ptr<StateComponent> &pastState,
                                          // Inputs
                                          const std::shared_ptr<InputCommandComponent> &inputCommand,
                                          // Predicted State
@@ -620,7 +620,7 @@ int AbsolutePoseSensorCore::predictStateCore(// State k: Sensor
 int AbsolutePoseSensorCore::predictErrorStateJacobian(//Time
                              const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore> &past_state,
+                             const std::shared_ptr<StateComponent> &past_state,
                             // Inputs
                             const std::shared_ptr<InputCommandComponent> &input_command,
                              // Predicted State
@@ -891,7 +891,7 @@ int AbsolutePoseSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
 int AbsolutePoseSensorCore::predictMeasurement(// Time
                                         const TimeStamp &current_time_stamp,
                                         // Current State
-                                        const std::shared_ptr<StateEstimationCore> &current_state,
+                                        const std::shared_ptr<StateComponent> &current_state,
                                         // Measurements
                                         const std::shared_ptr<SensorMeasurementCore> &measurement,
                                         // Predicted Measurements
@@ -1147,7 +1147,7 @@ int AbsolutePoseSensorCore::predictMeasurementCore(// State: Robot
 int AbsolutePoseSensorCore::predictErrorMeasurementJacobian(// Time
                                     const TimeStamp& current_time_stamp,
                                     // Current State
-                                    const std::shared_ptr<StateEstimationCore>& current_state,
+                                    const std::shared_ptr<StateComponent>& current_state,
                                     // Measurements
                                     const std::shared_ptr<SensorMeasurementCore>& measurement,
                                     // Predicted Measurements
@@ -2034,7 +2034,7 @@ int AbsolutePoseSensorCore::resetErrorStateJacobian(// Time
 int AbsolutePoseSensorCore::mapMeasurement(// Time
                    const TimeStamp& current_time_stamp,
                    // Current State
-                   const std::shared_ptr<StateEstimationCore>& current_state,
+                   const std::shared_ptr<StateComponent>& current_state,
                    // Current Measurement
                    const std::shared_ptr<SensorMeasurementCore>& current_measurement,
                    // List Map Element Core -> New will be added if not available
@@ -2293,7 +2293,7 @@ int AbsolutePoseSensorCore::mapMeasurementCore(// robot wrt world (state)
 int AbsolutePoseSensorCore::jacobiansMapMeasurement(// Time
                    const TimeStamp& current_time_stamp,
                    // Current State
-                   const std::shared_ptr<StateEstimationCore>& current_state,
+                   const std::shared_ptr<StateComponent>& current_state,
                    // Current Measurement
                    const std::shared_ptr<SensorMeasurementCore>& current_measurement,
                    // New Map Element State Core

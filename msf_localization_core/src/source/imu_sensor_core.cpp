@@ -972,7 +972,7 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp de
 int ImuSensorCore::predictState(//Time
                  const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                  // Previous State
-                 const std::shared_ptr<StateEstimationCore>& pastState,
+                 const std::shared_ptr<StateComponent>& pastState,
                  // Inputs
                  const std::shared_ptr<InputCommandComponent>& inputCommand,
                  // Predicted State
@@ -1115,7 +1115,7 @@ int ImuSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, cons
 int ImuSensorCore::predictErrorStateJacobian(//Time
                              const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                              // Previous State
-                             const std::shared_ptr<StateEstimationCore>& past_state,
+                             const std::shared_ptr<StateComponent>& past_state,
                             // Inputs
                             const std::shared_ptr<InputCommandComponent>& input_command,
                              // Predicted State
@@ -1497,7 +1497,7 @@ int ImuSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
 int ImuSensorCore::predictMeasurement(// Time
                                        const TimeStamp& current_time_stamp,
                                        // Current State
-                                       const std::shared_ptr<StateEstimationCore>& current_state,
+                                       const std::shared_ptr<StateComponent>& current_state,
                                       // Measurements
                                       const std::shared_ptr<SensorMeasurementCore>& measurement,
                                        // Predicted Measurements
@@ -1850,7 +1850,7 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
 int ImuSensorCore::predictErrorMeasurementJacobian(// Time
                                                 const TimeStamp& current_time_stamp,
                                                 // Current State
-                                                const std::shared_ptr<StateEstimationCore>& current_state,
+                                                const std::shared_ptr<StateComponent>& current_state,
                                                 // Measurements
                                                 const std::shared_ptr<SensorMeasurementCore>& measurement,
                                                 // Predicted Measurement

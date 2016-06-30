@@ -265,7 +265,7 @@ int AbsolutePoseDrivenRobotCore::predictState(//Time
                                              const TimeStamp &previousTimeStamp,
                                              const TimeStamp &currentTimeStamp,
                                              // Previous State
-                                             const std::shared_ptr<StateEstimationCore> &past_state,
+                                             const std::shared_ptr<StateComponent> &past_state,
                                              // Inputs
                                              const std::shared_ptr<InputCommandComponent> &input_command,
                                              // Predicted State
@@ -447,7 +447,7 @@ int AbsolutePoseDrivenRobotCore::predictStateSpecific(const TimeStamp &previousT
 int AbsolutePoseDrivenRobotCore::predictErrorStateJacobian(//Time
                                                  const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
                                                  // Previous State
-                                                 const std::shared_ptr<StateEstimationCore>& past_state,
+                                                 const std::shared_ptr<StateComponent>& past_state,
                                                   // Inputs
                                                   const std::shared_ptr<InputCommandComponent>& input_command,
                                                  // Predicted State
