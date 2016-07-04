@@ -24,8 +24,13 @@ MsfLocalizationCore::MsfLocalizationCore()
     firstAvailableMapElementId=0;
 
 
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Create Storage Core
     TheMsfStorageCore=std::make_shared<MsfStorageCore>();
+#else
+    // TODO
+#endif
 
 
     // New Measurement
@@ -133,6 +138,11 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
     }
 #endif
 
+
+    // Set the initial state with the correct time stamp
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+
     // Clear the buffer except the last state estimation that will be used as init state
     TimeStamp InitTimeStamp;
     std::shared_ptr<StateEstimationCore> InitState;
@@ -162,6 +172,14 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
 #endif
         return -3;
     }
+
+
+#else
+    // TODO
+
+
+#endif
+
 
 
     // Change Flag in the core
@@ -202,9 +220,23 @@ bool MsfLocalizationCore::isStateEstimationEnabled() const
 int MsfLocalizationCore::setMeasurement(const TimeStamp& time_stamp,
                                         const std::shared_ptr<SensorMeasurementCore>& sensor_measurement)
 {
-    int error=this->TheMsfStorageCore->setMeasurement(time_stamp, sensor_measurement);
+    int errorSetMeasurement=0;
 
-    if(error)
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+    // Add to buffer
+    errorSetMeasurement=this->TheMsfStorageCore->setMeasurement(time_stamp, sensor_measurement);
+#else
+    // Create new Sensor Measurement Component
+    std::shared_ptr<SensorMeasurementComponent> new_measurement=std::make_shared<SensorMeasurementComponent>();
+
+    // Fill it with the measurement
+    new_measurement->list_sensor_measurement_core_.push_back(sensor_measurement);
+
+    // Push back to the list
+    list_sensor_measurements_.push_back(new_measurement);
+#endif
+
+    if(errorSetMeasurement)
         return -1;
 
     this->semaphoreNewMeasurementNotify(time_stamp);
@@ -215,9 +247,28 @@ int MsfLocalizationCore::setMeasurement(const TimeStamp& time_stamp,
 int MsfLocalizationCore::setMeasurementList(const TimeStamp& time_stamp,
                                             const std::list< std::shared_ptr<SensorMeasurementCore> >& list_sensor_measurement)
 {
-    int error=this->TheMsfStorageCore->setMeasurementList(time_stamp, list_sensor_measurement);
+    int errorSetMeasurement=0;
 
-    if(error)
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+    // Add to buffer
+    errorSetMeasurement=this->TheMsfStorageCore->setMeasurementList(time_stamp, list_sensor_measurement);
+#else
+    // Create new Sensor Measurement Component
+    std::shared_ptr<SensorMeasurementComponent> new_measurement=std::make_shared<SensorMeasurementComponent>();
+
+    // Fill it with the list of measurement
+    for(std::list< std::shared_ptr<SensorMeasurementCore> >::const_iterator it_list_sensor_measurement=list_sensor_measurement.begin();
+        it_list_sensor_measurement!=list_sensor_measurement.end();
+        ++it_list_sensor_measurement)
+    {
+        new_measurement->list_sensor_measurement_core_.push_back(*it_list_sensor_measurement);
+    }
+
+    // Push back to the list
+    list_sensor_measurements_.push_back(new_measurement);
+#endif
+
+    if(errorSetMeasurement)
         return -1;
 
     this->semaphoreNewMeasurementNotify(time_stamp);
@@ -250,14 +301,55 @@ int MsfLocalizationCore::semaphoreNewMeasurementNotify(const TimeStamp& new_meas
 int MsfLocalizationCore::setInputCommand(const TimeStamp& time_stamp,
                                         const std::shared_ptr<InputCommandCore>& input_command)
 {
-    this->TheMsfStorageCore->setInputCommand(time_stamp, input_command);
+    int errorSetInputCommand=0;
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+    // Add to buffer
+    errorSetInputCommand=this->TheMsfStorageCore->setInputCommand(time_stamp, input_command);
+#else
+    // Create new Sensor Measurement Component
+    std::shared_ptr<InputCommandComponent> new_input_command=std::make_shared<InputCommandComponent>();
+
+    // Fill it with the measurement
+    new_input_command->list_input_command_core_.push_back(input_command);
+
+    // Push back to the list
+    list_input_commands_.push_back(new_input_command);
+#endif
+
+    if(errorSetInputCommand)
+        return -1;
+
     return 0;
 }
 
 int MsfLocalizationCore::setInputCommandList(const TimeStamp& time_stamp,
                         const std::list< std::shared_ptr<InputCommandCore> >& list_input_command)
 {
-    this->TheMsfStorageCore->setInputCommandList(time_stamp, list_input_command);
+    int errorSetInputCommand=0;
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+    // Add to the buffer
+    errorSetInputCommand=this->TheMsfStorageCore->setInputCommandList(time_stamp, list_input_command);
+#else
+    // Create new Sensor Measurement Component
+    std::shared_ptr<InputCommandComponent> new_input_command=std::make_shared<InputCommandComponent>();
+
+    // Fill it with the list of measurement
+    for(std::list< std::shared_ptr<InputCommandCore> >::const_iterator it_list_input_command=list_input_command.begin();
+        it_list_input_command!=list_input_command.end();
+        ++it_list_input_command)
+    {
+        new_input_command->list_input_command_core_.push_back(*it_list_input_command);
+    }
+
+    // Push back to the list
+    list_input_commands_.push_back(new_input_command);
+#endif
+
+    if(errorSetInputCommand)
+        return -1;
+
     return 0;
 }
 
@@ -303,6 +395,8 @@ int MsfLocalizationCore::predictThreadStep()
         TimeStamp TheTimeStamp=getTimeStamp();
         std::shared_ptr<StateEstimationCore> ThePredictedState;
 
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
         // Predict. Typically it will not be any
         //std::cout<<"Calling predict TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
         this->TheMsfStorageCore->getElement(TheTimeStamp, ThePredictedState);
@@ -336,6 +430,13 @@ int MsfLocalizationCore::predictThreadStep()
             }
         }
 
+#else
+
+        // TODO
+
+#endif
+
+
         if(ThePredictedState)
             ThePredictedState.reset();
 
@@ -359,7 +460,7 @@ int MsfLocalizationCore::predictThreadStep()
         return 0;
 }
 
-
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::bufferManagerThreadFunction()
 {
 #if _DEBUG_MSF_LOCALIZATION_CORE
@@ -447,8 +548,10 @@ int MsfLocalizationCore::bufferManagerThreadFunction()
 
     return 0;
 }
+#endif
 
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 {
 #if _BUFFER_PROPAGATION_MULTI_THREADING
@@ -627,7 +730,9 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
     // End
     return 0;
 }
+#endif
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(const TimeStamp &time_stamp)
 {
     // Element cannot be removed and need to be processed
@@ -721,7 +826,9 @@ int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(const TimeStamp &time_
 
     return -100;
 }
+#endif
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList(const TimeStamp& time_stamp)
 {
     TimeStamp TheNewOutdatedTimeStamp;
@@ -763,6 +870,7 @@ int MsfLocalizationCore::findNextElementInBufferAndAddOutdatedList(const TimeSta
     // End
     return 0;
 }
+#endif
 
 int MsfLocalizationCore::publishThreadFunction()
 {
@@ -797,8 +905,10 @@ int MsfLocalizationCore::startThreads()
     // Prediction state thread
     predictThread=new std::thread(&MsfLocalizationCore::predictThreadFunction, this);
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Buffer Manager thread
     bufferManagerThread=new std::thread(&MsfLocalizationCore::bufferManagerThreadFunction, this);
+#endif
 
     // Publish thread
     publish_thread_=new std::thread(&MsfLocalizationCore::publishThreadFunction, this);
@@ -813,7 +923,9 @@ int MsfLocalizationCore::startThreads()
 int MsfLocalizationCore::stopThreads()
 {
     delete predictThread;
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     delete bufferManagerThread;
+#endif
     delete publish_thread_;
     delete new_measurement_notification_thread_;
 
@@ -829,8 +941,14 @@ int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
     {
 
         // Get previous element with state
-        int error_get_element=this->TheMsfStorageCore->getElementWithStateEstimateByStamp(requested_time_stamp,
+        int error_get_element=-1;
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+        error_get_element=this->TheMsfStorageCore->getElementWithStateEstimateByStamp(requested_time_stamp,
                                                                                           received_time_stamp, received_state);
+#else
+        // TODO
+#endif
 
         // Check
         if(error_get_element || !received_state)
@@ -860,6 +978,7 @@ int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
 #endif
 
                 // Predict
+#if _USE_BUFFER_IN_STATE_ESTIMATION
                 if(this->predictInBufferNoAddBuffer(requested_time_stamp, received_state))
                 {
                     // Error
@@ -872,6 +991,9 @@ int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
 #endif
                     return -2;
                 }
+#else
+                // TODO
+#endif
 
                 // Set the time stamp
                 received_time_stamp=requested_time_stamp;
@@ -888,7 +1010,11 @@ int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
     else
     {
         // Get the last state estimation
+#if _USE_BUFFER_IN_STATE_ESTIMATION
         this->TheMsfStorageCore->getLastElementWithStateEstimate(received_time_stamp, received_state);
+#else
+        // TODO
+#endif
 
         // Time Stamp is null, put the current one
         if(received_time_stamp==TimeStamp(0,0))
@@ -919,6 +1045,8 @@ int MsfLocalizationCore::getStateByStamp(const TimeStamp& requested_time_stamp,
     return 0;
 }
 
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::getPreviousState(const TimeStamp &TheTimeStamp, TimeStamp& ThePreviousTimeStamp, std::shared_ptr<StateEstimationCore>& ThePreviousState)
 {
     // Get the previous not the last!
@@ -951,14 +1079,12 @@ int MsfLocalizationCore::getPreviousState(const TimeStamp &TheTimeStamp, TimeSta
 
     return 0;
 }
+#endif
+
 
 int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
-                                           //const std::shared_ptr<StateEstimationCore> ThePreviousState,
                                            std::shared_ptr<InputCommandComponent>& input_command)
 {
-    // Checks
-//    if(!ThePreviousState)
-//        return -1;
 
     // Create Pointer
     if(!input_command)
@@ -972,26 +1098,6 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
         itInputCore!=this->TheListOfInputCore.end();
         ++itInputCore)
     {
-        /*
-        // Find the input command in ThePreviousState if exist
-        bool flag_input_command_already_set=false;
-        for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=ThePreviousState->TheListInputCommandCore.begin();
-            itInputCommand!=ThePreviousState->TheListInputCommandCore.end();
-            ++itInputCommand)
-        {
-            if((*itInputCommand)->getInputCoreSharedPtr() == (*itInputCore))
-            {
-                flag_input_command_already_set=true;
-                input_command->TheListInputCommandCore.push_back((*itInputCommand));
-                break;
-            }
-        }
-
-        // Input Command Already Set
-        if(flag_input_command_already_set)
-            continue;
-        */
-
 
         // Command
         std::shared_ptr<InputCommandCore> input_command_core;
@@ -1012,8 +1118,11 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
         else
         {
             // Search input command in buffer
-
+#if _USE_BUFFER_IN_STATE_ESTIMATION
             error_get_previous_input_command=TheMsfStorageCore->getPreviousInputCommandByStampAndInputCore(TheTimeStamp, *itInputCore, input_command_core);
+#else
+            // TODO
+#endif
 
         }
 
@@ -1040,6 +1149,7 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
 
     return 0;
 }
+
 
 #if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::predictInBuffer(const TimeStamp &TheTimeStamp)

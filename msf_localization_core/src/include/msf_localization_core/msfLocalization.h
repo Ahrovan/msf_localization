@@ -117,9 +117,14 @@
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 
 
-#define _USE_BUFFER_IN_STATE_ESTIMATION 1
+#define _USE_BUFFER_IN_STATE_ESTIMATION 0
 #define _BUFFER_PROPAGATION_MULTI_THREADING 0
 
+
+
+//////////////////////////////////////
+///
+/// /////////////////////////////
 class MsfLocalizationCore
 {
 
@@ -140,17 +145,29 @@ public:
     // Storage for states, measurements and input commands
 #if _USE_BUFFER_IN_STATE_ESTIMATION
 protected:
+    // Buffer for everything
     std::shared_ptr<MsfStorageCore> TheMsfStorageCore;
 #else
 protected:
+    // List of measurements received to be processed (FIFO list)
+    std::list< std::shared_ptr<SensorMeasurementComponent> > list_sensor_measurements_;
+    // List of input commands received to be processed (FIFO list)
+    std::list< std::shared_ptr<InputCommandComponent> > list_input_commands_;
+
     // Previous State
-    const TimeStamp previous_time_stamp_;
-    const std::shared_ptr<StateEstimationCore> previous_state_;
-    // Inputs (if any)
-    const std::shared_ptr<InputCommandComponent> input_commands_;
-    // Measurements
-    // TODO
-    // std::list<std::shared_ptr<SensorMeasurementCore> > sensor_mesurements_;
+    TimeStamp previous_time_stamp_;
+    std::shared_ptr<StateComponent> previous_state_;
+
+    // Current State
+    TimeStamp current_time_stamp_;
+    std::shared_ptr<StateComponent> current_state_;
+
+    // Current Input Commands
+    std::shared_ptr<InputCommandComponent> current_input_commands_;
+
+    // Current Measurements
+    std::shared_ptr<SensorMeasurementComponent> current_sensor_measurements_;
+
 #endif
 
 
@@ -242,35 +259,42 @@ public:
                         std::shared_ptr<StateEstimationCore>& received_state);
 
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Get previous state
 protected:
     int getPreviousState(const TimeStamp& TheTimeStamp,
                          TimeStamp& ThePreviousTimeStamp,
                          std::shared_ptr<StateEstimationCore>& ThePreviousState);
+#endif
+
 
     // Fill inputs
 protected:
     int findInputCommands(const TimeStamp& TheTimeStamp,
-                          //const std::shared_ptr<StateEstimationCore> ThePreviousState,
                           std::shared_ptr<InputCommandComponent>& input_command);
 
 
 
 
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Remove unneded current state
 public:
     int removeUnnecessaryStateFromBuffer(const TimeStamp& time_stamp);
+#endif
 
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Find next element in buffer and add to outdated list
 public:
     int findNextElementInBufferAndAddOutdatedList(const TimeStamp& time_stamp);
+#endif
 
 
 
 
     /// Predict Step Functions
+
 #if _USE_BUFFER_IN_STATE_ESTIMATION
 protected:
     int predictInBuffer(const TimeStamp& TheTimeStamp);
@@ -335,6 +359,7 @@ protected:
 
 
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Buffer Manager Thread
 protected:
     std::thread* bufferManagerThread;
@@ -346,6 +371,8 @@ protected:
 #if _BUFFER_PROPAGATION_MULTI_THREADING
 protected:
     int num_buffer_propagation_threads=0;
+#endif
+
 #endif
 
 

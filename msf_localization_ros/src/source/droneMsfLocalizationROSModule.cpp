@@ -517,12 +517,18 @@ int MsfLocalizationROS::readConfigFile()
 #endif
 
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
     // Add init state to the buffer
     std::shared_ptr<StateEstimationCore> init_state_estimation_core=std::make_shared<StateEstimationCore>();
     init_state_estimation_core->state_component_=InitialState;
-
     TheMsfStorageCore->addElement(TimeStamp(0,0), init_state_estimation_core);
+#else
+    // Set the init state as the current state
+    current_state_=InitialState;
+    current_time_stamp_=TimeStamp(0,0);
+#endif
 
+    // End
     return 0;
 }
 
@@ -628,7 +634,11 @@ int MsfLocalizationROS::publishThreadFunction()
 
     // variables for current_state
     TimeStamp current_time_stamp;
-    std::shared_ptr<StateEstimationCore> current_state;
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+    std::shared_ptr<StateEstimationCore> current_state_estimation_core;
+#endif
+    std::shared_ptr<StateComponent> current_state;
+
 
 
     // Loop
@@ -643,6 +653,12 @@ int MsfLocalizationROS::publishThreadFunction()
         }
 #endif
 
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+        // Free the ownership of current_state (if any)
+        if(current_state_estimation_core)
+            current_state_estimation_core.reset();
+#endif
+
         // Free the ownership of current_state (if any)
         if(current_state)
             current_state.reset();
@@ -655,13 +671,16 @@ int MsfLocalizationROS::publishThreadFunction()
             // Async wait
             if( publish_rate_val_ == 0 )
             {
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
                 // Sleep until we have an updated state
                 this->TheMsfStorageCore->semaphoreBufferUpdated();
 
                 // Get last element with state -> Do not do the predict
-                this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state);
-
-
+                this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state_estimation_core);
+#else
+                // TODO
+#endif
 
             }
             else if( publish_rate_val_ > 0 )
@@ -669,35 +688,40 @@ int MsfLocalizationROS::publishThreadFunction()
 
                 // Get current element
                 current_time_stamp=getTimeStamp();
-                this->TheMsfStorageCore->getElement(current_time_stamp, current_state);
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+                // Find in the buffer the element with the current_time_stamp
+                this->TheMsfStorageCore->getElement(current_time_stamp, current_state_estimation_core);
 
 
                 // If no current_state -> predict state but no add buffer
-                if(!current_state)
+                if(!current_state_estimation_core)
                 {
 
 #if 1 || _DEBUG_MSF_LOCALIZATION_CORE
-                {
-                    std::ostringstream logString;
-                    logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
-                    this->log(logString.str());
-                }
-#endif
-
-                    if(this->predictInBufferNoAddBuffer(current_time_stamp, current_state))
-                {
-                    // Error
-#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::publishThreadFunction() error in predictInBufferNoAddBuffer()"<<std::endl;
+                        logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
                         this->log(logString.str());
                     }
 #endif
-                    continue;
-                }
-                }
 
+                    if(this->predictInBufferNoAddBuffer(current_time_stamp, current_state_estimation_core))
+                    {
+                        // Error
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+                        {
+                            std::ostringstream logString;
+                            logString<<"MsfLocalizationROS::publishThreadFunction() error in predictInBufferNoAddBuffer()"<<std::endl;
+                            this->log(logString.str());
+                        }
+#endif
+                        continue;
+                    }
+                }
+#else
+                // TODO
+#endif
             }
             else
             {
@@ -709,7 +733,12 @@ int MsfLocalizationROS::publishThreadFunction()
         else
         {
             // Get the last state estimation
-            this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state);
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+            this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state_estimation_core);
+#else
+            current_time_stamp=this->current_time_stamp_;
+            current_state=this->current_state_;
+#endif
 
 
             // Time Stamp is null, put the current one
@@ -721,8 +750,9 @@ int MsfLocalizationROS::publishThreadFunction()
         }
 
 
-        // Error with predicted state
-        if(!current_state)
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+        // Check Error with predicted state
+        if(!current_state_estimation_core)
         {
 #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
             {
@@ -734,12 +764,38 @@ int MsfLocalizationROS::publishThreadFunction()
             continue;
         }
 
+        // Set current_state
+        current_state=current_state_estimation_core->state_component_;
+#endif
+
+        // Check current_state
+        if(!current_state)
+        {
+#if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
+            {
+                std::ostringstream logString;
+                logString<<"MsfLocalizationROS::publishThreadFunction() error 2!"<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+            continue;
+        }
+
 
 
         // Publish
-        if(publishState(current_time_stamp, current_state->state_component_))
+        if(publishState(current_time_stamp, current_state))
+        {
+            std::cout<<"error publishing state"<<std::endl;
             continue;
+        }
 
+
+#if _USE_BUFFER_IN_STATE_ESTIMATION
+        // Free the ownership of current_state_estimation_core (not really needed)
+        if(current_state_estimation_core)
+            current_state_estimation_core.reset();
+#endif
 
         // Free the ownership of current_state (not really needed)
         if(current_state)
