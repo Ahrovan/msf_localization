@@ -11,6 +11,11 @@
 	<url>http://ros.org/wiki/msf_localization_ros</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>cmake_modules</build_depend>
+
+  <depend>eigen</depend>
+  <depend>boost</depend>
 
   <depend>roscpp</depend>
   <depend>std_srvs</depend>

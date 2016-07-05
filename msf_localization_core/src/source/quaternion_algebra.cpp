@@ -139,11 +139,20 @@ Eigen::Matrix4d quatMatPlus(const Eigen::Vector4d &q)
 
 Eigen::Matrix4d quatMatPlus(const Eigen::Vector3d& q)
 {
-    Eigen::Vector4d quat;
-    quat[0]=0;
-    quat.block<3,1>(1,0)=q;
+//    Eigen::Vector4d quat;
+//    quat[0]=0;
+//    quat.block<3,1>(1,0)=q;
 
-    return quatMatPlus(quat);
+//    return quatMatPlus(quat);
+
+    Eigen::Matrix4d QuatMat;
+    QuatMat.setZero();
+
+    QuatMat.block<1,3>(0,1)=-q.transpose();
+    QuatMat.block<3,3>(1,1)=skewSymMat(q);
+    QuatMat.block<3,1>(1,0)=q;
+
+    return QuatMat;
 }
 
 
@@ -161,11 +170,20 @@ Eigen::Matrix4d quatMatMinus(const Eigen::Vector4d& q)
 
 Eigen::Matrix4d quatMatMinus(const Eigen::Vector3d& q)
 {
-    Eigen::Vector4d quat;
-    quat[0]=0;
-    quat.block<3,1>(1,0)=q;
+//    Eigen::Vector4d quat;
+//    quat[0]=0;
+//    quat.block<3,1>(1,0)=q;
 
-    return quatMatMinus(quat);
+//    return quatMatMinus(quat);
+
+    Eigen::Matrix4d QuatMat;
+    QuatMat.setZero();
+
+    QuatMat.block<1,3>(0,1)=-q.transpose();
+    QuatMat.block<3,3>(1,1)=-skewSymMat(q);
+    QuatMat.block<3,1>(1,0)=q;
+
+    return QuatMat;
 }
 
 

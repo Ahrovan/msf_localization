@@ -85,19 +85,24 @@ set(MSF_LOCALIZATION_ROS_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs)
+                COMPONENTS cmake_modules roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs)
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
+find_package(Eigen REQUIRED)
+
 
 catkin_package(
-    DEPENDS Boost
+    INCLUDE_DIRS ${MSF_LOCALIZATION_ROS_INCLUDE_DIR}
+    LIBRARIES ${PROJECT_NAME}_lib
+    DEPENDS Boost Eigen
     CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs
   )
 
 
 include_directories(${MSF_LOCALIZATION_ROS_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Eigen_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
 
@@ -105,6 +110,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME}_lib ${MSF_LOCALIZATION_ROS_SOURCE_FILES} ${MSF_LOCALIZATION_ROS_HEADER_FILES})
 add_dependencies(${PROJECT_NAME}_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_lib ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_lib ${Eigen_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES})
 
 add_executable(${PROJECT_NAME}_test ${MSF_LOCALIZATION_ROS_SOURCE_DIR}/test.cpp)

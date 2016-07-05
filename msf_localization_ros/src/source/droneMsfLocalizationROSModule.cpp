@@ -680,6 +680,11 @@ int MsfLocalizationROS::publishThreadFunction()
                 this->TheMsfStorageCore->getLastElementWithStateEstimate(current_time_stamp, current_state_estimation_core);
 #else
                 // TODO
+
+                this->semaphoreUpdatedStateWait(current_time_stamp);
+
+                current_time_stamp=this->current_time_stamp_;
+                current_state=this->current_state_;
 #endif
 
             }
@@ -721,6 +726,8 @@ int MsfLocalizationROS::publishThreadFunction()
                 }
 #else
                 // TODO
+                current_time_stamp=this->current_time_stamp_;
+                current_state=this->current_state_;
 #endif
             }
             else

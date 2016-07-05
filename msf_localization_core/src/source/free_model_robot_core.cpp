@@ -788,7 +788,6 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
                 dimension_error_state_j+=3;
             }
 
-
             // vel / acc
             {
                 // Eigen::MatrixXd::Identity(3,3)*dt;

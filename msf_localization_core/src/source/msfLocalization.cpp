@@ -36,6 +36,9 @@ MsfLocalizationCore::MsfLocalizationCore()
     // New Measurement
     new_measurement_lock_=new std::unique_lock<std::mutex>(new_measurement_mutex_);
 
+    // Updated State
+    updated_state_lock_=new std::unique_lock<std::mutex>(updated_state_mutex_);
+
 
     // LOG
     const char* env_p = std::getenv("FUSEON_STACK");
@@ -92,6 +95,7 @@ int MsfLocalizationCore::close()
 
     // Delete
     delete new_measurement_lock_;
+    delete updated_state_lock_;
 
     // Cleaning
 
@@ -176,7 +180,8 @@ int MsfLocalizationCore::setStateEstimationEnabled(bool predictEnabled)
 
 #else
     // TODO
-
+    this->previous_time_stamp_=getTimeStamp();
+    this->previous_state_=this->current_state_;
 
 #endif
 
@@ -732,6 +737,150 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 }
 #endif
 
+#if !_USE_BUFFER_IN_STATE_ESTIMATION
+int MsfLocalizationCore::updateThreadFunction()
+{
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::updateThreadFunction()"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+
+    while(isAlive())
+    {
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::updateThreadFunction() loop init"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+
+        // Get first available measurement from the measurement buffer if any, if not, wait
+        TimeStamp current_time_stamp=getTimeStamp();
+        if(this->list_sensor_measurements_.empty())
+        {
+            this->semaphoreNewMeasurementWait(current_time_stamp);
+        }
+
+        std::shared_ptr<SensorMeasurementComponent> sensor_measurement;
+        sensor_measurement=this->list_sensor_measurements_.front();
+        this->list_sensor_measurements_.pop_front();
+
+        if(!sensor_measurement)
+        {
+            std::cout<<"error"<<std::endl;
+            continue;
+        }
+
+
+#if 1 || _DEBUG_MSF_LOCALIZATION_CORE
+        {
+            std::ostringstream logString;
+            logString<<"MsfLocalizationCore::updateThreadFunction() updating TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+
+        // Do full update
+
+        // Predict
+
+        // Get input commands
+        std::shared_ptr<InputCommandComponent> input_commands;
+        int error_get_input_commands=findInputCommands(current_time_stamp,
+                                                        input_commands);
+        if(error_get_input_commands)
+        {
+            std::cout<<"error_get_input_commands="<<error_get_input_commands<<std::endl;
+            continue;
+        }
+
+        // Run predict
+        TimeStamp previous_time_stamp=this->previous_time_stamp_;
+        std::shared_ptr<StateComponent> previous_state=this->previous_state_;
+        TimeStamp predicted_time_stamp=current_time_stamp;
+        std::shared_ptr<StateComponent> predicted_state;
+        int error_predict=predictCore(previous_time_stamp, predicted_time_stamp,
+                                        // Previous State
+                                        previous_state,
+                                        // Inputs
+                                        input_commands,
+                                        // Predicted State
+                                        predicted_state);
+        // Check errors predict
+        if(error_predict)
+        {
+            std::cout<<"error_predict="<<error_predict<<std::endl;
+            continue;
+        }
+
+        if(!predicted_state)
+        {
+            std::cout<<"error !predicted_state"<<std::endl;
+            continue;
+        }
+
+
+        // Update
+        // TODO
+
+        // Run update
+        std::shared_ptr<StateComponent> updated_state;
+        int error_update=updateCore(current_time_stamp,
+                                       predicted_state,
+                                       sensor_measurement,
+                                       updated_state);
+
+        // Check error update
+        if(error_update)
+        {
+            std::cout<<"error_update="<<error_update<<std::endl;
+            continue;
+        }
+
+        if(!updated_state)
+        {
+            std::cout<<"error !updated_state"<<std::endl;
+            continue;
+        }
+
+
+        // Set results in class variables
+        this->current_state_=updated_state;
+        this->current_time_stamp_=current_time_stamp;
+
+
+        // Prepare for next iteration
+        this->previous_state_=updated_state;
+        this->previous_time_stamp_=current_time_stamp;
+
+
+        // Notify
+        this->semaphoreUpdatedStateNotify(current_time_stamp);
+    }
+
+
+#if _DEBUG_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::updateThreadFunction() ended"<<std::endl;
+        this->log(logString.str());
+    }
+#endif
+
+    return 0;
+}
+#endif
+
+
+
 #if _USE_BUFFER_IN_STATE_ESTIMATION
 int MsfLocalizationCore::removeUnnecessaryStateFromBuffer(const TimeStamp &time_stamp)
 {
@@ -908,6 +1057,9 @@ int MsfLocalizationCore::startThreads()
 #if _USE_BUFFER_IN_STATE_ESTIMATION
     // Buffer Manager thread
     bufferManagerThread=new std::thread(&MsfLocalizationCore::bufferManagerThreadFunction, this);
+#else
+    // Update thread
+    update_thread_=new std::thread(&MsfLocalizationCore::updateThreadFunction, this);
 #endif
 
     // Publish thread
@@ -1146,6 +1298,29 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
 
     }
 
+
+    return 0;
+}
+
+
+int MsfLocalizationCore::semaphoreUpdatedStateWait(TimeStamp& updated_state_time_stamp)
+{
+    // Wait
+    updated_state_condition_variable_.wait(*updated_state_lock_);
+
+    // Get time stamp
+    updated_state_time_stamp=updated_state_time_stamp_;
+
+    return 0;
+}
+
+int MsfLocalizationCore::semaphoreUpdatedStateNotify(const TimeStamp &updated_state_time_stamp)
+{
+    // Set time stamp
+    updated_state_time_stamp_=updated_state_time_stamp;
+
+    // Notify
+    updated_state_condition_variable_.notify_all();
 
     return 0;
 }
@@ -3166,6 +3341,22 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
                                     const std::shared_ptr<SensorMeasurementComponent> &sensor_measurement_component,
                                     std::shared_ptr<StateComponent> &UpdatedState)
 {
+    // Checks
+    if(!OldState)
+    {
+        return -1;
+    }
+
+
+    // variable initializations
+    if(!UpdatedState)
+    {
+        // Create variable
+        UpdatedState=std::make_shared<StateComponent>();
+        // Set initial values
+        UpdatedState=OldState;
+    }
+
 
     // Iterative EKF Vars and preparation
     bool iterativeEkfEnabled=false;
@@ -3180,6 +3371,11 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
 
     // Mahalanobis Distance
     double mahalanobisDistanceOld=std::numeric_limits<double>::infinity();
+
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+    TimeStamp beginUpdate=getTimeStamp();
+#endif
 
 
     // Loop
@@ -4764,14 +4960,22 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE
-        {
-            std::ostringstream logString;
-            logString<<"MsfLocalizationCore::updateCore() P(k+1|k+1): UpdatedState->covarianceMatrix for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-            logString<<*UpdatedState->covarianceMatrix<<std::endl;
-            this->log(logString.str());
-        }
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::updateCore() P(k+1|k+1): UpdatedState->covarianceMatrix for TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<*UpdatedState->covarianceMatrix<<std::endl;
+        this->log(logString.str());
+    }
  #endif
 
+
+#if _DEBUG_TIME_MSF_LOCALIZATION_CORE
+    {
+        std::ostringstream logString;
+        logString<<"MsfLocalizationCore::updateCore() update core time: "<<(getTimeStamp()-beginUpdate).nsec<<std::endl;
+        this->log(logString.str());
+    }
+#endif
 
 
 

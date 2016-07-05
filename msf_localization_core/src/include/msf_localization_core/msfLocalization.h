@@ -117,7 +117,7 @@
 #define _DEBUG_ERROR_MSF_LOCALIZATION_CORE 1
 
 
-#define _USE_BUFFER_IN_STATE_ESTIMATION 0
+#define _USE_BUFFER_IN_STATE_ESTIMATION 1
 #define _BUFFER_PROPAGATION_MULTI_THREADING 0
 
 
@@ -277,6 +277,19 @@ protected:
 
 
 
+    // Updated state notification
+public:
+    int semaphoreUpdatedStateWait(TimeStamp& updated_state_time_stamp);
+    int semaphoreUpdatedStateNotify(const TimeStamp &updated_state_time_stamp);
+protected:
+    TimeStamp updated_state_time_stamp_;
+protected:
+    std::mutex updated_state_mutex_;             // mutex for critical section
+    std::condition_variable updated_state_condition_variable_; // condition variable for critical section
+    std::unique_lock<std::mutex>* updated_state_lock_;
+
+
+
 #if _USE_BUFFER_IN_STATE_ESTIMATION
     // Remove unneded current state
 public:
@@ -372,6 +385,13 @@ protected:
 protected:
     int num_buffer_propagation_threads=0;
 #endif
+
+#else
+    // Update Thread
+protected:
+    std::thread* update_thread_;
+protected:
+    int updateThreadFunction();
 
 #endif
 
