@@ -13,6 +13,19 @@ namespace Quaternion
     typedef Eigen::Vector3d PureQuaternion;
 
 
+    // Class for Usefull Jacobians related to Quaternions
+    extern class Jacobians
+    {
+        public:
+            Jacobians();
+
+        public:
+            // Jacobian error quaternion wrt error theta
+            Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta;
+
+    } jacobians;
+
+
     // Conjugate
     Quaternion conj(const Quaternion& q);
 

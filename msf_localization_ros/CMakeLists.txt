@@ -31,7 +31,8 @@ endif()
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
- 
+#set(DCMAKE_BUILD_TYPE "Release")
+
 
 
 set(MSF_LOCALIZATION_ROS_SOURCE_DIR
@@ -89,20 +90,31 @@ find_package(catkin REQUIRED
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3)
+if(NOT EIGEN3_FOUND)
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+  # Possibly map additional variables to the EIGEN3_ prefix.
+  message(WARN "Using Eigen2!")
+else()
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+endif()
 
 
 catkin_package(
     INCLUDE_DIRS ${MSF_LOCALIZATION_ROS_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}_lib
-    DEPENDS Boost Eigen
+    DEPENDS Boost Eigen3
     CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs
   )
 
 
 include_directories(${MSF_LOCALIZATION_ROS_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${Eigen_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
 
@@ -110,7 +122,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME}_lib ${MSF_LOCALIZATION_ROS_SOURCE_FILES} ${MSF_LOCALIZATION_ROS_HEADER_FILES})
 add_dependencies(${PROJECT_NAME}_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_lib ${Boost_LIBRARIES})
-target_link_libraries(${PROJECT_NAME}_lib ${Eigen_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_lib ${EIGEN3_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES})
 
 add_executable(${PROJECT_NAME}_test ${MSF_LOCALIZATION_ROS_SOURCE_DIR}/test.cpp)

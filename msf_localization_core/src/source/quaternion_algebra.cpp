@@ -5,6 +5,23 @@
 namespace Quaternion
 {
 
+Jacobians::Jacobians()
+{
+    // Jacobian error quaternion wrt error theta
+    mat_diff_error_quat_wrt_error_theta.resize(4,3);
+    mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
+                                        0.5, 0, 0,
+                                        0, 0.5, 0,
+                                        0, 0, 0.5;
+
+    return;
+}
+
+
+Jacobians jacobians;
+
+
+
 Quaternion conj(const Quaternion &q)
 {
     Eigen::Vector4d qr;

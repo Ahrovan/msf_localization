@@ -7,7 +7,7 @@ RosArucoEyeInterface::RosArucoEyeInterface(ros::NodeHandle* nh, tf::TransformBro
 {
 
     // Frequencies
-    frequency_desired_=20.0; // Hz
+    frequency_desired_=-20.0; // Hz
     previous_time_stamp_=ros::Time(0,0);
 
 

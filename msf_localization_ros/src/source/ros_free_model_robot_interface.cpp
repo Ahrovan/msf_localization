@@ -308,21 +308,21 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
 
 
-   /// Velocity
+    /// Velocity
 
-   geometry_msgs::Vector3 lin_vel;
-   lin_vel.x=robotLinearSpeed[0];
-   lin_vel.y=robotLinearSpeed[1];
-   lin_vel.z=robotLinearSpeed[2];
+    geometry_msgs::Vector3 lin_vel;
+    lin_vel.x=robotLinearSpeed[0];
+    lin_vel.y=robotLinearSpeed[1];
+    lin_vel.z=robotLinearSpeed[2];
 
-   geometry_msgs::Vector3 ang_vel;
-   ang_vel.x=robotAngularVelocity[0];
-   ang_vel.y=robotAngularVelocity[1];
-   ang_vel.z=robotAngularVelocity[2];
+    geometry_msgs::Vector3 ang_vel;
+    ang_vel.x=robotAngularVelocity[0];
+    ang_vel.y=robotAngularVelocity[1];
+    ang_vel.z=robotAngularVelocity[2];
 
 
-   geometry_msgs::Twist velocity;
-   velocity.linear=lin_vel;
+    geometry_msgs::Twist velocity;
+    velocity.linear=lin_vel;
     velocity.angular=ang_vel;
 
 

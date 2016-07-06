@@ -31,7 +31,7 @@ endif()
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
-
+#set(DCMAKE_BUILD_TYPE Release)
 
 
 #MSF_LOCALIZATION
@@ -214,25 +214,39 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS cmake_modules pugixml)
+                COMPONENTS pugixml)
 
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
-find_package(Eigen REQUIRED)
+
+find_package(Eigen3)
+if(NOT EIGEN3_FOUND)
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+  # Possibly map additional variables to the EIGEN3_ prefix.
+  message(WARN "Using Eigen2!")
+else()
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+endif()
+
+#add_definitions(-DEIGEN_NO_DEBUG -DEIGEN_MPL2_ONLY)
 
 
 catkin_package(
         INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
-        DEPENDS Boost Eigen
+        DEPENDS Boost Eigen3
         CATKIN_DEPENDS pugixml
   )
 
 
 include_directories(${MSF_LOCALIZATION_CORE_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${Eigen_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
 
@@ -240,6 +254,6 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} ${MSF_LOCALIZATION_CORE_SOURCE_FILES} ${MSF_LOCALIZATION_CORE_HEADER_FILES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${Eigen_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${EIGEN3_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

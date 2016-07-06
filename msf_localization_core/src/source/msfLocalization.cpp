@@ -4432,7 +4432,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
 
 
             // Update Covariance Matrix
-            *UpdatedState->covarianceMatrix=jacobian_reset_error_state*AuxiliarCovarianceMatrix*jacobian_reset_error_state.transpose();
+            (*UpdatedState->covarianceMatrix)=jacobian_reset_error_state*AuxiliarCovarianceMatrix*jacobian_reset_error_state.transpose();
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE

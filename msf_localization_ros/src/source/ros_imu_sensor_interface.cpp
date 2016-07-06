@@ -11,7 +11,7 @@ RosImuSensorInterface::RosImuSensorInterface(ros::NodeHandle* nh, tf::TransformB
 {
 
     // Frequencies
-    frequency_desired_=30.0; // Hz
+    frequency_desired_=-30.0; // Hz
     previous_time_stamp_=ros::Time(0,0);
 
     return;
