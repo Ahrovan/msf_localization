@@ -21,7 +21,9 @@ namespace Quaternion
 
         public:
             // Jacobian error quaternion wrt error theta
-            Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta;
+            Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta;
+            // Jacobian error theta wrt error quaternion
+            Eigen::Matrix<double, 3, 4> mat_diff_error_theta_wrt_error_quat;
 
     } jacobians;
 

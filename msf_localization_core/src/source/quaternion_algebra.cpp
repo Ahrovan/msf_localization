@@ -8,11 +8,14 @@ namespace Quaternion
 Jacobians::Jacobians()
 {
     // Jacobian error quaternion wrt error theta
-    mat_diff_error_quat_wrt_error_theta.resize(4,3);
     mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
                                         0.5, 0, 0,
                                         0, 0.5, 0,
                                         0, 0, 0.5;
+
+    mat_diff_error_theta_wrt_error_quat<<0, 2, 0, 0,
+                                        0, 0, 2, 0,
+                                        0, 0, 0, 2;
 
     return;
 }
