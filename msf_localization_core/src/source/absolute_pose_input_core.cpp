@@ -931,12 +931,12 @@ int AbsolutePoseInputCore::predictErrorStateJacobiansCore(// State k: input
 {
 
     /// Position
-    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::MatrixXd::Identity(3,3);
+    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::Matrix3d::Identity(3,3);
 
 
     /// Attitude
     // TODO FIX!
-    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::MatrixXd::Identity(3,3);
+    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::Matrix3d::Identity(3,3);
 
 
     // End

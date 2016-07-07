@@ -200,9 +200,9 @@ public:
     // Linear acceleration sensitivity: Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
     // TODO
 protected:
-    Eigen::MatrixXd noise_sensitivity_linear_acceleration_;
+    Eigen::Matrix3d noise_sensitivity_linear_acceleration_;
 public:
-    Eigen::MatrixXd getNoiseSensitivityLinearAcceleration() const;
+    Eigen::Matrix3d getNoiseSensitivityLinearAcceleration() const;
     int setNoiseSensitivityLinearAcceleration(const Eigen::Matrix3d& noise_sensitivity_linear_acceleration);
 
 

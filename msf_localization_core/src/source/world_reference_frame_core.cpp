@@ -627,7 +627,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp&
         // posi / posi
         if(isEstimationPositionWorldReferenceFrameWrtWorldEnabled())
         {
-            //Eigen::MatrixXd::Identity(3,3);
+            //Eigen::Matrix3d::Identity(3,3);
             for(int i=0; i<3; i++)
                 triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+i,1));
             dimension_error_state_i+=3;
@@ -637,7 +637,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp&
         // att / att
         if(isEstimationAttitudeWorldReferenceFrameWrtWorldEnabled())
         {
-            //Eigen::MatrixXd::Identity(3,3);
+            //Eigen::Matrix3d::Identity(3,3);
             for(int i=0; i<3; i++)
                 triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_i+i,1));
             dimension_error_state_i+=3;

@@ -2,20 +2,40 @@
 #include "msf_localization_core/quaternion_algebra.h"
 
 
+
 namespace Quaternion
 {
 
 Jacobians::Jacobians()
 {
-    // Jacobian error quaternion wrt error theta
-    mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
-                                        0.5, 0, 0,
-                                        0, 0.5, 0,
-                                        0, 0, 0.5;
+    std::vector<Eigen::Triplet<double> > triplets;
 
-    mat_diff_error_theta_wrt_error_quat<<0, 2, 0, 0,
-                                        0, 0, 2, 0,
-                                        0, 0, 0, 2;
+    // Jacobian error quaternion wrt error theta
+    mat_diff_error_quat_wrt_error_theta_dense<<0, 0, 0,
+                                            0.5, 0, 0,
+                                            0, 0.5, 0,
+                                            0, 0, 0.5;
+
+    mat_diff_error_quat_wrt_error_theta_sparse.resize(4,3);
+    triplets.clear();
+    triplets.push_back(Eigen::Triplet<double>(1, 0, 0.5));
+    triplets.push_back(Eigen::Triplet<double>(2, 1, 0.5));
+    triplets.push_back(Eigen::Triplet<double>(3, 2, 0.5));
+    mat_diff_error_quat_wrt_error_theta_sparse.setFromTriplets(triplets.begin(), triplets.end());
+
+
+
+    // Jacobian error theta wrt error quaternion
+    mat_diff_error_theta_wrt_error_quat_dense<<0, 2, 0, 0,
+                                                0, 0, 2, 0,
+                                                0, 0, 0, 2;
+
+    mat_diff_error_theta_wrt_error_quat_sparse.resize(3, 4);
+    triplets.clear();
+    triplets.push_back(Eigen::Triplet<double>(0, 1, 2));
+    triplets.push_back(Eigen::Triplet<double>(1, 2, 2));
+    triplets.push_back(Eigen::Triplet<double>(2, 3, 2));
+    mat_diff_error_theta_wrt_error_quat_sparse.setFromTriplets(triplets.begin(), triplets.end());
 
     return;
 }
@@ -228,9 +248,9 @@ Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d& v_rot)
 }
 
 
-Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d& v_rot)
+Eigen::Matrix<double, 4, 3> jacobianRotationVectorToQuaternion(const Eigen::Vector3d& v_rot)
 {
-    Eigen::MatrixXd jacobian_matrix(4,3);
+    Eigen::Matrix<double, 4, 3> jacobian_matrix;//(4,3);
     jacobian_matrix.setZero();
 
 

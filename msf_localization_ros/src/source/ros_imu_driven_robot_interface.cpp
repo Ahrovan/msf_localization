@@ -133,12 +133,12 @@ int RosImuDrivenRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
     // Covariance
     // TODO fix! Covariance of the attitude is not ok!
-    Eigen::MatrixXd robotPoseCovariance(6,6);
+    Eigen::Matrix<double, 6, 6> robotPoseCovariance;//(6,6);
     robotPoseCovariance.setZero();
     robotPoseCovariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(0,0);
     robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(6,6);
     double robotPoseCovarianceArray[36];
-    Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
+    Eigen::Map< Eigen::Matrix<double, 6, 6> >(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
     for(unsigned int i=0; i<36; i++)
     {
         robotPoseWithCovarianceStampedMsg.pose.covariance[i]=robotPoseCovarianceArray[i];

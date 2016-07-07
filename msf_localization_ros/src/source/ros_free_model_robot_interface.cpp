@@ -195,14 +195,14 @@ int RosFreeModelRobotInterface::setRobotPoseWithCovarianceMsg(const std::shared_
 
     // Covariance
     // TODO fix! Covariance of the attitude is not ok!
-    Eigen::MatrixXd robotPoseCovariance(6,6);
+    Eigen::Matrix<double, 6, 6> robotPoseCovariance;//(6,6);
     robotPoseCovariance.setZero();
     robotPoseCovariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(0,0);
     robotPoseCovariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(9,9);
     robotPoseCovariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(0,9);
     robotPoseCovariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(9,0);
     double robotPoseCovarianceArray[36];
-    Eigen::Map<Eigen::MatrixXd>(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
+    Eigen::Map< Eigen::Matrix<double, 6, 6> >(robotPoseCovarianceArray, 6, 6) = robotPoseCovariance;
     for(unsigned int i=0; i<36; i++)
     {
         robot_pose_msg.covariance[i]=robotPoseCovarianceArray[i];
@@ -333,14 +333,14 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
     robot_velocities_with_covariance_stamped_msg_.twist.twist=velocity;
 
     {
-        Eigen::MatrixXd covariance(6,6);
+        Eigen::Matrix<double, 6, 6> covariance;//(6,6);
         covariance.setZero();
         covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(3,3);
         covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(12,12);
         covariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(12,3);
         covariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(3,12);
         double covarianceArray[36];
-        Eigen::Map<Eigen::MatrixXd>(covarianceArray, 6, 6) = covariance;
+        Eigen::Map< Eigen::Matrix<double, 6, 6> >(covarianceArray, 6, 6) = covariance;
         for(unsigned int i=0; i<36; i++)
         {
             robot_velocities_with_covariance_stamped_msg_.twist.covariance[i]=covarianceArray[i];
@@ -384,14 +384,14 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
     robot_accelerations_with_covariance_stamped_msg_.accel.accel=acceleration;
 
     {
-        Eigen::MatrixXd covariance(6,6);
+        Eigen::Matrix<double, 6, 6> covariance;//(6,6);
         covariance.setZero();
         covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(6,6);
         covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(15,15);
         covariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(15,6);
         covariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(6,15);
         double covarianceArray[36];
-        Eigen::Map<Eigen::MatrixXd>(covarianceArray, 6, 6) = covariance;
+        Eigen::Map< Eigen::Matrix<double, 6, 6> >(covarianceArray, 6, 6) = covariance;
         for(unsigned int i=0; i<36; i++)
         {
             robot_accelerations_with_covariance_stamped_msg_.accel.covariance[i]=covarianceArray[i];

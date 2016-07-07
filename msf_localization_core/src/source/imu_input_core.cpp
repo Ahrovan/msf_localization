@@ -786,7 +786,7 @@ int ImuInputCore::enableParameterSensitivityLinearAcceleration()
     return 0;
 }
 
-Eigen::MatrixXd ImuInputCore::getNoiseSensitivityLinearAcceleration() const
+Eigen::Matrix3d ImuInputCore::getNoiseSensitivityLinearAcceleration() const
 {
     return this->noise_sensitivity_linear_acceleration_;
 }

@@ -3,6 +3,7 @@
 
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 #include <cmath>
 
@@ -21,9 +22,11 @@ namespace Quaternion
 
         public:
             // Jacobian error quaternion wrt error theta
-            Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta;
+            Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta_dense;
+            Eigen::SparseMatrix<double> mat_diff_error_quat_wrt_error_theta_sparse;
             // Jacobian error theta wrt error quaternion
-            Eigen::Matrix<double, 3, 4> mat_diff_error_theta_wrt_error_quat;
+            Eigen::Matrix<double, 3, 4> mat_diff_error_theta_wrt_error_quat_dense;
+            Eigen::SparseMatrix<double> mat_diff_error_theta_wrt_error_quat_sparse;
 
     } jacobians;
 
@@ -62,7 +65,7 @@ namespace Quaternion
     // Rotation vector to quaternion
     Eigen::Vector4d rotationVectorToQuaternion(const Eigen::Vector3d& v_rot);
 
-    Eigen::MatrixXd jacobianRotationVectorToQuaternion(const Eigen::Vector3d& v_rot);
+    Eigen::Matrix<double, 4, 3> jacobianRotationVectorToQuaternion(const Eigen::Vector3d& v_rot);
 
 
     // Skew-Symmetric Matrix: https://en.wikipedia.org/wiki/Skew-symmetric_matrix

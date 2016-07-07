@@ -571,19 +571,19 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     std::vector<Eigen::Triplet<double> > tripletListErrorJacobian;
 
     // posi / posi
-    // Eigen::MatrixXd::Identity(3,3);
+    // Eigen::Matrix3d::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i,1));
 
 
     // posi / vel
-    // Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::Matrix3d::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,3+i,dt));
 
 
     // posi / acc
-    // 0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+    // 0.5*Eigen::Matrix3d::Identity(3,3)*pow(dt,2);
     double dt2=pow(dt,2);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(i,i+6,0.5*dt2));
@@ -594,13 +594,13 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // vel / vel
-    // Eigen::MatrixXd::Identity(3,3);
+    // Eigen::Matrix3d::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,3+i,1));
 
 
     // vel / acc
-    // Eigen::MatrixXd::Identity(3,3)*dt;
+    // Eigen::Matrix3d::Identity(3,3)*dt;
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(3+i,6+i,dt));
 
@@ -613,7 +613,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // acc / acc
-    // Eigen::MatrixXd::Identity(3,3);
+    // Eigen::Matrix3d::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(6+i,6+i,1));
 
@@ -631,14 +631,14 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // Auxiliar Matrixes
     Eigen::Matrix4d quat_mat_plus_quat_ref_k1=Quaternion::quatMatPlus(predictedState->attitude_robot_wrt_world_);
     Eigen::Matrix4d quat_mat_plus_quat_ref_k1_inv=quat_mat_plus_quat_ref_k1.inverse();
-    Eigen::MatrixXd mat_delta_q_delta_theta(4, 3);
+    Eigen::Matrix<double, 4, 3> mat_delta_q_delta_theta;//(4, 3);
     mat_delta_q_delta_theta.setZero();
     mat_delta_q_delta_theta(1,0)=1;
     mat_delta_q_delta_theta(2,1)=1;
     mat_delta_q_delta_theta(3,2)=1;
     Eigen::Matrix4d quat_mat_plus_quat_ref_k=Quaternion::quatMatPlus(pastState->attitude_robot_wrt_world_);
     Eigen::Matrix4d quat_mat_minus_quat_ref_k=Quaternion::quatMatMinus(pastState->attitude_robot_wrt_world_);
-    Eigen::MatrixXd mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
+    Eigen::Matrix<double, 4, 3> mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
 
 
 
@@ -672,7 +672,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     // zero
 
     // ang_vel / ang_vel [3 non-zero]
-    // Eigen::MatrixXd::Identity(3,3);
+    // Eigen::Matrix3d::Identity(3,3);
     for(int i=0; i<3; i++)
         tripletListErrorJacobian.push_back(Eigen::Triplet<double>(9+3+i,9+3+i,1));
 

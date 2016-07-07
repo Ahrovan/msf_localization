@@ -829,12 +829,12 @@ int CodedVisualMarkerEyeCore::predictErrorStateJacobiansCore(// State k: Sensor
 {
 
     /// Position
-    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::MatrixXd::Identity(3,3);
+    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::Matrix3d::Identity(3,3);
 
 
     /// Attitude
     // TODO FIX!
-    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::MatrixXd::Identity(3,3);
+    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::Matrix3d::Identity(3,3);
 
 
     // End
@@ -1918,13 +1918,13 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
                                 0, 0, -1, 0,
                                 0, 0, 0, -1;
 
-    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
+    Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta;//(4,3);
     mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
                                         1, 0, 0,
                                         0, 1, 0,
                                         0, 0, 1;
 
-    Eigen::MatrixXd mat_diff_vector_wrt_vector_amp(3,4);
+    Eigen::Matrix<double, 3, 4> mat_diff_vector_wrt_vector_amp;//(3,4);
     mat_diff_vector_wrt_vector_amp<<0, 1, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 1;
@@ -1937,7 +1937,7 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
             -mat_diff_vector_wrt_vector_amp*mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_eye_wrt_world*mat_diff_vector_wrt_vector_amp.transpose();
 
     jacobian_error_meas_pos_wrt_error_state_robot_att=
-            mat_diff_vector_wrt_vector_amp*( mat_q_minus_tinc2aux_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_plus_tran_inc2_wrt_world )*mat_q_minus_att_visual_marker_eye_wrt_robot*mat_q_plus_att_robot_wrt_world*0.5*mat_diff_error_quat_wrt_error_theta;
+            mat_diff_vector_wrt_vector_amp*( mat_q_minus_tinc2aux_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_att_world_wrt_visual_marker_eye*mat_q_plus_tran_inc2_wrt_world )*mat_q_minus_att_visual_marker_eye_wrt_robot*mat_q_plus_att_robot_wrt_world*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
     jacobian_error_meas_att_wrt_error_state_robot_att=
             mat_diff_error_quat_wrt_error_theta.transpose()*inv_mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye*mat_q_minus_att_visual_marker_wrt_world*mat_diff_quat_inv_wrt_quat*mat_q_minus_att_visual_marker_eye_wrt_robot*mat_q_plus_att_robot_wrt_world*mat_diff_error_quat_wrt_error_theta;
@@ -1960,7 +1960,7 @@ int CodedVisualMarkerEyeCore::jacobiansErrorMeasurementsCore(// State: Robot
 
     // Noise
     jacobian_error_meas_pos_wrt_error_meas_pos=
-            Eigen::MatrixXd::Identity(3, 3);
+            Eigen::Matrix3d::Identity(3, 3);
 
     jacobian_error_meas_att_wrt_error_meas_att=
             mat_diff_error_quat_wrt_error_theta.transpose() *  inv_mat_q_plus_att_meas_visual_marker_wrt_visual_marker_eye*  mat_q_plus_att_pred_visual_marker_wrt_visual_marker_eye  *mat_diff_error_quat_wrt_error_theta;
@@ -2766,13 +2766,13 @@ int CodedVisualMarkerEyeCore::jacobiansMapMeasurementCore(// robot wrt world (st
                                 0, 0, -1, 0,
                                 0, 0, 0, -1;
 
-    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
+    Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta;//(4,3);
     mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
                                         1, 0, 0,
                                         0, 1, 0,
                                         0, 0, 1;
 
-    Eigen::MatrixXd mat_diff_vector_wrt_vector_amp(3,4);
+    Eigen::Matrix<double, 3, 4> mat_diff_vector_wrt_vector_amp;//(3,4);
     mat_diff_vector_wrt_vector_amp<<0, 1, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 1;

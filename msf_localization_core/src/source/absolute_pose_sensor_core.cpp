@@ -876,12 +876,12 @@ int AbsolutePoseSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
 {
 
     /// Position
-    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::MatrixXd::Identity(3,3);
+    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::Matrix3d::Identity(3,3);
 
 
     /// Attitude
     // TODO FIX!
-    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::MatrixXd::Identity(3,3);
+    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::Matrix3d::Identity(3,3);
 
 
     // End
@@ -1927,13 +1927,13 @@ int AbsolutePoseSensorCore::jacobiansErrorMeasurementsCore(// State: Robot
                                 0, 0, -1, 0,
                                 0, 0, 0, -1;
 
-    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
+    Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta;//(4,3);
     mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
                                         1, 0, 0,
                                         0, 1, 0,
                                         0, 0, 1;
 
-    Eigen::MatrixXd mat_diff_vector_wrt_vector_amp(3,4);
+    Eigen::Matrix<double, 3, 4> mat_diff_vector_wrt_vector_amp;//(3,4);
     mat_diff_vector_wrt_vector_amp<<0, 1, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 1;
@@ -1969,7 +1969,7 @@ int AbsolutePoseSensorCore::jacobiansErrorMeasurementsCore(// State: Robot
 
     // Noise
     jacobian_error_meas_pos_wrt_error_meas_pos=
-            Eigen::MatrixXd::Identity(3, 3);
+            Eigen::Matrix3d::Identity(3, 3);
 
     jacobian_error_meas_att_wrt_error_meas_att=
             mat_diff_error_quat_wrt_error_theta.transpose() *  inv_mat_quat_mat_plus_meas_att_sensor_wrt_map_element*  mat_quat_mat_plus_att_sensor_wrt_map_element  *mat_diff_error_quat_wrt_error_theta;
@@ -2780,13 +2780,13 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementCore(// robot wrt world (stat
                                 0, 0, -1, 0,
                                 0, 0, 0, -1;
 
-    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
+    Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta;//(4,3);
     mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
                                         1, 0, 0,
                                         0, 1, 0,
                                         0, 0, 1;
 
-    Eigen::MatrixXd mat_diff_vector_wrt_vector_amp(3,4);
+    Eigen::Matrix<double, 3, 4> mat_diff_vector_wrt_vector_amp;//(3,4);
     mat_diff_vector_wrt_vector_amp<<0, 1, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 1;

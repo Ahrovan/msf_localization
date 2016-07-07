@@ -76,8 +76,8 @@ int RosAbsolutePoseInputInterface::setInputCommandRos(const geometry_msgs::PoseW
     // Covariance
     if(this->hasInputCommandPoseInputWrtInputWorldCovariance())
     {
-        Eigen::MatrixXd noise_input_command_pose_input_wrt_input_world=
-                Eigen::Map<Eigen::MatrixXd>(msg->pose.covariance.c_array(), 6, 6);
+        Eigen::Matrix<double, 6, 6> noise_input_command_pose_input_wrt_input_world=
+                Eigen::Map< Eigen::Matrix<double, 6, 6> >(msg->pose.covariance.c_array(), 6, 6);
         input_command->setNoiseInputCommandPoseInputWrtInputWorld(noise_input_command_pose_input_wrt_input_world);
     }
 

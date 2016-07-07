@@ -1408,7 +1408,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
                 dimension_error_state_i+=3;
 
             // Update jacobian
-            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::Matrix3d::Identity(3,3);
             for(int i=0; i<3; i++)
                 tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
 
@@ -1435,7 +1435,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
                 dimension_error_state_i+=3;
 
             // Update jacobian
-            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::MatrixXd::Identity(3,3);
+            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::Matrix3d::Identity(3,3);
             for(int i=0; i<3; i++)
                 tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
 
@@ -2846,13 +2846,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
                                 0, 0, -1, 0,
                                 0, 0, 0, -1;
 
-    Eigen::MatrixXd mat_diff_error_quat_wrt_error_theta(4,3);
-    mat_diff_error_quat_wrt_error_theta<<0, 0, 0,
-                                        1, 0, 0,
-                                        0, 1, 0,
-                                        0, 0, 1;
-
-    Eigen::MatrixXd mat_diff_w_amp_wrt_w(3,4);
+    //
+    Eigen::Matrix<double, 3, 4> mat_diff_w_amp_wrt_w;//(3,4);
     mat_diff_w_amp_wrt_w<<  0, 1, 0, 0,
                             0, 0, 1, 0,
                             0, 0, 0, 1;
@@ -2936,7 +2931,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
                 )
             )
             // common 2
-            )*mat_q_plus_attitude_robot_wrt_world*mat_diff_error_quat_wrt_error_theta*0.5;
+            )*mat_q_plus_attitude_robot_wrt_world*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
     jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel=
             sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()* (-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot))) *mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot* mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
@@ -2946,7 +2941,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
 
 
     jacobian_error_meas_ang_vel_wrt_error_state_robot_att=
-            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w*( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world )*mat_q_minus_attitude_sensor_wrt_robot*mat_q_plus_attitude_robot_wrt_world*mat_diff_error_quat_wrt_error_theta*0.5;
+            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w*( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world )*mat_q_minus_attitude_sensor_wrt_robot*mat_q_plus_attitude_robot_wrt_world*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
     jacobian_error_meas_ang_vel_wrt_error_state_robot_ang_vel=
             sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w* mat_q_plus_attitude_world_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world *mat_diff_w_amp_wrt_w.transpose();
@@ -2959,7 +2954,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
 
     // TODO FIX!
     jacobian_error_meas_lin_acc_wrt_error_state_sensor_att=
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*( Quaternion::quatMatMinus(Quaternion::cross_pure_gen(acceleration_total_imu_wrt_robot, attitude_sensor_wrt_robot))*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_robot_wrt_sensor*Quaternion::quatMatPlus(acceleration_total_imu_wrt_robot) )*mat_q_plus_attitude_sensor_wrt_robot*mat_diff_error_quat_wrt_error_theta*0.5;
+            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*( Quaternion::quatMatMinus(Quaternion::cross_pure_gen(acceleration_total_imu_wrt_robot, attitude_sensor_wrt_robot))*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_robot_wrt_sensor*Quaternion::quatMatPlus(acceleration_total_imu_wrt_robot) )*mat_q_plus_attitude_sensor_wrt_robot*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
     jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc=
             Eigen::Matrix3d::Identity(3,3);
@@ -2967,7 +2962,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
 
 
     jacobian_error_meas_ang_vel_wrt_error_state_sensor_att=
-            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w* ( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world ) *mat_q_plus_attitude_robot_wrt_world*mat_q_plus_attitude_sensor_wrt_robot*mat_diff_error_quat_wrt_error_theta*0.5;
+            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w* ( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world ) *mat_q_plus_attitude_robot_wrt_world*mat_q_plus_attitude_sensor_wrt_robot*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
     jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel=
             Eigen::Matrix3d::Identity(3,3);
@@ -2976,14 +2971,14 @@ int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
     /// Jacobians: Noise
 
     jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc=
-            Eigen::MatrixXd::Identity(3, 3);
+            Eigen::Matrix3d::Identity(3, 3);
 
     // TODO
     jacobian_error_meas_att_wrt_error_meas_att=
-            Eigen::MatrixXd::Identity(3, 3);
+            Eigen::Matrix3d::Identity(3, 3);
 
     jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel=
-            Eigen::MatrixXd::Identity(3, 3);
+            Eigen::Matrix3d::Identity(3, 3);
 
 
     /// End

@@ -178,20 +178,20 @@ protected:
                                               const Eigen::Vector4d& estim_attitude_robot_wrt_world,
                                               // Jacobians Error State: Fx, Fp
                                               // Input
-                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_error_state_pos,
-                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_error_state_att,
-                                              Eigen::MatrixXd &jacobian_error_state_robot_att_wrt_input_error_state_att,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_pos_wrt_input_error_state_pos,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_pos_wrt_input_error_state_att,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_att_wrt_input_error_state_att,
                                               // Map Element
-                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_map_element_error_state_pos,
-                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_map_element_error_state_att,
-                                              Eigen::MatrixXd &jacobian_error_state_robot_att_wrt_map_element_error_state_att,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_pos_wrt_map_element_error_state_pos,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_pos_wrt_map_element_error_state_att,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_att_wrt_map_element_error_state_att,
                                               // Jacobian Input: Fu
-                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_command_pos,
-                                              Eigen::MatrixXd &jacobian_error_state_robot_pos_wrt_input_command_att,
-                                              Eigen::MatrixXd &jacobian_error_state_robot_att_wrt_input_command_att,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_pos_wrt_input_command_pos,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_pos_wrt_input_command_att,
+                                              Eigen::Matrix3d &jacobian_error_state_robot_att_wrt_input_command_att,
                                               // Jacobians Noise: Fn
-                                              Eigen::MatrixXd& jacobian_error_state_pos_wrt_noise_pos,
-                                              Eigen::MatrixXd& jacobian_error_state_att_wrt_noise_att
+                                              Eigen::Matrix3d& jacobian_error_state_pos_wrt_noise_pos,
+                                              Eigen::Matrix3d& jacobian_error_state_att_wrt_noise_att
                                               );
 
 

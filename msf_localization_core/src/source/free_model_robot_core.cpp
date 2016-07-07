@@ -744,7 +744,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // posi / posi
             {
-                // Eigen::MatrixXd::Identity(3,3);
+                // Eigen::Matrix3d::Identity(3,3);
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,1));
                 dimension_error_state_j+=3;
@@ -753,7 +753,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // posi / vel
             {
-                // Eigen::MatrixXd::Identity(3,3)*dt;
+                // Eigen::Matrix3d::Identity(3,3)*dt;
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,dt));
                 dimension_error_state_j+=3;
@@ -762,7 +762,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // posi / acc
             {
-                // 0.5*Eigen::MatrixXd::Identity(3,3)*pow(dt,2);
+                // 0.5*Eigen::Matrix3d::Identity(3,3)*pow(dt,2);
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,0.5*dt2));
                 dimension_error_state_j+=3;
@@ -785,7 +785,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // vel / vel
             {
-                // Eigen::MatrixXd::Identity(3,3);
+                // Eigen::Matrix3d::Identity(3,3);
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,1));
                 dimension_error_state_j+=3;
@@ -793,7 +793,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // vel / acc
             {
-                // Eigen::MatrixXd::Identity(3,3)*dt;
+                // Eigen::Matrix3d::Identity(3,3)*dt;
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,dt));
                 dimension_error_state_j+=3;
@@ -822,7 +822,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // acc / acc
             {
-                // Eigen::MatrixXd::Identity(3,3);
+                // Eigen::Matrix3d::Identity(3,3);
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,1));
                 dimension_error_state_j+=3;
@@ -846,19 +846,14 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
         // Auxiliar Matrixes
         Eigen::Matrix4d quat_mat_plus_quat_ref_k1=Quaternion::quatMatPlus(predictedState->attitude_robot_wrt_world_);
         Eigen::Matrix4d quat_mat_plus_quat_ref_k1_inv=quat_mat_plus_quat_ref_k1.inverse();
-        Eigen::MatrixXd mat_delta_q_delta_theta(4, 3);
-        mat_delta_q_delta_theta.setZero();
-        mat_delta_q_delta_theta(1,0)=1;
-        mat_delta_q_delta_theta(2,1)=1;
-        mat_delta_q_delta_theta(3,2)=1;
         Eigen::Matrix4d quat_mat_plus_quat_ref_k=Quaternion::quatMatPlus(pastState->attitude_robot_wrt_world_);
         Eigen::Matrix4d quat_mat_minus_quat_ref_k=Quaternion::quatMatMinus(pastState->attitude_robot_wrt_world_);
-        Eigen::MatrixXd mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
+        Eigen::Matrix<double, 4, 3> mat_jacobian_w_mean_dt_to_quat=Quaternion::jacobianRotationVectorToQuaternion(w_mean_dt);
         Eigen::Matrix3d skew_mat_alpha_dt=Quaternion::skewSymMat(pastState->angular_acceleration_robot_wrt_world_*dt);
-        Eigen::MatrixXd mat_aux_j2(4,3);
+        Eigen::Matrix<double, 4, 3> mat_aux_j2;//(4,3);
         mat_aux_j2.setZero();
         mat_aux_j2.block<3,3>(1,0)=-skew_mat_alpha_dt;
-        Eigen::MatrixXd mat_aux_j3(4,3);
+        Eigen::Matrix<double, 4, 3> mat_aux_j3;//(4,3);
         mat_aux_j3.setZero();
         mat_aux_j3.block<3,3>(1,0)=skew_mat_alpha_dt*dt;
 
@@ -883,7 +878,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
             // att / att [9 non-zero]
             {
                 Eigen::Matrix3d jacobianAttAtt=
-                        mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+dt2/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*mat_delta_q_delta_theta;
+                        Quaternion::jacobians.mat_diff_error_theta_wrt_error_quat_sparse*quat_mat_plus_quat_ref_k1_inv*(Quaternion::quatMatPlus(quat_w_mean_dt)+dt2/24*Quaternion::quatMatPlus(quat_for_second_order_correction))*quat_mat_plus_quat_ref_k*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
                 BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobianAttAtt, dimension_error_state_i, dimension_error_state_j);
                 dimension_error_state_j+=3;
             }
@@ -893,7 +888,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
             // att / ang_vel [9 non-zero]
             {
                 Eigen::Matrix3d jacobianAttAngVel=
-                        2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + dt2/24*mat_aux_j2);
+                        Quaternion::jacobians.mat_diff_error_theta_wrt_error_quat_sparse*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*dt + dt2/24*mat_aux_j2);
                 BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobianAttAngVel, dimension_error_state_i, dimension_error_state_j);
                 dimension_error_state_j+=3;
             }
@@ -902,7 +897,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
             // att / ang_accel [9 non-zero]
             {
                 Eigen::Matrix3d jacobianAttAngAcc=
-                        2*mat_delta_q_delta_theta.transpose()*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*dt2 + dt2/24*mat_aux_j3);
+                        Quaternion::jacobians.mat_diff_error_theta_wrt_error_quat_sparse*quat_mat_plus_quat_ref_k1_inv*quat_mat_minus_quat_ref_k*(mat_jacobian_w_mean_dt_to_quat*0.5*dt2 + dt2/24*mat_aux_j3);
                 BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobianAttAngAcc, dimension_error_state_i, dimension_error_state_j);
                 dimension_error_state_j+=3;
             }
@@ -929,7 +924,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // ang_vel / ang_vel [3 non-zero]
             {
-                // Eigen::MatrixXd::Identity(3,3);
+                // Eigen::Matrix3d::Identity(3,3);
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,1));
                 dimension_error_state_j+=3;
@@ -939,7 +934,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // ang_vel / ang_acc [3 non-zero]
             {
-                // Eigen::MatrixXd::Identity(3,3)*dt;
+                // Eigen::Matrix3d::Identity(3,3)*dt;
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,dt));
                 dimension_error_state_j+=3;
@@ -973,7 +968,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
             // ang_acc / ang_acc [3 non-zero]
             {
-                // Eigen::MatrixXd::Identity(3,3);
+                // Eigen::Matrix3d::Identity(3,3);
                 for(int i=0; i<3; i++)
                     triplet_list_jacobian_error_state_wrt_error_state.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_error_state_j+i,1));
                 dimension_error_state_j+=3;
@@ -1046,7 +1041,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
         // Linear Acceleration
         {
-            //jacobian_error_state_noise.block<3,3>(6,0)=Eigen::MatrixXd::Identity(3,3);
+            //jacobian_error_state_noise.block<3,3>(6,0)=Eigen::Matrix3d::Identity(3,3);
             for(int i=0; i<3; i++)
                 tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
             dimension_state_i+=3;
@@ -1071,7 +1066,7 @@ int FreeModelRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 
         // Angular Acceleration
         {
-            //jacobian_error_state_noise.block<3,3>(15,3)=Eigen::MatrixXd::Identity(3,3);
+            //jacobian_error_state_noise.block<3,3>(15,3)=Eigen::Matrix3d::Identity(3,3);
             for(int i=0; i<3; i++)
                 tripletListNoiseJacobian.push_back(Eigen::Triplet<double>(dimension_state_i+i,dimension_noise_i+i,1));
             dimension_state_i+=3;
