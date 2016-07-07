@@ -18,7 +18,8 @@ enum class MeasurementTypes
     undefined=0,
     imu=1,
     coded_visual_marker=2,
-    mocap
+    mocap,
+    px4flow
 };
 
 
@@ -31,6 +32,9 @@ public:
 
 protected:
     int init();
+
+public:
+    virtual bool measurementSet() {return false;};
 
 protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer

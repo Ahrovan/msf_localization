@@ -1,12 +1,10 @@
-
-#include "msf_localization_core/imu_sensor_core.h"
+#include "msf_localization_core/px4flow_sensor_core.h"
 
 // Circular Dependency
-//#include "msf_localization_core/msf_storage_core.h"
 #include "msf_localization_core/msfLocalization.h"
 
 
-ImuSensorCore::ImuSensorCore() :
+Px4FlowSensorCore::Px4FlowSensorCore() :
     SensorCore()
 {
     init();
@@ -14,48 +12,39 @@ ImuSensorCore::ImuSensorCore() :
     return;
 }
 
-ImuSensorCore::ImuSensorCore(MsfLocalizationCore *msf_localization_core_ptr) :
+Px4FlowSensorCore::Px4FlowSensorCore(MsfLocalizationCore *msf_localization_core_ptr) :
     SensorCore(msf_localization_core_ptr)
 {
-    //std::cout<<"ImuSensorCore::ImuSensorCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
 
     init();
 
     return;
 }
 
-ImuSensorCore::~ImuSensorCore()
+Px4FlowSensorCore::~Px4FlowSensorCore()
 {
     return;
 }
 
-int ImuSensorCore::init()
+int Px4FlowSensorCore::init()
 {
     // Sensor Type
-    setSensorType(SensorTypes::imu);
+    setSensorType(SensorTypes::px4flow);
 
-
-    // Sensor name -> Default
-    //sensor_name_="imu_sensor";
 
     // Flags measurement
-    flagMeasurementOrientation=false;
-    flagMeasurementAngularVelocity=false;
-    flagMeasurementLinearAcceleration=false;
+    flag_measurement_velocity_=false;
+    flag_measurement_ground_distance_=false;
 
     // Flags estimation -> By default are considered parameters
-    flagEstimationBiasAngularVelocity=false;
-    flagEstimationScaleAngularVelocity=false;
-    flagEstimationBiasLinearAcceleration=false;
-    flagEstimationScaleLinearAcceleration=false;
 
     // State -> Again just in case
     dimension_error_state_=0;
     dimension_state_=0;
 
     // Parameters
-    dimension_parameters_+=3+3; // TODO Sensitivities
-    dimension_error_parameters_+=3+3; // TODO Sensitivities
+    dimension_parameters_+=0;
+    dimension_error_parameters_+=0;
 
     // Dimension measurements -> Again just in case
     dimension_measurement_=0;
@@ -65,28 +54,26 @@ int ImuSensorCore::init()
     dimension_noise_=0;
 
     // Noises measurements
-    noiseMeasurementAngularVelocity.setZero();
-    noiseMeasurementLinearAcceleration.setZero();
+    noise_measurement_velocity_.setZero();
+    noise_measurement_ground_distance_=0;
+
 
     // Noises parameters
-    noiseBiasAngularVelocity.setZero();
-    noiseScaleAngularVelocity.setZero();
-    noiseBiasLinearAcceleration.setZero();
-    noiseScaleLinearAcceleration.setZero();
+    //noiseBiasAngularVelocity.setZero();
 
     // Noises estimation
-    noiseEstimationBiasAngularVelocity.setZero();
-    noiseEstimationBiasLinearAcceleration.setZero();
+    //noiseEstimationBiasAngularVelocity.setZero();
+
 
     return 0;
 }
 
-int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore)
+int Px4FlowSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int sensor_id, std::shared_ptr<Px4FlowSensorStateCore>& sensor_init_state)
 {
 
     // Create a class for the SensorStateCore
-    if(!SensorInitStateCore)
-        SensorInitStateCore=std::make_shared<ImuSensorStateCore>(this->getMsfElementCoreWeakPtr());
+    if(!sensor_init_state)
+        sensor_init_state=std::make_shared<Px4FlowSensorStateCore>(this->getMsfElementCoreWeakPtr());
 
 
     // Set Id
@@ -122,6 +109,7 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
     /// Other Parameters
     pugi::xml_node parameters = sensor.child("parameters");
 
+    /*
     // Angular Velocity
     pugi::xml_node param_angular_velocity = parameters.child("angular_velocity");
 
@@ -138,19 +126,8 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
     {
         this->enableEstimationScaleAngularVelocity();
     }
+    */
 
-    // Linear Acceleration
-    pugi::xml_node param_linear_acceleration = parameters.child("linear_acceleration");
-
-    // Linear Acceleration Biases
-    readingValue=param_linear_acceleration.child("biases").child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableEstimationBiasLinearAcceleration();
-
-    // Linear Acceleration Scale
-    readingValue=param_linear_acceleration.child("scale").child_value("enabled");
-    if(std::stoi(readingValue))
-        this->enableEstimationScaleLinearAcceleration();
 
 
 
@@ -158,48 +135,38 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
     pugi::xml_node measurements = sensor.child("measurements");
 
 
-    /// Linear Acceleration
-    pugi::xml_node meas_linear_acceleration = measurements.child("linear_acceleration");
+    /// Velocity
+    pugi::xml_node meas_velocity = measurements.child("velocity");
 
-    readingValue=meas_linear_acceleration.child_value("enabled");
+    readingValue=meas_velocity.child_value("enabled");
     if(std::stoi(readingValue))
-        this->enableMeasurementLinearAcceleration();
+        this->enableMeasurementVelocity();
 
-    readingValue=meas_linear_acceleration.child_value("var");
+    readingValue=meas_velocity.child_value("var");
     if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseMeasurementLinearAcceleration(variance.asDiagonal());
+        Eigen::Vector2d variance;
+        stm>>variance[0]>>variance[1];
+        this->setNoiseMeasurementVelocity(variance.asDiagonal());
     }
 
+    /// Ground Distance
+    pugi::xml_node meas_ground_distance = measurements.child("ground_distance");
 
-    /// Orientation
-    pugi::xml_node orientation = measurements.child("orientation");
-
-    readingValue=orientation.child_value("enabled");
-    // TODO
-
-    readingValue=orientation.child_value("var");
-    // TODO
-
-
-    /// Angular Velocity
-    pugi::xml_node meas_angular_velocity = measurements.child("angular_velocity");
-
-    readingValue=meas_angular_velocity.child_value("enabled");
+    readingValue=meas_ground_distance.child_value("enabled");
     if(std::stoi(readingValue))
-        this->enableMeasurementAngularVelocity();
+        this->enableMeasurementGroundDistance();
 
-    readingValue=meas_angular_velocity.child_value("var");
+    readingValue=meas_ground_distance.child_value("var");
     if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseMeasurementAngularVelocity(variance.asDiagonal());
+        double variance;
+        stm>>variance;
+        this->setNoiseMeasurementGroundDistance(variance);
     }
+
 
 
     //// Init State
@@ -213,7 +180,7 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setPositionSensorWrtRobot(init_estimation);
+        sensor_init_state->setPositionSensorWrtRobot(init_estimation);
     }
 
     // Attitude of the sensor wrt robot
@@ -223,51 +190,24 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
         std::istringstream stm(readingValue);
         Eigen::Vector4d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2]>>init_estimation[3];
-        SensorInitStateCore->setAttitudeSensorWrtRobot(init_estimation);
+        sensor_init_state->setAttitudeSensorWrtRobot(init_estimation);
     }
 
 
     /// Parameters
 
     // Bias Angular Velocity
+    /*
     readingValue=param_angular_velocity.child("biases").child_value("init_estimation");
     if(!readingValue.empty())
     {
         std::istringstream stm(readingValue);
         Eigen::Vector3d init_estimation;
         stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setBiasesAngularVelocity(init_estimation);
-    }
+        sensor_init_state->setBiasesAngularVelocity(init_estimation);
+    }*/
 
-    // Scale Angular Velocity
-    readingValue=param_angular_velocity.child("scale").child_value("init_estimation");
-    if(!readingValue.empty())
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setScaleAngularVelocity(init_estimation);
-    }
 
-    // Bias Linear Acceleration
-    readingValue=param_linear_acceleration.child("biases").child_value("init_estimation");
-    if(!readingValue.empty())
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setBiasesLinearAcceleration(init_estimation);
-    }
-
-    // Scale Linear Acceleration
-    readingValue=param_linear_acceleration.child("scale").child_value("init_estimation");
-    if(!readingValue.empty())
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d init_estimation;
-        stm>>init_estimation[0]>>init_estimation[1]>>init_estimation[2];
-        SensorInitStateCore->setScaleLinearAcceleration(init_estimation);
-    }
 
 
     //// Init Variances
@@ -297,6 +237,7 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
 
     /// Other Parameters
 
+    /*
     // Bias Linear Acceleration
     readingValue=param_linear_acceleration.child("biases").child_value("init_var");
     if(!readingValue.empty())
@@ -306,40 +247,14 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
         stm>>variance[0]>>variance[1]>>variance[2];
         this->setNoiseBiasLinearAcceleration(variance.asDiagonal());
     }
+    */
 
-    // Scale Linear Acceleration
-    readingValue=param_linear_acceleration.child("scale").child_value("init_var");
-    if(!readingValue.empty())
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseScaleLinearAcceleration(variance.asDiagonal());
-    }
 
-    // Bias Angular Velocity
-    readingValue=param_angular_velocity.child("biases").child_value("init_var");
-    if(!readingValue.empty())
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseBiasAngularVelocity(variance.asDiagonal());
-    }
-
-    // Scale Angular Velocity
-    readingValue=param_angular_velocity.child("scale").child_value("init_var");
-    if(!readingValue.empty())
-    {
-        std::istringstream stm(readingValue);
-        Eigen::Vector3d variance;
-        stm>>variance[0]>>variance[1]>>variance[2];
-        this->setNoiseScaleAngularVelocity(variance.asDiagonal());
-    }
 
 
     // Noises in the estimation (if enabled)
 
+    /*
     // Bias Linear Acceleration
     if(this->isEstimationBiasLinearAccelerationEnabled())
     {
@@ -352,25 +267,8 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
             this->setNoiseEstimationBiasLinearAcceleration(variance.asDiagonal());
         }
     }
+    */
 
-    // Sensitivity
-    // TODO
-
-    // Bias Angular Velocity
-    if(this->isEstimationBiasAngularVelocityEnabled())
-    {
-        readingValue=param_angular_velocity.child("biases").child_value("noise");
-        if(!readingValue.empty())
-        {
-            std::istringstream stm(readingValue);
-            Eigen::Vector3d variance;
-            stm>>variance[0]>>variance[1]>>variance[2];
-            this->setNoiseEstimationBiasAngularVelocity(variance.asDiagonal());
-        }
-    }
-
-    // Sensitivity
-    // TODO
 
 
     // Prepare covariance matrix
@@ -383,427 +281,95 @@ int ImuSensorCore::readConfig(const pugi::xml_node& sensor, const unsigned int s
     return 0;
 }
 
-bool ImuSensorCore::isMeasurementOrientationEnabled() const
+bool Px4FlowSensorCore::isMeasurementVelocityEnabled() const
 {
-    return flagMeasurementOrientation;
+    return this->flag_measurement_velocity_;
 }
 
-int ImuSensorCore::enableMeasurementOrientation()
+void Px4FlowSensorCore::enableMeasurementVelocity()
 {
-    if(!this->flagMeasurementOrientation)
+    if(this->flag_measurement_velocity_==false)
     {
-        this->flagMeasurementOrientation=true;
-        this->dimension_measurement_+=4;
-        dimension_error_measurement_+=3;
+        this->flag_measurement_velocity_=true;
+        dimension_error_measurement_+=2;
+        dimension_measurement_+=2;
     }
-    return 0;
+    return;
 }
 
-bool ImuSensorCore::isMeasurementAngularVelocityEnabled() const
+Eigen::Matrix2d Px4FlowSensorCore::getNoiseMeasurementVelocity() const
 {
-    return flagMeasurementAngularVelocity;
+    return this->noise_measurement_velocity_;
 }
 
-int ImuSensorCore::enableMeasurementAngularVelocity()
+void Px4FlowSensorCore::setNoiseMeasurementVelocity(const Eigen::Matrix2d& noise_measurement_velocity)
 {
-    if(!this->flagMeasurementAngularVelocity)
+    this->noise_measurement_velocity_=noise_measurement_velocity;
+    return;
+}
+
+bool Px4FlowSensorCore::isMeasurementGroundDistanceEnabled() const
+{
+    return this->flag_measurement_ground_distance_;
+}
+
+void Px4FlowSensorCore::enableMeasurementGroundDistance()
+{
+    if(this->flag_measurement_ground_distance_==false)
     {
-        this->flagMeasurementAngularVelocity=true;
-        this->dimension_measurement_+=3;
-        dimension_error_measurement_+=3;
+        flag_measurement_ground_distance_=true;
+        dimension_error_measurement_+=1;
+        dimension_measurement_+=1;
     }
-    return 0;
+    return;
 }
 
-Eigen::Matrix3d ImuSensorCore::getNoiseMeasurementAngularVelocity() const
+double Px4FlowSensorCore::getNoiseMeasurementGroundDistance() const
 {
-    return this->noiseMeasurementAngularVelocity;
+    return this->noise_measurement_ground_distance_;
 }
 
-int ImuSensorCore::setNoiseMeasurementAngularVelocity(const Eigen::Matrix3d &noiseMeasurementAngularVelocity)
+void Px4FlowSensorCore::setNoiseMeasurementGroundDistance(double noise_measurement_ground_distance)
 {
-    this->noiseMeasurementAngularVelocity=noiseMeasurementAngularVelocity;
-    return 0;
+    this->noise_measurement_ground_distance_=noise_measurement_ground_distance;
+    return;
 }
 
-
-bool ImuSensorCore::isMeasurementLinearAccelerationEnabled() const
+Eigen::SparseMatrix<double> Px4FlowSensorCore::getCovarianceMeasurement()
 {
-    return flagMeasurementLinearAcceleration;
-}
+    Eigen::SparseMatrix<double> covariances_matrix;
 
-int ImuSensorCore::enableMeasurementLinearAcceleration()
-{
-    if(!this->flagMeasurementLinearAcceleration)
-    {
-        this->flagMeasurementLinearAcceleration=true;
-        this->dimension_measurement_+=3;
-        dimension_error_measurement_+=3;
-    }
-    return 0;
-}
+    covariances_matrix.resize(this->getDimensionErrorMeasurement(), this->getDimensionErrorMeasurement());
+    //covariances_matrix.setZero();
+    covariances_matrix.reserve(this->getDimensionErrorMeasurement());
 
-Eigen::Matrix3d ImuSensorCore::getNoiseMeasurementLinearAcceleration() const
-{
-    return this->noiseMeasurementLinearAcceleration;
-}
-
-int ImuSensorCore::setNoiseMeasurementLinearAcceleration(const Eigen::Matrix3d &noiseMeasurementLinearAcceleration)
-{
-    this->noiseMeasurementLinearAcceleration=noiseMeasurementLinearAcceleration;
-
-    return 0;
-}
-
-
-int ImuSensorCore::setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
-{
-    if(!isSensorEnabled())
-        return 0;
-
-    if(!this->isCorrect())
-        std::cout<<"ERROR"<<std::endl;
-
-
-    this->getMsfLocalizationCorePtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
-
-    return 0;
-}
-
-
-bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const
-{
-    return this->flagEstimationBiasAngularVelocity;
-}
-
-int ImuSensorCore::enableEstimationBiasAngularVelocity()
-{
-    if(!this->flagEstimationBiasAngularVelocity)
-    {
-        // Enable
-        this->flagEstimationBiasAngularVelocity=true;
-        // Update State Dimension
-        this->dimension_state_+=3;
-        // Update Error State Dimension
-        this->dimension_error_state_+=3;
-        //
-        this->dimension_parameters_-=3;
-        //
-        this->dimension_error_parameters_-=3;
-        //
-        this->dimension_noise_+=3;
-    }
-    return 0;
-}
-
-int ImuSensorCore::enableParameterBiasAngularVelocity()
-{
-    if(this->flagEstimationBiasAngularVelocity)
-    {
-        // Enable
-        this->flagEstimationBiasAngularVelocity=false;
-        // Update State Dimension
-        this->dimension_state_-=3;
-        // Update Error State Dimension
-        this->dimension_error_state_-=3;
-        //
-        this->dimension_parameters_+=3;
-        //
-        this->dimension_error_parameters_+=3;
-        //
-        this->dimension_noise_-=3;
-    }
-    return 0;
-}
-
-Eigen::Matrix3d ImuSensorCore::getNoiseBiasAngularVelocity() const
-{
-    return this->noiseBiasAngularVelocity;
-}
-
-int ImuSensorCore::setNoiseBiasAngularVelocity(const Eigen::Matrix3d &noiseBiasAngularVelocity)
-{
-    this->noiseBiasAngularVelocity=noiseBiasAngularVelocity;
-    return 0;
-}
-
-
-// Angular Velocity biases: Estimation Covariance (if enabled estimation)
-Eigen::Matrix3d ImuSensorCore::getNoiseEstimationBiasAngularVelocity() const
-{
-    return this->noiseEstimationBiasAngularVelocity;
-}
-
-int ImuSensorCore::setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noiseEstimationBiasAngularVelocity)
-{
-    this->noiseEstimationBiasAngularVelocity=noiseEstimationBiasAngularVelocity;
-    return 0;
-}
-
-
-bool ImuSensorCore::isEstimationScaleAngularVelocityEnabled() const
-{
-    return this->flagEstimationScaleAngularVelocity;
-}
-
-int ImuSensorCore::enableEstimationScaleAngularVelocity()
-{
-    if(!this->flagEstimationScaleAngularVelocity)
-    {
-        // Enable
-        this->flagEstimationScaleAngularVelocity=true;
-        // Update State Dimension
-        this->dimension_state_+=3;
-        // Update Error State Dimension
-        this->dimension_error_state_+=3;
-        //
-        this->dimension_parameters_-=3;
-        //
-        this->dimension_error_parameters_-=3;
-    }
-    return 0;
-}
-
-int ImuSensorCore::enableParameterScaleAngularVelocity()
-{
-    if(this->flagEstimationScaleAngularVelocity)
-    {
-        // Enable
-        this->flagEstimationScaleAngularVelocity=false;
-        // Update State Dimension
-        this->dimension_state_-=3;
-        // Update Error State Dimension
-        this->dimension_error_state_-=3;
-        //
-        this->dimension_parameters_+=3;
-        //
-        this->dimension_error_parameters_+=3;
-    }
-    return 0;
-}
-
-Eigen::Matrix3d ImuSensorCore::getNoiseScaleAngularVelocity() const
-{
-    return this->noiseScaleAngularVelocity;
-}
-
-int ImuSensorCore::setNoiseScaleAngularVelocity(const Eigen::Matrix3d &noiseScaleAngularVelocity)
-{
-    this->noiseScaleAngularVelocity=noiseScaleAngularVelocity;
-    return 0;
-}
-
-
-bool ImuSensorCore::isEstimationSensitivityAngularVelocityEnabled() const
-{
-    return this->flagEstimationSensitivityAngularVelocity;
-}
-
-int ImuSensorCore::enableEstimationSensitivityAngularVelocity()
-{
-    if(!this->flagEstimationSensitivityAngularVelocity)
-    {
-        // Enable
-        this->flagEstimationSensitivityAngularVelocity=true;
-        // Update State Dimension
-        this->dimension_state_+=9;
-        // Update Error State Dimension
-        this->dimension_error_state_+=9;
-        //
-        this->dimension_parameters_-=9;
-        //
-        this->dimension_error_parameters_-=9;
-    }
-    return 0;
-}
-
-int ImuSensorCore::enableParameterSensitivityAngularVelocity()
-{
-    if(this->flagEstimationSensitivityAngularVelocity)
-    {
-        // Enable
-        this->flagEstimationSensitivityAngularVelocity=false;
-        // Update State Dimension
-        this->dimension_state_-=9;
-        // Update Error State Dimension
-        this->dimension_error_state_-=9;
-        //
-        this->dimension_parameters_+=9;
-        //
-        this->dimension_error_parameters_+=9;
-    }
-    return 0;
-}
-
-
-
-
-bool ImuSensorCore::isEstimationBiasLinearAccelerationEnabled() const
-{
-    return this->flagEstimationBiasLinearAcceleration;
-}
-
-int ImuSensorCore::enableEstimationBiasLinearAcceleration()
-{
-    if(!this->flagEstimationBiasLinearAcceleration)
-    {
-        // Enable
-        this->flagEstimationBiasLinearAcceleration=true;
-        // Update State Dimension
-        this->dimension_state_+=3;
-        // Update Error State Dimension
-        this->dimension_error_state_+=3;
-        //
-        this->dimension_parameters_-=3;
-        //
-        this->dimension_error_parameters_-=3;
-        //
-        this->dimension_noise_+=3;
-    }
-    return 0;
-}
-
-int ImuSensorCore::enableParameterBiasLinearAcceleration()
-{
-    if(this->flagEstimationBiasLinearAcceleration)
-    {
-        // Enable
-        this->flagEstimationBiasLinearAcceleration=false;
-        // Update State Dimension
-        this->dimension_state_-=3;
-        // Update Error State Dimension
-        this->dimension_error_state_-=3;
-        //
-        this->dimension_parameters_+=3;
-        //
-        this->dimension_error_parameters_+=3;
-        //
-        this->dimension_noise_-=3;
-    }
-    return 0;
-}
-
-Eigen::Matrix3d ImuSensorCore::getNoiseBiasLinearAcceleration() const
-{
-    return this->noiseBiasLinearAcceleration;
-}
-
-int ImuSensorCore::setNoiseBiasLinearAcceleration(const Eigen::Matrix3d &noiseBiasLinearAcceleration)
-{
-    this->noiseBiasLinearAcceleration=noiseBiasLinearAcceleration;
-    return 0;
-}
-
-Eigen::Matrix3d ImuSensorCore::getNoiseEstimationBiasLinearAcceleration() const
-{
-    return this->noiseEstimationBiasLinearAcceleration;
-}
-
-int ImuSensorCore::setNoiseEstimationBiasLinearAcceleration(const Eigen::Matrix3d &noiseEstimationBiasLinearAcceleration)
-{
-    this->noiseEstimationBiasLinearAcceleration=noiseEstimationBiasLinearAcceleration;
-    return 0;
-}
-
-
-bool ImuSensorCore::isEstimationScaleLinearAccelerationEnabled() const
-{
-    return this->flagEstimationScaleLinearAcceleration;
-}
-
-int ImuSensorCore::enableEstimationScaleLinearAcceleration()
-{
-    if(!this->flagEstimationScaleLinearAcceleration)
-    {
-        // Enable
-        this->flagEstimationScaleLinearAcceleration=true;
-        // Update State Dimension
-        this->dimension_state_+=3;
-        // Update Error State Dimension
-        this->dimension_error_state_+=3;
-        //
-        this->dimension_parameters_-=3;
-        //
-        this->dimension_error_parameters_-=3;
-    }
-    return 0;
-}
-
-int ImuSensorCore::enableParameterScaleLinearAcceleration()
-{
-    if(this->flagEstimationScaleLinearAcceleration)
-    {
-        // Enable
-        this->flagEstimationScaleLinearAcceleration=false;
-        // Update State Dimension
-        this->dimension_state_-=3;
-        // Update Error State Dimension
-        this->dimension_error_state_-=3;
-        //
-        this->dimension_parameters_+=3;
-        //
-        this->dimension_error_parameters_+=3;
-    }
-    return 0;
-}
-
-Eigen::Matrix3d ImuSensorCore::getNoiseScaleLinearAcceleration() const
-{
-    return this->noiseScaleLinearAcceleration;
-}
-
-int ImuSensorCore::setNoiseScaleLinearAcceleration(const Eigen::Matrix3d &noiseScaleLinearAcceleration)
-{
-    this->noiseScaleLinearAcceleration=noiseScaleLinearAcceleration;
-    return 0;
-}
-
-Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceMeasurement()
-{
-    Eigen::SparseMatrix<double> CovariancesMatrix;
-
-    CovariancesMatrix.resize(this->getDimensionErrorMeasurement(), this->getDimensionErrorMeasurement());
-    //CovariancesMatrix.setZero();
-    CovariancesMatrix.reserve(this->getDimensionErrorMeasurement());
-
-    std::vector<Eigen::Triplet<double> > tripletCovarianceMeasurement;
+    std::vector<Eigen::Triplet<double> > triplets_covariance_measurement;
 
     unsigned int dimension=0;
-    if(this->isMeasurementLinearAccelerationEnabled())
-    {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementLinearAcceleration();
 
-        for(int i=0; i<3; i++)
-            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseMeasurementLinearAcceleration(i,i)));
-
-        dimension+=3;
-    }
-    if(this->isMeasurementOrientationEnabled())
+    if(isMeasurementVelocityEnabled())
     {
-        // TODO
-        dimension+=3;
-    }
-    if(this->isMeasurementAngularVelocityEnabled())
-    {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseMeasurementAngularVelocity();
-
-        for(int i=0; i<3; i++)
-            tripletCovarianceMeasurement.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseMeasurementAngularVelocity(i,i)));
+        for(int i=0; i<2; i++)
+            triplets_covariance_measurement.push_back(Eigen::Triplet<double>(dimension+i, dimension+i, noise_measurement_velocity_(i,i)));
 
         dimension+=3;
     }
 
-    CovariancesMatrix.setFromTriplets(tripletCovarianceMeasurement.begin(), tripletCovarianceMeasurement.end());
+    if(isMeasurementGroundDistanceEnabled())
+    {
+        triplets_covariance_measurement.push_back(Eigen::Triplet<double>(dimension, dimension, noise_measurement_ground_distance_));
+
+        dimension+=1;
+    }
 
 
-//    std::cout<<"CovariancesMatrix="<<std::endl;
-//    std::cout<<Eigen::MatrixXd(CovariancesMatrix)<<std::endl;
+    covariances_matrix.setFromTriplets(triplets_covariance_measurement.begin(), triplets_covariance_measurement.end());
 
 
-    return CovariancesMatrix;
+    return covariances_matrix;
 }
 
-Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
+Eigen::SparseMatrix<double> Px4FlowSensorCore::getCovarianceParameters()
 {
     Eigen::SparseMatrix<double> CovariancesMatrix;
 
@@ -815,8 +381,6 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
     unsigned int dimension=0;
     if(!this->isEstimationPositionSensorWrtRobotEnabled())
     {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoisePositionSensorWrtRobot();
-
         for(int i=0; i<3; i++)
             tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noisePositionSensorWrtRobot(i,i)));
 
@@ -825,13 +389,12 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
     }
     if(!this->isEstimationAttitudeSensorWrtRobotEnabled())
     {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseAttitudeSensorWrtRobot();
-
         for(int i=0; i<3; i++)
             tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseAttitudeSensorWrtRobot(i,i)));
 
         dimension+=3;
     }
+    /*
     if(!this->isEstimationBiasLinearAccelerationEnabled())
     {
         //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasLinearAcceleration();
@@ -841,39 +404,8 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
 
         dimension+=3;
     }
-    /*
-    // TODO
-    if(!this->isEstimationScaleLinearAccelerationEnabled())
-    {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleLinearAcceleration();
-
-        for(int i=0; i<3; i++)
-            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseScaleLinearAcceleration(i,i)));
-
-        dimension+=3;
-    }
     */
-    if(!this->isEstimationBiasAngularVelocityEnabled())
-    {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseBiasAngularVelocity();
 
-        for(int i=0; i<3; i++)
-            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseBiasAngularVelocity(i,i)));
-
-        dimension+=3;
-    }
-    /*
-    // TODO
-    if(!this->isEstimationScaleAngularVelocityEnabled())
-    {
-        //CovariancesMatrix.block<3,3>(dimension, dimension)=this->getNoiseScaleAngularVelocity();
-
-        for(int i=0; i<3; i++)
-            tripletCovarianceParameters.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noiseScaleAngularVelocity(i,i)));
-
-        dimension+=3;
-    }
-    */
 
     CovariancesMatrix.setFromTriplets(tripletCovarianceParameters.begin(), tripletCovarianceParameters.end());
 
@@ -881,7 +413,7 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceParameters()
     return CovariancesMatrix;
 }
 
-int ImuSensorCore::prepareCovarianceInitErrorStateSpecific()
+int Px4FlowSensorCore::prepareCovarianceInitErrorStateSpecific()
 {
     int point=0;
     if(this->isEstimationPositionSensorWrtRobotEnabled())
@@ -894,26 +426,20 @@ int ImuSensorCore::prepareCovarianceInitErrorStateSpecific()
         this->covariance_init_error_state_.block<3,3>(point,point)=noiseAttitudeSensorWrtRobot;
         point+=3;
     }
+    /*
     if(this->isEstimationBiasLinearAccelerationEnabled())
     {
         this->covariance_init_error_state_.block<3,3>(point,point)=noiseBiasLinearAcceleration;
         point+=3;
     }
-    // TODO
-    // Add ka
-    if(this->isEstimationBiasAngularVelocityEnabled())
-    {
-        this->covariance_init_error_state_.block<3,3>(point,point)=noiseBiasAngularVelocity;
-    }
-    // TODO
-    // Add kw
+    */
 
 
     return 0;
 }
 
 
-Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
+Eigen::SparseMatrix<double> Px4FlowSensorCore::getCovarianceNoise(const TimeStamp deltaTimeStamp)
 {
     Eigen::SparseMatrix<double> covariance_noise;
 
@@ -933,6 +459,7 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp de
 
     // Fill
     int dimension_noise_i=0;
+    /*
     if(isEstimationBiasLinearAccelerationEnabled())
     {
         //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasLinearAcceleration*deltaTimeStamp.get_double();
@@ -943,38 +470,26 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp de
 
         dimension_noise_i+=3;
     }
+    */
 
-    if(isEstimationBiasAngularVelocityEnabled())
-    {
-        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasAngularVelocity*deltaTimeStamp.get_double();
-
-        for(int i=0; i<3; i++)
-            tripletCovarianceNoise.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,noiseEstimationBiasAngularVelocity(i,i)*dt));
-
-
-        dimension_noise_i+=3;
-    }
 
 
     covariance_noise.setFromTriplets(tripletCovarianceNoise.begin(), tripletCovarianceNoise.end());
 
-
-//    std::cout<<"covariance_noise"<<std::endl;
-//    std::cout<<Eigen::MatrixXd(covariance_noise)<<std::endl;
 
 
     // End
     return covariance_noise;
 }
 
-int ImuSensorCore::predictState(//Time
-                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                 // Previous State
-                 const std::shared_ptr<StateComponent>& pastState,
-                 // Inputs
-                 const std::shared_ptr<InputCommandComponent>& inputCommand,
-                 // Predicted State
-                 std::shared_ptr<StateCore> &predictedState)
+int Px4FlowSensorCore::predictState(//Time
+                                     const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                     // Previous State
+                                     const std::shared_ptr<StateComponent>& pastState,
+                                     // Inputs
+                                     const std::shared_ptr<InputCommandComponent>& inputCommand,
+                                     // Predicted State
+                                     std::shared_ptr<StateCore> &predictedState)
 {
     // Checks
 
@@ -985,7 +500,7 @@ int ImuSensorCore::predictState(//Time
     // TODO
 
     // Search for the past sensor State Core
-    ImuSensorStateCore* past_sensor_state(nullptr);
+    Px4FlowSensorStateCore* past_sensor_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=pastState->TheListSensorStateCore.begin();
         it_sensor_state!=pastState->TheListSensorStateCore.end();
@@ -993,7 +508,7 @@ int ImuSensorCore::predictState(//Time
     {
         if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_sensor_state=dynamic_cast<ImuSensorStateCore*>((*it_sensor_state).get());
+            past_sensor_state=dynamic_cast<Px4FlowSensorStateCore*>((*it_sensor_state).get());
             break;
         }
     }
@@ -1002,23 +517,23 @@ int ImuSensorCore::predictState(//Time
 
 
     // Predicted State
-    ImuSensorStateCore* predicted_sensor_state(nullptr);
+    Px4FlowSensorStateCore* predicted_sensor_state(nullptr);
     // Create the prediction if it does not exist
     if(!predicted_sensor_state)
     {
-        predicted_sensor_state=new ImuSensorStateCore;
+        predicted_sensor_state=new Px4FlowSensorStateCore;
         predicted_sensor_state->setMsfElementCorePtr(past_sensor_state->getMsfElementCoreWeakPtr());
         predictedState=std::shared_ptr<StateCore>(predicted_sensor_state);
     }
     else
-        predicted_sensor_state=dynamic_cast<ImuSensorStateCore*>(predictedState.get());
+        predicted_sensor_state=dynamic_cast<Px4FlowSensorStateCore*>(predictedState.get());
 
 
 
     // Predict State
     int error_predict_state=predictStateSpecific(previousTimeStamp, currentTimeStamp,
-                                         past_sensor_state,
-                                         predicted_sensor_state);
+                                                 past_sensor_state,
+                                                 predicted_sensor_state);
 
     // Check error
     if(error_predict_state)
@@ -1032,15 +547,15 @@ int ImuSensorCore::predictState(//Time
 
 
 
-int ImuSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
-                                        const ImuSensorStateCore *pastState,
-                                        ImuSensorStateCore *&predictedState)
+int Px4FlowSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                            const Px4FlowSensorStateCore *pastState,
+                                            Px4FlowSensorStateCore *&predictedState)
 {
 
     // Checks in the past state
     if(!pastState->isCorrect())
     {
-        std::cout<<"ImuSensorCore::predictState() error !pastState->isCorrect()"<<std::endl;
+        std::cout<<"Px4FlowSensorCore::predictState() error !pastState->isCorrect()"<<std::endl;
         return -5;
     }
 
@@ -1048,7 +563,7 @@ int ImuSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, cons
     // Create the predicted state if it doesn't exists
     if(!predictedState)
     {
-        predictedState=new ImuSensorStateCore;
+        predictedState=new Px4FlowSensorStateCore;
         predictedState->setMsfElementCorePtr(pastState->getMsfElementCoreWeakPtr());
     }
 
@@ -1070,33 +585,20 @@ int ImuSensorCore::predictStateSpecific(const TimeStamp &previousTimeStamp, cons
 
 
     // Bias Angular Velocity
-    predictedState->biasesAngularVelocity=pastState->biasesAngularVelocity;
-
-
-    // Scale Angular Velocity
-    predictedState->scaleAngularVelocity=pastState->scaleAngularVelocity;
-
-
-    // Bias Linear Acceleration
-    predictedState->biasesLinearAcceleration=pastState->biasesLinearAcceleration;
-
-    // Scale Linear Velocity
-    predictedState->scaleLinearAcceleration=pastState->scaleLinearAcceleration;
-
-
+    //predictedState->biasesAngularVelocity=pastState->biasesAngularVelocity;
 
 
     return 0;
 }
 
-int ImuSensorCore::predictErrorStateJacobian(//Time
-                             const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                             // Previous State
-                             const std::shared_ptr<StateComponent>& past_state,
-                            // Inputs
-                            const std::shared_ptr<InputCommandComponent>& input_command,
-                             // Predicted State
-                             std::shared_ptr<StateCore> &predicted_state)
+int Px4FlowSensorCore::predictErrorStateJacobian(//Time
+                                                 const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
+                                                 // Previous State
+                                                 const std::shared_ptr<StateComponent>& past_state,
+                                                // Inputs
+                                                const std::shared_ptr<InputCommandComponent>& input_command,
+                                                 // Predicted State
+                                                 std::shared_ptr<StateCore> &predicted_state)
 {
     // Checks
 
@@ -1112,7 +614,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
 
 
     // Search for the past sensor State Core
-    ImuSensorStateCore* past_sensor_state(nullptr);
+    Px4FlowSensorStateCore* past_sensor_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=past_state->TheListSensorStateCore.begin();
         it_sensor_state!=past_state->TheListSensorStateCore.end();
@@ -1120,7 +622,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
     {
         if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            past_sensor_state=dynamic_cast<ImuSensorStateCore*>((*it_sensor_state).get());
+            past_sensor_state=dynamic_cast<Px4FlowSensorStateCore*>((*it_sensor_state).get());
             break;
         }
     }
@@ -1142,7 +644,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
 
 
     /// Predicted State Cast
-    ImuSensorStateCore* predicted_sensor_state=dynamic_cast<ImuSensorStateCore*>(predicted_state.get());
+    Px4FlowSensorStateCore* predicted_sensor_state=dynamic_cast<Px4FlowSensorStateCore*>(predicted_state.get());
 
 
     /// Get iterators to fill jacobians
@@ -1160,7 +662,7 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
         ++itSensorStateCore, ++it_jacobian_error_state_wrt_sensor_error_state, ++it_jacobian_error_state_wrt_sensor_error_parameters
         )
     {
-        if( dynamic_cast<ImuSensorStateCore*>((*itSensorStateCore).get()) == past_sensor_state )
+        if( dynamic_cast<Px4FlowSensorStateCore*>((*itSensorStateCore).get()) == past_sensor_state )
             break;
     }
 
@@ -1199,9 +701,9 @@ int ImuSensorCore::predictErrorStateJacobian(//Time
     return 0;
 }
 
-int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
-                                                      const ImuSensorStateCore *pastState,
-                                                      const ImuSensorStateCore *predictedState,
+int Px4FlowSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousTimeStamp, const TimeStamp &currentTimeStamp,
+                                                      const Px4FlowSensorStateCore *pastState,
+                                                      const Px4FlowSensorStateCore *predictedState,
                                                       // Jacobians Error State: Fx, Fp
                                                       // Sensor
                                                       Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
@@ -1228,8 +730,8 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
     // Jacobian: State
     Eigen::Matrix3d jacobian_error_sens_pos_wrt_error_state_sens_pos;
     Eigen::Matrix3d jacobian_error_sens_att_wrt_error_state_sens_att;
-    Eigen::Matrix3d jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc;
-    Eigen::Matrix3d jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel;
+    //Eigen::Matrix3d jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc;
+
 
 
 
@@ -1244,7 +746,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
 
 
     //// Core
-
+    /*
     int error_predict_error_state_jacobians_core=predictErrorStateJacobiansCore(// State k: Sensor
                                                                                 position_sensor_wrt_robot,
                                                                                 attitude_sensor_wrt_robot,
@@ -1259,7 +761,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
 
     if(error_predict_error_state_jacobians_core)
         return error_predict_error_state_jacobians_core;
-
+    */
 
     //// Jacobians Error State - Error State: Fx & Jacobians Error State - Error Parameters: Fp
     // TODO FIX!
@@ -1314,7 +816,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
             dimension_error_state_i+=3;
         }
 
-
+        /*
         // bias linear acceleration
         if(this->isEstimationBiasLinearAccelerationEnabled())
         {
@@ -1324,24 +826,8 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
             // Update dimension for next
             dimension_error_state_i+=3;
         }
+        */
 
-
-        // Ka
-        // TODO
-
-        // bias angular velocity
-        if(this->isEstimationBiasAngularVelocityEnabled())
-        {
-            // Add to the triplets
-            BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_state_wrt_error_state, jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel, dimension_error_state_i, dimension_error_state_i);
-
-            // Update dimension for next
-            dimension_error_state_i+=3;
-        }
-
-
-        // Kw
-        // TODO
 
 
 
@@ -1373,6 +859,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
         std::vector<Eigen::Triplet<double> > tripletJacobianErrorStateNoise;
 
 
+        /*
         // bias linear acceleration
         if(isEstimationBiasLinearAccelerationEnabled())
         {
@@ -1393,32 +880,8 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
             // Update dimension for next
             dimension_noise_i+=3;
         }
+        */
 
-        // bias angular velocity
-        if(isEstimationBiasAngularVelocityEnabled())
-        {
-            int dimension_error_state_i=0;
-
-            if(isEstimationPositionSensorWrtRobotEnabled())
-                dimension_error_state_i+=3;
-
-            if(isEstimationAttitudeSensorWrtRobotEnabled())
-                dimension_error_state_i+=3;
-
-            if(isEstimationBiasLinearAccelerationEnabled())
-                dimension_error_state_i+=3;
-
-            if(isEstimationScaleLinearAccelerationEnabled())
-                dimension_error_state_i+=3;
-
-            // Update jacobian
-            //jacobian_error_state_noise.block<3,3>(dimension_error_state_i, dimension_noise_i)=Eigen::Matrix3d::Identity(3,3);
-            for(int i=0; i<3; i++)
-                tripletJacobianErrorStateNoise.push_back(Eigen::Triplet<double>(dimension_error_state_i+i,dimension_noise_i+i,1));
-
-            // Update dimension for next
-            dimension_noise_i+=3;
-        }
 
 
         // Set From Triplets
@@ -1431,47 +894,7 @@ int ImuSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &previousT
     return 0;
 }
 
-
-int ImuSensorCore::predictErrorStateJacobiansCore(// State k: Sensor
-                                                  const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
-                                                  // TODO Add others
-                                                  // State k+1: Sensor
-                                                  const Eigen::Vector3d& pred_position_sensor_wrt_robot, const Eigen::Vector4d& pred_attitude_sensor_wrt_robot,
-                                                  // TODO add others
-                                                  // Jacobian: State Fx & Fp
-                                                  Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att,
-                                                  Eigen::Matrix3d& jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc,
-                                                  Eigen::Matrix3d& jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel
-                                                  )
-{
-
-
-    // posi sensor / posi sensor
-    jacobian_error_sens_pos_wrt_error_state_sens_pos=Eigen::Matrix3d::Identity();
-
-    // att sensor / att sensor
-    // TODO FIX
-    jacobian_error_sens_att_wrt_error_state_sens_att=Eigen::Matrix3d::Identity();
-
-
-    // ba / ba
-    jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc=Eigen::Matrix3d::Identity();;
-
-    // ka / ka
-    // TODO
-
-    // bw / bw
-    jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel=Eigen::Matrix3d::Identity();
-
-    // kw / kw
-    // TODO
-
-    // End
-    return 0;
-}
-
-
-int ImuSensorCore::predictMeasurement(// Time
+int Px4FlowSensorCore::predictMeasurement(// Time
                                        const TimeStamp& current_time_stamp,
                                        // Current State
                                        const std::shared_ptr<StateComponent>& current_state,
@@ -1497,24 +920,24 @@ int ImuSensorCore::predictMeasurement(// Time
 
 
     // Predicted Measurement
-    ImuSensorMeasurementCore* predicted_sensor_measurement(nullptr);
+    Px4FlowSensorMeasurementCore* predicted_sensor_measurement(nullptr);
     if(!predicted_measurement)
     {
-        predicted_sensor_measurement=new ImuSensorMeasurementCore;
+        predicted_sensor_measurement=new Px4FlowSensorMeasurementCore;
         predicted_sensor_measurement->setSensorCorePtr(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
-        predicted_measurement=std::shared_ptr<ImuSensorMeasurementCore>(predicted_sensor_measurement);
+        predicted_measurement=std::shared_ptr<Px4FlowSensorMeasurementCore>(predicted_sensor_measurement);
     }
     else
     {
         if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
             return -3;
-        predicted_sensor_measurement=dynamic_cast<ImuSensorMeasurementCore*>(predicted_measurement.get());
+        predicted_sensor_measurement=dynamic_cast<Px4FlowSensorMeasurementCore*>(predicted_measurement.get());
     }
 
 
 
     // Search for the current sensor State Core
-    ImuSensorStateCore* current_sensor_state(nullptr);
+    Px4FlowSensorStateCore* current_sensor_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
         it_sensor_state!=current_state->TheListSensorStateCore.end();
@@ -1522,7 +945,7 @@ int ImuSensorCore::predictMeasurement(// Time
     {
         if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            current_sensor_state=dynamic_cast<ImuSensorStateCore*>((*it_sensor_state).get());
+            current_sensor_state=dynamic_cast<Px4FlowSensorStateCore*>((*it_sensor_state).get());
             break;
         }
     }
@@ -1532,7 +955,6 @@ int ImuSensorCore::predictMeasurement(// Time
 
     // Predict State
     int error_predict_measurement=predictMeasurementSpecific(current_time_stamp,
-                                                             dynamic_cast<GlobalParametersStateCore*>(current_state->TheGlobalParametersStateCore.get()),
                                                              dynamic_cast<RobotStateCore*>(current_state->TheRobotStateCore.get()),
                                                              current_sensor_state,
                                                              predicted_sensor_measurement);
@@ -1547,15 +969,12 @@ int ImuSensorCore::predictMeasurement(// Time
     return 0;
 }
 
-int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
-                                      const GlobalParametersStateCore *TheGlobalParametersStateCore,
-                                      const RobotStateCore *currentRobotState,
-                                      const ImuSensorStateCore *currentImuState,
-                                      ImuSensorMeasurementCore *&predictedMeasurement)
+int Px4FlowSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
+                                                  const RobotStateCore *currentRobotState,
+                                                  const Px4FlowSensorStateCore *currentImuState,
+                                                  Px4FlowSensorMeasurementCore *&predictedMeasurement)
 {
-#if _DEBUG_SENSOR_CORE
-    logFile<<"ImuSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
-#endif
+
 
     // Check
     if(!isCorrect())
@@ -1564,7 +983,7 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
         return -50;
     }
 
-    // Check imu
+    // Check sensor state
     if(!currentImuState)
     {
         std::cout<<"ImuSensorCore::predictMeasurementSpecific() error 1"<<std::endl;
@@ -1594,29 +1013,14 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
     // TODO check if it must be done here
     if(!predictedMeasurement)
     {
-        predictedMeasurement=new ImuSensorMeasurementCore;
+        predictedMeasurement=new Px4FlowSensorMeasurementCore;
         predictedMeasurement->setSensorCorePtr(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
-
-        //std::weak_ptr<ImuSensorCore> TheImuSensorCore=std::dynamic_pointer_cast<ImuSensorCore>(this->getMsfElementCoreSharedPtr());
-        //predictedMeasurement=std::make_shared<ImuSensorMeasurementCore>(std::shared_ptr<ImuSensorCore>(this));
-
-#if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurementSpecific() pointer created"<<std::endl;
-#endif
     }
 
-
-//    // Set the sensor core -> Needed
-//    if(predictedMeasurement)
-//    {
-//        predictedMeasurement->setTheSensorCore(this->getMsfElementCoreWeakPtr());
-//    }
 
 
 
     // Variables
-    // State: World
-    Eigen::Vector3d gravity_wrt_world;
     // State: Robot
     Eigen::Vector3d position_robot_wrt_world;
     Eigen::Vector4d attitude_robot_wrt_world;
@@ -1628,25 +1032,16 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
     Eigen::Vector3d position_sensor_wrt_robot;
     Eigen::Vector4d attitude_sensor_wrt_robot;
     // Parameters: Sensor
-    Eigen::Vector3d biases_meas_linear_acceleration;
-    Eigen::Matrix3d sensitivity_meas_linear_acceleration;
-    Eigen::Vector3d biases_meas_angular_velocity;
-    Eigen::Matrix3d sensitivity_meas_angular_velocity;
+    //Eigen::Vector3d biases_meas_linear_acceleration;
 //    // Measurement
 //    Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor;
-//    Eigen::Vector3d meas_attitude_sensor_wrt_sensor;
-//    Eigen::Vector3d meas_ang_velocity_sensor_wrt_sensor;
 //    // Predicted Measurement
 //    Eigen::Vector3d lin_accel_sensor_wrt_sensor;
-//    Eigen::Vector3d attitude_sensor_wrt_sensor;
-//    Eigen::Vector3d ang_velocity_sensor_wrt_sensor;
 
 
     /// Fill Variables
 
 
-    // State: World
-    gravity_wrt_world=TheGlobalParametersStateCore->getGravity();
 
     // State: Robot
     position_robot_wrt_world; // Not needed
@@ -1661,26 +1056,22 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
     attitude_sensor_wrt_robot=currentImuState->getAttitudeSensorWrtRobot();
 
     // Parameters: Sensor
-    biases_meas_linear_acceleration=currentImuState->getBiasesLinearAcceleration();
-    sensitivity_meas_linear_acceleration=currentImuState->getScaleLinearAcceleration().asDiagonal();
-    biases_meas_angular_velocity=currentImuState->getBiasesAngularVelocity();
-    sensitivity_meas_angular_velocity=currentImuState->getScaleAngularVelocity().asDiagonal();
+    //biases_meas_linear_acceleration=currentImuState->getBiasesLinearAcceleration();
+
 
 //    // Measurement
 //    meas_lin_accel_sensor_wrt_sensor;
-//    meas_attitude_sensor_wrt_sensor;
-//    meas_ang_velocity_sensor_wrt_sensor;
+
 
 //    // Predicted Measurement
 //    lin_accel_sensor_wrt_sensor;
-//    attitude_sensor_wrt_sensor;
-//    ang_velocity_sensor_wrt_sensor;
+
 
 
     /// Measurements Prediction
 
 
-
+    /*
     // Linear acceleration
     if(isMeasurementLinearAccelerationEnabled())
     {
@@ -1763,68 +1154,17 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
         // Set
         predictedMeasurement->setLinearAcceleration(ThePredictedLinearAcceleration);
     }
+    */
 
 
 
-    // Orientation
-    if(this->isMeasurementOrientationEnabled())
-    {
-#if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurementSpecific() orientation"<<std::endl;
-#endif
-
-        // TODO
-
-    }
-
-    // Angular velocity
-    if(isMeasurementAngularVelocityEnabled())
-    {
-#if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurementSpecific() angular velocity"<<std::endl;
-#endif
-
-
-        Eigen::Vector3d ThePredictedAngularVelocity;
-
-
-        // Model
-        Eigen::Vector4d quat_predicted_angular_velocity_in_robot;
-        quat_predicted_angular_velocity_in_robot[0]=0;
-        quat_predicted_angular_velocity_in_robot.block<3,1>(1,0)=ang_velocity_robot_wrt_world;
-        Eigen::Vector4d quat_predicted_angular_velocity_in_imu;
-
-        quat_predicted_angular_velocity_in_imu=Quaternion::cross(Quaternion::inv(attitude_sensor_wrt_robot), Quaternion::inv(attitude_robot_wrt_world), quat_predicted_angular_velocity_in_robot, attitude_robot_wrt_world, attitude_sensor_wrt_robot);
-
-        Eigen::Vector3d predicted_angular_velocity_in_imu;
-        predicted_angular_velocity_in_imu=quat_predicted_angular_velocity_in_imu.block<3,1>(1,0);
-
-        ThePredictedAngularVelocity=sensitivity_meas_angular_velocity*predicted_angular_velocity_in_imu+biases_meas_angular_velocity;
-
-#if _DEBUG_SENSOR_CORE
-        logFile<<"ImuSensorCore::predictMeasurementSpecific() predicted w="<<ThePredictedAngularVelocity.transpose()<<std::endl;
-#endif
-
-
-        // Set
-        predictedMeasurement->setAngularVelocity(ThePredictedAngularVelocity);
-    }
-
-
-
-
-
-
-#if _DEBUG_SENSOR_CORE
-    logFile<<"ImuSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
-#endif
 
     // End
     return 0;
 }
 
 
-int ImuSensorCore::predictErrorMeasurementJacobian(// Time
+int Px4FlowSensorCore::predictErrorMeasurementJacobian(// Time
                                                 const TimeStamp& current_time_stamp,
                                                 // Current State
                                                 const std::shared_ptr<StateComponent>& current_state,
@@ -1857,7 +1197,7 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 
 
     // Search for the current sensor State Core
-    ImuSensorStateCore* current_sensor_state(nullptr);
+    Px4FlowSensorStateCore* current_sensor_state(nullptr);
 
     for(std::list< std::shared_ptr<StateCore> >::iterator it_sensor_state=current_state->TheListSensorStateCore.begin();
         it_sensor_state!=current_state->TheListSensorStateCore.end();
@@ -1865,7 +1205,7 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
     {
         if((*it_sensor_state)->getMsfElementCoreSharedPtr() == this->getMsfElementCoreSharedPtr())
         {
-            current_sensor_state=dynamic_cast<ImuSensorStateCore*>((*it_sensor_state).get());
+            current_sensor_state=dynamic_cast<Px4FlowSensorStateCore*>((*it_sensor_state).get());
             break;
         }
     }
@@ -1884,17 +1224,15 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 
 
     // Predicted Measurement Cast
-    ImuSensorMeasurementCore* predicted_sensor_measurement(nullptr);
+    Px4FlowSensorMeasurementCore* predicted_sensor_measurement(nullptr);
     if(measurement->getSensorCoreSharedPtr() != predicted_measurement->getSensorCoreSharedPtr())
         return -3;
-    predicted_sensor_measurement=dynamic_cast<ImuSensorMeasurementCore*>(predicted_measurement.get());
+    predicted_sensor_measurement=dynamic_cast<Px4FlowSensorMeasurementCore*>(predicted_measurement.get());
 
 
 
     /// Get iterators to fill jacobians
 
-    // World
-    // Nothing to do
 
     // Robot
     // Nothing to do
@@ -1911,21 +1249,17 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
         ++itSensorStateCore, ++it_jacobian_error_measurement_wrt_sensor_error_state, ++it_jacobian_error_measurement_wrt_sensor_error_parameters
         )
     {
-        if( dynamic_cast<ImuSensorStateCore*>((*itSensorStateCore).get()) == current_sensor_state )
+        if( dynamic_cast<Px4FlowSensorStateCore*>((*itSensorStateCore).get()) == current_sensor_state )
             break;
     }
 
 
     /// Predict Error Measurement Jacobians
     int error_predict_measurement=predictErrorMeasurementJacobianSpecific(current_time_stamp,
-                                                                          dynamic_cast<GlobalParametersStateCore*>(current_state->TheGlobalParametersStateCore.get()),
                                                                           dynamic_cast<RobotStateCore*>(current_state->TheRobotStateCore.get()),
                                                                           current_sensor_state,
                                                                           predicted_sensor_measurement,
                                                                           // Jacobians State / Parameters
-                                                                          // World
-                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.world,
-                                                                          predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.world,
                                                                           // Robot
                                                                           predicted_sensor_measurement->jacobian_error_measurement_wrt_error_state_.robot,
                                                                           predicted_sensor_measurement->jacobian_error_measurement_wrt_error_parameters_.robot,
@@ -1947,15 +1281,11 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
 }
 
 
-int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
-                                                           const GlobalParametersStateCore* TheGlobalParametersStateCore,
+int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
                                                            const RobotStateCore* TheRobotStateCore,
-                                                           const ImuSensorStateCore* TheImuStateCore,
-                                                           ImuSensorMeasurementCore*& predictedMeasurement,
+                                                           const Px4FlowSensorStateCore* TheImuStateCore,
+                                                           Px4FlowSensorMeasurementCore*& predictedMeasurement,
                                                            // Jacobians State / Parameters
-                                                           // World
-                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_state,
-                                                           Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_parameters,
                                                            // Robot
                                                            Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
                                                            Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
@@ -1977,7 +1307,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     /// Common Variables
 
     // Imu sensor core
-    std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(TheImuStateCore->getMsfElementCoreSharedPtr());
+    std::shared_ptr<const Px4FlowSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const Px4FlowSensorCore>(TheImuStateCore->getMsfElementCoreSharedPtr());
 
 
     // dimension of the measurement
@@ -1988,8 +1318,6 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     /// Variables
 
-    // State: World
-    Eigen::Vector3d gravity_wrt_world;
     // State: Robot
     Eigen::Vector3d position_robot_wrt_world;
     Eigen::Vector4d attitude_robot_wrt_world;
@@ -2001,23 +1329,17 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     Eigen::Vector3d position_sensor_wrt_robot;
     Eigen::Vector4d attitude_sensor_wrt_robot;
     // Parameters: Sensor
-    Eigen::Matrix3d sensitivity_meas_linear_acceleration;
-    Eigen::Matrix3d sensitivity_meas_angular_velocity;
+    //Eigen::Matrix3d sensitivity_meas_linear_acceleration;
     // Measurement
-    Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor;
-    Eigen::Vector3d meas_attitude_sensor_wrt_sensor;
-    Eigen::Vector3d meas_ang_velocity_sensor_wrt_sensor;
+    //Eigen::Vector3d meas_lin_accel_sensor_wrt_sensor;
     // Predicted Measurement
-    Eigen::Vector3d lin_accel_sensor_wrt_sensor;
-    Eigen::Vector3d attitude_sensor_wrt_sensor;
-    Eigen::Vector3d ang_velocity_sensor_wrt_sensor;
+    //Eigen::Vector3d lin_accel_sensor_wrt_sensor;
+
 
 
     /// Fill Variables
 
 
-    // State: World
-    gravity_wrt_world=TheGlobalParametersStateCore->getGravity();
 
     // State: Robot
     position_robot_wrt_world; // Not needed
@@ -2032,19 +1354,16 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     attitude_sensor_wrt_robot=TheImuStateCore->getAttitudeSensorWrtRobot();
 
     // Parameters: Sensor
-    sensitivity_meas_linear_acceleration=TheImuStateCore->getScaleLinearAcceleration().asDiagonal();
-    sensitivity_meas_angular_velocity=TheImuStateCore->getScaleAngularVelocity().asDiagonal();
+    //sensitivity_meas_linear_acceleration=TheImuStateCore->getScaleLinearAcceleration().asDiagonal();
 
 
     // Measurement
-    meas_lin_accel_sensor_wrt_sensor;
-    meas_attitude_sensor_wrt_sensor;
-    meas_ang_velocity_sensor_wrt_sensor;
+    //meas_lin_accel_sensor_wrt_sensor;
+
 
     // Predicted Measurement
-    lin_accel_sensor_wrt_sensor;
-    attitude_sensor_wrt_sensor;
-    ang_velocity_sensor_wrt_sensor;
+    //lin_accel_sensor_wrt_sensor;
+
 
 
 
@@ -2052,9 +1371,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     /// Jacobians Variables
 
     // Jacobian State
-
-    // World
-    Eigen::Matrix3d jacobian_error_meas_lin_acc_wrt_error_gravity;
+/*
 
     // Robot
     Eigen::Matrix3d jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc;
@@ -2082,11 +1399,11 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     Eigen::Matrix3d jacobian_error_meas_att_wrt_error_meas_att;
     Eigen::Matrix3d jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel;
 
-
+*/
 
 
     /// Call core
-
+/*
     int error=predictErrorMeasurementJacobianCore(// State: World
                                                   gravity_wrt_world,
                                                   // State: Robot
@@ -2113,13 +1430,10 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     if(error)
         return error;
-
+*/
 
     /// Dimensions
 
-    // dimension of the global parameters
-    int dimension_world_error_state=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
-    int dimension_world_error_parameters=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
 
     // dimension of robot
     int dimension_robot_error_state=TheRobotStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
@@ -2134,7 +1448,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     ///// Jacobians error measurement - error state / error parameters
 
-
+/*
     /// Jacobians error measurement - world error state / error parameters
 
     {
@@ -2431,21 +1745,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
             }
 
 
-            // z_lin_acc / ka
-            /*
-            if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
-            {
-//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
-//                        (accel_sensor_wrt_sensor+gravity_sensor).asDiagonal();
-                dimension_sensor_error_state_i+=3;
-            }
-            else
-            {
-//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
-//                        (accel_sensor_wrt_sensor+gravity_sensor).asDiagonal();
-                dimension_sensor_error_parameters_i+=3;
-            }
-            */
+
 
 
             // z_lin_acc / bw
@@ -2461,19 +1761,6 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
             }
 
 
-            // z_lin_acc / kw
-            /*
-            if(the_imu_sensor_core->isEstimationScaleAngularVelocityEnabled())
-            {
-                // Zeros
-                dimension_sensor_error_state_i+=3;
-            }
-            else
-            {
-                // Zeros
-                dimension_sensor_error_parameters_i+=3;
-            }
-            */
 
 
             dimension_error_measurement_i+=3;
@@ -2530,19 +1817,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
             }
 
 
-            // z_atti / ka
-            /*
-            if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
-            {
-                // Zeros
-                dimension_sensor_error_state_i+=3;
-            }
-            else
-            {
-                // Zeros
-                dimension_sensor_error_parameters_i+=3;
-            }
-            */
+
 
 
             // z_atti / bw
@@ -2558,19 +1833,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
             }
 
 
-            // z_atti / kw
-            /*
-            if(the_imu_sensor_core->isEstimationScaleAngularVelocityEnabled())
-            {
-                // Zeros
-                dimension_sensor_error_state_i+=3;
-            }
-            else
-            {
-                // Zeros
-                dimension_sensor_error_parameters_i+=3;
-            }
-            */
+
 
             dimension_error_measurement_i+=3;
         }
@@ -2627,19 +1890,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
             }
 
 
-            // z_ang_vel / ka
-            /*
-            if(the_imu_sensor_core->isEstimationScaleLinearAccelerationEnabled())
-            {
-                // Zeros
-                dimension_sensor_error_state_i+=3;
-            }
-            else
-            {
-                // Zeros
-                dimension_sensor_error_parameters_i+=3;
-            }
-            */
+
 
 
             // z_ang_vel / bw
@@ -2661,21 +1912,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
             }
 
 
-            // z_ang_vel / kw
-            /*
-            if(the_imu_sensor_core->isEstimationScaleAngularVelocityEnabled())
-            {
-//                predictedMeasurement->jacobianMeasurementErrorState.jacobianMeasurementSensorErrorState.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_state_i)=
-//                        angular_velocity_imu_wrt_world_in_imu.asDiagonal();
-                dimension_sensor_error_state_i+=3;
-            }
-            else
-            {
-//                predictedMeasurement->jacobianMeasurementErrorParameters.jacobianMeasurementSensorParameters.block<3,3>(dimension_error_measurement_i, dimension_sensor_error_parameters_i)=
-//                        angular_velocity_imu_wrt_world_in_imu.asDiagonal();
-                dimension_sensor_error_parameters_i+=3;
-            }
-            */
+
 
 
             dimension_error_measurement_i+=3;
@@ -2750,219 +1987,14 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     }
 
+    */
+
 
     // End
     return 0;
 }
 
-int ImuSensorCore::predictErrorMeasurementJacobianCore(// State: World
-                                                       const Eigen::Vector3d& gravity_wrt_world,
-                                                       // State: Robot
-                                                       const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
-                                                       const Eigen::Vector3d& lin_speed_robot_wrt_world, const Eigen::Vector3d& ang_velocity_robot_wrt_world,
-                                                       const Eigen::Vector3d& lin_accel_robot_wrt_world, const Eigen::Vector3d& ang_accel_robot_wrt_world,
-                                                       // State: Sensor
-                                                       const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
-                                                       // Parameters: Sensor
-                                                       const Eigen::Matrix3d& sensitivity_meas_linear_acceleration, const Eigen::Matrix3d& sensitivity_meas_angular_velocity,
-                                                       // Measurement
-                                                       const Eigen::Vector3d& meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d& meas_ang_velocity_sensor_wrt_sensor,
-                                                       // Predicted Measurement
-                                                       const Eigen::Vector3d& lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& attitude_sensor_wrt_sensor, const Eigen::Vector3d& ang_velocity_sensor_wrt_sensor,
-                                                       // Jacobians: State and Params
-                                                       Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_gravity,
-                                                       Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_acc,
-                                                       Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_robot_ang_vel,
-                                                       Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc,
-                                                       Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_sensor_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel,
-                                                       // Jacobians: Noise
-                                                       Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel
-                                                       )
-{
-
-    // Aux vars
-    //
-    Quaternion::Quaternion quat_attitude_sensor_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
-
-    Quaternion::PureQuaternion angular_velocity_imu_wrt_world_in_imu = Quaternion::cross_sandwich( Quaternion::inv(quat_attitude_sensor_wrt_world), ang_velocity_robot_wrt_world , quat_attitude_sensor_wrt_world );
-
-    Quaternion::PureQuaternion angular_velocity_robot_wrt_world_in_robot = Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_velocity_robot_wrt_world , attitude_robot_wrt_world);
-
-    Quaternion::PureQuaternion angular_acceleration_robot_wrt_world_in_robot = Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_accel_robot_wrt_world , attitude_robot_wrt_world);
-
-    //
-    Eigen::Matrix4d mat_q_plus_attitude_robot_wrt_world=Quaternion::quatMatPlus(attitude_robot_wrt_world);
-    Eigen::Matrix4d mat_q_minus_attitude_sensor_wrt_robot=Quaternion::quatMatMinus(attitude_sensor_wrt_robot);
-    Eigen::Matrix4d mat_q_plus_attitude_world_wrt_sensor=Quaternion::quatMatPlus(Quaternion::inv(quat_attitude_sensor_wrt_world));
-    Eigen::Matrix4d mat_q_minus_attitude_sensor_wrt_world=Quaternion::quatMatMinus(quat_attitude_sensor_wrt_world);
-    Eigen::Matrix4d mat_q_plus_attitude_sensor_wrt_robot=Quaternion::quatMatPlus(attitude_sensor_wrt_robot);
-    Eigen::Matrix4d mat_q_plus_attitude_robot_wrt_sensor=Quaternion::quatMatPlus(Quaternion::inv(attitude_sensor_wrt_robot));
-    Eigen::Matrix4d mat_q_plus_attitude_world_wrt_robot=Quaternion::quatMatPlus(Quaternion::inv(attitude_robot_wrt_world));
-    Eigen::Matrix4d mat_q_minus_attitude_robot_wrt_world=Quaternion::quatMatMinus(attitude_robot_wrt_world);
-
-    //
-    Eigen::Matrix4d mat_q_plus_angular_velocity_robot_wrt_world_in_world = Quaternion::quatMatPlus(ang_velocity_robot_wrt_world);
-    Eigen::Matrix4d mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world = Quaternion::quatMatMinus(Quaternion::cross_pure_gen(ang_velocity_robot_wrt_world, quat_attitude_sensor_wrt_world));
-
-    Eigen::Matrix4d mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(gravity_wrt_world, attitude_robot_wrt_world));
-    Eigen::Matrix4d mat_q_plus_gravity_wrt_world=Quaternion::quatMatPlus(gravity_wrt_world);
-
-    Eigen::Matrix4d mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(lin_accel_robot_wrt_world, attitude_robot_wrt_world));
-    Eigen::Matrix4d mat_q_plus_linear_acceleration_robot_wrt_world=Quaternion::quatMatPlus(lin_accel_robot_wrt_world);
-
-    Eigen::Matrix4d mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(ang_velocity_robot_wrt_world, attitude_robot_wrt_world));
-
-    Eigen::Matrix4d mat_q_minus_cross_angular_acceleration_robot_wrt_world_in_world_and_atti_robot_wrt_world=Quaternion::quatMatMinus(Quaternion::cross_pure_gen(ang_accel_robot_wrt_world, attitude_robot_wrt_world));
-
-    Eigen::Matrix4d mat_q_plus_angular_acceleration_robot_wrt_world=Quaternion::quatMatPlus(ang_accel_robot_wrt_world);
-
-    //
-    Eigen::Matrix4d mat_diff_quat_inv_wrt_quat;
-    mat_diff_quat_inv_wrt_quat<<1, 0, 0, 0,
-                                0, -1, 0, 0,
-                                0, 0, -1, 0,
-                                0, 0, 0, -1;
-
-    //
-    Eigen::Matrix<double, 3, 4> mat_diff_w_amp_wrt_w;//(3,4);
-    mat_diff_w_amp_wrt_w<<  0, 1, 0, 0,
-                            0, 0, 1, 0,
-                            0, 0, 0, 1;
-
-
-
-
-    // More Aux vars
-    Eigen::MatrixXd jacobianMeas_g_I_wrt_q_r_w=mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_gravity_wrt_wolrd_and_attitude_robot_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot*mat_q_plus_gravity_wrt_world);
-    Eigen::MatrixXd jacobianMeas_a_real_wrt_q_r_w=mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*(mat_q_minus_cross_acceleration_robot_wrt_world_and_attitude_robot_wrt_world* mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_robot* mat_q_plus_linear_acceleration_robot_wrt_world);
-    Eigen::MatrixXd jacobianMeas_an_wrt_q_r_w=-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot))*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_velocity_robot_wrt_world_in_world);
-    Eigen::MatrixXd jacobianMeas_at_wrt_q_r_w=-1*Quaternion::skewSymMat(position_sensor_wrt_robot)*mat_diff_w_amp_wrt_w*(mat_q_minus_cross_angular_acceleration_robot_wrt_world_in_world_and_atti_robot_wrt_world*mat_diff_quat_inv_wrt_quat+mat_q_plus_attitude_world_wrt_robot*mat_q_plus_angular_acceleration_robot_wrt_world);
-
-
-
-    // Even more Auxiliar vars
-
-    // Angular vel
-    Eigen::Vector3d angular_vel_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_velocity_robot_wrt_world ,attitude_robot_wrt_world);
-    // Angular acceler
-    Eigen::Vector3d angular_acc_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_accel_robot_wrt_world ,attitude_robot_wrt_world);
-
-    // Ficticious Acc: Normal wrt robot
-    Eigen::Vector3d normal_acceleration=angular_vel_robot_wrt_world_in_robot.cross(angular_vel_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot));
-    // Ficticious Acc: Tang wrt robot
-    Eigen::Vector3d tangencial_acceleration=angular_acc_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot);
-
-    // Ficticious Acc total wrt robot
-    Eigen::Vector3d ficticious_acceleration=normal_acceleration+tangencial_acceleration;
-
-    // Attitude sensor wrt world
-    Eigen::Vector4d attitude_sensor_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
-
-    // Acceleracion in sensor
-    Eigen::Vector3d accel_sensor_wrt_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), lin_accel_robot_wrt_world, attitude_sensor_wrt_world) + Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_robot), ficticious_acceleration, attitude_sensor_wrt_robot);
-
-    // Gravity in sensor
-    Eigen::Vector3d gravity_sensor=Quaternion::cross_sandwich(Quaternion::inv(attitude_sensor_wrt_world), gravity_wrt_world, attitude_sensor_wrt_world);
-    // Gravity in robot
-    Eigen::Vector3d gravity_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), gravity_wrt_world, attitude_robot_wrt_world);
-
-    // Linear acceleration in sensor wrt robot
-    Eigen::Vector3d accel_robot_wrt_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), lin_accel_robot_wrt_world, attitude_robot_wrt_world);
-
-    // Acceleration total imu wrt robot
-    Eigen::Vector3d acceleration_total_imu_wrt_robot=gravity_robot+accel_robot_wrt_robot+ficticious_acceleration;
-
-
-
-
-
-
-    /// Jacobian World Gravity
-
-    jacobian_error_meas_lin_acc_wrt_error_gravity=
-            -1*sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose();
-
-
-
-
-    /// Jacobian Robot
-
-    jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc=
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_sensor* mat_q_minus_attitude_sensor_wrt_world*mat_diff_w_amp_wrt_w.transpose();
-
-    jacobian_error_meas_lin_acc_wrt_error_state_robot_att=
-            // common 1
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*(
-            // d(ga_I)/d(q_r_w)
-            -jacobianMeas_g_I_wrt_q_r_w  +
-            // d(a_real)/d(q_r_w)
-            jacobianMeas_a_real_wrt_q_r_w +
-            // d(a_ficticious)/d(q_r_w)
-            ( mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()*
-                (
-                // an
-                jacobianMeas_an_wrt_q_r_w
-                +
-                // at
-                jacobianMeas_at_wrt_q_r_w
-                )
-            )
-            // common 2
-            )*mat_q_plus_attitude_robot_wrt_world*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
-
-    jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel=
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()* (-2*Quaternion::skewSymMat(angular_velocity_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot))) *mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot* mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
-
-    jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_acc=
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_minus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()*(-1*Quaternion::skewSymMat(position_sensor_wrt_robot))*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_world_wrt_robot*mat_q_minus_attitude_robot_wrt_world*mat_diff_w_amp_wrt_w.transpose();
-
-
-    jacobian_error_meas_ang_vel_wrt_error_state_robot_att=
-            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w*( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world )*mat_q_minus_attitude_sensor_wrt_robot*mat_q_plus_attitude_robot_wrt_world*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
-
-    jacobian_error_meas_ang_vel_wrt_error_state_robot_ang_vel=
-            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w* mat_q_plus_attitude_world_wrt_sensor*mat_q_minus_attitude_sensor_wrt_world *mat_diff_w_amp_wrt_w.transpose();
-
-
-
-    /// Jacobian Sensor
-    jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos=
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*mat_q_plus_attitude_robot_wrt_sensor*mat_q_plus_attitude_sensor_wrt_robot*mat_diff_w_amp_wrt_w.transpose()*(Quaternion::skewSymMat( angular_velocity_robot_wrt_world_in_robot.cross(angular_velocity_robot_wrt_world_in_robot) )+Quaternion::skewSymMat( angular_acceleration_robot_wrt_world_in_robot ));
-
-    // TODO FIX!
-    jacobian_error_meas_lin_acc_wrt_error_state_sensor_att=
-            sensitivity_meas_linear_acceleration*mat_diff_w_amp_wrt_w*( Quaternion::quatMatMinus(Quaternion::cross_pure_gen(acceleration_total_imu_wrt_robot, attitude_sensor_wrt_robot))*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_robot_wrt_sensor*Quaternion::quatMatPlus(acceleration_total_imu_wrt_robot) )*mat_q_plus_attitude_sensor_wrt_robot*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
-
-    jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc=
-            Eigen::Matrix3d::Identity(3,3);
-
-
-
-    jacobian_error_meas_ang_vel_wrt_error_state_sensor_att=
-            sensitivity_meas_angular_velocity*mat_diff_w_amp_wrt_w* ( mat_q_minus_cross_angular_vel_robot_wrt_world_in_world_and_atti_imu_wrt_world*mat_diff_quat_inv_wrt_quat + mat_q_plus_attitude_world_wrt_sensor*mat_q_plus_angular_velocity_robot_wrt_world_in_world ) *mat_q_plus_attitude_robot_wrt_world*mat_q_plus_attitude_sensor_wrt_robot*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
-
-    jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel=
-            Eigen::Matrix3d::Identity(3,3);
-
-
-    /// Jacobians: Noise
-
-    jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc=
-            Eigen::Matrix3d::Identity(3, 3);
-
-    // TODO
-    jacobian_error_meas_att_wrt_error_meas_att=
-            Eigen::Matrix3d::Identity(3, 3);
-
-    jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel=
-            Eigen::Matrix3d::Identity(3, 3);
-
-
-    /// End
-    return 0;
-}
-
-int ImuSensorCore::resetErrorStateJacobian(// Time
+int Px4FlowSensorCore::resetErrorStateJacobian(// Time
                                             const TimeStamp& current_time_stamp,
                                             // Increment Error State
                                             const Eigen::VectorXd& increment_error_state,
@@ -3008,6 +2040,7 @@ int ImuSensorCore::resetErrorStateJacobian(// Time
         dimension_error_state_i+=3;
     }
 
+    /*
     // Bias Linear Acceleration
     if(this->isEstimationBiasLinearAccelerationEnabled())
     {
@@ -3016,15 +2049,8 @@ int ImuSensorCore::resetErrorStateJacobian(// Time
 
         dimension_error_state_i+=3;
     }
+    */
 
-    // Bias Angular Acceleration
-    if(this->isEstimationBiasAngularVelocityEnabled())
-    {
-        for(int i=0; i<3; i++)
-            triplets_jacobian_error_reset.push_back(Eigen::Triplet<double>(dimension_error_state_i+i, dimension_error_state_i+i, 1.0));
-
-        dimension_error_state_i+=3;
-    }
 
 
     current_state->jacobian_error_state_reset_.setFromTriplets(triplets_jacobian_error_reset.begin(), triplets_jacobian_error_reset.end());

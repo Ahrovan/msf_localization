@@ -111,6 +111,10 @@ set(MSF_LOCALIZATION_CORE_SOURCE_FILES
 
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/coded_visual_marker_landmark_state_core.cpp
 
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/px4flow_sensor_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/px4flow_sensor_state_core.cpp
+  ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/px4flow_sensor_measurement_core.cpp
+
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/msf_storage_core.cpp
   ${MSF_LOCALIZATION_CORE_SOURCE_DIR}/state_estimation_core.cpp
 
@@ -189,10 +193,13 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/coded_visual_marker_eye_state_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/coded_visual_marker_measurement_core.h
 
-
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/coded_visual_marker_landmark_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/coded_visual_marker_landmark_state_core.h
+
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/px4flow_sensor_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/px4flow_sensor_state_core.h
+  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/px4flow_sensor_measurement_core.h
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/msf_storage_core.h
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/state_estimation_core.h

@@ -73,6 +73,27 @@ int SensorCore::getDimensionErrorMeasurement() const
     return this->dimension_error_measurement_;
 }
 
+int SensorCore::setMeasurement(const TimeStamp& time_stamp, const std::shared_ptr<SensorMeasurementCore> sensor_measurement)
+{
+    if(!isSensorEnabled())
+        return 0;
+
+    if(!this->isCorrect())
+    {
+        std::cout<<"ERROR"<<std::endl;
+        return -1;
+    }
+
+    // If it does not have any measurement, do not set measurement
+    if(!sensor_measurement->measurementSet())
+        return 0;
+
+    if(this->getMsfLocalizationCorePtr()->setMeasurement(time_stamp, sensor_measurement))
+        return -2;
+
+    return 0;
+}
+
 bool SensorCore::isEstimationAttitudeSensorWrtRobotEnabled() const
 {
     return this->flagEstimationAttitudeSensorWrtRobot;

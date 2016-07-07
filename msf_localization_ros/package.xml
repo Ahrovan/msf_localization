@@ -23,12 +23,14 @@
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>tf</depend>
+
   <depend>pugixml</depend>
+
 	<depend>msf_localization_core</depend>
 	<depend>msf_localization_ros_srvs</depend>
 
   <depend>aruco_eye_msgs</depend>
-
+  <depend>px_comm</depend>
 
 </package>
 

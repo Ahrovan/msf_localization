@@ -1,6 +1,6 @@
 
-#ifndef _IMU_SENSOR_CORE_H
-#define _IMU_SENSOR_CORE_H
+#ifndef _PX4FLOW_SENSOR_CORE_H
+#define _PX4FLOW_SENSOR_CORE_H
 
 
 
@@ -10,14 +10,15 @@
 // Time Stamp
 #include "msf_localization_core/time_stamp.h"
 
+
 // Sensor core
 #include "msf_localization_core/sensor_core.h"
 
-// IMU Measurement
-#include "msf_localization_core/imu_sensor_measurement_core.h"
+// Px4flow sensor Measurement
+#include "msf_localization_core/px4flow_sensor_measurement_core.h"
 
-// IMU State
-#include "msf_localization_core/imu_sensor_state_core.h"
+// Px4flow sensor State
+#include "msf_localization_core/px4flow_sensor_state_core.h"
 
 // Robot Core
 #include "msf_localization_core/robot_core.h"
@@ -25,18 +26,16 @@
 // Robot state
 #include "msf_localization_core/robot_state_core.h"
 
-// Global parameters
-#include "msf_localization_core/global_parameters_state_core.h"
 
 
 
 
-class ImuSensorCore : public SensorCore
+class Px4FlowSensorCore : public SensorCore
 {
 public:
-    ImuSensorCore();
-    ImuSensorCore(MsfLocalizationCore* msf_localization_core_ptr);
-    ~ImuSensorCore();
+    Px4FlowSensorCore();
+    Px4FlowSensorCore(MsfLocalizationCore* msf_localization_core_ptr);
+    ~Px4FlowSensorCore();
 
 
 protected:
@@ -44,63 +43,44 @@ protected:
 
 
 public:
-    int readConfig(const pugi::xml_node& sensor, const unsigned int sensorId, std::shared_ptr<ImuSensorStateCore>& SensorInitStateCore);
+    int readConfig(const pugi::xml_node& sensor, const unsigned int sensor_id, std::shared_ptr<Px4FlowSensorStateCore>& sensor_init_state);
 
 
 
 
     ///// Measurements
 
-    // z=[z_lin_accel, z_attit, z_ang_vel]'
+    // Meas=[v, dg]
 
 
-    // Orientation Measurement
+    // Velocity: v=[vx, vy]
 protected:
-    bool flagMeasurementOrientation;
+    bool flag_measurement_velocity_;
 public:
-    bool isMeasurementOrientationEnabled() const;
-    int enableMeasurementOrientation();
+    bool isMeasurementVelocityEnabled() const;
+    void enableMeasurementVelocity();
 
-    // Orientation measurement Covariance
+    // Velocity Covariance
 protected:
-    // TODO
+    Eigen::Matrix2d noise_measurement_velocity_;
+public:
+    Eigen::Matrix2d getNoiseMeasurementVelocity() const;
+    void setNoiseMeasurementVelocity(const Eigen::Matrix2d& noise_measurement_velocity);
 
 
-    // Angular Velocity Measurement
+    // Ground Distance: dg
 protected:
-    bool flagMeasurementAngularVelocity;
+    bool flag_measurement_ground_distance_;
 public:
-    bool isMeasurementAngularVelocityEnabled() const;
-    int enableMeasurementAngularVelocity();
+    bool isMeasurementGroundDistanceEnabled() const;
+    void enableMeasurementGroundDistance();
 
-    // Angular velocity measurement convariance
+    // Ground Distance Covariance
 protected:
-    Eigen::Matrix3d noiseMeasurementAngularVelocity;
+    double noise_measurement_ground_distance_;
 public:
-    Eigen::Matrix3d getNoiseMeasurementAngularVelocity() const;
-    int setNoiseMeasurementAngularVelocity(const Eigen::Matrix3d& noiseMeasurementAngularVelocity);
-
-
-    // Linear Acceleration Measurement
-protected:
-    bool flagMeasurementLinearAcceleration;
-public:
-    bool isMeasurementLinearAccelerationEnabled() const;
-    int enableMeasurementLinearAcceleration();
-
-    // Linear acceleration measurement covariance
-protected:
-    Eigen::Matrix3d noiseMeasurementLinearAcceleration;
-public:
-    Eigen::Matrix3d getNoiseMeasurementLinearAcceleration() const;
-    int setNoiseMeasurementLinearAcceleration(const Eigen::Matrix3d& noiseMeasurementLinearAcceleration);
-
-
-    // Store Measurement
-public:
-    int setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
-
-
+    double getNoiseMeasurementGroundDistance() const;
+    void setNoiseMeasurementGroundDistance(double noise_measurement_ground_distance);
 
 
 
@@ -109,7 +89,7 @@ public:
     ///// State estimation and parameters
 
 
-
+/*
     /// Angular Velocity biases: bw (3x1)
 
     // Angular Velocity Biases: bwx, bwy, bwz
@@ -136,91 +116,9 @@ public:
     Eigen::Matrix3d getNoiseEstimationBiasAngularVelocity() const;
     int setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noiseEstimationBiasAngularVelocity);
 
+*/
 
 
-    /// Angular Velocity scale: kw (3x1)
-
-    // Angular Velocity Scale: kwx, kwy, kwz
-protected:
-    bool flagEstimationScaleAngularVelocity; // TODO
-public:
-    bool isEstimationScaleAngularVelocityEnabled() const;
-    int enableEstimationScaleAngularVelocity();
-    int enableParameterScaleAngularVelocity();
-
-
-    // Angular Velocity scale: Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
-protected:
-    Eigen::Matrix3d noiseScaleAngularVelocity;
-public:
-    Eigen::Matrix3d getNoiseScaleAngularVelocity() const;
-    int setNoiseScaleAngularVelocity(const Eigen::Matrix3d& noiseScaleAngularVelocity);
-
-
-    // Angular Velocity scale: Estimation Covariance (if enabled estimation -> used)
-    // TODO
-
-
-    // Angular Velocity Sensitivity
-protected:
-    bool flagEstimationSensitivityAngularVelocity; // TODO
-public:
-    bool isEstimationSensitivityAngularVelocityEnabled() const;
-    int enableEstimationSensitivityAngularVelocity();
-    int enableParameterSensitivityAngularVelocity();
-
-
-
-
-    /// Linear Acceleration biases: ba (3x1)
-
-    // Linear Acceleration Biases: bax, bay, baz
-protected:
-    bool flagEstimationBiasLinearAcceleration;
-public:
-    bool isEstimationBiasLinearAccelerationEnabled() const;
-    int enableEstimationBiasLinearAcceleration();
-    int enableParameterBiasLinearAcceleration();
-
-
-    // Linear Acceleration biases: covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
-protected:
-    Eigen::Matrix3d noiseBiasLinearAcceleration;
-public:
-    Eigen::Matrix3d getNoiseBiasLinearAcceleration() const;
-    int setNoiseBiasLinearAcceleration(const Eigen::Matrix3d& noiseBiasLinearAcceleration);
-
-
-    // Linear Acceleration biases: estimation covariance (if enabled estimation -> used)
-protected:
-    Eigen::Matrix3d noiseEstimationBiasLinearAcceleration;
-public:
-    Eigen::Matrix3d getNoiseEstimationBiasLinearAcceleration() const;
-    int setNoiseEstimationBiasLinearAcceleration(const Eigen::Matrix3d& noiseEstimationBiasLinearAcceleration);
-
-
-
-    /// Linear acceleration scale: ka (3x1)
-
-    // Linear acceleration Scale: kax, kay, kaz
-protected:
-    bool flagEstimationScaleLinearAcceleration; // TODO
-public:
-    bool isEstimationScaleLinearAccelerationEnabled() const;
-    int enableEstimationScaleLinearAcceleration();
-    int enableParameterScaleLinearAcceleration();
-
-
-    // Linear acceleration scale: Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
-protected:
-    Eigen::Matrix3d noiseScaleLinearAcceleration;
-public:
-    Eigen::Matrix3d getNoiseScaleLinearAcceleration() const;
-    int setNoiseScaleLinearAcceleration(const Eigen::Matrix3d& noiseScaleLinearAcceleration);
-
-
-    // Linear acceleration scale: Estimation Covariance (if enabled estimation -> used)
-    // TODO
 
 
 
@@ -268,8 +166,8 @@ public:
 
 protected:
     int predictStateSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                            const ImuSensorStateCore* pastState,
-                            ImuSensorStateCore*& predictedState);
+                            const Px4FlowSensorStateCore* pastState,
+                            Px4FlowSensorStateCore*& predictedState);
 
     // Jacobian of the error state: F
 
@@ -285,8 +183,8 @@ public:
 
 protected:
     int predictErrorStateJacobiansSpecific(const TimeStamp& previousTimeStamp, const TimeStamp& currentTimeStamp,
-                                           const ImuSensorStateCore* pastState,
-                                           const ImuSensorStateCore* predictedState,
+                                           const Px4FlowSensorStateCore* pastState,
+                                           const Px4FlowSensorStateCore* predictedState,
                                            // Jacobians Error State: Fx, Fp
                                            // Sensor
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_sensor_error_state,
@@ -295,7 +193,7 @@ protected:
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_noise
                                            );
 
-
+/*
 protected:
     int predictErrorStateJacobiansCore(// State k: Sensor
                                        const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
@@ -308,7 +206,7 @@ protected:
                                        Eigen::Matrix3d& jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc,
                                        Eigen::Matrix3d& jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel
                                        );
-
+*/
 
 
 
@@ -331,10 +229,9 @@ public:
 
 protected:
     int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
-                           const GlobalParametersStateCore* TheGlobalParametersStateCore,
                            const RobotStateCore* currentRobotState,
-                           const ImuSensorStateCore* currentImuState,
-                           ImuSensorMeasurementCore*& predictedMeasurement);
+                           const Px4FlowSensorStateCore* currentImuState,
+                           Px4FlowSensorMeasurementCore*& predictedMeasurement);
 
 
     // Jacobian of the measurements: H
@@ -350,14 +247,10 @@ public:
 
 protected:
     int predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
-                                                const GlobalParametersStateCore* TheGlobalParametersStateCore,
                                                 const RobotStateCore* TheRobotStateCore,
-                                                const ImuSensorStateCore* TheImuStateCore,
-                                                ImuSensorMeasurementCore*& predictedMeasurement,
+                                                const Px4FlowSensorStateCore* TheImuStateCore,
+                                                Px4FlowSensorMeasurementCore*& predictedMeasurement,
                                                 // Jacobians State / Parameters
-                                                // World
-                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_state,
-                                                Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_world_error_parameters,
                                                 // Robot
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_parameters,
@@ -367,6 +260,8 @@ protected:
                                                 // Jacobians Measurement
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
                                                 );
+/*
+protected:
     int predictErrorMeasurementJacobianCore(// State: World
                                             const Eigen::Vector3d& gravity_wrt_world,
                                             // State: Robot
@@ -390,7 +285,7 @@ protected:
                                             // Jacobians: Noise
                                             Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel
                                             );
-
+*/
 
 
     /// Reset Error State
@@ -410,8 +305,9 @@ public:
     // None
 
 
-};
 
+
+};
 
 
 

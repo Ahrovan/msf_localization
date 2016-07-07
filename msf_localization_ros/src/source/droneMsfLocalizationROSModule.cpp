@@ -347,6 +347,40 @@ int MsfLocalizationROS::readConfigFile()
 
         }
 
+        //// Px4Flow Sensor Type
+        if(sensorType=="px4flow")
+        {
+            std::cout<<"sensor = px4flow"<<std::endl;
+
+            // Create a class for the SensoreCore
+            std::shared_ptr<RosPx4FlowSensorInterface> TheRosSensorInterface;
+            // Create a class for the SensorStateCore
+            std::shared_ptr<Px4FlowSensorStateCore> TheSensorStateCore;
+
+            // Create a class for the SensoreCore
+            if(!TheRosSensorInterface)
+                TheRosSensorInterface=std::make_shared<RosPx4FlowSensorInterface>(nh, this->tf_transform_broadcaster_, this);
+
+            // Set the pointer to itself
+            TheRosSensorInterface->setMsfElementCorePtr(TheRosSensorInterface);
+
+            // Read configs
+            if(TheRosSensorInterface->readConfig(sensor, firstAvailableSensorId, TheSensorStateCore))
+                return -2;
+
+            // Update id
+            firstAvailableSensorId++;
+
+            // Finish
+
+            // Push to the list of sensors
+            this->TheListOfSensorCore.push_back(TheRosSensorInterface);
+
+            // Push the init state of the sensor
+            InitialState->TheListSensorStateCore.push_back(TheSensorStateCore);
+
+        }
+
     }
 
 

@@ -116,33 +116,8 @@ MsfLocalizationCore* MsfElementCore::getMsfLocalizationCorePtr() const
     return this->msf_localization_core_ptr_;
 }
 
-/*
-int MsfElementCore::setMsfStorageCorePtr(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)
-{
-    this->msf_storage_core_ptr_=msf_storage_core_ptr;
-    return 0;
-}
-
-std::weak_ptr<MsfStorageCore> MsfElementCore::getMsfStorageCoreWeakPtr() const
-{
-    return this->msf_storage_core_ptr_;
-}
-
-std::shared_ptr<MsfStorageCore> MsfElementCore::getMsfStorageCoreSharedPtr() const
-{
-    return this->msf_storage_core_ptr_.lock();
-}
-*/
-
 bool MsfElementCore::isCorrect() const
 {
-    /*
-    if(this->msf_storage_core_ptr_.expired())
-    {
-        std::cout<<"error in msf_storage_core_ptr_"<<std::endl;
-        return false;
-    }
-    */
 
     if(!this->msf_localization_core_ptr_)
     {

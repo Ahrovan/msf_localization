@@ -15,7 +15,8 @@ enum class SensorTypes
     undefined=0,
     imu=1,
     coded_visual_marker_eye=2,
-    absolute_pose
+    absolute_pose=3,
+    px4flow
 };
 
 

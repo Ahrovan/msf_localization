@@ -92,8 +92,10 @@
 #include "msf_localization_ros/ros_imu_sensor_interface.h"
 // ROS Aruco Eye
 #include "msf_localization_ros/ros_aruco_eye_interface.h"
-// Mocap
+// ROS Absolute Pose Sensor
 #include "msf_localization_ros/ros_absolute_pose_sensor_interface.h"
+// ROS Px4Flow
+#include "msf_localization_ros/ros_px4flow_sensor_interface.h"
 
 
 /// ROS Inputs
