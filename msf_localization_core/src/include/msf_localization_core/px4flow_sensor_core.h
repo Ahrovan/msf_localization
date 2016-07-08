@@ -89,45 +89,22 @@ public:
     ///// State estimation and parameters
 
 
-/*
-    /// Angular Velocity biases: bw (3x1)
+    // if enabled
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot]'
 
-    // Angular Velocity Biases: bwx, bwy, bwz
+
+
+
+    ///// Fixed parameters
+
+    // Sensitivity of the measurement of velocity
 protected:
-    bool flagEstimationBiasAngularVelocity;
-public:
-    bool isEstimationBiasAngularVelocityEnabled() const;
-    int enableEstimationBiasAngularVelocity();
-    int enableParameterBiasAngularVelocity();
-
-
-    // Angular Velocity biases: Covariance (if enabled estimation -> P; if no enabled estimation -> Sigma_mu)
-protected:
-    Eigen::Matrix3d noiseBiasAngularVelocity;
-public:
-    Eigen::Matrix3d getNoiseBiasAngularVelocity() const;
-    int setNoiseBiasAngularVelocity(const Eigen::Matrix3d& noiseBiasAngularVelocity);
-
-
-    // Angular Velocity biases: Estimation Covariance (if enabled estimation -> used)
-protected:
-    Eigen::Matrix3d noiseEstimationBiasAngularVelocity;
-public:
-    Eigen::Matrix3d getNoiseEstimationBiasAngularVelocity() const;
-    int setNoiseEstimationBiasAngularVelocity(const Eigen::Matrix3d& noiseEstimationBiasAngularVelocity);
-
-*/
-
-
-
+    Eigen::SparseMatrix<double> sensitivity_meas_lin_vel_;
 
 
 
     ///// Covariances Getters
 
-    // Covariance Error Measurements: Rn
-public:
-    Eigen::SparseMatrix<double> getCovarianceMeasurement();
 
     // Covariance Error Parameters: Rp = Qp
 public:
@@ -193,20 +170,16 @@ protected:
                                            Eigen::SparseMatrix<double>& jacobian_error_state_wrt_noise
                                            );
 
-/*
+
 protected:
     int predictErrorStateJacobiansCore(// State k: Sensor
                                        const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
-                                       // TODO Add others
                                        // State k+1: Sensor
                                        const Eigen::Vector3d& pred_position_sensor_wrt_robot, const Eigen::Vector4d& pred_attitude_sensor_wrt_robot,
-                                       // TODO add others
                                        // Jacobian: State Fx & Fp
-                                       Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att,
-                                       Eigen::Matrix3d& jacobian_error_bias_lin_acc_wrt_error_bias_lin_acc,
-                                       Eigen::Matrix3d& jacobian_error_bias_ang_vel_wrt_error_bias_ang_vel
+                                       Eigen::Matrix3d& jacobian_error_sens_pos_wrt_error_state_sens_pos,  Eigen::Matrix3d& jacobian_error_sens_att_wrt_error_state_sens_att
                                        );
-*/
+
 
 
 
@@ -228,10 +201,23 @@ public:
                            std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
-    int predictMeasurementSpecific(const TimeStamp& theTimeStamp,
-                           const RobotStateCore* currentRobotState,
-                           const Px4FlowSensorStateCore* currentImuState,
-                           Px4FlowSensorMeasurementCore*& predictedMeasurement);
+    int predictMeasurementSpecific(const TimeStamp& time_stamp,
+                                   const RobotStateCore* current_robot_state,
+                                   const Px4FlowSensorStateCore* current_sensor_state, const Px4FlowSensorMeasurementCore *sensor_measurement,
+                                   Px4FlowSensorMeasurementCore*& predicted_measurement);
+protected:
+    int predictMeasurementCore(// State
+                               // Robot
+                               const Eigen::Vector3d &position_robot_wrt_world,
+                               const Eigen::Vector3d &lin_speed_robot_wrt_world,
+                               const Eigen::Vector4d &attitude_robot_wrt_world,
+                               const Eigen::Vector3d &ang_velocity_robot_wrt_world,
+                               // Sensor
+                               const Eigen::Vector3d& position_sensor_wrt_robot,
+                               const Eigen::Vector4d& attitude_sensor_wrt_robot,
+                               // Predicted measurements
+                               bool flag_pred_meas_lin_velocity_sensor_wrt_sensor, Eigen::Vector2d& pred_meas_lin_velocity_sensor_wrt_sensor,
+                               bool flag_pred_meas_ground_distance, double& pred_meas_ground_distance);
 
 
     // Jacobian of the measurements: H
@@ -246,10 +232,10 @@ public:
                                         std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 
 protected:
-    int predictErrorMeasurementJacobianSpecific(const TimeStamp& theTimeStamp,
-                                                const RobotStateCore* TheRobotStateCore,
-                                                const Px4FlowSensorStateCore* TheImuStateCore,
-                                                Px4FlowSensorMeasurementCore*& predictedMeasurement,
+    int predictErrorMeasurementJacobianSpecific(const TimeStamp& time_stamp,
+                                                const RobotStateCore* robot_state,
+                                                const Px4FlowSensorStateCore* sensor_state, const Px4FlowSensorMeasurementCore *sensor_measurement,
+                                                Px4FlowSensorMeasurementCore*& predicted_measurement,
                                                 // Jacobians State / Parameters
                                                 // Robot
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_robot_error_state,
@@ -260,32 +246,30 @@ protected:
                                                 // Jacobians Measurement
                                                 Eigen::SparseMatrix<double>& jacobian_error_measurement_wrt_error_measurement
                                                 );
-/*
+
 protected:
-    int predictErrorMeasurementJacobianCore(// State: World
-                                            const Eigen::Vector3d& gravity_wrt_world,
-                                            // State: Robot
+    int predictErrorMeasurementJacobianCore(// State: Robot
                                             const Eigen::Vector3d& position_robot_wrt_world, const Eigen::Vector4d& attitude_robot_wrt_world,
                                             const Eigen::Vector3d& lin_speed_robot_wrt_world, const Eigen::Vector3d& ang_velocity_robot_wrt_world,
-                                            const Eigen::Vector3d& lin_accel_robot_wrt_world, const Eigen::Vector3d& ang_accel_robot_wrt_world,
                                             // State: Sensor
                                             const Eigen::Vector3d& position_sensor_wrt_robot, const Eigen::Vector4d& attitude_sensor_wrt_robot,
                                             // Parameters: Sensor
-                                            const Eigen::Matrix3d& sensitivity_meas_linear_acceleration, const Eigen::Matrix3d& sensitivity_meas_angular_velocity,
+                                            // None
                                             // Measurement
-                                            const Eigen::Vector3d& meas_lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& meas_attitude_sensor_wrt_sensor, const Eigen::Vector3d& meas_ang_velocity_sensor_wrt_sensor,
+                                            const Eigen::Vector2d& meas_lin_velocity_sensor_wrt_sensor, const double meas_ground_distance,
                                             // Predicted Measurement
-                                            const Eigen::Vector3d& lin_accel_sensor_wrt_sensor, const Eigen::Vector3d& attitude_sensor_wrt_sensor, const Eigen::Vector3d& ang_velocity_sensor_wrt_sensor,
+                                            const Eigen::Vector2d& pred_meas_lin_velocity_sensor_wrt_sensor, const double pred_meas_ground_distance,
+                                            // Flags
+                                            bool flag_measurement_velocity, bool flag_measurement_ground_distance,
                                             // Jacobians: State and Params
-                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_gravity,
-                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_lin_acc, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_vel, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_robot_ang_acc,
-                                            Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_robot_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_robot_ang_vel,
-                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_pos, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_att, Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_state_sensor_bias_lin_acc,
-                                            Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_sensor_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel,
+                                            Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_lin_vel, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_att, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_ang_vel,
+                                            // TODO: Jacobians ground_distance wrt robot
+                                            Eigen::Matrix<double, 2, 3> &jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_sensor_att,
+                                            // TODO: Jacobians ground_distance wrt sensor
                                             // Jacobians: Noise
-                                            Eigen::Matrix3d& jacobian_error_meas_lin_acc_wrt_error_meas_lin_acc, Eigen::Matrix3d& jacobian_error_meas_att_wrt_error_meas_att, Eigen::Matrix3d& jacobian_error_meas_ang_vel_wrt_error_meas_ang_vel
+                                            Eigen::Matrix2d& jacobian_error_meas_lin_vel_wrt_error_meas_lin_vel, double jacobian_error_meas_ground_distance_wrt_error_meas_ground_distance
                                             );
-*/
+
 
 
     /// Reset Error State

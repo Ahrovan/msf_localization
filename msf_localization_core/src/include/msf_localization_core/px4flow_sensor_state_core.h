@@ -25,18 +25,9 @@ protected:
     ///// Px4Flow State if enabled (or Parameters if disabled)
 
     // if enabled
-    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot, bias_lin_accel]'
+    // State: xs=[posi_sensor_wrt_robot, att_sensor_wrt_robot]'
 
-    /*
-    // Angular Velocity Biases
-protected:
-public:
-    Eigen::Vector3d biasesAngularVelocity;
-public:
-    Eigen::Vector3d getBiasesAngularVelocity() const;
-    int setBiasesAngularVelocity(const Eigen::Vector3d& biasesAngularVelocity);
 
-    */
 
 
 

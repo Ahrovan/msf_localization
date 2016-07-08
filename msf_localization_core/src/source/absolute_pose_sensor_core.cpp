@@ -1196,9 +1196,11 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobian(// Time
 
     //// Init Jacobians
     int error_init_jacobians=predictErrorMeasurementJacobianInit(// Current State
-                                                                current_state,
-                                                                // Predicted Measurements
-                                                                predicted_measurement);
+                                                                 current_state,
+                                                                 // Sensor Measurement
+                                                                 measurement,
+                                                                 // Predicted Measurements
+                                                                 predicted_measurement);
 
     if(error_init_jacobians)
         return error_init_jacobians;
@@ -1401,6 +1403,9 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
 
     // dimensions
 
+    // Dimension measurement
+    int dimension_error_measurement=matchedMeasurement->getDimensionErrorMeasurement();
+
     // Dimension robot
     int dimension_robot_error_state=currentRobotState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     int dimension_robot_error_parameters=currentRobotState->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
@@ -1437,8 +1442,8 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
 
     {
         // Resize and init
-        jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement_, dimension_robot_error_state);
-        jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement_, dimension_robot_error_parameters);
+        jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement, dimension_robot_error_state);
+        jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement, dimension_robot_error_parameters);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
@@ -1599,8 +1604,8 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
     {
 
         // Resize and init
-        jacobian_error_measurement_wrt_sensor_error_state.resize(dimension_error_measurement_, dimension_sensor_error_state);
-        jacobian_error_measurement_wrt_sensor_error_parameters.resize(dimension_error_measurement_, dimension_sensor_error_parameters);
+        jacobian_error_measurement_wrt_sensor_error_state.resize(dimension_error_measurement, dimension_sensor_error_state);
+        jacobian_error_measurement_wrt_sensor_error_parameters.resize(dimension_error_measurement, dimension_sensor_error_parameters);
 
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
@@ -1699,8 +1704,8 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
 
     {
         // Resize and init
-        jacobian_error_measurement_wrt_map_element_error_state.resize(dimension_error_measurement_, dimension_map_element_error_state);
-        jacobian_error_measurement_wrt_map_element_error_parameters.resize(dimension_error_measurement_, dimension_map_element_error_parameters);
+        jacobian_error_measurement_wrt_map_element_error_state.resize(dimension_error_measurement, dimension_map_element_error_state);
+        jacobian_error_measurement_wrt_map_element_error_parameters.resize(dimension_error_measurement, dimension_map_element_error_parameters);
 
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
@@ -1807,7 +1812,7 @@ int AbsolutePoseSensorCore::predictErrorMeasurementJacobianSpecific(const TimeSt
 
     {
         // Resize and init Jacobian
-        jacobian_error_measurement_wrt_error_measurement.resize(dimension_error_measurement_, dimension_error_measurement_);
+        jacobian_error_measurement_wrt_error_measurement.resize(dimension_error_measurement, dimension_error_measurement);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_measurement;
 
@@ -2459,7 +2464,7 @@ int AbsolutePoseSensorCore::jacobiansMapMeasurementSpecific(const TimeStamp &the
     int dimension_sensor_error_state_total=TheSensorState->getMsfElementCoreSharedPtr()->getDimensionErrorState();
 
     // Measurement
-    int dimension_map_new_element_measurement=TheCodedVisualMarkerMeasurement->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+    int dimension_map_new_element_measurement=TheCodedVisualMarkerMeasurement->getDimensionErrorMeasurement();
 
     // New Map element
     int dimension_map_new_element_error_state_total=TheCodeCodedVisualMarkerLandmarkCore->getDimensionErrorState();

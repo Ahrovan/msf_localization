@@ -24,9 +24,23 @@ namespace Quaternion
             // Jacobian error quaternion wrt error theta
             Eigen::Matrix<double, 4, 3> mat_diff_error_quat_wrt_error_theta_dense;
             Eigen::SparseMatrix<double> mat_diff_error_quat_wrt_error_theta_sparse;
+
             // Jacobian error theta wrt error quaternion
             Eigen::Matrix<double, 3, 4> mat_diff_error_theta_wrt_error_quat_dense;
             Eigen::SparseMatrix<double> mat_diff_error_theta_wrt_error_quat_sparse;
+
+            //
+            Eigen::Matrix<double, 4, 4> mat_diff_quat_inv_wrt_quat_dense;
+            Eigen::SparseMatrix<double> mat_diff_quat_inv_wrt_quat_sparse;
+
+            //
+            Eigen::Matrix<double, 3, 4> mat_diff_vector_wrt_vector_amp_dense;
+            Eigen::SparseMatrix<double> mat_diff_vector_wrt_vector_amp_sparse;
+
+            //
+            Eigen::Matrix<double, 4, 3> mat_diff_vector_amp_wrt_vector_dense;
+            Eigen::SparseMatrix<double> mat_diff_vector_amp_wrt_vector_sparse;
+
 
     } jacobians;
 

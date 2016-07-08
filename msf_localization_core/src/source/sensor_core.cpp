@@ -85,7 +85,7 @@ int SensorCore::setMeasurement(const TimeStamp& time_stamp, const std::shared_pt
     }
 
     // If it does not have any measurement, do not set measurement
-    if(!sensor_measurement->measurementSet())
+    if(!sensor_measurement->isMeasurementSet())
         return 0;
 
     if(this->getMsfLocalizationCorePtr()->setMeasurement(time_stamp, sensor_measurement))
@@ -201,8 +201,15 @@ int SensorCore::setNoisePositionSensorWrtRobot(const Eigen::Matrix3d &noisePosit
     return 0;
 }
 
+Eigen::SparseMatrix<double> SensorCore::getCovarianceMeasurement()
+{
+    throw;
+}
+
 int SensorCore::predictErrorMeasurementJacobianInit(// Current State
                                                     const std::shared_ptr<StateComponent> &current_state,
+                                                    // Sensor Measurement
+                                                    const std::shared_ptr<SensorMeasurementCore> &sensor_measurement,
                                                     // Predicted Measurements
                                                     std::shared_ptr<SensorMeasurementCore> &predicted_measurement)
 {
@@ -211,12 +218,15 @@ int SensorCore::predictErrorMeasurementJacobianInit(// Current State
     if(!current_state)
         return -1;
 
+    if(!sensor_measurement)
+        return -11;
+
     if(!predicted_measurement)
         return -10;
 
 
     // Dimension
-    int dimension_error_measurement=this->getDimensionErrorMeasurement();
+    int dimension_error_measurement=sensor_measurement->getDimensionErrorMeasurement();
 
 
     /// Hx

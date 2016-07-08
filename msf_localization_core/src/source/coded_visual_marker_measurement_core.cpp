@@ -110,7 +110,7 @@ Eigen::VectorXd CodedVisualMarkerMeasurementCore::getInnovation(const std::share
 {
     // Create the Measurement
     Eigen::VectorXd the_innovation;
-    the_innovation.resize(this->getSensorCoreSharedPtr()->getDimensionErrorMeasurement(), 1);
+    the_innovation.resize(this->getDimensionErrorMeasurement(), 1);
     the_innovation.setZero();
 
     // Check

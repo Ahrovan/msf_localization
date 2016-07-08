@@ -33,8 +33,13 @@ public:
 protected:
     int init();
 
+    // Dimension of the measurement
 public:
-    virtual bool measurementSet() {return false;};
+    virtual int getDimensionMeasurement() const;
+    virtual int getDimensionErrorMeasurement() const;
+
+public:
+    virtual bool isMeasurementSet() const;
 
 protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer

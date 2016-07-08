@@ -112,7 +112,7 @@ Eigen::VectorXd ImuSensorMeasurementCore::getInnovation(const std::shared_ptr<Se
 {
     // Create the Measurement
     Eigen::VectorXd TheInnovation;
-    TheInnovation.resize(this->getSensorCoreSharedPtr()->getDimensionErrorMeasurement(), 1);
+    TheInnovation.resize(this->getDimensionErrorMeasurement(), 1);
     TheInnovation.setZero();
 
     // Check

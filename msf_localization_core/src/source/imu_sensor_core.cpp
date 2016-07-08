@@ -1876,6 +1876,8 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
     //// Init Jacobians
     int error_init_jacobians=predictErrorMeasurementJacobianInit(// Current State
                                                                 current_state,
+                                                                 // Sensor Measurement
+                                                                 measurement,
                                                                 // Predicted Measurements
                                                                 predicted_measurement);
 
@@ -1889,6 +1891,8 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
         return -3;
     predicted_sensor_measurement=dynamic_cast<ImuSensorMeasurementCore*>(predicted_measurement.get());
 
+    // Sensor Measurement Cast
+    ImuSensorMeasurementCore* sensor_measurement=dynamic_cast<ImuSensorMeasurementCore*>(measurement.get());
 
 
     /// Get iterators to fill jacobians
@@ -1921,6 +1925,7 @@ int ImuSensorCore::predictErrorMeasurementJacobian(// Time
                                                                           dynamic_cast<GlobalParametersStateCore*>(current_state->TheGlobalParametersStateCore.get()),
                                                                           dynamic_cast<RobotStateCore*>(current_state->TheRobotStateCore.get()),
                                                                           current_sensor_state,
+                                                                          sensor_measurement,
                                                                           predicted_sensor_measurement,
                                                                           // Jacobians State / Parameters
                                                                           // World
@@ -1951,6 +1956,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
                                                            const GlobalParametersStateCore* TheGlobalParametersStateCore,
                                                            const RobotStateCore* TheRobotStateCore,
                                                            const ImuSensorStateCore* TheImuStateCore,
+                                                           const ImuSensorMeasurementCore* sensor_measurement,
                                                            ImuSensorMeasurementCore*& predictedMeasurement,
                                                            // Jacobians State / Parameters
                                                            // World
@@ -1978,10 +1984,6 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     // Imu sensor core
     std::shared_ptr<const ImuSensorCore> the_imu_sensor_core=std::dynamic_pointer_cast<const ImuSensorCore>(TheImuStateCore->getMsfElementCoreSharedPtr());
-
-
-    // dimension of the measurement
-    int dimension_error_measurement=this->getDimensionErrorMeasurement();
 
 
 
@@ -2117,6 +2119,9 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     /// Dimensions
 
+    // dimension error measurements
+    int dimension_error_measurement=sensor_measurement->getDimensionErrorMeasurement();
+
     // dimension of the global parameters
     int dimension_world_error_state=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorState();
     int dimension_world_error_parameters=TheGlobalParametersStateCore->getMsfElementCoreSharedPtr()->getDimensionErrorParameters();
@@ -2140,8 +2145,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     {
 
         // Resize and init Jacobian
-        jacobian_error_measurement_wrt_world_error_state.resize(dimension_error_measurement_, dimension_world_error_state);
-        jacobian_error_measurement_wrt_world_error_parameters.resize(dimension_error_measurement_, dimension_world_error_parameters);
+        jacobian_error_measurement_wrt_world_error_state.resize(dimension_error_measurement, dimension_world_error_state);
+        jacobian_error_measurement_wrt_world_error_parameters.resize(dimension_error_measurement, dimension_world_error_parameters);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
@@ -2200,8 +2205,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
     {
 
         // Resize and init
-        jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement_, dimension_robot_error_state);
-        jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement_, dimension_robot_error_parameters);
+        jacobian_error_measurement_wrt_robot_error_state.resize(dimension_error_measurement, dimension_robot_error_state);
+        jacobian_error_measurement_wrt_robot_error_parameters.resize(dimension_error_measurement, dimension_robot_error_parameters);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_parameters;
@@ -2354,8 +2359,8 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     {
         // Resize and init
-        jacobian_error_measurement_wrt_sensor_error_state.resize(dimension_error_measurement_, dimension_sensor_error_state);
-        jacobian_error_measurement_wrt_sensor_error_parameters.resize(dimension_error_measurement_, dimension_sensor_error_parameters);
+        jacobian_error_measurement_wrt_sensor_error_state.resize(dimension_error_measurement, dimension_sensor_error_state);
+        jacobian_error_measurement_wrt_sensor_error_parameters.resize(dimension_error_measurement, dimension_sensor_error_parameters);
 
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_state;
@@ -2703,7 +2708,7 @@ int ImuSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& theT
 
     {
         // Resize and init Jacobian
-        jacobian_error_measurement_wrt_error_measurement.resize(dimension_error_measurement_, dimension_error_measurement_);
+        jacobian_error_measurement_wrt_error_measurement.resize(dimension_error_measurement, dimension_error_measurement);
 
         std::vector<Eigen::Triplet<double>> triplet_list_jacobian_error_measurement_wrt_error_measurement;
 

@@ -353,6 +353,7 @@ protected:
                                                 const GlobalParametersStateCore* TheGlobalParametersStateCore,
                                                 const RobotStateCore* TheRobotStateCore,
                                                 const ImuSensorStateCore* TheImuStateCore,
+                                                const ImuSensorMeasurementCore* sensor_measurement,
                                                 ImuSensorMeasurementCore*& predictedMeasurement,
                                                 // Jacobians State / Parameters
                                                 // World

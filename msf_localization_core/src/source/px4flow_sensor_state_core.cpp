@@ -33,19 +33,6 @@ int Px4FlowSensorStateCore::init()
     return 0;
 }
 
-/*
-Eigen::Vector3d Px4FlowSensorStateCore::getBiasesAngularVelocity() const
-{
-    return this->biasesAngularVelocity;
-}
-
-int Px4FlowSensorStateCore::setBiasesAngularVelocity(const Eigen::Vector3d &biasesAngularVelocity)
-{
-    this->biasesAngularVelocity=biasesAngularVelocity;
-    return 0;
-}
-*/
-
 
 int Px4FlowSensorStateCore::updateStateFromIncrementErrorState(const Eigen::VectorXd &increment_error_state)
 {
@@ -73,16 +60,6 @@ int Px4FlowSensorStateCore::updateStateFromIncrementErrorState(const Eigen::Vect
 
         dimension+=3;
     }
-    /*
-    if(px4flow_sensor_core->isEstimationBiasLinearAccelerationEnabled())
-    {
-        this->biasesLinearAcceleration+=increment_error_state.block<3,1>(dimension, 0);
-
-        //std::cout<<"biasesLinearAcceleration="<<this->biasesLinearAcceleration.transpose()<<std::endl;
-
-        dimension+=3;
-    }
-    */
 
 
     return 0;

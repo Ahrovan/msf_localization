@@ -109,7 +109,6 @@ int RosPx4FlowSensorInterface::open()
     px4flow_meas_sub_=nh->subscribe(px4flow_meas_topic_name_, 10, &RosPx4FlowSensorInterface::px4FlowMeasCallback, this);
 
     // Publishers
-    //estimated_bias_linear_acceleration_pub_=nh->advertise<geometry_msgs::Vector3Stamped>(estimated_bias_linear_acceleration_topic_name_, 1, true);
 
 
     return 0;
@@ -120,8 +119,6 @@ int RosPx4FlowSensorInterface::publish(const TimeStamp& time_stamp, const std::s
     // tf pose sensor wrt robot
     this->publishTfPoseSensorWrtRobot(time_stamp, robot_core, sensor_state_core);
 
-    // Estimated biases
-    //this->publishEstimatedBiasLinearAcceleration(time_stamp, std::dynamic_pointer_cast<ImuSensorStateCore>(sensor_state_core));
 
     // end
     return 0;
@@ -142,9 +139,6 @@ int RosPx4FlowSensorInterface::readConfig(const pugi::xml_node& sensor, unsigned
     this->setPx4FlowMeasTopicName(sensor_topic);
 
 
-    // Estimated states topic name
-    //std::string estimated_bias_linear_acceleration_topic_name=sensor.child("parameters").child("linear_acceleration").child("biases").child_value("ros_topic");
-    //this->setEstimatedBiasLinearAccelerationTopicName(estimated_bias_linear_acceleration_topic_name);
 
     /// Finish
 

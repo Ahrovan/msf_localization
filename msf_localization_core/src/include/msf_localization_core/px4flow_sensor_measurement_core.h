@@ -21,7 +21,13 @@ protected:
     int init();
 
 public:
-    bool measurementSet();
+    bool isMeasurementSet() const;
+
+    // Dimension of the measurement
+public:
+    int getDimensionMeasurement() const;
+    int getDimensionErrorMeasurement() const;
+
 
 
     ///// Measurement
@@ -66,6 +72,15 @@ public:
     //// Get the full measurement as a Eigen::VectorXd
 public:
     Eigen::VectorXd getMeasurement();
+
+
+    ///// Covariances getters
+
+    // Covariance Sensor Error Measurements: Rn
+public:
+    Eigen::SparseMatrix<double> getCovarianceMeasurement();
+
+
 
 };
 

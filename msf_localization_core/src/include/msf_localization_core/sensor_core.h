@@ -122,7 +122,7 @@ public:
 
     // Covariance Sensor Error Measurements: Rn
 public:
-    virtual Eigen::SparseMatrix<double> getCovarianceMeasurement()=0;
+    virtual Eigen::SparseMatrix<double> getCovarianceMeasurement();
 
 
 
@@ -174,6 +174,8 @@ public:
 protected:
     int predictErrorMeasurementJacobianInit(// Current State
                                             const std::shared_ptr<StateComponent>& current_state,
+                                            // Sensor Measurements
+                                            const std::shared_ptr<SensorMeasurementCore> &sensor_measurement,
                                             // Predicted Measurements
                                             std::shared_ptr<SensorMeasurementCore> &predicted_measurement);
 

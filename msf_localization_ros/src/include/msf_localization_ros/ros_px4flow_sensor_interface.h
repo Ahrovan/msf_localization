@@ -58,20 +58,6 @@ public:
     int setPx4FlowMeasTopicName(const std::string px4flow_meas_topic_name);
 
 
-    /*
-    // Publishers for biases
-protected:
-    std::string estimated_bias_linear_acceleration_topic_name_;
-public:
-    int setEstimatedBiasLinearAccelerationTopicName(const std::string& estimated_bias_linear_acceleration_topic_name);
-protected:
-    ros::Publisher estimated_bias_linear_acceleration_pub_;
-    geometry_msgs::Vector3Stamped estimated_bias_linear_acceleration_msg_;
-protected:
-    int publishEstimatedBiasLinearAcceleration(const TimeStamp& time_stamp,
-                                               const std::shared_ptr<ImuSensorStateCore>& sensor_state_core);
-
-*/
 
 public:
     int open();

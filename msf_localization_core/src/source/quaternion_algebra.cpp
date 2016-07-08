@@ -37,6 +37,49 @@ Jacobians::Jacobians()
     triplets.push_back(Eigen::Triplet<double>(2, 3, 2));
     mat_diff_error_theta_wrt_error_quat_sparse.setFromTriplets(triplets.begin(), triplets.end());
 
+
+
+    mat_diff_quat_inv_wrt_quat_dense<<1, 0, 0, 0,
+                                        0, -1, 0, 0,
+                                        0, 0, -1, 0,
+                                        0, 0, 0, -1;
+
+    mat_diff_quat_inv_wrt_quat_sparse.resize(4, 4);
+    triplets.clear();
+    triplets.push_back(Eigen::Triplet<double>(0, 0, 1));
+    triplets.push_back(Eigen::Triplet<double>(1, 1, -1));
+    triplets.push_back(Eigen::Triplet<double>(2, 2, -1));
+    triplets.push_back(Eigen::Triplet<double>(3, 3, -1));
+    mat_diff_quat_inv_wrt_quat_sparse.setFromTriplets(triplets.begin(), triplets.end());
+
+
+
+    mat_diff_vector_wrt_vector_amp_dense<<0, 1, 0, 0,
+                                            0, 0, 1, 0,
+                                            0, 0, 0, 1;
+
+    mat_diff_vector_wrt_vector_amp_sparse.resize(3, 4);
+    triplets.clear();
+    triplets.push_back(Eigen::Triplet<double>(0, 1, 1));
+    triplets.push_back(Eigen::Triplet<double>(1, 2, 1));
+    triplets.push_back(Eigen::Triplet<double>(2, 3, 1));
+    mat_diff_vector_wrt_vector_amp_sparse.setFromTriplets(triplets.begin(), triplets.end());
+
+
+    mat_diff_vector_amp_wrt_vector_dense<<0, 0, 0,
+                                            1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1;
+
+    mat_diff_vector_amp_wrt_vector_sparse.resize(4, 3);
+    triplets.clear();
+    triplets.push_back(Eigen::Triplet<double>(1, 0, 1));
+    triplets.push_back(Eigen::Triplet<double>(2, 1, 1));
+    triplets.push_back(Eigen::Triplet<double>(3, 2, 1));
+    mat_diff_vector_amp_wrt_vector_sparse.setFromTriplets(triplets.begin(), triplets.end());
+
+
+    // End
     return;
 }
 

@@ -3903,12 +3903,12 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             // Fill Blocks
             {
                 int num_error_measurements_i=0;
-                for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListPredictedMeas=TheListMatchedMeasurements.begin();
-                    itListPredictedMeas!=TheListMatchedMeasurements.end();
-                    ++itListPredictedMeas)
+                for(std::list<std::shared_ptr<SensorMeasurementCore> >::const_iterator itListMatchedMeas=TheListMatchedMeasurements.begin();
+                    itListMatchedMeas!=TheListMatchedMeasurements.end();
+                    ++itListMatchedMeas)
                 {
                     block_covariance_error_measurement(num_error_measurements_i, num_error_measurements_i)=
-                            (*itListPredictedMeas)->getCovarianceMeasurement();
+                            (*itListMatchedMeas)->getCovarianceMeasurement();
                     num_error_measurements_i++;
                 }
             }
@@ -4617,7 +4617,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
                 itUnmatchedMeas!=TheListUnmatchedMeasurementsWithMapElement.end();
                 ++itUnmatchedMeas)
             {
-                dimension_new_map_elements_noise_measurement_total+=(*itUnmatchedMeas)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+                dimension_new_map_elements_noise_measurement_total+=(*itUnmatchedMeas)->getDimensionErrorMeasurement();
             }
 
 

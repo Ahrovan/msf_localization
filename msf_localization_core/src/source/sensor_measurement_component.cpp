@@ -40,7 +40,7 @@ int SensorMeasurementComponent::getDimensionMeasurement() const
         it_sensor_measurement!=list_sensor_measurement_core_.end();
         ++it_sensor_measurement)
     {
-        dimension_sensor_measurement+=(*it_sensor_measurement)->getSensorCoreSharedPtr()->getDimensionMeasurement();
+        dimension_sensor_measurement+=(*it_sensor_measurement)->getDimensionMeasurement();
     }
 
     return dimension_sensor_measurement;
@@ -54,7 +54,7 @@ int SensorMeasurementComponent::getDimensionErrorMeasurement() const
         it_sensor_measurement!=list_sensor_measurement_core_.end();
         ++it_sensor_measurement)
     {
-        dimension_error_sensor_measurement+=(*it_sensor_measurement)->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
+        dimension_error_sensor_measurement+=(*it_sensor_measurement)->getDimensionErrorMeasurement();
     }
 
     return dimension_error_sensor_measurement;
