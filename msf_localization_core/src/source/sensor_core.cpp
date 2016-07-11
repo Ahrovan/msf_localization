@@ -86,10 +86,16 @@ int SensorCore::setMeasurement(const TimeStamp& time_stamp, const std::shared_pt
 
     // If it does not have any measurement, do not set measurement
     if(!sensor_measurement->isMeasurementSet())
+    {
+        //std::cout<<"no measurements"<<std::endl;
         return 0;
+    }
 
     if(this->getMsfLocalizationCorePtr()->setMeasurement(time_stamp, sensor_measurement))
+    {
+        //std::cout<<"ERROR setting measurement"<<std::endl;
         return -2;
+    }
 
     return 0;
 }

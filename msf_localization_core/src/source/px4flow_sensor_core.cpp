@@ -311,7 +311,6 @@ Eigen::SparseMatrix<double> Px4FlowSensorCore::getCovarianceParameters()
         for(int i=0; i<3; i++)
             triplets_covariance.push_back(Eigen::Triplet<double>(dimension+i,dimension+i,noisePositionSensorWrtRobot(i,i)));
 
-
         dimension+=3;
     }
     if(!this->isEstimationAttitudeSensorWrtRobotEnabled())
@@ -1037,7 +1036,23 @@ int Px4FlowSensorCore::predictMeasurementCore(// State
     // Ground Distance
     if(flag_pred_meas_ground_distance)
     {
-        // TODO
+        // TODO FIX
+        // Provisional variables for ground plane:
+        Eigen::Vector3d ground_plane_normal(0,0,1);
+        Eigen::Vector3d ground_plane_point(0,0,0);
+
+        // Distance sensor line
+        Eigen::Vector4d att_sensor_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
+        Eigen::Vector3d distance_sensor_tvect=Quaternion::cross_sandwich(att_sensor_wrt_world, Eigen::Vector3d(0,0,1), Quaternion::inv(att_sensor_wrt_world));
+
+        Eigen::Vector3d position_sensor_wrt_world=Quaternion::cross_sandwich(attitude_robot_wrt_world, position_sensor_wrt_robot, Quaternion::inv(attitude_robot_wrt_world))+position_robot_wrt_world;
+
+        // Pred measurement
+        double lambda_num=ground_plane_normal.dot(ground_plane_point-position_sensor_wrt_world);
+        double lambda_den=ground_plane_normal.dot(distance_sensor_tvect);
+        double lamdba=lambda_num/lambda_den;
+        pred_meas_ground_distance=std::abs(lamdba);
+
     }
 
 
@@ -1261,27 +1276,34 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
     // Jacobian State
 
     // Robot
+    // meas_lin_vel
     Eigen::Matrix<double, 2, 3> jacobian_error_meas_lin_vel_wrt_error_state_robot_lin_vel;
     Eigen::Matrix<double, 2, 3> jacobian_error_meas_lin_vel_wrt_error_state_robot_att;
     Eigen::Matrix<double, 2, 3> jacobian_error_meas_lin_vel_wrt_error_state_robot_ang_vel;
 
-    // TODO: meas_ground_distance
-    //Eigen::Matrix3d jacobian_error_meas_ang_vel_wrt_error_state_robot_att;
-    //Eigen::Matrix3d jacobian_error_meas_ang_vel_wrt_error_state_robot_ang_vel;
+    // meas_ground_distance
+    Eigen::Matrix<double, 1, 3> jacobian_error_meas_ground_distance_wrt_error_state_robot_pos;
+    Eigen::Matrix<double, 1, 3> jacobian_error_meas_ground_distance_wrt_error_state_robot_att;
 
 
     // Sensor
+    // meas_lin_vel
     Eigen::Matrix<double, 2, 3> jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos;
     Eigen::Matrix<double, 2, 3> jacobian_error_meas_lin_vel_wrt_error_state_sensor_att;
 
+    // meas_ground_distance
+    Eigen::Matrix<double, 1, 3> jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos;
+    Eigen::Matrix<double, 1, 3> jacobian_error_meas_ground_distance_wrt_error_state_sensor_att;
+
+
+    // Map element
     // TODO: meas_ground_distance
-    //Eigen::Matrix3d jacobian_error_meas_ang_vel_wrt_error_state_sensor_att;
-    //Eigen::Matrix3d jacobian_error_meas_ang_vel_wrt_error_state_sensor_bias_ang_vel;
 
 
     // Jacobians: Noise
+    // meas_lin_vel
     Eigen::Matrix2d jacobian_error_meas_lin_vel_wrt_error_meas_lin_vel;
-    // TODO: meas_ground_distance
+    // meas_ground_distance
     double jacobian_error_meas_ground_distance_wrt_error_meas_ground_distance;
 
 
@@ -1304,9 +1326,10 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
                                                   sensor_measurement->isVelocitySet(), sensor_measurement->isGroundDistanceSet(),
                                                   // Jacobians: State and Params
                                                   jacobian_error_meas_lin_vel_wrt_error_state_robot_lin_vel, jacobian_error_meas_lin_vel_wrt_error_state_robot_att, jacobian_error_meas_lin_vel_wrt_error_state_robot_ang_vel,
-                                                  // TODO: Jacobians ground_distance wrt robot
+                                                  jacobian_error_meas_ground_distance_wrt_error_state_robot_pos, jacobian_error_meas_ground_distance_wrt_error_state_robot_att,
                                                   jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos, jacobian_error_meas_lin_vel_wrt_error_state_sensor_att,
-                                                  // TODO: Jacobians ground_distance wrt sensor
+                                                  jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos, jacobian_error_meas_ground_distance_wrt_error_state_sensor_att,
+                                                  // TODO: Jacobians ground_distance wrt map
                                                   // Jacobians: Noise
                                                   jacobian_error_meas_lin_vel_wrt_error_meas_lin_vel, jacobian_error_meas_ground_distance_wrt_error_meas_ground_distance
                                                   );
@@ -1399,7 +1422,7 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
 
             }
 
-            dimension_error_measurement_i+=3;
+            dimension_error_measurement_i+=2;
         }
 
 
@@ -1412,22 +1435,22 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
                 case RobotCoreTypes::free_model:
                 {
                     // z_ang_vel / posi
-                    // TODO
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_ground_distance_wrt_error_state_robot_pos, dimension_error_measurement_i, 0);
 
                     // z_ang_vel / lin_speed
-                    // TODO
+                    // Zeros
 
                     // z_ang_vel / lin_acc
-                    // TODO
+                    // Zeros
 
                     // z_ang_vel / attit
-                    // TODO
+                    BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_ground_distance_wrt_error_state_robot_att, dimension_error_measurement_i, 9);
 
                     // z_ang_vel / ang_vel
-                    // TODO
+                    // Zeros
 
                     // z_ang_vel / ang_acc
-                    // TODO
+                    // Zeros
 
                     // end
                     break;
@@ -1439,7 +1462,7 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
 
             }
 
-            dimension_error_measurement_i+=3;
+            dimension_error_measurement_i+=1;
         }
 
 
@@ -1526,12 +1549,14 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
             // z_ground_distance / posi_sen_wrt_robot
             if(sensor_core->isEstimationPositionSensorWrtRobotEnabled())
             {
-                // TODO
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos, dimension_error_measurement_i, dimension_sensor_error_state_i);
+
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
-                // TODO
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
+
                 dimension_sensor_error_parameters_i+=3;
             }
 
@@ -1539,12 +1564,14 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
             // z_ground_distance / atti_sen_wrt_robot
             if(sensor_core->isEstimationAttitudeSensorWrtRobotEnabled())
             {
-                // TODO
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_state, jacobian_error_meas_ground_distance_wrt_error_state_sensor_att, dimension_error_measurement_i, dimension_sensor_error_state_i);
+
                 dimension_sensor_error_state_i+=3;
             }
             else
             {
-                // TODO
+                BlockMatrix::insertVectorEigenTripletFromEigenDense(triplet_list_jacobian_error_measurement_wrt_error_parameters, jacobian_error_meas_ground_distance_wrt_error_state_sensor_att, dimension_error_measurement_i, dimension_sensor_error_parameters_i);
+
                 dimension_sensor_error_parameters_i+=3;
             }
 
@@ -1562,7 +1589,7 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianSpecific(const TimeStamp& 
     /// Jacobian measurement - map element error state / error parameters
 
     {
-        // Nothing to do
+        // TODO FIX
     }
 
 
@@ -1626,9 +1653,10 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianCore(// State: Robot
                                                            bool flag_measurement_velocity, bool flag_measurement_ground_distance,
                                                             // Jacobians: State and Params
                                                             Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_lin_vel, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_att, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_ang_vel,
-                                                            // TODO: Jacobians ground_distance wrt robot
+                                                           Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_robot_pos, Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_robot_att,
                                                             Eigen::Matrix<double, 2, 3> &jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_sensor_att,
-                                                            // TODO: Jacobians ground_distance wrt sensor
+                                                           Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos, Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_sensor_att,
+                                                           // TODO: Jacobians ground_distance wrt map
                                                             // Jacobians: Noise
                                                             Eigen::Matrix2d& jacobian_error_meas_lin_vel_wrt_error_meas_lin_vel, double jacobian_error_meas_ground_distance_wrt_error_meas_ground_distance
                                                             )
@@ -1641,6 +1669,15 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianCore(// State: Robot
         Eigen::Vector4d att_sensor_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
         Eigen::Vector4d att_world_wrt_sensor=Quaternion::inv(att_sensor_wrt_world);
         Eigen::Vector4d att_world_wrt_robot=Quaternion::inv(attitude_robot_wrt_world);
+        Eigen::Vector4d att_robot_wrt_sensor=Quaternion::inv(attitude_sensor_wrt_robot);
+
+
+        // Vars
+        Eigen::Vector3d ang_vel_robot_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), ang_velocity_robot_wrt_world, attitude_robot_wrt_world);
+
+        Eigen::Vector3d lin_vel_sensor_wrt_world_in_world=lin_speed_robot_wrt_world + Quaternion::cross_sandwich(attitude_robot_wrt_world, ang_vel_robot_wrt_world_in_robot.cross(position_sensor_wrt_robot), Quaternion::inv(attitude_robot_wrt_world));
+
+        Eigen::Vector3d lin_vel_sensor_wrt_world_in_robot=Quaternion::cross_sandwich(Quaternion::inv(attitude_robot_wrt_world), lin_vel_sensor_wrt_world_in_world, attitude_robot_wrt_world);
 
 
         //
@@ -1653,6 +1690,16 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianCore(// State: Robot
         //
         Eigen::Matrix4d mat_quat_plus_att_world_wrt_robot=Quaternion::quatMatPlus(att_world_wrt_robot);
         Eigen::Matrix4d mat_quat_minus_att_world_wrt_robot=Quaternion::quatMatMinus(att_world_wrt_robot);
+        //
+        Eigen::Matrix4d mat_quat_minus_att_sensor_wrt_robot=Quaternion::quatMatMinus(attitude_sensor_wrt_robot);
+        Eigen::Matrix4d mat_quat_plus_att_sensor_wrt_robot=Quaternion::quatMatPlus(attitude_sensor_wrt_robot);
+        //
+        Eigen::Matrix4d mat_quat_plus_att_robot_wrt_sensor=Quaternion::quatMatPlus(att_robot_wrt_sensor);
+
+        //
+        Eigen::Matrix4d mat_quat_plus_vel_robot_wrt_world_in_world=Quaternion::quatMatPlus(lin_speed_robot_wrt_world);
+        //
+        Eigen::Matrix4d mat_quat_plus_ang_vel_robot_wrt_world_in_world=Quaternion::quatMatPlus(ang_velocity_robot_wrt_world);
 
         //
         Eigen::Matrix3d j2a=-Quaternion::skewSymMat(position_sensor_wrt_robot);
@@ -1663,7 +1710,12 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianCore(// State: Robot
         jacobian_error_meas_lin_vel_wrt_error_state_robot_lin_vel=
                 this->sensitivity_meas_lin_vel_*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*mat_quat_plus_att_world_wrt_sensor*mat_quat_minus_att_sensor_wrt_world*Quaternion::jacobians.mat_diff_vector_amp_wrt_vector_sparse;
 
-        jacobian_error_meas_lin_vel_wrt_error_state_robot_att;
+        jacobian_error_meas_lin_vel_wrt_error_state_robot_att=
+                this->sensitivity_meas_lin_vel_*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*(
+                (Quaternion::quatMatMinus(Quaternion::cross_pure_gen(lin_speed_robot_wrt_world, att_sensor_wrt_world))*Quaternion::jacobians.mat_diff_quat_inv_wrt_quat_sparse+mat_quat_plus_att_world_wrt_sensor*mat_quat_plus_vel_robot_wrt_world_in_world)*mat_quat_minus_att_sensor_wrt_robot
+                    +
+                mat_quat_plus_att_robot_wrt_sensor*mat_quat_minus_att_sensor_wrt_robot*Quaternion::jacobians.mat_diff_vector_amp_wrt_vector_sparse*j2a*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*(Quaternion::quatMatMinus(Quaternion::cross_pure_gen(ang_velocity_robot_wrt_world, attitude_robot_wrt_world))*Quaternion::jacobians.mat_diff_quat_inv_wrt_quat_sparse+mat_quat_plus_att_world_wrt_robot*mat_quat_plus_ang_vel_robot_wrt_world_in_world)
+                )*mat_quat_plus_att_robot_wrt_world*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
         jacobian_error_meas_lin_vel_wrt_error_state_robot_ang_vel=
                 this->sensitivity_meas_lin_vel_*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*mat_quat_plus_att_world_wrt_sensor*mat_quat_minus_att_sensor_wrt_world*
@@ -1672,9 +1724,11 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianCore(// State: Robot
                 mat_quat_plus_att_world_wrt_robot*mat_quat_minus_att_robot_wrt_world*Quaternion::jacobians.mat_diff_vector_amp_wrt_vector_sparse;
 
         // Error Meas Lin Vel / Sensor Error State (/ Parameters)
-        jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos;
+        jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos=
+                this->sensitivity_meas_lin_vel_*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*mat_quat_plus_att_world_wrt_sensor*mat_quat_minus_att_sensor_wrt_world*mat_quat_plus_att_robot_wrt_world*mat_quat_minus_att_world_wrt_robot*Quaternion::jacobians.mat_diff_vector_amp_wrt_vector_sparse*Quaternion::skewSymMat(ang_vel_robot_wrt_world_in_robot);
 
-        jacobian_error_meas_lin_vel_wrt_error_state_sensor_att;
+        jacobian_error_meas_lin_vel_wrt_error_state_sensor_att=
+                this->sensitivity_meas_lin_vel_*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*(Quaternion::quatMatMinus(Quaternion::cross_pure_gen(lin_vel_sensor_wrt_world_in_robot, attitude_sensor_wrt_robot))*Quaternion::jacobians.mat_diff_quat_inv_wrt_quat_sparse+mat_quat_plus_att_robot_wrt_sensor*Quaternion::quatMatPlus(lin_vel_sensor_wrt_world_in_robot))*mat_quat_plus_att_sensor_wrt_robot*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
 
         // Error Meas Lin Vel / Error Meas Lin Vel
@@ -1686,14 +1740,56 @@ int Px4FlowSensorCore::predictErrorMeasurementJacobianCore(// State: Robot
     if(flag_measurement_ground_distance)
     {
         // Common
-        // TODO
+        // TODO FIX
+        // Provisional variables for ground plane:
+        // n
+        Eigen::Vector3d ground_plane_normal(0,0,1);
+        // xp
+        Eigen::Vector3d ground_plane_point(0,0,0);
+
+        // Distance sensor line
+        Eigen::Vector4d att_sensor_wrt_world=Quaternion::cross(attitude_robot_wrt_world, attitude_sensor_wrt_robot);
+        // u
+        Eigen::Vector3d distance_sensor_tvect=Quaternion::cross_sandwich(att_sensor_wrt_world, Eigen::Vector3d(0,0,1), Quaternion::inv(att_sensor_wrt_world));
+
+        // xr
+        Eigen::Vector3d position_sensor_wrt_world=Quaternion::cross_sandwich(attitude_robot_wrt_world, position_sensor_wrt_robot, Quaternion::inv(attitude_robot_wrt_world))+position_robot_wrt_world;
+
+        // Pred measurement
+        double lambda_num=ground_plane_normal.dot(ground_plane_point-position_sensor_wrt_world);
+        double lambda_den=ground_plane_normal.dot(distance_sensor_tvect);
+        //double lamdba=lambda_num/lambda_den;
+        //pred_meas_ground_distance=std::abs(lamdba);
+
+        //
+        Eigen::Vector3d distance_sensor_tvec_robot=Quaternion::cross_sandwich(attitude_sensor_wrt_robot, Eigen::Vector3d(0,0,1), Quaternion::inv(attitude_sensor_wrt_robot));
+
 
         // Fill
         //
-        // TODO
+        // Robot
+        jacobian_error_meas_ground_distance_wrt_error_state_robot_pos=
+                -1/lambda_den*ground_plane_normal.transpose();
+
+        jacobian_error_meas_ground_distance_wrt_error_state_robot_att=
+                1/pow(lambda_den,2)*(
+                ground_plane_normal.dot(position_sensor_wrt_world-ground_plane_point)*ground_plane_normal.transpose()*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*
+                    (Quaternion::quatMatPlus(Quaternion::cross_gen_pure(attitude_robot_wrt_world, distance_sensor_tvec_robot))*Quaternion::jacobians.mat_diff_quat_inv_wrt_quat_sparse+Quaternion::quatMatMinus(Quaternion::inv(attitude_robot_wrt_world))*Quaternion::quatMatMinus(distance_sensor_tvec_robot))
+                -
+                ground_plane_normal.dot(distance_sensor_tvect)*ground_plane_normal.transpose()*Quaternion::jacobians.mat_diff_vector_wrt_vector_amp_sparse*
+                    (Quaternion::quatMatPlus(Quaternion::cross_gen_pure(attitude_robot_wrt_world, position_sensor_wrt_robot))*Quaternion::jacobians.mat_diff_quat_inv_wrt_quat_sparse+Quaternion::quatMatMinus(Quaternion::inv(attitude_robot_wrt_world))*Quaternion::quatMatMinus(position_sensor_wrt_robot))
+                )*Quaternion::quatMatPlus(attitude_robot_wrt_world)*Quaternion::jacobians.mat_diff_error_quat_wrt_error_theta_sparse;
 
         //
+        // Sensor
+        jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos;
+
+        jacobian_error_meas_ground_distance_wrt_error_state_sensor_att;
+
+        //
+        // Map
         // TODO
+
 
         //
         jacobian_error_meas_ground_distance_wrt_error_meas_ground_distance=1;

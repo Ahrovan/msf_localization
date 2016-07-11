@@ -81,7 +81,10 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 
     // If the new element is older than the oldest time stamp in buffer, we discard the element
     if(TheTimeStamp<oldest_time_stamp)
+    {
+        //std::cout<<"MsfStorageCore::setMeasurement() measurement too old. not set"<<std::endl;
         return 1;
+    }
 
 
     // This is already safe

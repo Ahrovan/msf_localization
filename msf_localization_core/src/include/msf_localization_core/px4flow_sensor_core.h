@@ -3,6 +3,8 @@
 #define _PX4FLOW_SENSOR_CORE_H
 
 
+// Math
+#include <cmath>
 
 // Pugixml
 #include "pugixml/pugixml.hpp"
@@ -263,9 +265,10 @@ protected:
                                             bool flag_measurement_velocity, bool flag_measurement_ground_distance,
                                             // Jacobians: State and Params
                                             Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_lin_vel, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_att, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_robot_ang_vel,
-                                            // TODO: Jacobians ground_distance wrt robot
+                                            Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_robot_pos, Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_robot_att,
                                             Eigen::Matrix<double, 2, 3> &jacobian_error_meas_lin_vel_wrt_error_state_sensor_pos, Eigen::Matrix<double, 2, 3>& jacobian_error_meas_lin_vel_wrt_error_state_sensor_att,
-                                            // TODO: Jacobians ground_distance wrt sensor
+                                            Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_sensor_pos, Eigen::Matrix<double, 1, 3>& jacobian_error_meas_ground_distance_wrt_error_state_sensor_att,
+                                            // TODO: Jacobians ground_distance wrt map
                                             // Jacobians: Noise
                                             Eigen::Matrix2d& jacobian_error_meas_lin_vel_wrt_error_meas_lin_vel, double jacobian_error_meas_ground_distance_wrt_error_meas_ground_distance
                                             );

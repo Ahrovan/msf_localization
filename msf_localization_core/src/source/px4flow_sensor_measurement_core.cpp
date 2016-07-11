@@ -155,7 +155,7 @@ Eigen::VectorXd Px4FlowSensorMeasurementCore::getInnovation(const std::shared_pt
 
     if(this->isGroundDistanceSet())
     {
-        inovation_measurement(dimension,0)=matched_measurement(dimension, 1) - predicted_measurement(dimension, 1);
+        inovation_measurement(dimension,0)=matched_measurement(dimension, 0) - predicted_measurement(dimension, 0);
         dimension+=1;
     }
 
@@ -215,7 +215,7 @@ Eigen::SparseMatrix<double> Px4FlowSensorMeasurementCore::getCovarianceMeasureme
 
         BlockMatrix::insertVectorEigenTripletFromEigenDense(triplets_covariance_measurement, noise_measurement_velocity, dimension, dimension);
 
-        dimension+=3;
+        dimension+=2;
     }
 
     if(isGroundDistanceSet())
