@@ -61,13 +61,16 @@ int RosPx4FlowSensorInterface::setMeasurementRos(const px_comm::OpticalFlowConst
     std::shared_ptr<Px4FlowSensorMeasurementCore> sensor_measurement_core=std::make_shared<Px4FlowSensorMeasurementCore>(sensor_core);
 
 
+    // Values
+    int quality=msg->quality;
+    double ground_distance=msg->ground_distance;
+
+
     // Velocity
     if(this->isMeasurementVelocityEnabled())
     {
-        int quality=msg->quality;
-
         // We avoid to use bad optical flow measurements
-        if(quality > 100)
+        if(quality >= 200 && ground_distance >= 0.30001)
         {
             Eigen::Vector2d velocity(msg->velocity_x, msg->velocity_y);
             sensor_measurement_core->setVelocity(velocity);
@@ -77,10 +80,8 @@ int RosPx4FlowSensorInterface::setMeasurementRos(const px_comm::OpticalFlowConst
     // Ground Distance
     if(this->isMeasurementGroundDistanceEnabled())
     {
-        double ground_distance=msg->ground_distance;
-
         // We avoid to use erroneous measurements
-        if(ground_distance > 0.300001)
+        if(ground_distance > 0.30001)
         {
             sensor_measurement_core->setGroundDistance(ground_distance);
         }
