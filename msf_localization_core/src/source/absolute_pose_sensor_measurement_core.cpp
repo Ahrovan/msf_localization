@@ -125,7 +125,14 @@ Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getInnovation(const std::shar
     {
         Eigen::Vector4d quat_innov_attitude=Quaternion::cross(Quaternion::inv(thePredictedMeasurement->attitude_mocap_sensor_wrt_mocap_world_), theMatchedMeasurement->attitude_mocap_sensor_wrt_mocap_world_);
 
-        the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
+        //the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
+
+        // Check that the attitude is represented correctly
+        if(quat_innov_attitude(0)>0)
+            the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
+        else
+            the_innovation.block<3,1>(dimension,0)=-2*quat_innov_attitude.block<3,1>(1,0);
+
         dimension+=3;
     }
 

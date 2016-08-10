@@ -94,14 +94,44 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
                         (it_visual_markers)->pose.pose.orientation.y,
                         (it_visual_markers)->pose.pose.orientation.z;
 
-            if(orientation_aux[0]<0)
-            {
-                orientation=-orientation_aux;
-            }
-            else
-            {
-                orientation=orientation_aux;
-            }
+
+            // Fix the attitude quaternion
+
+            // Op1: Not working fine
+//            if(orientation_aux[0]<0)
+//            {
+//                orientation=-orientation_aux;
+//            }
+//            else
+//            {
+//                orientation=orientation_aux;
+//            }
+
+            // Op2: Not working fine
+//            double max_coeff_att=orientation_aux.maxCoeff();
+//            double min_coeff_att=orientation_aux.minCoeff();
+
+//            double ref_coeff_att;
+
+//            if(max_coeff_att > -min_coeff_att)
+//                ref_coeff_att=max_coeff_att;
+//            else
+//                ref_coeff_att=min_coeff_att;
+
+//            if(ref_coeff_att<0)
+//            {
+//                orientation=-orientation_aux;
+//            }
+//            else
+
+//            {
+//                orientation=orientation_aux;
+//            }
+
+
+            // Do not fix attitude quaternion
+            orientation=orientation_aux;
+
 
             if(the_visual_marker_measurement_core->setVisualMarkerAttitude(orientation))
                 std::cout<<"Error setting orientation"<<std::endl;
