@@ -702,7 +702,7 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 #endif
 
         // Purge the buffer ??
-        this->TheMsfStorageCore->purgeRingBuffer(50);
+        this->TheMsfStorageCore->purgeRingBuffer(500);
 
 
         // Display the buffer
