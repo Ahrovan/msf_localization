@@ -150,7 +150,7 @@ The package msf_localization_ros included in this repository generates one ROS n
 
 
 ## msf_localization_ros
-This node processes the given images searching for ArUco visual markers, publishing them in a ROS topic.
+This node runs the core of the algorithm.
 
 ### ROS Launcher
 The package msf_localization_ros includes a launcher called msf_localization_ros.launch.
