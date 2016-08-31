@@ -128,7 +128,7 @@ Eigen::VectorXd AbsolutePoseSensorMeasurementCore::getInnovation(const std::shar
         //the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
 
         // Check that the attitude is represented correctly
-        if(quat_innov_attitude(0)>0)
+        if(quat_innov_attitude(0)>=0)
             the_innovation.block<3,1>(dimension,0)=2*quat_innov_attitude.block<3,1>(1,0);
         else
             the_innovation.block<3,1>(dimension,0)=-2*quat_innov_attitude.block<3,1>(1,0);
