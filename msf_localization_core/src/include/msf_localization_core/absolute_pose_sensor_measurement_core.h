@@ -19,12 +19,30 @@ protected:
 
 
 
-    // Measurement
+    /// Measurement
+
+
+public:
+    bool isMeasurementSet() const;
+
+    // Dimension of the measurement
+public:
+    int getDimensionMeasurement() const;
+    int getDimensionErrorMeasurement() const;
+
+
+
 protected:
     // Position of the mocap sensor wrt mocap world
     Eigen::Vector3d position_mocap_sensor_wrt_mocap_world_;
+    bool flag_position_set_;
     // Attitude of the mocap sensor wrt mocap world
     Eigen::Vector4d attitude_mocap_sensor_wrt_mocap_world_;
+    bool flag_attitude_set_;
+
+public:
+    bool isPositionSet() const {return flag_position_set_;}
+    bool isAttitudeSet() const {return flag_attitude_set_;}
 
 
 public:

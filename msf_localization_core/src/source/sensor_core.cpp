@@ -87,14 +87,56 @@ int SensorCore::setMeasurement(const TimeStamp& time_stamp, const std::shared_pt
     // If it does not have any measurement, do not set measurement
     if(!sensor_measurement->isMeasurementSet())
     {
-        //std::cout<<"no measurements"<<std::endl;
+        std::cout<<"SensorCore::setMeasurement() no isMeasurementSet()"<<std::endl;
         return 0;
     }
 
-    if(this->getMsfLocalizationCorePtr()->setMeasurement(time_stamp, sensor_measurement))
+    // check if it is correct
+    if(!sensor_measurement->isCorrect())
     {
-        //std::cout<<"ERROR setting measurement"<<std::endl;
+        std::cout<<"SensorCore::setMeasurement() no isCorrect()"<<std::endl;
+        return 0;
+    }
+
+    // Set
+    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurement(time_stamp, sensor_measurement);
+    if(error_set_measurement > 0)
+    {
+        //std::cout<<"SensorCore::setMeasurement() error > 0 setMeasurement()"<<std::endl;
+        return 2;
+    }
+    else if(error_set_measurement < 0)
+    {
+        std::cout<<"SensorCore::setMeasurement() error < 0 setMeasurement()"<<std::endl;
         return -2;
+    }
+
+    return 0;
+}
+
+int SensorCore::setMeasurementList(const TimeStamp& time_stamp, const std::list< std::shared_ptr<SensorMeasurementCore> >& sensor_measurement_list)
+{
+    if(!isSensorEnabled())
+        return 0;
+
+    // Check if there are measurements
+    if(sensor_measurement_list.size() == 0)
+        return 0;
+
+    // check all the measurements from the list
+    // TODO
+
+    // Set
+    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurementList(time_stamp, sensor_measurement_list);
+    if(error_set_measurement > 0)
+    {
+        //std::cout<<"SensorCore::setMeasurementList() error setMeasurementList()"<<std::endl;
+        return 1;
+    }
+    else if(error_set_measurement < 0)
+    {
+        std::cout<<"SensorCore::setMeasurementList() error < 0 setMeasurementList()"<<std::endl;
+        return -1;
     }
 
     return 0;

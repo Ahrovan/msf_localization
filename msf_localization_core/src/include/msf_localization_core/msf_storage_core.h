@@ -40,6 +40,9 @@
 // Condition variable
 #include <condition_variable>
 
+// Chrono
+#include <chrono>
+
 
 #include "msf_localization_core/stamped_ring_buffer.h"
 
@@ -97,6 +100,9 @@
 
 #define _DEBUG_MSF_STORAGE 0
 
+#define _DEBUG_MSF_STORAGE_BUFFER_TIME 0
+
+
 
 
 class MsfStorageCore : protected StampedRingBuffer< std::shared_ptr<StateEstimationCore> >
@@ -107,9 +113,19 @@ public:
 
     // mutex to protect the buffer
 protected:
-    std::mutex TheRingBufferMutex;
+    //std::recursive_timed_mutex TheRingBufferMutex;
+    std::recursive_mutex TheRingBufferMutex;
+protected:
+    // timeout for the mutex of the buffer in us.
+    // Not working with C++11 unless you have a real-time OS.
+    // std::timed_mutex uses a steady_clock (precision ~ms):
+    // http://en.cppreference.com/w/cpp/thread/timed_mutex/try_lock_for
+    // const int buffer_mutex_timeout_us_=5000; //500;
 
 
+    // Get number elements in the buffer (safe)
+public:
+    int getNumElements();
 
     // Get element in the ring buffer (safe)
 public:
@@ -132,24 +148,24 @@ public:
 public:
     int getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& nextTimeStamp);
 
-    // Get previous timestamp
+    // Get previous timestamp (safe)
 public:
     int getPreviousTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& previousTimeStamp);
 
-    // Get the previous input by stamp using the input core
+    // Get the previous input by stamp using the input core (safe)
 public:
     int getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp,
                                                    const std::shared_ptr<InputCore>& input_core,
                                                    std::shared_ptr<InputCommandCore>& input_command_core);
 
-    // Get oldest time stamp
+    // Get oldest time stamp (safe)
 public:
     int getOldestTimeStamp(TimeStamp& oldest_time_stamp);
 
 
     // Add element in the ring buffer by stamp (safe)
 public:
-    int addElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore);
+    int addElement(const TimeStamp& TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore, bool flag_wait_before_overwrite=true);
 
 
     /// Measurements
@@ -196,6 +212,7 @@ public:
     // Display Elements in the ring buffer (safe)
 public:
     int displayRingBuffer();
+public:
     int displayStateEstimationElement(const TimeStamp& TheTimeStamp,
                                       const std::shared_ptr<StateEstimationCore>&  TheStateEstimationCore);
 
@@ -204,16 +221,30 @@ public:
 
 
 
-
+    //// Outdated elements buffer
+    ///
     // List with the timestamp of the outdated elements of the buffer
 protected:
     std::list<TimeStamp> outdatedBufferElements;
 public:
+    // (safe)
     int addOutdatedElement(const TimeStamp& TheTimeStamp);
+    // (safe)
     int getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bool sleep_if_empty=true);
 public:
+    // get number of outdated elements (safe)
+    int getNumOutdatedElements();
+    // (safe)
     int displayOutdatedBufferElements();
+    // (safe)
     std::string getDisplayOutdatedElements();
+    // Protector mutex
+protected:
+    //std::recursive_timed_mutex outdated_buffer_elements_protector_mutex_;
+    std::recursive_mutex outdated_buffer_elements_protector_mutex_;
+    // timeout for the mutex of the buffer in us
+    //const int outdated_elements_buffer_mutex_timeout_us_=5000; //50;
+
     // Buffer waiting
 protected:
     std::mutex outdatedBufferElementsMutex;             // mutex for critical section
@@ -236,7 +267,7 @@ protected:
     std::ofstream logFile;
     // mutex to protect the log file
 protected:
-    std::mutex TheLogFileMutex;
+    std::recursive_mutex TheLogFileMutex;
 public:
     int log(std::string logString);
 

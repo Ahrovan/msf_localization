@@ -72,7 +72,8 @@ public:
 
     //// Measurement
 public:
-    virtual int setMeasurement(const TimeStamp& time_stamp, const std::shared_ptr<SensorMeasurementCore> sensor_measurement);
+    int setMeasurement(const TimeStamp& time_stamp, const std::shared_ptr<SensorMeasurementCore> sensor_measurement);
+    int setMeasurementList(const TimeStamp& time_stamp, const std::list< std::shared_ptr<SensorMeasurementCore> >& sensor_measurement_list);
 
 
     //// Pose of the sensor wrt robot

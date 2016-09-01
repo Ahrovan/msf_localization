@@ -304,6 +304,7 @@ int CodedVisualMarkerEyeCore::setMeasurement(const TimeStamp the_time_stamp, std
 }
 */
 
+/*
 int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp& the_time_stamp, const std::list< std::shared_ptr<SensorMeasurementCore> >& the_visual_marker_measurement_list)
 {
     if(!isSensorEnabled())
@@ -313,14 +314,21 @@ int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp& the_time_stamp
     if(the_visual_marker_measurement_list.size() == 0)
         return 0;
 
-    if(this->getMsfLocalizationCorePtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list))
+    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list);
+    if(error_set_measurement > 0)
     {
-        std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
+        //std::cout<<"CodedVisualMarkerEyeCore::setMeasurementList() error setMeasurementList()"<<std::endl;
         return 1;
+    }
+    else if(error_set_measurement < 0)
+    {
+        std::cout<<"CodedVisualMarkerEyeCore::setMeasurementList() error < 0 setMeasurementList()"<<std::endl;
+        return -1;
     }
 
     return 0;
 }
+*/
 
 Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceMeasurement()
 {

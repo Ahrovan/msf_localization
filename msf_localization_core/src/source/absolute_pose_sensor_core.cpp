@@ -329,20 +329,27 @@ void AbsolutePoseSensorCore::setSensorMeasurementPoseSensorWrtSensorWorldHasCova
     return;
 }
 
+/*
 int AbsolutePoseSensorCore::setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement)
 {
     if(!isSensorEnabled())
         return 0;
 
-    if(this->getMsfLocalizationCorePtr()->setMeasurement(the_time_stamp, sensor_measurement))
+    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurement(the_time_stamp, sensor_measurement);
+    if(error_set_measurement > 0)
     {
-        std::cout<<"AbsolutePoseSensorCore::setMeasurement() error"<<std::endl;
+        //std::cout<<"AbsolutePoseSensorCore::setMeasurement() error > 0 setMeasurementList()"<<std::endl;
         return 1;
+    }
+    else if(error_set_measurement < 0)
+    {
+        std::cout<<"AbsolutePoseSensorCore::setMeasurement() error < 0 setMeasurementList()"<<std::endl;
+        return -1;
     }
 
     return 0;
 }
-
+*/
 
 /*
 int AbsolutePoseSensorCore::setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > sensor_measurement_list)

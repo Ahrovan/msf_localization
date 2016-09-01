@@ -35,11 +35,12 @@ protected:
 
     // Dimension of the measurement
 public:
-    virtual int getDimensionMeasurement() const;
-    virtual int getDimensionErrorMeasurement() const;
+    virtual int getDimensionMeasurement() const=0;
+    virtual int getDimensionErrorMeasurement() const=0;
 
+    // New function
 public:
-    virtual bool isMeasurementSet() const;
+    virtual bool isMeasurementSet() const=0;
 
 protected:
     // It is not the owner of this Pointer. it doesn't modify the pointer

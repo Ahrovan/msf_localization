@@ -16,7 +16,10 @@
 
 MsfStorageCore::MsfStorageCore()
 {
+
     // Mutex
+
+    //
     outdatedBufferElementsLock=new std::unique_lock<std::mutex>(outdatedBufferElementsMutex);
 
     updated_buffer_lock_=new std::unique_lock<std::mutex>(updated_buffer_mutex_);
@@ -60,6 +63,7 @@ MsfStorageCore::~MsfStorageCore()
     return;
 }
 
+// safe
 int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::shared_ptr<SensorMeasurementCore> &TheSensorMeasurement)
 {
 #if _DEBUG_MSF_STORAGE
@@ -76,8 +80,18 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
     // Get the oldest time stamp in the buffer
     TimeStamp oldest_time_stamp;
 
-    if(getOldestTimeStamp(oldest_time_stamp))
-        return -1;
+    // (safe)
+    int error_get_oldest_time_stamp=getOldestTimeStamp(oldest_time_stamp);
+    if(error_get_oldest_time_stamp<0)
+    {
+        std::cout<<"MsfStorageCore::setMeasurement() error -100 getOldestTimeStamp()"<<std::endl;
+        return -100;
+    }
+    else if(error_get_oldest_time_stamp>0)
+    {
+        // std::cout<<"MsfStorageCore::setMeasurement() error > 0 getOldestTimeStamp()"<<std::endl;
+        return 10;
+    }
 
     // If the new element is older than the oldest time stamp in buffer, we discard the element
     if(TheTimeStamp<oldest_time_stamp)
@@ -87,8 +101,13 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
     }
 
 
-    // This is already safe
-    this->getElement(TheTimeStamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_get_element=this->getElement(TheTimeStamp, TheStateEstimationCore);
+    if(error_get_element<0)
+    {
+        std::cout<<"MsfStorageCore::setMeasurement() error < 0 getElement()"<<std::endl;
+        return -100;
+    }
 
     if(!TheStateEstimationCore)
     {
@@ -105,18 +124,17 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 
 
     // Add measurement to the MSF Storage Core
-    // TODO, protect to avoid races!
-    // TODO fix!
-    //TheRingBufferMutex.lock();
-    //this->addElementByStamp(TheMeasurementToTheBuffer);
 
-    // This is already safe
-    this->addElement(TheTimeStamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_add_element=this->addElement(TheTimeStamp, TheStateEstimationCore);
+    if(error_add_element<0)
+    {
+        std::cout<<"MsfStorageCore::setMeasurement() error -100 addElement()"<<std::endl;
+        return -100;
+    }
 
-    //TheRingBufferMutex.unlock();
 
-
-    // Add TimeStamp to the outdated elements list
+    // Add TimeStamp to the outdated elements list (safe)
     this->addOutdatedElement(TheTimeStamp);
 
 #if _DEBUG_MSF_STORAGE
@@ -135,6 +153,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
     return 0;
 }
 
+// safe
 int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std::list<std::shared_ptr<SensorMeasurementCore>>& TheListSensorMeasurement)
 {
 #if _DEBUG_MSF_STORAGE
@@ -150,8 +169,14 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
 
     // Get the oldest time stamp in the buffer
     TimeStamp oldest_time_stamp;
-
-    if(getOldestTimeStamp(oldest_time_stamp))
+    // (safe)
+    int error_get_oldest_time_stamp=getOldestTimeStamp(oldest_time_stamp);
+    if(error_get_oldest_time_stamp<0)
+    {
+        std::cout<<"MsfStorageCore::setMeasurementList() error -100 getOldestTimeStamp()"<<std::endl;
+        return -100;
+    }
+    else if(error_get_oldest_time_stamp>0)
         return -1;
 
     // If the new element is older than the oldest time stamp in buffer, we discard the element
@@ -159,8 +184,13 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
         return 0;
 
 
-    // This is already safe
-    this->getElement(TheTimeStamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_get_element=this->getElement(TheTimeStamp, TheStateEstimationCore);
+    if(error_get_element<0)
+    {
+        std::cout<<"MsfStorageCore::setMeasurementList() error -100 getElement()"<<std::endl;
+        return -100;
+    }
 
     if(!TheStateEstimationCore)
     {
@@ -179,11 +209,16 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
         TheStateEstimationCore->sensor_measurement_component_->list_sensor_measurement_core_.push_back((*itSensorMeasurements));
     }
 
-    // This is already safe
-    this->addElement(TheTimeStamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_add_element=this->addElement(TheTimeStamp, TheStateEstimationCore);
+    if(error_add_element<0)
+    {
+        std::cout<<"MsfStorageCore::setMeasurementList() error -100 addElement()"<<std::endl;
+        return -100;
+    }
 
 
-    // Add TimeStamp to the outdated elements list
+    // Add TimeStamp to the outdated elements list (safe)
     this->addOutdatedElement(TheTimeStamp);
 
 #if _DEBUG_MSF_STORAGE
@@ -201,6 +236,7 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
     return 0;
 }
 
+// safe
 int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shared_ptr<InputCommandCore> &input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
@@ -216,8 +252,14 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
 
     // Get the oldest time stamp in the buffer
     TimeStamp oldest_time_stamp;
-
-    if(getOldestTimeStamp(oldest_time_stamp))
+    // (safe)
+    int error_get_oldest_time_stamp=getOldestTimeStamp(oldest_time_stamp);
+    if(error_get_oldest_time_stamp<0)
+    {
+        std::cout<<"MsfStorageCore::setInputCommand() error -100 getOldestTimeStamp()"<<std::endl;
+        return -100;
+    }
+    else if(error_get_oldest_time_stamp>0)
         return -1;
 
     // If the new element is older than the oldest time stamp in buffer, we discard the element
@@ -225,8 +267,13 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
         return 0;
 
 
-    // This is already safe
-    this->getElement(time_stamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_get_element=this->getElement(time_stamp, TheStateEstimationCore);
+    if(error_get_element<0)
+    {
+        std::cout<<"MsfStorageCore::setInputCommand() error < 0 getElement()"<<std::endl;
+        return -100;
+    }
 
     if(!TheStateEstimationCore)
     {
@@ -265,10 +312,15 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
     }
 
 
-    // This is already safe
-    this->addElement(time_stamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_add_element=this->addElement(time_stamp, TheStateEstimationCore);
+    if(error_add_element<0)
+    {
+        std::cout<<"MsfStorageCore::setInputCommand() error < 0 addElement()"<<std::endl;
+        return -100;
+    }
 
-    // Add TimeStamp to the outdated elements list
+    // Add TimeStamp to the outdated elements list (safe)
     this->addOutdatedElement(time_stamp);
 
 #if _DEBUG_MSF_STORAGE
@@ -283,6 +335,7 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
     return 0;
 }
 
+// safe
 int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::list<std::shared_ptr<InputCommandCore> > &list_input_command_core)
 {
 #if _DEBUG_MSF_STORAGE
@@ -298,17 +351,32 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
 
     // Get the oldest time stamp in the buffer
     TimeStamp oldest_time_stamp;
-
-    if(getOldestTimeStamp(oldest_time_stamp))
+    // (safe)
+    int error_get_oldest_time_stamp=getOldestTimeStamp(oldest_time_stamp);
+    if(error_get_oldest_time_stamp<0)
+    {
+        std::cout<<"MsfStorageCore::setInputCommandList() error -100 getOldestTimeStamp()"<<std::endl;
+        return -100;
+    }
+    else if(error_get_oldest_time_stamp>0)
+    {
         return -1;
+    }
 
     // If the new element is older than the oldest time stamp in buffer, we discard the element
     if(time_stamp<oldest_time_stamp)
+    {
         return 0;
+    }
 
 
-    // This is already safe
-    this->getElement(time_stamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_get_element=this->getElement(time_stamp, TheStateEstimationCore);
+    if(error_get_element<0)
+    {
+        std::cout<<"MsfStorageCore::setInputCommandList() error < 0 getElement()"<<std::endl;
+        return -100;
+    }
 
     if(!TheStateEstimationCore)
     {
@@ -353,11 +421,16 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
 
     }
 
-    // This is already safe
-    this->addElement(time_stamp, TheStateEstimationCore);
+    // This is already safe (safe)
+    int error_add_element=this->addElement(time_stamp, TheStateEstimationCore);
+    if(error_add_element<0)
+    {
+        std::cout<<"MsfStorageCore::setInputCommandList() error < 0 addElement()"<<std::endl;
+        return -100;
+    }
 
 
-    // Add TimeStamp to the outdated elements list
+    // Add TimeStamp to the outdated elements list (safe)
     this->addOutdatedElement(time_stamp);
 
 #if _DEBUG_MSF_STORAGE
@@ -368,36 +441,58 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
     }
 #endif
 
-
     return 0;
 }
 
+// This is safe
 int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
     StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
+    // lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
-        itElement!=this->getEnd();
-        ++itElement)
     {
-        int errorGetElement=this->getElementI(BufferElement, itElement);
-        if(errorGetElement)
-            continue;
-        if(BufferElement.object->hasState())
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+            itElement!=this->getEnd();
+            ++itElement)
         {
-            TheTimeStamp=BufferElement.timeStamp;
-            PreviousState=BufferElement.object;
-            //std::cout<<"found!"<<std::endl;
-            break;
+            int errorGetElement=this->getElementI(BufferElement, itElement);
+            if(errorGetElement)
+                continue;
+            if(BufferElement.object->hasState())
+            {
+                TheTimeStamp=BufferElement.timeStamp;
+                PreviousState=BufferElement.object;
+                //std::cout<<"found!"<<std::endl;
+                break;
+            }
         }
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
     }
-    TheRingBufferMutex.unlock();
-
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getLastElementWithStateEstimate() error -100"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
     return 0;
 }
 
+// Safe
 int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
 #if _DEBUG_MSF_STORAGE
@@ -413,64 +508,92 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
 
     StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
-    // Find
+    // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
-        itElement!=this->getEnd();
-        ++itElement)
     {
-        // Get the element
-        int errorGetElement=this->getElementI(BufferElement, itElement);
+        // loop
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+            itElement!=this->getEnd();
+            ++itElement)
+        {
+            // Get the element
+            int errorGetElement=this->getElementI(BufferElement, itElement);
 
-        if(errorGetElement)
-            continue;
+            if(errorGetElement)
+                continue;
 
 #if _DEBUG_MSF_STORAGE
-        {
-            std::ostringstream logString;
-            logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
-            this->log(logString.str());
-        }
-#endif
-
-
-        // Check the time stamp
-        if(BufferElement.timeStamp>ThePreviousTimeStamp)
-        {
-            continue;
-        }
-        else
-        {
-            //logFile<<"found by time stamp!"<<std::endl;
-
-            // Check if it has state
-            if(BufferElement.object->hasState())
             {
-#if _DEBUG_MSF_STORAGE
-                {
-                    std::ostringstream logString;
-                    logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    this->log(logString.str());
-                }
+                std::ostringstream logString;
+                logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                this->log(logString.str());
+            }
 #endif
 
-                TheTimeStamp=BufferElement.timeStamp;
-                PreviousState=BufferElement.object;
-                //logFile<<"found with state!"<<std::endl;
 
-#if _DEBUG_MSF_STORAGE
+            // Check the time stamp
+            if(BufferElement.timeStamp>ThePreviousTimeStamp)
+            {
+                continue;
+            }
+            else
+            {
+                //logFile<<"found by time stamp!"<<std::endl;
+
+                // Check if it has state
+                if(BufferElement.object->hasState())
                 {
-                    std::ostringstream logString;
-                    logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    this->log(logString.str());
-                }
+#if _DEBUG_MSF_STORAGE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        this->log(logString.str());
+                    }
 #endif
 
-                break;
+                    TheTimeStamp=BufferElement.timeStamp;
+                    PreviousState=BufferElement.object;
+                    //logFile<<"found with state!"<<std::endl;
+
+#if _DEBUG_MSF_STORAGE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        this->log(logString.str());
+                    }
+#endif
+
+                    break;
+                }
             }
         }
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+
+        // check
+        if(!PreviousState)
+        {
+            return -1;
+        }
     }
-    TheRingBufferMutex.unlock();
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getElementWithStateEstimateByStamp() error -100"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -480,14 +603,13 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
     }
 #endif
 
-    if(!PreviousState)
-        return -1;
 
+    // end
     return 0;
 
 }
 
-
+// Safe
 int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& ThePreviousTimeStamp, TimeStamp& TheTimeStamp, std::shared_ptr<StateEstimationCore>& PreviousState)
 {
 #if _DEBUG_MSF_STORAGE
@@ -503,152 +625,239 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 
     StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
-    // Find
+    // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
-        itElement!=this->getEnd();
-        ++itElement)
     {
-        // Get the element
-        int errorGetElement=this->getElementI(BufferElement, itElement);
+        // Find
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+            itElement!=this->getEnd();
+            ++itElement)
+        {
+            // Get the element
+            int errorGetElement=this->getElementI(BufferElement, itElement);
 
-        if(errorGetElement)
-            continue;
+            if(errorGetElement)
+                continue;
+
+#if _DEBUG_MSF_STORAGE
+            {
+                std::ostringstream logString;
+                logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
+
+            // Check the time stamp
+            if(BufferElement.timeStamp>=ThePreviousTimeStamp)
+            {
+                continue;
+            }
+            else
+            {
+                //logFile<<"found by time stamp!"<<std::endl;
+
+                // Check if it has state
+                if(BufferElement.object->hasState())
+                {
+#if _DEBUG_MSF_STORAGE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        this->log(logString.str());
+                    }
+#endif
+
+                    TheTimeStamp=BufferElement.timeStamp;
+                    PreviousState=BufferElement.object;
+                    //logFile<<"found with state!"<<std::endl;
+
+#if _DEBUG_MSF_STORAGE
+                    {
+                        std::ostringstream logString;
+                        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        this->log(logString.str());
+                    }
+#endif
+
+                    break;
+                }
+            }
+        }
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
 
 #if _DEBUG_MSF_STORAGE
         {
             std::ostringstream logString;
-            logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+            logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() ended"<<std::endl;
             this->log(logString.str());
         }
 #endif
 
-
-        // Check the time stamp
-        if(BufferElement.timeStamp>=ThePreviousTimeStamp)
+        if(!PreviousState)
         {
-            continue;
+            return -1;
         }
-        else
-        {
-            //logFile<<"found by time stamp!"<<std::endl;
 
-            // Check if it has state
-            if(BufferElement.object->hasState())
-            {
-#if _DEBUG_MSF_STORAGE
-                {
-                    std::ostringstream logString;
-                    logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    this->log(logString.str());
-                }
-#endif
-
-                TheTimeStamp=BufferElement.timeStamp;
-                PreviousState=BufferElement.object;
-                //logFile<<"found with state!"<<std::endl;
-
-#if _DEBUG_MSF_STORAGE
-                {
-                    std::ostringstream logString;
-                    logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
-                    this->log(logString.str());
-                }
-#endif
-
-                break;
-            }
-        }
     }
-    TheRingBufferMutex.unlock();
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() error -100"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
-#if _DEBUG_MSF_STORAGE
-    {
-        std::ostringstream logString;
-        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() ended"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-    if(!PreviousState)
-        return -1;
 
     return 0;
 }
 
-
-
-
-int MsfStorageCore::getElement(const TimeStamp &timeStamp, std::shared_ptr<StateEstimationCore> &TheElement)
+// safe
+int MsfStorageCore::getNumElements()
 {
-    //StateEstimationCore BufferElement;
-
+    // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-    int error=this->getElementByStamp(timeStamp, TheElement);
-    TheRingBufferMutex.unlock();
+    {
+        int num_elements=this->getSize();
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return num_elements;
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getNumElements() error -100"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
-    //TheElement=BufferElement.object;
-
-    return error;
 }
 
+// Safe
+int MsfStorageCore::getElement(const TimeStamp &timeStamp, std::shared_ptr<StateEstimationCore> &TheElement)
+{
+    // lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+    TheRingBufferMutex.lock();
+    {
+        int error=this->getElementByStamp(timeStamp, TheElement);
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return error;
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getElement() error -100"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
+
+}
+
+// Safe
 int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& nextTimeStamp)
 {
 
-    //std::cout<<"MsfStorageCore::getNextTimeStamp()"<<std::endl;
-
-    //StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
     TimeStamp bufferElementTimeStamp;
-
     nextTimeStamp=currentTimeStamp;
 
-    // Find
+    // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-
-//std::cout<<"TS: ";
-
-    // Loop
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
-        itElement!=this->getEnd();
-        ++itElement)
     {
-        // Get the element
-        int errorGetElement=this->getElementITimeStamp(bufferElementTimeStamp, itElement);
-
-        if(errorGetElement)
-            continue;
-
-        // Check the time stamp
-        if(bufferElementTimeStamp>currentTimeStamp)
+        // Loop
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+            itElement!=this->getEnd();
+            ++itElement)
         {
-            nextTimeStamp=bufferElementTimeStamp;
+            // Get the element
+            int errorGetElement=this->getElementITimeStamp(bufferElementTimeStamp, itElement);
 
-            //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+            if(errorGetElement)
+                continue;
 
-            continue;
+            // Check the time stamp
+            if(bufferElementTimeStamp>currentTimeStamp)
+            {
+                nextTimeStamp=bufferElementTimeStamp;
+
+                //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+
+                continue;
+            }
+            else
+            {
+                //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+                break;
+            }
         }
-        else
+
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+
+        // Check if success
+        if(nextTimeStamp<=currentTimeStamp)
         {
-            //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
-            break;
+            return 1;
         }
+
     }
-
-
-    //std::cout<<std::endl;
-
-
-    TheRingBufferMutex.unlock();
-
-    //logFile<<"MsfStorageCore::getNextTimeStamp() ended"<<std::endl;
-
-    // Check if success
-    if(nextTimeStamp<=currentTimeStamp)
-        return 1;
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getNextTimeStamp() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
     return 0;
 }
 
+// Safe
 int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, TimeStamp& previousTimeStamp)
 {
     //StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
@@ -656,55 +865,69 @@ int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, Time
 
     previousTimeStamp=currentTimeStamp;
 
-    // Find
+    // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-
-//std::cout<<"TS: ";
-
-    // Loop
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
-        itElement!=this->getEnd();
-        ++itElement)
     {
-        // Get the element
-        int errorGetElement=this->getElementITimeStamp(bufferElementTimeStamp, itElement);
-
-        if(errorGetElement)
-            continue;
-
-        // Check the time stamp
-        if(bufferElementTimeStamp<currentTimeStamp)
+        // Loop
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+            itElement!=this->getEnd();
+            ++itElement)
         {
-            previousTimeStamp=bufferElementTimeStamp;
+            // Get the element
+            int errorGetElement=this->getElementITimeStamp(bufferElementTimeStamp, itElement);
 
-            //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+            if(errorGetElement)
+                continue;
 
-            break;
+            // Check the time stamp
+            if(bufferElementTimeStamp<currentTimeStamp)
+            {
+                previousTimeStamp=bufferElementTimeStamp;
+                break;
+            }
+            else
+            {
+                continue;
+            }
         }
-        else
-        {
-            //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
-            continue;
-        }
+
+        // Unlock
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+
+        // Check if success
+        if(previousTimeStamp>=currentTimeStamp)
+            return -1;
+
     }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getPreviousTimeStamp() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
-
-    //std::cout<<std::endl;
-
-
-    TheRingBufferMutex.unlock();
-
-
-    // Check if success
-    if(previousTimeStamp>=currentTimeStamp)
-        return -1;
 
 
     return 0;
 }
 
+// Safe
 int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& time_stamp, const std::shared_ptr<InputCore>& input_core, std::shared_ptr<InputCommandCore>& input_command_core)
 {
+
 #if _DEBUG_MSF_STORAGE
         {
             std::ostringstream logString;
@@ -717,117 +940,167 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 
     StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
 
-    // Find
+    // lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
-        itElement!=this->getEnd();
-        ++itElement)
     {
-        // Get the element
-        int errorGetElement=this->getElementI(BufferElement, itElement);
+        // loop
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
+            itElement!=this->getEnd();
+            ++itElement)
+        {
+            // Get the element
+            int errorGetElement=this->getElementI(BufferElement, itElement);
 
-        if(errorGetElement)
-            continue;
+            if(errorGetElement)
+                continue;
+
+#if _DEBUG_MSF_STORAGE
+            {
+                std::ostringstream logString;
+                logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
+
+            // Check the time stamp
+            if(BufferElement.timeStamp>time_stamp)
+            {
+                continue;
+            }
+            else
+            {
+                //logFile<<"found by time stamp!"<<std::endl;
+
+                // Check if it has input commands
+                if(BufferElement.object->hasInputCommand())
+                {
+
+                    //TheTimeStamp=BufferElement.timeStamp;
+                    //PreviousState=BufferElement.object;
+
+
+                    // Check
+                    bool flag_input_command_found=false;
+                    for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=BufferElement.object->input_command_component_->list_input_command_core_.begin();
+                        itInputCommand!=BufferElement.object->input_command_component_->list_input_command_core_.end();
+                        ++itInputCommand)
+                    {
+                        if((*itInputCommand)->getInputCoreSharedPtr() == input_core)
+                        {
+#if _DEBUG_MSF_STORAGE
+                            {
+                                std::ostringstream logString;
+                                logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found pre assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+                                this->log(logString.str());
+                            }
+#endif
+
+                            flag_input_command_found=true;
+                            input_command_core=(*itInputCommand);
+                            break;
+                        }
+                    }
+
+                    // Check and break
+                    if(flag_input_command_found)
+                    {
+
+#if _DEBUG_MSF_STORAGE
+                        {
+                            std::ostringstream logString;
+                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found post assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() the assigned TS is: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                            this->log(logString.str());
+                            this->displayStateEstimationElement(BufferElement.timeStamp, BufferElement.object);
+                        }
+#endif
+
+                        break;
+                    }
+                }
+            }
+        }
+        // unlock
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
 
 #if _DEBUG_MSF_STORAGE
         {
             std::ostringstream logString;
-            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() ended"<<std::endl;
             this->log(logString.str());
         }
 #endif
 
-
-        // Check the time stamp
-        if(BufferElement.timeStamp>time_stamp)
+        if(!input_command_core)
         {
-            continue;
+            return -1;
         }
-        else
-        {
-            //logFile<<"found by time stamp!"<<std::endl;
 
-            // Check if it has input commands
-            if(BufferElement.object->hasInputCommand())
-            {
-
-                //TheTimeStamp=BufferElement.timeStamp;
-                //PreviousState=BufferElement.object;
-
-
-                // Check
-                bool flag_input_command_found=false;
-                for(std::list<std::shared_ptr<InputCommandCore>>::iterator itInputCommand=BufferElement.object->input_command_component_->list_input_command_core_.begin();
-                    itInputCommand!=BufferElement.object->input_command_component_->list_input_command_core_.end();
-                    ++itInputCommand)
-                {
-                    if((*itInputCommand)->getInputCoreSharedPtr() == input_core)
-                    {
-#if _DEBUG_MSF_STORAGE
-                        {
-                            std::ostringstream logString;
-                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found pre assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
-                            this->log(logString.str());
-                        }
-#endif
-
-                        flag_input_command_found=true;
-                        input_command_core=(*itInputCommand);
-                        break;
-                    }
-                }
-
-                // Check and break
-                if(flag_input_command_found)
-                {
-
-#if _DEBUG_MSF_STORAGE
-                    {
-                        std::ostringstream logString;
-                        logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found post assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
-                        logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() the assigned TS is: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
-                        this->log(logString.str());
-                        this->displayStateEstimationElement(BufferElement.timeStamp, BufferElement.object);
-                    }
-#endif
-
-                    break;
-                }
-            }
-        }
     }
-    TheRingBufferMutex.unlock();
-
-#if _DEBUG_MSF_STORAGE
-    {
-        std::ostringstream logString;
-        logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() ended"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-    if(!input_command_core)
-        return -1;
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
     return 0;
 }
 
+// This is already safe
 int MsfStorageCore::getOldestTimeStamp(TimeStamp& oldest_time_stamp)
 {
     // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
+    {
+        //
+        getOldestTimeStampInBuffer(oldest_time_stamp);
 
-    getOldestTimeStampInBuffer(oldest_time_stamp);
-
-    // Unlock
-    TheRingBufferMutex.unlock();
+        // Unlock
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getOldestTimeStamp() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
     // End
     return 0;
 }
 
-int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore)
+// This is already safe
+int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_ptr<StateEstimationCore>& TheStateEstimationCore, bool flag_wait_before_overwrite)
 {
+
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
@@ -842,72 +1115,110 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
 #endif
 
 
-    // Check that nobody else is using the element in the buffer if it is going to be overwritten
-    std::shared_ptr<StateEstimationCore> OldStateEstimationElement;
-
-
-    this->getElement(TheTimeStamp, OldStateEstimationElement);
-
-
-    while(OldStateEstimationElement.use_count()>2)
+    if(flag_wait_before_overwrite)
     {
-        // Do nothing, sleep for a little
-        std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
+        // Check that nobody else is using the element in the buffer if it is going to be overwritten
+        //
+        std::shared_ptr<StateEstimationCore> OldStateEstimationElement;
+
+        // (safe)
+        int error_get_element=this->getElement(TheTimeStamp, OldStateEstimationElement);
+        if(error_get_element<0)
+        {
+            std::cout<<"MsfStorageCore::addElement() error -100 getElement()"<<std::endl;
+            return -100;
+        }
+        else if(!error_get_element)
+        {
+            // Wait
+            while(OldStateEstimationElement.use_count()>2)
+            {
+                // Do nothing, sleep for a little
+                // std::cout<<"MsfStorageCore::addElement() sleeping"<<std::endl;
+                std::this_thread::sleep_for( std::chrono::nanoseconds( 50 ) );
+            }
+        }
+        else
+        {
+            // Do nothing. The element needs to be created
+        }
+
     }
 
 
     // Lock the buffer. OJO!! Posible fuente de errores. no 100% sincronizado!
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-
-
-
-    // New buffer element
-    StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
-
-    BufferElement.timeStamp=TheTimeStamp;
-    BufferElement.object=TheStateEstimationCore;
-
-
-    // Error flag
-    int errorType;
-
-#if _DEBUG_MSF_STORAGE
     {
-        std::ostringstream logString;
-        logString<<"MsfStorageCore::addElement() pre addElementByStamp"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
+
+        // New buffer element
+        StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > BufferElement;
+
+        BufferElement.timeStamp=TheTimeStamp;
+        BufferElement.object=TheStateEstimationCore;
 
 
-
-    // Add
-    errorType=this->addElementByStamp(BufferElement);
-
-    // Unlock
-    TheRingBufferMutex.unlock();
-
-#if _DEBUG_MSF_STORAGE
-    {
-        std::ostringstream logString;
-        logString<<"MsfStorageCore::addElement() post addElementByStamp"<<std::endl;
-        this->log(logString.str());
-    }
-#endif
-
-    if(errorType)
-    {
+        // Error flag
+        int errorType;
 
 #if _DEBUG_MSF_STORAGE
         {
             std::ostringstream logString;
-            logString<<"MsfStorageCore::addElement() error in addElementByStamp number: "<<errorType<<std::endl;
+            logString<<"MsfStorageCore::addElement() pre addElementByStamp"<<std::endl;
             this->log(logString.str());
         }
 #endif
 
-        return errorType;
+
+
+        // Add
+        errorType=this->addElementByStamp(BufferElement);
+
+        // Unlock
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+
+#if _DEBUG_MSF_STORAGE
+        {
+            std::ostringstream logString;
+            logString<<"MsfStorageCore::addElement() post addElementByStamp()"<<std::endl;
+            this->log(logString.str());
+        }
+#endif
+
+        if(errorType)
+        {
+
+#if _DEBUG_MSF_STORAGE
+            {
+                std::ostringstream logString;
+                logString<<"MsfStorageCore::addElement() error in addElementByStamp number: "<<errorType<<std::endl;
+                this->log(logString.str());
+            }
+#endif
+
+            return errorType;
+        }
+
     }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::addElement() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
+
 
 
 #if _DEBUG_MSF_STORAGE
@@ -917,6 +1228,7 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
         this->log(logString.str());
     }
 #endif
+
 
     return 0;
 }
@@ -1172,33 +1484,49 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
     return 0;
 }
 
+// safe
 int MsfStorageCore::displayRingBuffer()
 {
-    TheRingBufferMutex.lock();
-
     // Display Buffer
     {
         std::ostringstream logString;
         logString<<" "<<std::endl;
-        logString<<"Displaying buffer of "<<this->getSize()<<" elements:"<<std::endl;
+        logString<<"Displaying buffer of "<<getNumElements()<<" elements:"<<std::endl;
 
         this->log(logString.str());
     }
 
 
-
-    for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
+    // Try to lock the mutex
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+    TheRingBufferMutex.lock();
     {
-        this->displayStateEstimationElement(it->timeStamp, it->object);
+        for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
+        {
+            this->displayStateEstimationElement(it->timeStamp, it->object);
+        }
+
+        // Unlock
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
     }
-
-    //logFile<<" "<<std::endl;
-
-    TheRingBufferMutex.unlock();
-
-
-    // Buffer Info
-    //logFile<<"Number of elements in buffer (before purge): "<<this->getSize()<<std::endl;
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::displayRingBuffer() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
 
 
     return 0;
@@ -1206,9 +1534,10 @@ int MsfStorageCore::displayRingBuffer()
 
 
 
-
+// safe
 int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 {
+
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
@@ -1222,18 +1551,60 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
     // Delete Lasts elements of the buffer, to avoid it growing a lot
     if(numElementsFrom>=0)
     {
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto start = std::chrono::high_resolution_clock::now();
+#endif
+        //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
         TheRingBufferMutex.lock();
-        this->purgeLastElementsFromI(numElementsFrom);
-        TheRingBufferMutex.unlock();
+        {
+            this->purgeLastElementsFromI(numElementsFrom);
+            TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+            auto end = std::chrono::high_resolution_clock::now();
+            auto diff = end - start;
+            logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        }
+//        else
+//        {
+//            std::cout<<"MsfStorageCore::purgeRingBuffer() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//            auto end = std::chrono::high_resolution_clock::now();
+//            auto diff = end - start;
+//            logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//            return -100;
+//        }
     }
     else
     {
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto start = std::chrono::high_resolution_clock::now();
+#endif
+        //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
         TheRingBufferMutex.lock();
-        this->purgeFull();
-        TheRingBufferMutex.unlock();
+        {
+            this->purgeFull();
+            TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+            auto end = std::chrono::high_resolution_clock::now();
+            auto diff = end - start;
+            logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        }
+//        else
+//        {
+//            std::cout<<"MsfStorageCore::purgeRingBuffer() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//            auto end = std::chrono::high_resolution_clock::now();
+//            auto diff = end - start;
+//            logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//            return -100;
+//        }
     }
 
-    //std::cout<<"Number of elements in buffer (after purge): "<<this->getSize()<<std::endl;
+    //std::cout<<"Number of elements in buffer (after purge): "<<getNumElements()<<std::endl;
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -1248,44 +1619,85 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
     return 0;
 }
 
-
+// safe
 int MsfStorageCore::purgeElementRingBuffer(const TimeStamp& TheTimeStamp)
 {
-
+    // Lock
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
     TheRingBufferMutex.lock();
-    int error=purgeElementByStamp(TheTimeStamp);
+    {
+        int error=purgeElementByStamp(TheTimeStamp);
 
-    TheRingBufferMutex.unlock();
-
-    return error;
+        TheRingBufferMutex.unlock();
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return error;
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::purgeElementRingBuffer() error!"<<std::endl;
+//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto diff = end - start;
+//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+//#endif
+//        return -100;
+//    }
+    return -1;
 }
 
 
-
-
+/////////
+// safe
 int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
 {
-    // Search for duplicates
-    std::list<TimeStamp>::iterator duplicate=std::find(outdatedBufferElements.begin(), outdatedBufferElements.end(), TheTimeStamp);
+    // Lock mutex
+    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+    outdated_buffer_elements_protector_mutex_.lock();
+    {
 
-    // It is duplicated, no need to add it
-    if(duplicate!=outdatedBufferElements.end())
+        // Search for duplicates
+        std::list<TimeStamp>::iterator duplicate=std::find(outdatedBufferElements.begin(), outdatedBufferElements.end(), TheTimeStamp);
+
+        // It is duplicated, no need to add it
+        if(duplicate!=outdatedBufferElements.end())
+        {
+            // unlock mutex
+            outdated_buffer_elements_protector_mutex_.unlock();
+            // end
+            return 0;
+        }
+
+        // Add element to the list
+        outdatedBufferElements.push_back(TheTimeStamp);
+
+        // Unlock mutex
+        outdated_buffer_elements_protector_mutex_.unlock();
+
+        // Notify to wake up
+        outdatedBufferElementsConditionVariable.notify_all();
+
+        // End
         return 0;
-
-    // Add element to the list
-    outdatedBufferElements.push_back(TheTimeStamp);
-
-    // Notify to wake up
-    outdatedBufferElementsConditionVariable.notify_all();
-
-    // End
-    return 0;
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::addOutdatedElement() error -100!"<<std::endl;
+//        return -100;
+//    }
 }
 
+// safe
 int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bool sleep_if_empty)
 {
     // Check the list size
-    while(outdatedBufferElements.size()==0)
+    while(getNumOutdatedElements()==0)
     {
         // No new outdated measurement
         if(flag_new_measurement_)
@@ -1296,7 +1708,6 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
             // Buffer is clean -> We are updated!
             // notify to wake up
             updated_buffer_condition_variable_.notify_all();
-
         }
 
         // Wait until a new element is pushed in the buffer
@@ -1304,29 +1715,75 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
             outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
         else
             break;
-
     }
+
 
 #if _DEBUG_MSF_STORAGE
     // Display
     this->displayOutdatedBufferElements();
 #endif
 
-    // Find the oldest element
-    std::list<TimeStamp>::iterator minElement=min_element(outdatedBufferElements.begin(),outdatedBufferElements.end());
+    // lock mutex
+    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+    outdated_buffer_elements_protector_mutex_.lock();
+    {
 
-    if(minElement==outdatedBufferElements.end())
-        return 1;
+        // Find the oldest element
+        std::list<TimeStamp>::iterator minElement=min_element(outdatedBufferElements.begin(),outdatedBufferElements.end());
 
-    // Save the TimeStamp to return it
-    TheOutdatedTimeStamp=(*minElement);
-    // Remove element of the list
-    outdatedBufferElements.erase(minElement);
+        if(minElement==outdatedBufferElements.end())
+        {
+            // unlock mutex
+            outdated_buffer_elements_protector_mutex_.unlock();
+
+            // end
+            return 1;
+        }
+
+        // Save the TimeStamp to return it
+        TheOutdatedTimeStamp=(*minElement);
+        // Remove element of the list
+        outdatedBufferElements.erase(minElement);
+
+        // unlock mutex
+        outdated_buffer_elements_protector_mutex_.unlock();
+
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getOldestOutdatedElement() error -100!"<<std::endl;
+//        return -100;
+//    }
+
     // End
     return 0;
 }
 
+// safe
+int MsfStorageCore::getNumOutdatedElements()
+{
+    // Lock mutex
+    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+    outdated_buffer_elements_protector_mutex_.lock();
+    {
+        //
+        int num_outdated_elements=outdatedBufferElements.size();
 
+        // unlock mutex
+        outdated_buffer_elements_protector_mutex_.unlock();
+
+        // end
+        return num_outdated_elements;
+
+    }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getNumOutdatedElements() error -100!"<<std::endl;
+//        return -100;
+//    }
+}
+
+// safe
 int MsfStorageCore::displayOutdatedBufferElements()
 {
     this->log(getDisplayOutdatedElements());
@@ -1334,22 +1791,40 @@ int MsfStorageCore::displayOutdatedBufferElements()
     return 0;
 }
 
+// safe
 std::string MsfStorageCore::getDisplayOutdatedElements()
 {
     std::ostringstream logString;
 
     logString<<"List of outdated elements: ";
-    for(std::list<TimeStamp>::iterator itElement=outdatedBufferElements.begin();
-        itElement!=outdatedBufferElements.end();
-        ++itElement)
+
+    // Lock mutex
+    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+    outdated_buffer_elements_protector_mutex_.lock();
     {
-        logString<<"TS: sec="<<itElement->sec<<" s; nsec="<<itElement->nsec<<" ns. ";
+        //
+        for(std::list<TimeStamp>::iterator itElement=outdatedBufferElements.begin();
+            itElement!=outdatedBufferElements.end();
+            ++itElement)
+        {
+            logString<<"TS: sec="<<itElement->sec<<" s; nsec="<<itElement->nsec<<" ns. ";
+
+        }
+
+        // unlock mutex
+        outdated_buffer_elements_protector_mutex_.unlock();
 
     }
+//    else
+//    {
+//        std::cout<<"MsfStorageCore::getDisplayOutdatedElements() error -100!"<<std::endl;
+//        logString<<"error in mutex";
+//    }
 
+    //
     logString<<std::endl;
 
-
+    //
     return logString.str();
 }
 
@@ -1365,14 +1840,23 @@ int MsfStorageCore::semaphoreBufferUpdated()
 
 int MsfStorageCore::log(std::string logString)
 {
+    // lock guard
+    //std::lock_guard<std::timed_mutex> lock_guard(TheLogFileMutex);
+
     // Lock mutex
+    //if(TheLogFileMutex.try_lock_for(std::chrono::microseconds(10)))
     TheLogFileMutex.lock();
+    {
+        // Write in file
+        logFile<<logString;
 
-    // Write in file
-    logFile<<logString;
+        // Unlock mutex
+        TheLogFileMutex.unlock();
 
-    // Unlock mutex
-    TheLogFileMutex.unlock();
-
-    return 0;
+        return 0;
+    }
+//    else
+//    {
+//        return -100;
+//    }
 }

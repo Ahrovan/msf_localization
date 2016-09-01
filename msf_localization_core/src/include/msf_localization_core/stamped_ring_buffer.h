@@ -3,6 +3,9 @@
 #define _STAMPED_RING_BUFFER_H
 
 
+#include <list>
+#include <algorithm>
+
 #include "msf_localization_core/ring_buffer.h"
 
 #include "msf_localization_core/time_stamp.h"
@@ -41,6 +44,15 @@ public:
 template <class BufferObjectType>
 class StampedRingBuffer : public RingBuffer< StampedBufferObjectType<BufferObjectType> >
 {
+public:
+    bool isTimeStamp(const StampedBufferObjectType<BufferObjectType> & element, const TimeStamp& time_stamp) const
+    {
+        if(element.timeStamp == time_stamp)
+            return true;
+        else
+            return false;
+    }
+
 public:
     int searchElementByStamp(StampedBufferObjectType<BufferObjectType>& TheElement, const TimeStamp& timeStamp) const
     {

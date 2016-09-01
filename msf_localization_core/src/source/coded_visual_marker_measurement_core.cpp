@@ -31,12 +31,59 @@ int CodedVisualMarkerMeasurementCore::init()
     this->position_.setZero();
     this->attitude_.setZero();
 
+    // flags set
+    flag_position_set_=false;
+    flag_attitude_set_=false;
+
+
     // Initial values of the Jacobians
 
     // Measurement type
     measurementType=MeasurementTypes::coded_visual_marker;
 
     return 0;
+}
+
+bool CodedVisualMarkerMeasurementCore::isMeasurementSet() const
+{
+    if(isPositionSet())
+        return true;
+    if(isAttitudeSet())
+        return true;
+
+    return false;
+}
+
+int CodedVisualMarkerMeasurementCore::getDimensionMeasurement() const
+{
+    int dimension_measurement=0;
+
+    if(isPositionSet())
+    {
+        dimension_measurement+=3;
+    }
+    if(isAttitudeSet())
+    {
+       dimension_measurement+=4;
+    }
+
+    return dimension_measurement;
+}
+
+int CodedVisualMarkerMeasurementCore::getDimensionErrorMeasurement() const
+{
+    int dimension_error_measurement=0;
+
+    if(isPositionSet())
+    {
+        dimension_error_measurement+=3;
+    }
+    if(isAttitudeSet())
+    {
+       dimension_error_measurement+=3;
+    }
+
+    return dimension_error_measurement;
 }
 
 int CodedVisualMarkerMeasurementCore::setVisualMarkerId(const int id)
@@ -53,6 +100,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerPosition(const Eigen::Vecto
     if(the_visual_marker_eye_core->isMeasurementPositionEnabled())
     {
         this->position_=position;
+        flag_position_set_=true;
     }
     else
     {
@@ -72,6 +120,7 @@ int CodedVisualMarkerMeasurementCore::setVisualMarkerAttitude(const Eigen::Vecto
 //            this->attitude_=-attitude;
 //        else
             this->attitude_=attitude;
+        flag_attitude_set_=true;
     }
     else
     {

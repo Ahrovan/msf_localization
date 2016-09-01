@@ -38,6 +38,59 @@ int ImuSensorMeasurementCore::init()
     return 0;
 }
 
+
+bool ImuSensorMeasurementCore::isMeasurementSet() const
+{
+    if(isOrientationSet())
+        return true;
+    if(isAngularVelocitySet())
+        return true;
+    if(isLinearAccelerationSet())
+        return true;
+    return false;
+}
+
+int ImuSensorMeasurementCore::getDimensionMeasurement() const
+{
+    int dimension_measurement=0;
+
+    if(isOrientationSet())
+    {
+        dimension_measurement+=4;
+    }
+    if(isAngularVelocitySet())
+    {
+       dimension_measurement+=3;
+    }
+    if(isLinearAccelerationSet())
+    {
+       dimension_measurement+=3;
+    }
+
+    return dimension_measurement;
+}
+
+int ImuSensorMeasurementCore::getDimensionErrorMeasurement() const
+{
+    int dimension_error_measurement=0;
+
+    if(isOrientationSet())
+    {
+        dimension_error_measurement+=3;
+    }
+    if(isAngularVelocitySet())
+    {
+       dimension_error_measurement+=3;
+    }
+    if(isLinearAccelerationSet())
+    {
+       dimension_error_measurement+=3;
+    }
+
+    return dimension_error_measurement;
+}
+
+
 bool ImuSensorMeasurementCore::isOrientationSet() const
 {
     return this->flagOrientationSet;

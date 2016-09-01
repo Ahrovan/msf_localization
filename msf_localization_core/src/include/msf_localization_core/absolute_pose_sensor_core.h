@@ -110,7 +110,7 @@ public:
 
     /// Store Measurement
 public:
-    int setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement);
+    //int setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement);
     //int setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > sensor_measurement_list);
 
 

@@ -455,7 +455,7 @@ int ImuSensorCore::setNoiseMeasurementLinearAcceleration(const Eigen::Matrix3d &
     return 0;
 }
 
-
+/*
 int ImuSensorCore::setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement)
 {
     if(!isSensorEnabled())
@@ -465,10 +465,21 @@ int ImuSensorCore::setMeasurement(const TimeStamp& TheTimeStamp, const std::shar
         std::cout<<"ERROR"<<std::endl;
 
 
-    this->getMsfLocalizationCorePtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurement(TheTimeStamp, TheImuSensorMeasurement);
+    if(error_set_measurement>0)
+    {
+        //std::cout<<"ImuSensorCore::setMeasurement() error > 0 setMeasurement()"<<std::endl;
+        return 1;
+    }
+    else if(error_set_measurement>0)
+    {
+        std::cout<<"ImuSensorCore::setMeasurement() error < 0 setMeasurement()"<<std::endl;
+        return -1;
+    }
 
     return 0;
 }
+*/
 
 
 bool ImuSensorCore::isEstimationBiasAngularVelocityEnabled() const

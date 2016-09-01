@@ -38,6 +38,47 @@ int AbsolutePoseSensorMeasurementCore::init()
     return 0;
 }
 
+bool AbsolutePoseSensorMeasurementCore::isMeasurementSet() const
+{
+    if(isPositionSet())
+        return true;
+    if(isAttitudeSet())
+        return true;
+
+    return false;
+}
+
+int AbsolutePoseSensorMeasurementCore::getDimensionMeasurement() const
+{
+    int dimension_measurement=0;
+
+    if(isPositionSet())
+    {
+        dimension_measurement+=3;
+    }
+    if(isAttitudeSet())
+    {
+       dimension_measurement+=4;
+    }
+
+    return dimension_measurement;
+}
+
+int AbsolutePoseSensorMeasurementCore::getDimensionErrorMeasurement() const
+{
+    int dimension_error_measurement=0;
+
+    if(isPositionSet())
+    {
+        dimension_error_measurement+=3;
+    }
+    if(isAttitudeSet())
+    {
+       dimension_error_measurement+=3;
+    }
+
+    return dimension_error_measurement;
+}
 
 int AbsolutePoseSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const Eigen::Vector3d &position_mocap_sensor_wrt_mocap_world)
 {
@@ -47,6 +88,7 @@ int AbsolutePoseSensorMeasurementCore::setPositionMocapSensorWrtMocapWorld(const
     if(sensor_core->isMeasurementPositionMocapSensorWrtMocapWorldEnabled())
     {
         this->position_mocap_sensor_wrt_mocap_world_=position_mocap_sensor_wrt_mocap_world;
+        flag_position_set_=true;
     }
     else
     {
@@ -63,6 +105,7 @@ int AbsolutePoseSensorMeasurementCore::setAttitudeMocapSensorWrtMocapWorld(const
     if(sensor_core->isMeasurementAttitudeMocapSensorWrtMocapWorldEnabled())
     {
         this->attitude_mocap_sensor_wrt_mocap_world_=attitude_mocap_sensor_wrt_mocap_world;
+        flag_attitude_set_=true;
     }
     else
     {

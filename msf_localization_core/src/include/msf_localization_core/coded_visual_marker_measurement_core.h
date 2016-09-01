@@ -20,15 +20,30 @@ protected:
 
 
 
-    // Measurement
+    /// Measurement
+
+public:
+    bool isMeasurementSet() const;
+
+    // Dimension of the measurement
+public:
+    int getDimensionMeasurement() const;
+    int getDimensionErrorMeasurement() const;
+
+
 protected:
     // Id of the visual marker -> Not measurement, but id
     int id_;
     // Position of the visual marker wrt visual marker detector
     Eigen::Vector3d position_;
+    bool flag_position_set_;
     // Attitude of the visual marker wrt visual marker detector
+    bool flag_attitude_set_;
     Eigen::Vector4d attitude_;
 
+public:
+    bool isPositionSet() const {return flag_position_set_;}
+    bool isAttitudeSet() const {return flag_attitude_set_;}
 
 public:
     int setVisualMarkerId(const int id);

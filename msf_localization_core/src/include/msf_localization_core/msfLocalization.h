@@ -203,6 +203,7 @@ protected:
     // Time Stamp getter
 public:
     virtual TimeStamp getTimeStamp();
+    std::string getTimeStampString();
 
     // isAlive
 public:
@@ -436,7 +437,7 @@ protected:
     std::ofstream logFile;
     // mutex to protect the log file
 protected:
-    std::mutex TheLogFileMutex;
+    std::recursive_mutex TheLogFileMutex;
 public:
     int log(std::string logString);
 

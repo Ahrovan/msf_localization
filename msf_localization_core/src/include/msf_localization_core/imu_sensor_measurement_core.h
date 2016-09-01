@@ -20,6 +20,16 @@ protected:
 
     ///// Measurement
 
+
+public:
+    bool isMeasurementSet() const;
+
+    // Dimension of the measurement
+public:
+    int getDimensionMeasurement() const;
+    int getDimensionErrorMeasurement() const;
+
+
     // Orientation
 protected:
     bool flagOrientationSet;

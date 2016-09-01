@@ -48,10 +48,12 @@ int SensorMeasurementCore::getDimensionErrorMeasurement() const
     return this->getSensorCoreSharedPtr()->getDimensionErrorMeasurement();
 }
 
+
 bool SensorMeasurementCore::isMeasurementSet() const
 {
     return false;
 }
+
 
 
 int SensorMeasurementCore::setSensorCorePtr(const std::weak_ptr<SensorCore> sensor_core_ptr)

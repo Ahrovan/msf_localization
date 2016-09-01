@@ -98,7 +98,7 @@ public:
 
     // Store Measurement
 public:
-    int setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
+    //int setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
 
 
 
