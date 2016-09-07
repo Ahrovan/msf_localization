@@ -54,6 +54,13 @@ protected:
     int init();
 
 
+    // Sensor core
+public:
+    std::weak_ptr<SensorCore> getSensorCoreWeakPtr() const;
+    std::shared_ptr<SensorCore> getSensorCoreSharedPtr() const;
+
+
+
 
     // Dimension of the measurement
 protected:

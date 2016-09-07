@@ -238,9 +238,10 @@ protected:
     // TODO Posible race problem
     TimeStamp new_measurement_time_stamp_;
 protected:
+private:
     std::mutex new_measurement_mutex_;             // mutex for critical section
     std::condition_variable new_measurement_condition_variable_; // condition variable for critical section
-    std::unique_lock<std::mutex>* new_measurement_lock_;
+    //std::unique_lock<std::mutex>* new_measurement_lock_;
 
 
     /// Input Command
@@ -285,9 +286,10 @@ public:
 protected:
     TimeStamp updated_state_time_stamp_;
 protected:
+private:
     std::mutex updated_state_mutex_;             // mutex for critical section
     std::condition_variable updated_state_condition_variable_; // condition variable for critical section
-    std::unique_lock<std::mutex>* updated_state_lock_;
+    //std::unique_lock<std::mutex>* updated_state_lock_;
 
 
 
@@ -437,7 +439,9 @@ protected:
     std::ofstream logFile;
     // mutex to protect the log file
 protected:
-    std::recursive_mutex TheLogFileMutex;
+private:
+    //std::recursive_mutex TheLogFileMutex;
+    std::timed_mutex TheLogFileMutex;
 public:
     int log(std::string logString);
 

@@ -18,11 +18,16 @@ MsfStorageCore::MsfStorageCore()
 {
 
     // Mutex
+    // buffer
+    buffer_mutex_timeout_us_=500; //50;
+    //lock_buffer_mutex_=new std::unique_lock<std::timed_mutex>(buffer_mutex_, std::defer_lock);
+
+    outdated_elements_buffer_mutex_timeout_us_=500; //50;
 
     //
-    outdatedBufferElementsLock=new std::unique_lock<std::mutex>(outdatedBufferElementsMutex);
+    //outdatedBufferElementsLock=new std::unique_lock<std::mutex>(outdatedBufferElementsMutex);
 
-    updated_buffer_lock_=new std::unique_lock<std::mutex>(updated_buffer_mutex_);
+    //updated_buffer_lock_=new std::unique_lock<std::mutex>(updated_buffer_mutex_);
 
 
     // Flags
@@ -57,8 +62,10 @@ MsfStorageCore::~MsfStorageCore()
 
 
     // Delete
-    delete outdatedBufferElementsLock;
-    delete updated_buffer_lock_;
+    //delete lock_buffer_mutex_;
+
+    //delete outdatedBufferElementsLock;
+    //delete updated_buffer_lock_;
 
     return;
 }
@@ -135,7 +142,11 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 
 
     // Add TimeStamp to the outdated elements list (safe)
-    this->addOutdatedElement(TheTimeStamp);
+    int error_outdated_element=this->addOutdatedElement(TheTimeStamp);
+    if(error_outdated_element)
+    {
+        // TODO
+    }
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -219,7 +230,11 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
 
 
     // Add TimeStamp to the outdated elements list (safe)
-    this->addOutdatedElement(TheTimeStamp);
+    int error_outdated_element=this->addOutdatedElement(TheTimeStamp);
+    if(error_outdated_element)
+    {
+        // TODO
+    }
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -321,7 +336,11 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
     }
 
     // Add TimeStamp to the outdated elements list (safe)
-    this->addOutdatedElement(time_stamp);
+    int error_outdated_element=this->addOutdatedElement(time_stamp);
+    if(error_outdated_element)
+    {
+        // TODO
+    }
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -431,7 +450,12 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
 
 
     // Add TimeStamp to the outdated elements list (safe)
-    this->addOutdatedElement(time_stamp);
+    int error_outdated_element=this->addOutdatedElement(time_stamp);
+    if(error_outdated_element)
+    {
+        // TODO
+    }
+
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -453,8 +477,9 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
             itElement!=this->getEnd();
@@ -471,23 +496,23 @@ int MsfStorageCore::getLastElementWithStateEstimate(TimeStamp& TheTimeStamp, std
                 break;
             }
         }
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getLastElementWithStateEstimate() error -100"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getLastElementWithStateEstimate() error -100"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
     return 0;
 }
@@ -512,8 +537,9 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         // loop
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
@@ -571,8 +597,8 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
                 }
             }
         }
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
@@ -584,16 +610,16 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
             return -1;
         }
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getElementWithStateEstimateByStamp() error -100"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getElementWithStateEstimateByStamp() error -100"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 #if _DEBUG_MSF_STORAGE
     {
@@ -629,8 +655,9 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         // Find
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
@@ -688,8 +715,8 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
                 }
             }
         }
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
@@ -709,16 +736,16 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
         }
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() error -100"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() error -100"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 
     return 0;
@@ -731,28 +758,29 @@ int MsfStorageCore::getNumElements()
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         int num_elements=this->getSize();
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
         return num_elements;
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getNumElements() error -100"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getNumElements() error -100"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 }
 
@@ -763,35 +791,36 @@ int MsfStorageCore::getElement(const TimeStamp &timeStamp, std::shared_ptr<State
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         int error=this->getElementByStamp(timeStamp, TheElement);
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
         return error;
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getElement() error -100"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getElement() error -100"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 }
 
 // Safe
 int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStamp& nextTimeStamp)
 {
-
+    // init
     TimeStamp bufferElementTimeStamp;
     nextTimeStamp=currentTimeStamp;
 
@@ -799,8 +828,9 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStam
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         // Loop
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
@@ -829,8 +859,8 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStam
             }
         }
 
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
@@ -843,16 +873,16 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStam
         }
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getNextTimeStamp() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getNextTimeStamp() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
     return 0;
 }
@@ -869,8 +899,9 @@ int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, Time
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         // Loop
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
@@ -896,8 +927,8 @@ int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, Time
         }
 
         // Unlock
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
@@ -908,16 +939,16 @@ int MsfStorageCore::getPreviousTimeStamp(const TimeStamp &currentTimeStamp, Time
             return -1;
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getPreviousTimeStamp() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getPreviousTimeStamp() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 
 
@@ -944,8 +975,9 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         // loop
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator itElement=this->getBegin();
@@ -1026,8 +1058,8 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
             }
         }
         // unlock
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
@@ -1047,16 +1079,16 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
         }
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
     return 0;
 }
@@ -1068,30 +1100,31 @@ int MsfStorageCore::getOldestTimeStamp(TimeStamp& oldest_time_stamp)
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         //
         getOldestTimeStampInBuffer(oldest_time_stamp);
 
         // Unlock
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getOldestTimeStamp() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getOldestTimeStamp() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
     // End
     return 0;
@@ -1120,7 +1153,7 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
         // Check that nobody else is using the element in the buffer if it is going to be overwritten
         //
         std::shared_ptr<StateEstimationCore> OldStateEstimationElement;
-
+//std::cout<<"std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()="<<std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::microseconds(buffer_mutex_timeout_us_)).count()<<std::endl;
         // (safe)
         int error_get_element=this->getElement(TheTimeStamp, OldStateEstimationElement);
         if(error_get_element<0)
@@ -1150,8 +1183,9 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
 
         // New buffer element
@@ -1178,8 +1212,8 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
         errorType=this->addElementByStamp(BufferElement);
 
         // Unlock
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
@@ -1208,16 +1242,16 @@ int MsfStorageCore::addElement(const TimeStamp &TheTimeStamp, const std::shared_
         }
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::addElement() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::addElement() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 
 
@@ -1501,8 +1535,9 @@ int MsfStorageCore::displayRingBuffer()
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         for(std::list< StampedBufferObjectType< std::shared_ptr<StateEstimationCore> > >::iterator it=this->TheElementsList.begin(); it!=this->TheElementsList.end(); ++it)
         {
@@ -1510,23 +1545,23 @@ int MsfStorageCore::displayRingBuffer()
         }
 
         // Unlock
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::displayRingBuffer() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::displayRingBuffer() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
 
 
     return 0;
@@ -1554,54 +1589,56 @@ int MsfStorageCore::purgeRingBuffer(int numElementsFrom)
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto start = std::chrono::high_resolution_clock::now();
 #endif
-        //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-        TheRingBufferMutex.lock();
+        std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+        if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//        lock_buffer_mutex.lock();
         {
             this->purgeLastElementsFromI(numElementsFrom);
-            TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+            lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
             auto end = std::chrono::high_resolution_clock::now();
             auto diff = end - start;
             logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
         }
-//        else
-//        {
-//            std::cout<<"MsfStorageCore::purgeRingBuffer() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//            auto end = std::chrono::high_resolution_clock::now();
-//            auto diff = end - start;
-//            logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//            return -100;
-//        }
+        else
+        {
+            std::cout<<"MsfStorageCore::purgeRingBuffer() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+            auto end = std::chrono::high_resolution_clock::now();
+            auto diff = end - start;
+            logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+            return -100;
+        }
     }
     else
     {
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto start = std::chrono::high_resolution_clock::now();
 #endif
-        //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-        TheRingBufferMutex.lock();
+        std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+        if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//        lock_buffer_mutex.lock();
         {
             this->purgeFull();
-            TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+            lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
             auto end = std::chrono::high_resolution_clock::now();
             auto diff = end - start;
             logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
         }
-//        else
-//        {
-//            std::cout<<"MsfStorageCore::purgeRingBuffer() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//            auto end = std::chrono::high_resolution_clock::now();
-//            auto diff = end - start;
-//            logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//            return -100;
-//        }
+        else
+        {
+            std::cout<<"MsfStorageCore::purgeRingBuffer() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+            auto end = std::chrono::high_resolution_clock::now();
+            auto diff = end - start;
+            logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+            return -100;
+        }
     }
 
     //std::cout<<"Number of elements in buffer (after purge): "<<getNumElements()<<std::endl;
@@ -1626,29 +1663,30 @@ int MsfStorageCore::purgeElementRingBuffer(const TimeStamp& TheTimeStamp)
 #if _DEBUG_MSF_STORAGE_BUFFER_TIME
     auto start = std::chrono::high_resolution_clock::now();
 #endif
-    //if(TheRingBufferMutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
-    TheRingBufferMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_buffer_mutex(buffer_mutex_, std::defer_lock);
+    if(lock_buffer_mutex.try_lock_for(std::chrono::microseconds(buffer_mutex_timeout_us_)))
+//    lock_buffer_mutex.lock();
     {
         int error=purgeElementByStamp(TheTimeStamp);
 
-        TheRingBufferMutex.unlock();
-#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        lock_buffer_mutex.unlock();
+#if 0 && _DEBUG_MSF_STORAGE_BUFFER_TIME
         auto end = std::chrono::high_resolution_clock::now();
         auto diff = end - start;
         logFile<<"ET:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
 #endif
         return error;
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::purgeElementRingBuffer() error!"<<std::endl;
-//#if _DEBUG_MSF_STORAGE_BUFFER_TIME
-//        auto end = std::chrono::high_resolution_clock::now();
-//        auto diff = end - start;
-//        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
-//#endif
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::purgeElementRingBuffer() error!"<<std::endl;
+#if _DEBUG_MSF_STORAGE_BUFFER_TIME
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = end - start;
+        logFile<<"ET*:  "<< std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()<<" ns"<<std::endl;
+#endif
+        return -100;
+    }
     return -1;
 }
 
@@ -1658,8 +1696,9 @@ int MsfStorageCore::purgeElementRingBuffer(const TimeStamp& TheTimeStamp)
 int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
 {
     // Lock mutex
-    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
-    outdated_buffer_elements_protector_mutex_.lock();
+    std::unique_lock<std::timed_mutex> lock_outdated_buffer_elements_protector_mutex(outdated_buffer_elements_protector_mutex_, std::defer_lock);
+    if(lock_outdated_buffer_elements_protector_mutex.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+//    lock_outdated_buffer_elements_protector_mutex.lock();
     {
 
         // Search for duplicates
@@ -1669,7 +1708,7 @@ int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
         if(duplicate!=outdatedBufferElements.end())
         {
             // unlock mutex
-            outdated_buffer_elements_protector_mutex_.unlock();
+            lock_outdated_buffer_elements_protector_mutex.unlock();
             // end
             return 0;
         }
@@ -1678,7 +1717,7 @@ int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
         outdatedBufferElements.push_back(TheTimeStamp);
 
         // Unlock mutex
-        outdated_buffer_elements_protector_mutex_.unlock();
+        lock_outdated_buffer_elements_protector_mutex.unlock();
 
         // Notify to wake up
         outdatedBufferElementsConditionVariable.notify_all();
@@ -1686,11 +1725,11 @@ int MsfStorageCore::addOutdatedElement(const TimeStamp &TheTimeStamp)
         // End
         return 0;
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::addOutdatedElement() error -100!"<<std::endl;
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::addOutdatedElement() error -100!"<<std::endl;
+        return -100;
+    }
 }
 
 // safe
@@ -1712,7 +1751,10 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
 
         // Wait until a new element is pushed in the buffer
         if(sleep_if_empty)
-            outdatedBufferElementsConditionVariable.wait(*outdatedBufferElementsLock);
+        {
+            std::unique_lock<std::mutex> outdatedBufferElementsLock(outdatedBufferElementsMutex);
+            outdatedBufferElementsConditionVariable.wait(outdatedBufferElementsLock);
+        }
         else
             break;
     }
@@ -1724,8 +1766,9 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
 #endif
 
     // lock mutex
-    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
-    outdated_buffer_elements_protector_mutex_.lock();
+    std::unique_lock<std::timed_mutex> lock_outdated_buffer_elements_protector_mutex(outdated_buffer_elements_protector_mutex_, std::defer_lock);
+    if(lock_outdated_buffer_elements_protector_mutex.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+//    lock_outdated_buffer_elements_protector_mutex.lock();
     {
 
         // Find the oldest element
@@ -1734,7 +1777,7 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
         if(minElement==outdatedBufferElements.end())
         {
             // unlock mutex
-            outdated_buffer_elements_protector_mutex_.unlock();
+            lock_outdated_buffer_elements_protector_mutex.unlock();
 
             // end
             return 1;
@@ -1746,14 +1789,14 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
         outdatedBufferElements.erase(minElement);
 
         // unlock mutex
-        outdated_buffer_elements_protector_mutex_.unlock();
+        lock_outdated_buffer_elements_protector_mutex.unlock();
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getOldestOutdatedElement() error -100!"<<std::endl;
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getOldestOutdatedElement() error -100!"<<std::endl;
+        return -100;
+    }
 
     // End
     return 0;
@@ -1763,30 +1806,35 @@ int MsfStorageCore::getOldestOutdatedElement(TimeStamp &TheOutdatedTimeStamp, bo
 int MsfStorageCore::getNumOutdatedElements()
 {
     // Lock mutex
-    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
-    outdated_buffer_elements_protector_mutex_.lock();
+    std::unique_lock<std::timed_mutex> lock_outdated_buffer_elements_protector_mutex(outdated_buffer_elements_protector_mutex_, std::defer_lock);
+    if(lock_outdated_buffer_elements_protector_mutex.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+//    lock_outdated_buffer_elements_protector_mutex.lock();
     {
         //
         int num_outdated_elements=outdatedBufferElements.size();
 
         // unlock mutex
-        outdated_buffer_elements_protector_mutex_.unlock();
+        lock_outdated_buffer_elements_protector_mutex.unlock();
 
         // end
         return num_outdated_elements;
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getNumOutdatedElements() error -100!"<<std::endl;
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getNumOutdatedElements() error -100!"<<std::endl;
+        return -100;
+    }
 }
 
 // safe
 int MsfStorageCore::displayOutdatedBufferElements()
 {
-    this->log(getDisplayOutdatedElements());
+    int error_log=this->log(getDisplayOutdatedElements());
+    if(error_log)
+    {
+        std::cout<<"MsfStorageCore::displayOutdatedBufferElements() error log()"<<std::endl;
+    }
 
     return 0;
 }
@@ -1799,8 +1847,9 @@ std::string MsfStorageCore::getDisplayOutdatedElements()
     logString<<"List of outdated elements: ";
 
     // Lock mutex
-    //if(outdated_buffer_elements_protector_mutex_.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
-    outdated_buffer_elements_protector_mutex_.lock();
+    std::unique_lock<std::timed_mutex> lock_outdated_buffer_elements_protector_mutex(outdated_buffer_elements_protector_mutex_, std::defer_lock);
+    if(lock_outdated_buffer_elements_protector_mutex.try_lock_for(std::chrono::microseconds(outdated_elements_buffer_mutex_timeout_us_)))
+//    lock_outdated_buffer_elements_protector_mutex.lock();
     {
         //
         for(std::list<TimeStamp>::iterator itElement=outdatedBufferElements.begin();
@@ -1812,14 +1861,14 @@ std::string MsfStorageCore::getDisplayOutdatedElements()
         }
 
         // unlock mutex
-        outdated_buffer_elements_protector_mutex_.unlock();
+        lock_outdated_buffer_elements_protector_mutex.unlock();
 
     }
-//    else
-//    {
-//        std::cout<<"MsfStorageCore::getDisplayOutdatedElements() error -100!"<<std::endl;
-//        logString<<"error in mutex";
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::getDisplayOutdatedElements() error -100!"<<std::endl;
+        logString<<"error in mutex";
+    }
 
     //
     logString<<std::endl;
@@ -1832,7 +1881,8 @@ std::string MsfStorageCore::getDisplayOutdatedElements()
 int MsfStorageCore::semaphoreBufferUpdated()
 {
     // Wait until buffer is updated
-    updated_buffer_condition_variable_.wait(*updated_buffer_lock_);
+    std::unique_lock<std::mutex> updated_buffer_lock(updated_buffer_mutex_);
+    updated_buffer_condition_variable_.wait(updated_buffer_lock);
 
     return 0;
 }
@@ -1844,19 +1894,21 @@ int MsfStorageCore::log(std::string logString)
     //std::lock_guard<std::timed_mutex> lock_guard(TheLogFileMutex);
 
     // Lock mutex
-    //if(TheLogFileMutex.try_lock_for(std::chrono::microseconds(10)))
-    TheLogFileMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_log_file_mutex(TheLogFileMutex, std::defer_lock);
+    if(lock_log_file_mutex.try_lock_for(std::chrono::microseconds(100)))
+//    lock_log_file_mutex.lock();
     {
         // Write in file
         logFile<<logString;
 
         // Unlock mutex
-        TheLogFileMutex.unlock();
+        lock_log_file_mutex.unlock();
 
         return 0;
     }
-//    else
-//    {
-//        return -100;
-//    }
+    else
+    {
+        std::cout<<"MsfStorageCore::log() error -100"<<std::endl;
+        return -100;
+    }
 }

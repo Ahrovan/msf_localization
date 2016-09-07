@@ -100,7 +100,7 @@
 
 #define _DEBUG_MSF_STORAGE 0
 
-#define _DEBUG_MSF_STORAGE_BUFFER_TIME 0
+#define _DEBUG_MSF_STORAGE_BUFFER_TIME 1
 
 
 
@@ -113,14 +113,16 @@ public:
 
     // mutex to protect the buffer
 protected:
-    //std::recursive_timed_mutex TheRingBufferMutex;
-    std::recursive_mutex TheRingBufferMutex;
+private:
+    std::timed_mutex buffer_mutex_;
+    //std::unique_lock<std::timed_mutex>* lock_buffer_mutex_;
+    //std::recursive_mutex TheRingBufferMutex;
 protected:
     // timeout for the mutex of the buffer in us.
     // Not working with C++11 unless you have a real-time OS.
     // std::timed_mutex uses a steady_clock (precision ~ms):
     // http://en.cppreference.com/w/cpp/thread/timed_mutex/try_lock_for
-    // const int buffer_mutex_timeout_us_=5000; //500;
+    int buffer_mutex_timeout_us_; //500;
 
 
     // Get number elements in the buffer (safe)
@@ -240,24 +242,27 @@ public:
     std::string getDisplayOutdatedElements();
     // Protector mutex
 protected:
+private:
     //std::recursive_timed_mutex outdated_buffer_elements_protector_mutex_;
-    std::recursive_mutex outdated_buffer_elements_protector_mutex_;
+    std::timed_mutex outdated_buffer_elements_protector_mutex_;
     // timeout for the mutex of the buffer in us
-    //const int outdated_elements_buffer_mutex_timeout_us_=5000; //50;
+    int outdated_elements_buffer_mutex_timeout_us_;
 
     // Buffer waiting
 protected:
+private:
     std::mutex outdatedBufferElementsMutex;             // mutex for critical section
     std::condition_variable outdatedBufferElementsConditionVariable; // condition variable for critical section
-    std::unique_lock<std::mutex>* outdatedBufferElementsLock;
+    //std::unique_lock<std::mutex>* outdatedBufferElementsLock;
 
     // Buffer updated: Async publishing
 public:
     int semaphoreBufferUpdated();
 protected:
+private:
     std::mutex updated_buffer_mutex_;             // mutex for critical section
     std::condition_variable updated_buffer_condition_variable_; // condition variable for critical section
-    std::unique_lock<std::mutex>* updated_buffer_lock_;
+    //std::unique_lock<std::mutex>* updated_buffer_lock_;
 
 
 
@@ -267,7 +272,8 @@ protected:
     std::ofstream logFile;
     // mutex to protect the log file
 protected:
-    std::recursive_mutex TheLogFileMutex;
+private:
+    std::timed_mutex TheLogFileMutex;
 public:
     int log(std::string logString);
 

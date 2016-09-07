@@ -34,10 +34,10 @@ MsfLocalizationCore::MsfLocalizationCore()
 
 
     // New Measurement
-    new_measurement_lock_=new std::unique_lock<std::mutex>(new_measurement_mutex_);
+    //new_measurement_lock_=new std::unique_lock<std::mutex>(new_measurement_mutex_);
 
     // Updated State
-    updated_state_lock_=new std::unique_lock<std::mutex>(updated_state_mutex_);
+    //updated_state_lock_=new std::unique_lock<std::mutex>(updated_state_mutex_);
 
 
     // LOG
@@ -94,8 +94,8 @@ int MsfLocalizationCore::close()
     stopThreads();
 
     // Delete
-    delete new_measurement_lock_;
-    delete updated_state_lock_;
+    //delete new_measurement_lock_;
+    //delete updated_state_lock_;
 
     // Cleaning
 
@@ -353,7 +353,8 @@ int MsfLocalizationCore::setMeasurementList(const TimeStamp& time_stamp,
 int MsfLocalizationCore::semaphoreNewMeasurementWait(TimeStamp& new_measurement_time_stamp)
 {
     // Wait
-    new_measurement_condition_variable_.wait(*new_measurement_lock_);
+    std::unique_lock<std::mutex>new_measurement_lock(new_measurement_mutex_);
+    new_measurement_condition_variable_.wait(new_measurement_lock);
 
     // Get time stamp
     new_measurement_time_stamp=new_measurement_time_stamp_;
@@ -827,13 +828,13 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 #if _DEBUG_MSF_LOCALIZATION_CORE
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::bufferPropagationStep() Going to purge the ring"<<std::endl;
+            logString<<"MsfLocalizationCore::bufferPropagationStep() Going to  the ring"<<std::endl;
             this->log(logString.str());
         }
 #endif
 
         // Purge the buffer ??
-        int error_purge_ring_buffer=this->TheMsfStorageCore->purgeRingBuffer(100);
+        int error_purge_ring_buffer=this->TheMsfStorageCore->purgeRingBuffer(500);
         if(error_purge_ring_buffer)
         {
     #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE
@@ -1534,7 +1535,8 @@ int MsfLocalizationCore::findInputCommands(const TimeStamp &TheTimeStamp,
 int MsfLocalizationCore::semaphoreUpdatedStateWait(TimeStamp& updated_state_time_stamp)
 {
     // Wait
-    updated_state_condition_variable_.wait(*updated_state_lock_);
+    std::unique_lock<std::mutex> updated_state_lock(updated_state_mutex_);
+    updated_state_condition_variable_.wait(updated_state_lock);
 
     // Get time stamp
     updated_state_time_stamp=updated_state_time_stamp_;
@@ -5303,8 +5305,9 @@ int MsfLocalizationCore::log(std::string logString)
     //std::lock_guard<std::timed_mutex> lock_guard(TheLogFileMutex);
 
     // Lock mutex
-    //if(TheLogFileMutex.try_lock_for(std::chrono::milliseconds(10)))
-    TheLogFileMutex.lock();
+    std::unique_lock<std::timed_mutex> lock_log_file_mutex(TheLogFileMutex, std::defer_lock);
+    if(lock_log_file_mutex.try_lock_for(std::chrono::microseconds(100)))
+    //lock_log_file_mutex.lock();
     {
         // Write in file
         logFile<<getTimeStampString()<<logString;
@@ -5314,8 +5317,9 @@ int MsfLocalizationCore::log(std::string logString)
 
         return 0;
     }
-//    else
-//    {
-//        return -100;
-//    }
+    else
+    {
+        //std::cout<<"aqui"<<std::endl;
+        return -100;
+    }
 }

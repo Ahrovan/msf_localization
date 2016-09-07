@@ -65,8 +65,8 @@ int RosArucoEyeInterface::setMeasurementRos(const aruco_eye_msgs::MarkerListPtr&
             continue;
 
         // Value with sensor core
-        std::shared_ptr<CodedVisualMarkerEyeCore> the_coded_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
-        std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement_core=std::make_shared<CodedVisualMarkerMeasurementCore>(the_coded_visual_marker_eye_core);
+        //std::shared_ptr<CodedVisualMarkerEyeCore> the_coded_visual_marker_eye_core=std::dynamic_pointer_cast<CodedVisualMarkerEyeCore>(this->getMsfElementCoreSharedPtr());
+        std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement_core=std::make_shared<CodedVisualMarkerMeasurementCore>(this->getSensorCoreWeakPtr());
 
         // Measured Id
         if(the_visual_marker_measurement_core->setVisualMarkerId((it_visual_markers)->id))

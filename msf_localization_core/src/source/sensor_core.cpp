@@ -20,7 +20,6 @@ SensorCore::SensorCore(MsfLocalizationCore* msf_localization_core_ptr) :
     SensorBasics(),
     MsfElementCore(msf_localization_core_ptr)
 {
-    //std::cout<<"SensorCore::SensorCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
 
     init();
 
@@ -61,6 +60,22 @@ int SensorCore::init()
     noisePositionSensorWrtRobot.setZero();
 
     return 0;
+}
+
+std::weak_ptr<SensorCore> SensorCore::getSensorCoreWeakPtr() const
+{
+    //std::weak_ptr<SensorCore> msf_element_core_weak_ptr_;
+    //std::shared_ptr<SensorCore> msf_element_core_ptr_=std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreWeakPtr());
+    //msf_element_core_weak_ptr_=msf_element_core_ptr_;
+    //return msf_element_core_weak_ptr_;
+    return std::weak_ptr<SensorCore>(std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr()));
+}
+
+std::shared_ptr<SensorCore> SensorCore::getSensorCoreSharedPtr() const
+{
+    //std::shared_ptr<SensorCore> msf_element_core_ptr_=std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr());
+    //return msf_element_core_ptr_;
+    return std::dynamic_pointer_cast<SensorCore>(this->getMsfElementCoreSharedPtr());
 }
 
 int SensorCore::getDimensionMeasurement() const

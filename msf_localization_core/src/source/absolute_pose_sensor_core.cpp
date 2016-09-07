@@ -21,7 +21,6 @@ AbsolutePoseSensorCore::AbsolutePoseSensorCore() :
 AbsolutePoseSensorCore::AbsolutePoseSensorCore(MsfLocalizationCore *msf_localization_core_ptr) :
     SensorCore(msf_localization_core_ptr)
 {
-    //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
 
     //
     init();
@@ -328,44 +327,6 @@ void AbsolutePoseSensorCore::setSensorMeasurementPoseSensorWrtSensorWorldHasCova
     this->flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance_=flag_sensor_measurement_pose_sensor_wrt_sensor_world_has_covariance;
     return;
 }
-
-/*
-int AbsolutePoseSensorCore::setMeasurement(const TimeStamp& the_time_stamp, const std::shared_ptr<AbsolutePoseSensorMeasurementCore> sensor_measurement)
-{
-    if(!isSensorEnabled())
-        return 0;
-
-    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurement(the_time_stamp, sensor_measurement);
-    if(error_set_measurement > 0)
-    {
-        //std::cout<<"AbsolutePoseSensorCore::setMeasurement() error > 0 setMeasurementList()"<<std::endl;
-        return 1;
-    }
-    else if(error_set_measurement < 0)
-    {
-        std::cout<<"AbsolutePoseSensorCore::setMeasurement() error < 0 setMeasurementList()"<<std::endl;
-        return -1;
-    }
-
-    return 0;
-}
-*/
-
-/*
-int AbsolutePoseSensorCore::setMeasurementList(const TimeStamp the_time_stamp, std::list< std::shared_ptr<SensorMeasurementCore> > sensor_measurement_list)
-{
-    if(!isSensorEnabled())
-        return 0;
-
-    if(this->getMsfStorageCoreSharedPtr()->setMeasurementList(the_time_stamp, sensor_measurement_list))
-    {
-        std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
-        return 1;
-    }
-
-    return 0;
-}
-*/
 
 Eigen::SparseMatrix<double> AbsolutePoseSensorCore::getCovarianceMeasurement()
 {

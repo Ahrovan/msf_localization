@@ -19,7 +19,6 @@ CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore() :
 CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(MsfLocalizationCore *msf_localization_core_ptr) :
     SensorCore(msf_localization_core_ptr)
 {
-    //std::cout<<"CodedVisualMarkerEyeCore::CodedVisualMarkerEyeCore(std::weak_ptr<MsfStorageCore> the_msf_storage_core)"<<std::endl;
 
     //
     init();
@@ -288,47 +287,6 @@ int CodedVisualMarkerEyeCore::setNoiseMeasurementAttitude(const Eigen::Matrix3d&
     return 0;
 }
 
-/*
-int CodedVisualMarkerEyeCore::setMeasurement(const TimeStamp the_time_stamp, std::shared_ptr<CodedVisualMarkerMeasurementCore> the_visual_marker_measurement)
-{
-    if(!isSensorEnabled())
-        return 0;
-
-    if(this->getMsfStorageCoreSharedPtr()->setMeasurement(the_time_stamp, the_visual_marker_measurement))
-    {
-        std::cout<<"CodedVisualMarkerEyeCore::setMeasurement() error"<<std::endl;
-        return 1;
-    }
-
-    return 0;
-}
-*/
-
-/*
-int CodedVisualMarkerEyeCore::setMeasurementList(const TimeStamp& the_time_stamp, const std::list< std::shared_ptr<SensorMeasurementCore> >& the_visual_marker_measurement_list)
-{
-    if(!isSensorEnabled())
-        return 0;
-
-    // Check if there are measurements
-    if(the_visual_marker_measurement_list.size() == 0)
-        return 0;
-
-    int error_set_measurement=this->getMsfLocalizationCorePtr()->setMeasurementList(the_time_stamp, the_visual_marker_measurement_list);
-    if(error_set_measurement > 0)
-    {
-        //std::cout<<"CodedVisualMarkerEyeCore::setMeasurementList() error setMeasurementList()"<<std::endl;
-        return 1;
-    }
-    else if(error_set_measurement < 0)
-    {
-        std::cout<<"CodedVisualMarkerEyeCore::setMeasurementList() error < 0 setMeasurementList()"<<std::endl;
-        return -1;
-    }
-
-    return 0;
-}
-*/
 
 Eigen::SparseMatrix<double> CodedVisualMarkerEyeCore::getCovarianceMeasurement()
 {

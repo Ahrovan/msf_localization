@@ -23,7 +23,6 @@ MsfElementCore::MsfElementCore()
 
 MsfElementCore::MsfElementCore(MsfLocalizationCore *msf_localization_core_ptr)
 {
-    //std::cout<<"MsfElementCore::MsfElementCore(std::weak_ptr<MsfStorageCore> msf_storage_core_ptr)"<<std::endl;
 
     init();
 
@@ -93,6 +92,11 @@ int MsfElementCore::setMsfElementCorePtr(const std::weak_ptr<MsfElementCore> msf
 {
     this->msf_element_core_ptr_=msf_element_core_ptr;
     return 0;
+}
+
+MsfElementCore* MsfElementCore::getMsfElementCoreRawPtr() const
+{
+    return this->msf_element_core_ptr_.lock().get();
 }
 
 std::weak_ptr<MsfElementCore> MsfElementCore::getMsfElementCoreWeakPtr() const

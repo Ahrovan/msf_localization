@@ -96,11 +96,6 @@ public:
     int setNoiseMeasurementLinearAcceleration(const Eigen::Matrix3d& noiseMeasurementLinearAcceleration);
 
 
-    // Store Measurement
-public:
-    //int setMeasurement(const TimeStamp& TheTimeStamp, const std::shared_ptr<ImuSensorMeasurementCore> TheImuSensorMeasurement);
-
-
 
 
 

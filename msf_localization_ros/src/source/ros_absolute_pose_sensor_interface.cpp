@@ -32,8 +32,8 @@ int RosAbsolutePoseSensorInterface::setMeasurementRos(const geometry_msgs::PoseS
 
 
     // Value with sensor core
-    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
-    std::shared_ptr<AbsolutePoseSensorMeasurementCore> measurement_core=std::make_shared<AbsolutePoseSensorMeasurementCore>(sensor_core);
+    //std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorMeasurementCore> measurement_core=std::make_shared<AbsolutePoseSensorMeasurementCore>(this->getSensorCoreWeakPtr());
 
 
     // Measurement Position
@@ -96,8 +96,8 @@ int RosAbsolutePoseSensorInterface::setMeasurementRos(const geometry_msgs::PoseW
 
 
     // Value with sensor core
-    std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
-    std::shared_ptr<AbsolutePoseSensorMeasurementCore> measurement_core=std::make_shared<AbsolutePoseSensorMeasurementCore>(sensor_core);
+    //std::shared_ptr<AbsolutePoseSensorCore> sensor_core=std::dynamic_pointer_cast<AbsolutePoseSensorCore>(this->getMsfElementCoreSharedPtr());
+    std::shared_ptr<AbsolutePoseSensorMeasurementCore> measurement_core=std::make_shared<AbsolutePoseSensorMeasurementCore>(this->getSensorCoreWeakPtr());
 
 
     // Measurement Position

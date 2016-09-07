@@ -73,10 +73,6 @@ enum class MsfElementCoreTypes
 
 // Forward declarations!
 
-//class MsfStorageCore;
-
-//class StateCore;
-
 
 // Test?
 class MsfLocalizationCore;
@@ -110,6 +106,7 @@ protected:
     std::weak_ptr<MsfElementCore> msf_element_core_ptr_;
 public:
     int setMsfElementCorePtr(const std::weak_ptr<MsfElementCore> msf_element_core_ptr);
+    MsfElementCore* getMsfElementCoreRawPtr() const;
     std::weak_ptr<MsfElementCore> getMsfElementCoreWeakPtr() const;
     std::shared_ptr<MsfElementCore> getMsfElementCoreSharedPtr() const;
 
@@ -122,15 +119,6 @@ public:
     MsfLocalizationCore* getMsfLocalizationCorePtr() const;
 
 
-    /*
-    // Pointer to the MSF Storage Core
-protected:
-    std::weak_ptr<MsfStorageCore> msf_storage_core_ptr_;
-public:
-    int setMsfStorageCorePtr(const std::weak_ptr<MsfStorageCore> msf_storage_core_ptr);
-    std::weak_ptr<MsfStorageCore> getMsfStorageCoreWeakPtr() const;
-    std::shared_ptr<MsfStorageCore> getMsfStorageCoreSharedPtr() const;
-    */
 
 
     // Check

@@ -10,7 +10,13 @@ CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
     #set(CMAKE_CXX_FLAGS "-std=c++11")
+    # http://stackoverflow.com/questions/37621342/cmake-will-not-compile-to-c-11-standard
+    # CMake below 3.1
     add_definitions(-std=c++11)
+    # CMake 3.1 and above
+    set(CMAKE_CXX_STANDARD 11) # C++11...
+    set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
+    set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 elseif(COMPILER_SUPPORTS_CXX0X)
     #set(CMAKE_CXX_FLAGS "-std=c++0x")
     add_definitions(-std=c++0x)
@@ -224,10 +230,11 @@ find_package(catkin REQUIRED
                 COMPONENTS pugixml)
 
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED
+                COMPONENTS filesystem)
 
 
-find_package(Eigen3)
+find_package(Eigen3 REQUIRED)
 if(NOT EIGEN3_FOUND)
   # Fallback to cmake_modules
   find_package(cmake_modules REQUIRED)
@@ -243,10 +250,14 @@ endif()
 #add_definitions(-DEIGEN_NO_DEBUG -DEIGEN_MPL2_ONLY)
 
 
+find_package(Threads REQUIRED)
+
+
+
 catkin_package(
         INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
-        DEPENDS Boost Eigen3
+        DEPENDS Boost Eigen3 Threads
         CATKIN_DEPENDS pugixml
   )
 
@@ -262,5 +273,6 @@ add_library(${PROJECT_NAME} ${MSF_LOCALIZATION_CORE_SOURCE_FILES} ${MSF_LOCALIZA
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${EIGEN3_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

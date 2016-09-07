@@ -90,9 +90,10 @@ set(MSF_LOCALIZATION_ROS_HEADER_FILES
 find_package(catkin REQUIRED
                 COMPONENTS cmake_modules roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs px_comm)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED
+                COMPONENTS filesystem)
 
-find_package(Eigen3)
+find_package(Eigen3 REQUIRED)
 if(NOT EIGEN3_FOUND)
   # Fallback to cmake_modules
   find_package(cmake_modules REQUIRED)
@@ -105,11 +106,13 @@ else()
   set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif()
 
+find_package(Threads REQUIRED)
+
 
 catkin_package(
     INCLUDE_DIRS ${MSF_LOCALIZATION_ROS_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}_lib
-    DEPENDS Boost Eigen3
+    DEPENDS Boost Eigen3 Threads
     CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs px_comm
   )
 
@@ -125,6 +128,7 @@ add_library(${PROJECT_NAME}_lib ${MSF_LOCALIZATION_ROS_SOURCE_FILES} ${MSF_LOCAL
 add_dependencies(${PROJECT_NAME}_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_lib ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_lib ${EIGEN3_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_lib ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES})
 
 #add_executable(${PROJECT_NAME}_test ${MSF_LOCALIZATION_ROS_SOURCE_DIR}/test.cpp)

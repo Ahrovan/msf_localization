@@ -55,10 +55,10 @@ int RosPx4FlowSensorInterface::setMeasurementRos(const px_comm::OpticalFlowConst
 
 
     // Sensor Core
-    std::shared_ptr<Px4FlowSensorCore> sensor_core=std::dynamic_pointer_cast<Px4FlowSensorCore>(this->getMsfElementCoreSharedPtr());
+    //std::shared_ptr<Px4FlowSensorCore> sensor_core=std::dynamic_pointer_cast<Px4FlowSensorCore>(this->getMsfElementCoreSharedPtr());
 
     // Value
-    std::shared_ptr<Px4FlowSensorMeasurementCore> sensor_measurement_core=std::make_shared<Px4FlowSensorMeasurementCore>(sensor_core);
+    std::shared_ptr<Px4FlowSensorMeasurementCore> sensor_measurement_core=std::make_shared<Px4FlowSensorMeasurementCore>(this->getSensorCoreWeakPtr());
 
 
     // Values
