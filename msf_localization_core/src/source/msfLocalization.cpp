@@ -2778,6 +2778,11 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
         block_jacobian_total_robot_error_state.analyse();
         block_jacobian_total_robot_error_parameters.analyse();
 
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_state=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_state);
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_parameters=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_parameters);
+
+
+
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
             std::ostringstream logString;
@@ -2907,6 +2912,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
         block_jacobian_total_robot_error_state_wrt_error_input_commands.analyse();
 
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_state_wrt_error_input_commands=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_state_wrt_error_input_commands);
+
+
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
             std::ostringstream logString;
@@ -2983,6 +2991,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
         block_jacobian_total_robot_error_noise_estimation.analyse();
 
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_noise_estimation=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_noise_estimation);
+
+
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
             std::ostringstream logString;
@@ -3007,7 +3018,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
         /// Covariance Error State: P
 
-
+/*
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorStateAsBlock=getTimeStamp();
 #endif
@@ -3036,7 +3047,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             this->log(logString.str());
         }
 #endif
-
+*/
 
 
         /// Covariance Error Parameters: Qp
@@ -3096,6 +3107,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
         block_covariance_total_robot_error_parameters.analyse();
 
+        Eigen::SparseMatrix<double> covariance_total_robot_error_parameters=BlockMatrix::convertToEigenSparse(block_covariance_total_robot_error_parameters);
+
 
 #if 0 && _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
     {
@@ -3142,6 +3155,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
         block_covariance_total_robot_error_inputs.analyse();
 
+        Eigen::SparseMatrix<double> covariance_total_robot_error_inputs=BlockMatrix::convertToEigenSparse(block_covariance_total_robot_error_inputs);
+
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
     {
@@ -3159,6 +3174,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             this->log(logString.str());
         }
 #endif
+
 
 
 
@@ -3218,6 +3234,8 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
         block_covariance_total_robot_error_noise_estimation.analyse();
 
+        Eigen::SparseMatrix<double> covariance_total_robot_error_noise_estimation=BlockMatrix::convertToEigenSparse(block_covariance_total_robot_error_noise_estimation);
+
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
@@ -3246,15 +3264,15 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 #endif
 
 
-
+        /*
         BlockMatrix::MatrixDense block_predicted_covariance_error_state;
         block_predicted_covariance_error_state.resize(num_error_states, num_error_states);
-
+        */
 
 
         try
         {
-
+            /*
             BlockMatrix::MatrixSparse block_covariance_total_robot_error;
             block_covariance_total_robot_error.resize(num_error_states, num_error_states);
 
@@ -3263,6 +3281,17 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
                                                 block_jacobian_total_robot_error_noise_estimation*block_covariance_total_robot_error_noise_estimation*block_jacobian_total_robot_error_noise_estimation.transpose() +
                                                 // Fp * Qp * Fp^t
                                                 block_jacobian_total_robot_error_parameters*block_covariance_total_robot_error_parameters*block_jacobian_total_robot_error_parameters.transpose();
+            */
+
+
+            Eigen::SparseMatrix<double> covariance_total_robot_error;
+            //block_covariance_total_robot_error.resize(num_error_states, num_error_states);
+
+
+            covariance_total_robot_error= // Fn * Qn * Fn^t
+                                                jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose() +
+                                                // Fp * Qp * Fp^t
+                                                jacobian_total_robot_error_parameters*covariance_total_robot_error_parameters*jacobian_total_robot_error_parameters.transpose();
 
 
 
@@ -3281,7 +3310,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             std::cout<<"size_cols="<<block_covariance_total_robot_error.getColsSize().transpose()<<std::endl;
             */
 
-
+/*
 #if 0 && _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
             {
                 std::ostringstream logString;
@@ -3290,14 +3319,20 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
                 this->log(logString.str());
             }
 #endif
-
+*/
 
             if(num_input_commands > 0)
             {
+                /*
                 block_covariance_total_robot_error+=// Fu * Qu * Fu^t
                                                     block_jacobian_total_robot_error_state_wrt_error_input_commands*block_covariance_total_robot_error_inputs*block_jacobian_total_robot_error_state_wrt_error_input_commands.transpose();
+                */
+
+                covariance_total_robot_error+=// Fu * Qu * Fu^t
+                                                    jacobian_total_robot_error_state_wrt_error_input_commands*covariance_total_robot_error_inputs*jacobian_total_robot_error_state_wrt_error_input_commands.transpose();
 
 
+/*
 #if 0 && _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
                 {
                     std::ostringstream logString;
@@ -3306,7 +3341,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
                     this->log(logString.str());
                 }
 #endif
-
+*/
             }
 
 
@@ -3339,11 +3374,19 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
             TimeStamp beginTimePredictedCovarianceErrorStateLastSum=getTimeStamp();
 #endif
-
+            /*
             block_predicted_covariance_error_state= // Fx * P * Fx^t
                                                     block_jacobian_total_robot_error_state*block_previous_covariance_error_state*block_jacobian_total_robot_error_state.transpose()+
                                                     // Fp * Qp * Fp^t + Fu * Qu * Fu^t + Fn * Qn * Fn^t
                                                     block_covariance_total_robot_error;
+            */
+
+            (*predicted_state->covarianceMatrix)= // Fx * P * Fx^t
+                                                    jacobian_total_robot_error_state*(*previous_state->covarianceMatrix)*jacobian_total_robot_error_state.transpose();
+
+            (*predicted_state->covarianceMatrix)+=
+                                                    // Fp * Qp * Fp^t + Fu * Qu * Fu^t + Fn * Qn * Fn^t
+                                                    covariance_total_robot_error;
 
 
 //#if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
@@ -3386,7 +3429,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
 
 
-
+/*
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
         TimeStamp beginTimePredictedCovarianceErrorStateAsEigen=getTimeStamp();
 #endif
@@ -3401,7 +3444,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             this->log(logString.str());
         }
 #endif
-
+*/
 
 
 #if _DEBUG_TIME_MSF_LOCALIZATION_CORE
