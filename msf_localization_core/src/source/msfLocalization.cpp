@@ -2779,8 +2779,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
         block_jacobian_total_robot_error_parameters.analyse();
 
         Eigen::SparseMatrix<double> jacobian_total_robot_error_state=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_state);
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_state_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_state);
         Eigen::SparseMatrix<double> jacobian_total_robot_error_parameters=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_parameters);
-
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_parameters_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_parameters.transpose());
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
@@ -2913,6 +2914,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
         block_jacobian_total_robot_error_state_wrt_error_input_commands.analyse();
 
         Eigen::SparseMatrix<double> jacobian_total_robot_error_state_wrt_error_input_commands=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_state_wrt_error_input_commands);
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_state_wrt_error_input_commands_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_state_wrt_error_input_commands.transpose());
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
@@ -2992,7 +2994,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
         block_jacobian_total_robot_error_noise_estimation.analyse();
 
         Eigen::SparseMatrix<double> jacobian_total_robot_error_noise_estimation=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_noise_estimation);
-
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_noise_estimation_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_noise_estimation.transpose());
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
@@ -3289,9 +3291,9 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 
 
             covariance_total_robot_error= // Fn * Qn * Fn^t
-                                                jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation.transpose() +
+                                                jacobian_total_robot_error_noise_estimation*covariance_total_robot_error_noise_estimation*jacobian_total_robot_error_noise_estimation_transpose +
                                                 // Fp * Qp * Fp^t
-                                                jacobian_total_robot_error_parameters*covariance_total_robot_error_parameters*jacobian_total_robot_error_parameters.transpose();
+                                                jacobian_total_robot_error_parameters*covariance_total_robot_error_parameters*jacobian_total_robot_error_parameters_transpose;
 
 
 
@@ -3329,7 +3331,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
                 */
 
                 covariance_total_robot_error+=// Fu * Qu * Fu^t
-                                                    jacobian_total_robot_error_state_wrt_error_input_commands*covariance_total_robot_error_inputs*jacobian_total_robot_error_state_wrt_error_input_commands.transpose();
+                                                    jacobian_total_robot_error_state_wrt_error_input_commands*covariance_total_robot_error_inputs*jacobian_total_robot_error_state_wrt_error_input_commands_transpose;
 
 
 /*
@@ -3382,7 +3384,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
             */
 
             (*predicted_state->covarianceMatrix)= // Fx * P * Fx^t
-                                                    jacobian_total_robot_error_state*(*previous_state->covarianceMatrix)*jacobian_total_robot_error_state.transpose();
+                                                    jacobian_total_robot_error_state*(*previous_state->covarianceMatrix)*jacobian_total_robot_error_state_transpose;
 
             (*predicted_state->covarianceMatrix)+=
                                                     // Fp * Qp * Fp^t + Fu * Qu * Fu^t + Fn * Qn * Fn^t
@@ -4054,10 +4056,12 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             // Sparse Matrix from block matrix
             Eigen::SparseMatrix<double> jacobian_error_measurement_wrt_error_state;
             jacobian_error_measurement_wrt_error_state=BlockMatrix::convertToEigenSparse(block_jacobian_error_measurement_wrt_error_state);
+            Eigen::SparseMatrix<double> jacobian_error_measurement_wrt_error_state_transpose=Eigen::SparseMatrix<double>(jacobian_error_measurement_wrt_error_state.transpose());
 
             // Sparse Matrix from block matrix
             Eigen::SparseMatrix<double> jacobian_error_measurement_wrt_error_parameters;
             jacobian_error_measurement_wrt_error_parameters=BlockMatrix::convertToEigenSparse(block_jacobian_error_measurement_wrt_error_parameters);
+            Eigen::SparseMatrix<double> jacobian_error_measurement_wrt_error_parameters_transpose=Eigen::SparseMatrix<double>(jacobian_error_measurement_wrt_error_parameters.transpose());
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE
@@ -4104,6 +4108,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             // Sparse matrix
             Eigen::SparseMatrix<double> jacobian_error_measurement_wrt_error_measurement;
             jacobian_error_measurement_wrt_error_measurement=BlockMatrix::convertToEigenSparse(block_jacobian_error_measurement_wrt_error_measurement);
+            Eigen::SparseMatrix<double> jacobian_error_measurement_wrt_error_measurement_transpose=Eigen::SparseMatrix<double>(jacobian_error_measurement_wrt_error_measurement.transpose());
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE
@@ -4315,14 +4320,14 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             Eigen::SparseMatrix<double> innovation_covariance_aux_sparse;
             innovation_covariance_aux_sparse=
                     // Hp * Rp * Hp^t
-                    jacobian_error_measurement_wrt_error_parameters*covariance_error_parameters*jacobian_error_measurement_wrt_error_parameters.transpose() +
+                    jacobian_error_measurement_wrt_error_parameters*covariance_error_parameters*jacobian_error_measurement_wrt_error_parameters_transpose +
                     // Hn * Rn * Hn^t
-                    jacobian_error_measurement_wrt_error_measurement*covariance_error_measurement*jacobian_error_measurement_wrt_error_measurement.transpose();
+                    jacobian_error_measurement_wrt_error_measurement*covariance_error_measurement*jacobian_error_measurement_wrt_error_measurement_transpose;
 
             // Equation (dense part): S = Hx * P * Hx^t + ( Hp * Rp * Hp^t + Hn * Rn * Hn^t )
             innovationCovariance=
                     // Hx * P * Hx^t
-                    jacobian_error_measurement_wrt_error_state*(*OldState->covarianceMatrix)*jacobian_error_measurement_wrt_error_state.transpose()+
+                    jacobian_error_measurement_wrt_error_state*(*OldState->covarianceMatrix)*jacobian_error_measurement_wrt_error_state_transpose+
                     // ( Hp * Rp * Hp^t + Hn * Rn * Hn^t )
                     Eigen::MatrixXd(innovation_covariance_aux_sparse);
 
@@ -4413,7 +4418,7 @@ int MsfLocalizationCore::updateCore(const TimeStamp &TheTimeStamp,
             Eigen::MatrixXd kalmanGain;
 
             // Equation
-            kalmanGain=(*OldState->covarianceMatrix)*jacobian_error_measurement_wrt_error_state.transpose()*innovation_covariance_inverse;
+            kalmanGain=(*OldState->covarianceMatrix)*jacobian_error_measurement_wrt_error_state_transpose*innovation_covariance_inverse;
 
 
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_UPDATE
