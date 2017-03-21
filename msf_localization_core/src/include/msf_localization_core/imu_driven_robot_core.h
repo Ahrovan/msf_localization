@@ -10,7 +10,7 @@
 #include "msf_localization_core/time_stamp.h"
 
 // Quaternion algebra
-#include "msf_localization_core/quaternion_algebra.h"
+#include "quaternion_algebra/quaternion_algebra.h"
 
 // Robot Core
 #include "msf_localization_core/robot_core.h"

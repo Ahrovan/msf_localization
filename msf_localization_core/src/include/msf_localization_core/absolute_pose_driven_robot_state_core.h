@@ -10,7 +10,7 @@
 #include "msf_localization_core/robot_state_core.h"
 
 
-#include "msf_localization_core/quaternion_algebra.h"
+#include "quaternion_algebra/quaternion_algebra.h"
 
 
 class AbsolutePoseDrivenRobotStateCore : public RobotStateCore

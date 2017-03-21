@@ -8,7 +8,7 @@
 
 #include "msf_localization_core/input_command_core.h"
 
-#include "msf_localization_core/quaternion_algebra.h"
+#include "quaternion_algebra/quaternion_algebra.h"
 
 
 

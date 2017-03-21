@@ -18,6 +18,8 @@
     <depend>boost</depend>
 
     <depend>pugixml</depend>
+    <depend>quaternion_algebra</depend>
+
   
 </package>
 

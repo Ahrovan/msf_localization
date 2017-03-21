@@ -15,7 +15,7 @@
 #include "msf_localization_core/time_stamp.h"
 
 // Quaternion algebra
-#include "msf_localization_core/quaternion_algebra.h"
+#include "quaternion_algebra/quaternion_algebra.h"
 
 // Map element Core
 #include "msf_localization_core/map_element_core.h"

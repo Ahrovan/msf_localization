@@ -13,7 +13,7 @@
 #include "msf_localization_core/map_element_core.h"
 
 
-#include "msf_localization_core/quaternion_algebra.h"
+#include "quaternion_algebra/quaternion_algebra.h"
 
 
 
