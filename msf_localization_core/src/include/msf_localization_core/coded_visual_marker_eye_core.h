@@ -10,7 +10,7 @@
 
 
 // Time Stamp
-#include "msf_localization_core/time_stamp.h"
+#include "time_stamp/time_stamp.h"
 
 
 // Sensor core

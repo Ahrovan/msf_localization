@@ -8,7 +8,7 @@
 #include "pugixml/pugixml.hpp"
 
 // Time Stamp
-#include "msf_localization_core/time_stamp.h"
+#include "time_stamp/time_stamp.h"
 
 // Sensor core
 #include "msf_localization_core/sensor_core.h"

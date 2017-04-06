@@ -6,7 +6,7 @@
 
 #include "msf_localization_ros/ros_interface.h"
 
-#include "msf_localization_core/time_stamp.h"
+#include "time_stamp/time_stamp.h"
 #include "msf_localization_core/global_parameters_core.h"
 #include "msf_localization_core/robot_state_core.h"
 

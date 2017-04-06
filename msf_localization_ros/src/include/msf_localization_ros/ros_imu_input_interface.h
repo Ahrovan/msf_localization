@@ -9,7 +9,7 @@
 
 
 // Time Stamp
-#include "msf_localization_core/time_stamp.h"
+#include "time_stamp/time_stamp.h"
 
 
 #include "msf_localization_ros/ros_input_interface.h"

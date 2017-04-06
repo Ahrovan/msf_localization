@@ -6,9 +6,9 @@
 #include <list>
 #include <algorithm>
 
-#include "msf_localization_core/ring_buffer.h"
+#include "buffer/ring_buffer.h"
 
-#include "msf_localization_core/time_stamp.h"
+#include "time_stamp/time_stamp.h"
 
 
 

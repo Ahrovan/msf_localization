@@ -2779,7 +2779,7 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
         block_jacobian_total_robot_error_parameters.analyse();
 
         Eigen::SparseMatrix<double> jacobian_total_robot_error_state=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_state);
-        Eigen::SparseMatrix<double> jacobian_total_robot_error_state_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_state);
+        Eigen::SparseMatrix<double> jacobian_total_robot_error_state_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_state.transpose());
         Eigen::SparseMatrix<double> jacobian_total_robot_error_parameters=BlockMatrix::convertToEigenSparse(block_jacobian_total_robot_error_parameters);
         Eigen::SparseMatrix<double> jacobian_total_robot_error_parameters_transpose=Eigen::SparseMatrix<double>(jacobian_total_robot_error_parameters.transpose());
 
@@ -2787,8 +2787,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 #if _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() Fx: block_jacobian_total_robot_error_state for TS: sec="<<predicted_time_stamp.sec<<" s; nsec="<<predicted_time_stamp.nsec<<" ns"<<std::endl;
-            logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_state)<<std::endl;
+            logString<<"MsfLocalizationCore::predictCore() Fx: jacobian_total_robot_error_state for TS: sec="<<predicted_time_stamp.sec<<" s; nsec="<<predicted_time_stamp.nsec<<" ns"<<std::endl;
+            logString<<jacobian_total_robot_error_state<<std::endl;
+            logString<<"MsfLocalizationCore::predictCore() Fx: jacobian_total_robot_error_state_transpose for TS: sec="<<predicted_time_stamp.sec<<" s; nsec="<<predicted_time_stamp.nsec<<" ns"<<std::endl;
+            logString<<jacobian_total_robot_error_state_transpose<<std::endl;
             this->log(logString.str());
         }
 #endif
@@ -2796,8 +2798,10 @@ int MsfLocalizationCore::predictCore(const TimeStamp &previous_time_stamp, const
 #if 0 && _DEBUG_MSF_LOCALIZATION_ALGORITHM_PREDICT
         {
             std::ostringstream logString;
-            logString<<"MsfLocalizationCore::predictCore() Fp: block_jacobian_total_robot_error_parameters for TS: sec="<<predicted_time_stamp.sec<<" s; nsec="<<predicted_time_stamp.nsec<<" ns"<<std::endl;
-            logString<<BlockMatrix::convertToEigenDense(block_jacobian_total_robot_error_parameters)<<std::endl;
+            logString<<"MsfLocalizationCore::predictCore() Fp: jacobian_total_robot_error_parameters for TS: sec="<<predicted_time_stamp.sec<<" s; nsec="<<predicted_time_stamp.nsec<<" ns"<<std::endl;
+            logString<<jacobian_total_robot_error_parameters<<std::endl;
+            logString<<"MsfLocalizationCore::predictCore() Fp: jacobian_total_robot_error_parameters_transpose for TS: sec="<<predicted_time_stamp.sec<<" s; nsec="<<predicted_time_stamp.nsec<<" ns"<<std::endl;
+            logString<<jacobian_total_robot_error_parameters_transpose<<std::endl;
             this->log(logString.str());
         }
 #endif

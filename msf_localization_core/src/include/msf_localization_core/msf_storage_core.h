@@ -44,7 +44,7 @@
 #include <chrono>
 
 
-#include "msf_localization_core/stamped_ring_buffer.h"
+#include "buffer/stamped_ring_buffer.h"
 
 #include "msf_localization_core/state_estimation_core.h"
 

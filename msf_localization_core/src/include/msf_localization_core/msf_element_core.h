@@ -42,7 +42,7 @@
 
 #include "msf_localization_core/block_matrix.h"
 
-#include "msf_localization_core/time_stamp.h"
+#include "time_stamp/time_stamp.h"
 
 
 //#include "msf_localization_core/state_estimation_core.h"

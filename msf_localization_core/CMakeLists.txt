@@ -213,16 +213,16 @@ set(MSF_LOCALIZATION_CORE_HEADER_FILES
 
   ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/block_matrix.h
 
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/ring_buffer.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/time_stamp.h
-  ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/stamped_ring_buffer.h
+  #${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/ring_buffer.h
+  #${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/time_stamp.h
+  #${MSF_LOCALIZATION_CORE_INCLUDE_DIR}/msf_localization_core/stamped_ring_buffer.h
 )
 
 
 
 
 find_package(catkin REQUIRED
-                COMPONENTS pugixml quaternion_algebra)
+                COMPONENTS pugixml quaternion_algebra time_stamp buffer)
 
 
 find_package(Boost REQUIRED
@@ -253,7 +253,7 @@ catkin_package(
         INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
         DEPENDS Boost EIGEN3 Threads
-        CATKIN_DEPENDS pugixml quaternion_algebra
+        CATKIN_DEPENDS pugixml quaternion_algebra time_stamp buffer
   )
 
 

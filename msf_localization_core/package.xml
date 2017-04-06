@@ -19,7 +19,8 @@
 
     <depend>pugixml</depend>
     <depend>quaternion_algebra</depend>
-
+    <depend>time_stamp</depend>
+    <depend>buffer</depend>
   
 </package>
 
