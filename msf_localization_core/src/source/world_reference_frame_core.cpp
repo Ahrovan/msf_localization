@@ -435,7 +435,7 @@ int WorldReferenceFrameCore::predictStateSpecific(const TimeStamp &previousTimeS
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     /// Position
@@ -582,7 +582,7 @@ int WorldReferenceFrameCore::predictErrorStateJacobiansSpecific(const TimeStamp&
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
 

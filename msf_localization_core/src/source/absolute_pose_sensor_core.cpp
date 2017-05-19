@@ -525,7 +525,7 @@ int AbsolutePoseSensorCore::predictStateSpecific(const TimeStamp &previousTimeSt
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     //// Core
@@ -720,7 +720,7 @@ int AbsolutePoseSensorCore::predictErrorStateJacobiansSpecific(const TimeStamp &
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     /// Fill variables

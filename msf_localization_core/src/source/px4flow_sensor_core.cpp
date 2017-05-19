@@ -364,7 +364,7 @@ Eigen::SparseMatrix<double> Px4FlowSensorCore::getCovarianceNoise(const TimeStam
     std::vector<Eigen::Triplet<double> > triplets_covariance;
 
     // dt
-    double dt=deltaTimeStamp.get_double();
+    double dt=deltaTimeStamp.getDouble();
 
     // Fill
     int dimension_noise_i=0;

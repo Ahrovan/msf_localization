@@ -484,7 +484,7 @@ int CodedVisualMarkerEyeCore::predictStateSpecific(const TimeStamp &previousTime
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     //// Core

@@ -834,7 +834,7 @@ int MsfLocalizationCore::bufferPropagationStep(const TimeStamp &time_stamp)
 #endif
 
         // Purge the buffer ??
-        int error_purge_ring_buffer=this->TheMsfStorageCore->purgeRingBuffer(500);
+        int error_purge_ring_buffer=this->TheMsfStorageCore->purgeRingBuffer(200);
         if(error_purge_ring_buffer)
         {
     #if _DEBUG_ERROR_MSF_LOCALIZATION_CORE

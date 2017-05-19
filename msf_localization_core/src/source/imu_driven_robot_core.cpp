@@ -273,7 +273,7 @@ Eigen::SparseMatrix<double> ImuDrivenRobotCore::getCovarianceNoise(const TimeSta
     std::vector<Eigen::Triplet<double> > tripletList;
 
     //
-    double dt=deltaTimeStamp.get_double();
+    double dt=deltaTimeStamp.getDouble();
 
     int dimension_noise_i=0;
 
@@ -406,7 +406,7 @@ int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp& previousTimeStamp,
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     /// Position
@@ -552,7 +552,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     ///// Jacobian Error State

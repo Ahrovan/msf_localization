@@ -458,7 +458,7 @@ Eigen::SparseMatrix<double> AbsolutePoseInputCore::getCovarianceInputs(const Tim
 
     std::vector<Eigen::Triplet<double> > tripletCovarianceMeasurement;
 
-    double dt=deltaTimeStamp.get_double();
+    double dt=deltaTimeStamp.getDouble();
     double dt2=dt*dt;
 
     unsigned int dimension=0;
@@ -615,7 +615,7 @@ int AbsolutePoseInputCore::predictStateSpecific(const TimeStamp &previousTimeSta
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     //// Core
@@ -807,7 +807,7 @@ int AbsolutePoseInputCore::predictErrorStateJacobiansSpecific(const TimeStamp &p
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     /// Fill variables

@@ -913,13 +913,13 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp de
     std::vector<Eigen::Triplet<double> > tripletCovarianceNoise;
 
     // dt
-    double dt=deltaTimeStamp.get_double();
+    double dt=deltaTimeStamp.getDouble();
 
     // Fill
     int dimension_noise_i=0;
     if(isEstimationBiasLinearAccelerationEnabled())
     {
-        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasLinearAcceleration*deltaTimeStamp.get_double();
+        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasLinearAcceleration*deltaTimeStamp.getDouble();
 
         for(int i=0; i<3; i++)
             tripletCovarianceNoise.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,noiseEstimationBiasLinearAcceleration(i,i)*dt));
@@ -930,7 +930,7 @@ Eigen::SparseMatrix<double> ImuSensorCore::getCovarianceNoise(const TimeStamp de
 
     if(isEstimationBiasAngularVelocityEnabled())
     {
-        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasAngularVelocity*deltaTimeStamp.get_double();
+        //covariance_noise.block<3,3>(dimension_noise_i,dimension_noise_i)=this->noiseEstimationBiasAngularVelocity*deltaTimeStamp.getDouble();
 
         for(int i=0; i<3; i++)
             tripletCovarianceNoise.push_back(Eigen::Triplet<double>(dimension_noise_i+i,dimension_noise_i+i,noiseEstimationBiasAngularVelocity(i,i)*dt));

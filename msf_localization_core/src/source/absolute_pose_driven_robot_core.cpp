@@ -208,7 +208,7 @@ Eigen::SparseMatrix<double> AbsolutePoseDrivenRobotCore::getCovarianceNoise(cons
     std::vector<Eigen::Triplet<double> > tripletList;
 
     //
-    double dt=deltaTimeStamp.get_double();
+    double dt=deltaTimeStamp.getDouble();
 
     int dimension_noise_i=0;
 
@@ -404,7 +404,7 @@ int AbsolutePoseDrivenRobotCore::predictStateSpecific(const TimeStamp &previousT
 
     // Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
     // Past Robot State -> Not needed
     // Eigen::Vector3d position_robot_wrt_world=past_robot_state->getPositionRobotWrtWorld();
@@ -664,7 +664,7 @@ int AbsolutePoseDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeSta
     // Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
     // Past Robot State -> Not needed
     Eigen::Vector3d position_robot_wrt_world=past_robot_state->getPositionRobotWrtWorld();

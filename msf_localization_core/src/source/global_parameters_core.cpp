@@ -307,7 +307,7 @@ int GlobalParametersCore::predictStateSpecific(const TimeStamp &previousTimeStam
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     /// Gravity
@@ -417,7 +417,7 @@ int GlobalParametersCore::predictErrorStateJacobianSpecific(const TimeStamp& pre
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
 

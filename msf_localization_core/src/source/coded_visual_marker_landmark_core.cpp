@@ -443,7 +443,7 @@ int CodedVisualMarkerLandmarkCore::predictStateSpecific(const TimeStamp &previou
 
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
     /// Position
@@ -591,7 +591,7 @@ int CodedVisualMarkerLandmarkCore::predictErrorStateJacobiansSpecific(const Time
     //Delta Time
     TimeStamp DeltaTime=currentTimeStamp-previousTimeStamp;
     // delta time
-    double dt=DeltaTime.get_double();
+    double dt=DeltaTime.getDouble();
 
 
 
