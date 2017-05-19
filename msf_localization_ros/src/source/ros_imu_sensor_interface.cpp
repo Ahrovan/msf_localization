@@ -147,7 +147,7 @@ int RosImuSensorInterface::publishEstimatedBiasLinearAcceleration(const TimeStam
             // Fill message
             // Header
             estimated_bias_linear_acceleration_msg_.header.frame_id="NA";
-            estimated_bias_linear_acceleration_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+            estimated_bias_linear_acceleration_msg_.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
             // Value
             Eigen::Vector3d estimated_bias_linear_acceleration=sensor_state_core->getBiasesLinearAcceleration();
             estimated_bias_linear_acceleration_msg_.vector.x=estimated_bias_linear_acceleration(0);

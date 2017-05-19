@@ -939,7 +939,7 @@ int AbsolutePoseSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeS
                                                  std::shared_ptr<AbsolutePoseSensorMeasurementCore> &predictedMeasurement)
 {
 #if _DEBUG_SENSOR_CORE
-    logFile<<"AbsolutePoseSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"AbsolutePoseSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.getSec()<<" s; nsec="<<theTimeStamp.getNSec()<<" ns"<<std::endl;
 #endif
 
     /// Check
@@ -1065,7 +1065,7 @@ int AbsolutePoseSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeS
 
 
 #if _DEBUG_SENSOR_CORE
-    logFile<<"AbsolutePoseSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"AbsolutePoseSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.getSec()<<" s; nsec="<<theTimeStamp.getNSec()<<" ns"<<std::endl;
 #endif
 
 

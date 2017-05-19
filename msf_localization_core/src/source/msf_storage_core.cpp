@@ -76,7 +76,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setMeasurement() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setMeasurement() TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -151,7 +151,7 @@ int MsfStorageCore::setMeasurement(const TimeStamp &TheTimeStamp, const std::sha
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -170,7 +170,7 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setMeasurementList() TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setMeasurementList() TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -239,7 +239,7 @@ int MsfStorageCore::setMeasurementList(const TimeStamp& TheTimeStamp, const std:
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setMeasurement () ended TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -257,7 +257,7 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setInputCommand() TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setInputCommand() TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -345,7 +345,7 @@ int MsfStorageCore::setInputCommand(const TimeStamp &time_stamp, const std::shar
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setInputCommand() ended TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setInputCommand() ended TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -360,7 +360,7 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setInputCommandList() TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setInputCommandList() TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -460,7 +460,7 @@ int MsfStorageCore::setInputCommandList(const TimeStamp& time_stamp, const std::
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::setInputCommandList() ended TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+        logString<<"MsfStorageCore::setInputCommandList() ended TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -523,7 +523,7 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() TS: sec="<<ThePreviousTimeStamp.sec<<"; nsec="<<ThePreviousTimeStamp.nsec<<std::endl;
+        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() TS: sec="<<ThePreviousTimeStamp.getSec()<<"; nsec="<<ThePreviousTimeStamp.getNSec()<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -555,7 +555,7 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
 #if _DEBUG_MSF_STORAGE
             {
                 std::ostringstream logString;
-                logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.getSec()<<" s; nsec="<<BufferElement.timeStamp.getNSec()<<" ns"<<std::endl;
                 this->log(logString.str());
             }
 #endif
@@ -576,7 +576,7 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
 #if _DEBUG_MSF_STORAGE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
                         this->log(logString.str());
                     }
 #endif
@@ -588,7 +588,7 @@ int MsfStorageCore::getElementWithStateEstimateByStamp(const TimeStamp& ThePrevi
 #if _DEBUG_MSF_STORAGE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        logString<<"MsfStorageCore::getElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
                         this->log(logString.str());
                     }
 #endif
@@ -641,7 +641,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
     {
         std::ostringstream logString;
-        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() TS: sec="<<ThePreviousTimeStamp.sec<<"; nsec="<<ThePreviousTimeStamp.nsec<<std::endl;
+        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() TS: sec="<<ThePreviousTimeStamp.getSec()<<"; nsec="<<ThePreviousTimeStamp.getNSec()<<std::endl;
         this->log(logString.str());
     }
 #endif
@@ -673,7 +673,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
             {
                 std::ostringstream logString;
-                logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() element is going to be checked TS: sec="<<BufferElement.timeStamp.getSec()<<" s; nsec="<<BufferElement.timeStamp.getNSec()<<" ns"<<std::endl;
                 this->log(logString.str());
             }
 #endif
@@ -694,7 +694,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found pre assign TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
                         this->log(logString.str());
                     }
 #endif
@@ -706,7 +706,7 @@ int MsfStorageCore::getPreviousElementWithStateEstimateByStamp(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+                        logString<<"MsfStorageCore::getPreviousElementWithStateEstimateByStamp() found post assign TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
                         this->log(logString.str());
                     }
 #endif
@@ -848,13 +848,13 @@ int MsfStorageCore::getNextTimeStamp(const TimeStamp& currentTimeStamp, TimeStam
             {
                 nextTimeStamp=bufferElementTimeStamp;
 
-                //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+                //std::cout<<"s:"<<BufferElement.timeStamp.getSec()<<",ns:"<<BufferElement.timeStamp.getNSec()<<"; ";
 
                 continue;
             }
             else
             {
-                //std::cout<<"s:"<<BufferElement.timeStamp.sec<<",ns:"<<BufferElement.timeStamp.nsec<<"; ";
+                //std::cout<<"s:"<<BufferElement.timeStamp.getSec()<<",ns:"<<BufferElement.timeStamp.getNSec()<<"; ";
                 break;
             }
         }
@@ -962,7 +962,7 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
         {
             std::ostringstream logString;
-            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() finding TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() finding TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
             this->log(logString.str());
 
             this->displayRingBuffer();
@@ -993,7 +993,7 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
             {
                 std::ostringstream logString;
-                logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() element is going to be checked TS: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() element is going to be checked TS: sec="<<BufferElement.timeStamp.getSec()<<" s; nsec="<<BufferElement.timeStamp.getNSec()<<" ns"<<std::endl;
                 this->log(logString.str());
             }
 #endif
@@ -1027,7 +1027,7 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
                             {
                                 std::ostringstream logString;
-                                logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found pre assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
+                                logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found pre assign TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
                                 this->log(logString.str());
                             }
 #endif
@@ -1045,8 +1045,8 @@ int MsfStorageCore::getPreviousInputCommandByStampAndInputCore(const TimeStamp& 
 #if _DEBUG_MSF_STORAGE
                         {
                             std::ostringstream logString;
-                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found post assign TS: sec="<<time_stamp.sec<<" s; nsec="<<time_stamp.nsec<<" ns"<<std::endl;
-                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() the assigned TS is: sec="<<BufferElement.timeStamp.sec<<" s; nsec="<<BufferElement.timeStamp.nsec<<" ns"<<std::endl;
+                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() found post assign TS: sec="<<time_stamp.getSec()<<" s; nsec="<<time_stamp.getNSec()<<" ns"<<std::endl;
+                            logString<<"MsfStorageCore::getPreviousInputCommandByStampAndInputCore() the assigned TS is: sec="<<BufferElement.timeStamp.getSec()<<" s; nsec="<<BufferElement.timeStamp.getNSec()<<" ns"<<std::endl;
                             this->log(logString.str());
                             this->displayStateEstimationElement(BufferElement.timeStamp, BufferElement.object);
                         }
@@ -1272,7 +1272,7 @@ int MsfStorageCore::displayStateEstimationElement(const TimeStamp& TheTimeStamp,
 {
 
     std::ostringstream logString;
-    logString<<"-TS: sec="<<TheTimeStamp.sec<<" s; nsec="<<TheTimeStamp.nsec<<" ns"<<std::endl;
+    logString<<"-TS: sec="<<TheTimeStamp.getSec()<<" s; nsec="<<TheTimeStamp.getNSec()<<" ns"<<std::endl;
 
 
 
@@ -1856,7 +1856,7 @@ std::string MsfStorageCore::getDisplayOutdatedElements()
             itElement!=outdatedBufferElements.end();
             ++itElement)
         {
-            logString<<"TS: sec="<<itElement->sec<<" s; nsec="<<itElement->nsec<<" ns. ";
+            logString<<"TS: sec="<<itElement->getSec()<<" s; nsec="<<itElement->getNSec()<<" ns. ";
 
         }
 

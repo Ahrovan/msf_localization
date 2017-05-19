@@ -52,7 +52,7 @@ bool RosFreeModelRobotInterface::getPoseWithCovarianceByStamp(msf_localization_r
     }
 
     // Received TimeStamp
-    res.received_stamp=ros::Time(received_time_stamp.sec, received_time_stamp.nsec);
+    res.received_stamp=ros::Time(received_time_stamp.getSec(), received_time_stamp.getNSec());
 
 
     // Received State
@@ -237,12 +237,12 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
     // ROBOT POSE
     // Stamp
-    robotPoseWithCovarianceStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robotPoseWithCovarianceStampedMsg.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     // Frame id
     robotPoseWithCovarianceStampedMsg.header.frame_id=world_core->getWorldName();
 
     //
-    robotPoseStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robotPoseStampedMsg.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     // Frame id
     robotPoseStampedMsg.header.frame_id=world_core->getWorldName();
 
@@ -250,22 +250,22 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
     // Velocities
 
     //
-    robot_velocities_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robot_velocities_stamped_msg_.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     //
     robot_velocities_stamped_msg_.header.frame_id=world_core->getWorldName();
 
     //
-    robot_velocities_with_covariance_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robot_velocities_with_covariance_stamped_msg_.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     //
     robot_velocities_with_covariance_stamped_msg_.header.frame_id=world_core->getWorldName();
 
     //
-    robotLinearSpeedStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robotLinearSpeedStampedMsg.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     // Frame id
     robotLinearSpeedStampedMsg.header.frame_id=world_core->getWorldName();
 
     //
-    robotAngularVelocityStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robotAngularVelocityStampedMsg.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     // Frame id
     robotAngularVelocityStampedMsg.header.frame_id=world_core->getWorldName();
 
@@ -273,22 +273,22 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
     // Accelerations
 
     //
-    robot_accelerations_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robot_accelerations_stamped_msg_.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     //
     robot_accelerations_stamped_msg_.header.frame_id=world_core->getWorldName();
 
     //
-    robot_accelerations_with_covariance_stamped_msg_.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robot_accelerations_with_covariance_stamped_msg_.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     //
     robot_accelerations_with_covariance_stamped_msg_.header.frame_id=world_core->getWorldName();
 
     //
-    robotLinearAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robotLinearAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     // Frame id
     robotLinearAccelerationStampedMsg.header.frame_id=world_core->getWorldName();
 
     //
-    robotAngularAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.sec, time_stamp.nsec);
+    robotAngularAccelerationStampedMsg.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
     // Frame id
     robotAngularAccelerationStampedMsg.header.frame_id=world_core->getWorldName();
 
@@ -465,7 +465,7 @@ int RosFreeModelRobotInterface::publishTfPoseRobotWrtWorld(const TimeStamp& time
 
     tf::Transform transform(tf_rot, tf_tran);
 
-    tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(time_stamp.sec, time_stamp.nsec),
+    tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(time_stamp.getSec(), time_stamp.getNSec()),
                                           world_core->getWorldName(), this->getRobotName()));
 
 

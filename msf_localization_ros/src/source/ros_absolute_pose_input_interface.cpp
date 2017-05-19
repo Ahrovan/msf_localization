@@ -132,7 +132,7 @@ int RosAbsolutePoseInputInterface::getInputCommand(const TimeStamp& requested_ti
                                                     std::shared_ptr<InputCommandCore> &received_input_command)
 {
     // Fill the service request
-    input_command_pose_with_covariance_input_wrt_input_world_srv_.request.requested_stamp=ros::Time(requested_time_stamp.sec, requested_time_stamp.nsec);
+    input_command_pose_with_covariance_input_wrt_input_world_srv_.request.requested_stamp=ros::Time(requested_time_stamp.getSec(), requested_time_stamp.getNSec());
 
 
     // Call the service
@@ -190,7 +190,7 @@ int RosAbsolutePoseInputInterface::getInputCommand(const TimeStamp& requested_ti
         input_command->setAttitudeInputWrtInputWorld(attitude_input_wrt_input_world);
     }
 
-//    std::cout<<"TimeStamp: sec="<<received_time_stamp.sec<<"s; nsec="<<received_time_stamp.nsec<<"ns"<<std::endl;
+//    std::cout<<"TimeStamp: sec="<<received_time_stamp.getSec()<<"s; nsec="<<received_time_stamp.getNSec()<<"ns"<<std::endl;
 //    std::cout<<"input_command->getNoiseInputCommandPoseInputWrtInputWorld()"<<std::endl;
 //    std::cout<<input_command->getNoiseInputCommandPoseInputWrtInputWorld()<<std::endl;
 

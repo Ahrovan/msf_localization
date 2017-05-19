@@ -742,7 +742,7 @@ int MsfLocalizationROS::publishThreadFunction()
 #if 1 || _DEBUG_MSF_LOCALIZATION_CORE
                 {
                     std::ostringstream logString;
-                    logString<<"MsfLocalizationROS::publishThreadFunction() going to publish TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
+                    logString<<"MsfLocalizationROS::publishThreadFunction() going to publish TS: sec="<<current_time_stamp.getSec()<<" s; nsec="<<current_time_stamp.getNSec()<<" ns"<<std::endl;
                     this->log(logString.str());
                 }
 #endif
@@ -776,7 +776,7 @@ int MsfLocalizationROS::publishThreadFunction()
 #if 1 || _DEBUG_MSF_LOCALIZATION_CORE
                     {
                         std::ostringstream logString;
-                        logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.sec<<" s; nsec="<<current_time_stamp.nsec<<" ns"<<std::endl;
+                        logString<<"MsfLocalizationROS::publishThreadFunction() predicting TS: sec="<<current_time_stamp.getSec()<<" s; nsec="<<current_time_stamp.getNSec()<<" ns"<<std::endl;
                         this->log(logString.str());
                     }
 #endif
@@ -989,7 +989,7 @@ int MsfLocalizationROS::publishState(const TimeStamp& current_time_stamp,
                 tf::Transform transform(tf_rot, tf_tran);
 
 
-                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(current_time_stamp.sec, current_time_stamp.nsec),
+                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(current_time_stamp.getSec(), current_time_stamp.getNSec()),
                                                       this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
                 break;
@@ -1009,7 +1009,7 @@ int MsfLocalizationROS::publishState(const TimeStamp& current_time_stamp,
                 tf::Transform transform(tf_rot, tf_tran);
 
 
-                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(current_time_stamp.sec, current_time_stamp.nsec),
+                tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(current_time_stamp.getSec(), current_time_stamp.getNSec()),
                                                       this->TheGlobalParametersCore->getWorldName(), std::dynamic_pointer_cast<MapElementCore>((*itMapElementState)->getMsfElementCoreSharedPtr())->getMapElementName()));
 
                 break;
@@ -1124,7 +1124,7 @@ int MsfLocalizationROS::setNewMeasurementNotificationTopicName(std::string new_m
 
 int MsfLocalizationROS::publishNewMeasurementNotification(const TimeStamp& measurement_time_stamp)
 {
-    new_measurement_notification_msgs_.data=ros::Time(measurement_time_stamp.sec, measurement_time_stamp.nsec);
+    new_measurement_notification_msgs_.data=ros::Time(measurement_time_stamp.getSec(), measurement_time_stamp.getNSec());
 
     new_measurement_notification_pub_.publish(new_measurement_notification_msgs_);
 

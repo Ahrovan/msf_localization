@@ -30,7 +30,7 @@ int RosSensorInterface::publishTfPoseSensorWrtRobot(const TimeStamp& time_stamp,
     tf::Transform transform(tf_rot, tf_tran);
 
 
-    tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(time_stamp.sec, time_stamp.nsec),
+    tf_transform_broadcaster_->sendTransform(tf::StampedTransform(transform, ros::Time(time_stamp.getSec(), time_stamp.getNSec()),
                                           robot_core->getRobotName(), std::dynamic_pointer_cast<SensorCore>(sensor_state_core->getMsfElementCoreSharedPtr())->getSensorName()));
 
     return 0;

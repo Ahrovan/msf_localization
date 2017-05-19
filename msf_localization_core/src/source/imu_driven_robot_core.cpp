@@ -379,7 +379,7 @@ int ImuDrivenRobotCore::predictStateSpecific(const TimeStamp& previousTimeStamp,
     //std::shared_ptr<ImuDrivenRobotStateCore> pastState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(pastStateI);
     //std::shared_ptr<ImuDrivenRobotStateCore> predictedState=std::dynamic_pointer_cast<ImuDrivenRobotStateCore>(predictedStateI);
 
-//std::cout<<"Input TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns."<<std::endl;
+//std::cout<<"Input TS: sec="<<currentTimeStamp.getSec()<<" s; nsec="<<currentTimeStamp.getNSec()<<" ns."<<std::endl;
 //std::cout<<"\t + a: "<<input->getLinearAcceleration().transpose()<<std::endl;
 //std::cout<<"\t + w: "<<input->getAngularVelocity().transpose()<<std::endl;
 
@@ -715,7 +715,7 @@ int ImuDrivenRobotCore::predictErrorStateJacobianSpecific(const TimeStamp& previ
 #if _DEBUG_ROBOT_CORE
     {
         std::ostringstream logString;
-        logString<<"ImuDrivenRobotCore::predictErrorStateJacobians() for TS: sec="<<currentTimeStamp.sec<<" s; nsec="<<currentTimeStamp.nsec<<" ns"<<std::endl;
+        logString<<"ImuDrivenRobotCore::predictErrorStateJacobians() for TS: sec="<<currentTimeStamp.getSec()<<" s; nsec="<<currentTimeStamp.getNSec()<<" ns"<<std::endl;
         logString<<"Jacobian Error State"<<std::endl;
         logString<<Eigen::MatrixXd(predictedState->jacobian_error_state_)<<std::endl;
         logString<<"Jacobian Error State Noise"<<std::endl;

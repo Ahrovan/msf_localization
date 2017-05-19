@@ -1538,7 +1538,7 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
                                       ImuSensorMeasurementCore *&predictedMeasurement)
 {
 #if _DEBUG_SENSOR_CORE
-    logFile<<"ImuSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"ImuSensorCore::predictMeasurementSpecific() TS: sec="<<theTimeStamp.getSec()<<" s; nsec="<<theTimeStamp.getNSec()<<" ns"<<std::endl;
 #endif
 
     // Check
@@ -1800,7 +1800,7 @@ int ImuSensorCore::predictMeasurementSpecific(const TimeStamp &theTimeStamp,
 
 
 #if _DEBUG_SENSOR_CORE
-    logFile<<"ImuSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"ImuSensorCore::predictMeasurementSpecific() ended TS: sec="<<theTimeStamp.getSec()<<" s; nsec="<<theTimeStamp.getNSec()<<" ns"<<std::endl;
 #endif
 
     // End

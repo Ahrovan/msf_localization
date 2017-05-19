@@ -889,7 +889,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp &theTim
                                                  CodedVisualMarkerMeasurementCore *&predictedMeasurement)
 {
 #if _DEBUG_SENSOR_CORE
-    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() TS: sec="<<theTimeStamp.getSec()<<" s; nsec="<<theTimeStamp.getNSec()<<" ns"<<std::endl;
 #endif
 
     /// Check
@@ -1026,7 +1026,7 @@ int CodedVisualMarkerEyeCore::predictMeasurementSpecific(const TimeStamp &theTim
 
 
 #if _DEBUG_SENSOR_CORE
-    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() ended TS: sec="<<theTimeStamp.sec<<" s; nsec="<<theTimeStamp.nsec<<" ns"<<std::endl;
+    logFile<<"CodedVisualMarkerEyeCore::predictMeasurement() ended TS: sec="<<theTimeStamp.getSec()<<" s; nsec="<<theTimeStamp.getNSec()<<" ns"<<std::endl;
 #endif
 
 
