@@ -58,6 +58,8 @@
 #include <iomanip>
 #include <ctime>
 
+#include <boost/filesystem.hpp>
+
 
 
 #include "msf_localization_core/block_matrix.h"

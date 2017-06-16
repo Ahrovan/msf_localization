@@ -38,6 +38,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
+#include <boost/filesystem.hpp>
+
 
 
 #include "msf_localization_core/block_matrix.h"

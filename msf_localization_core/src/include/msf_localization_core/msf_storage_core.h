@@ -44,6 +44,9 @@
 #include <chrono>
 
 
+#include <boost/filesystem.hpp>
+
+
 #include "buffer/stamped_ring_buffer.h"
 
 #include "msf_localization_core/state_estimation_core.h"

@@ -250,8 +250,8 @@ find_package(Threads REQUIRED)
 
 
 catkin_package(
-        INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR}
-        LIBRARIES ${PROJECT_NAME}
+        INCLUDE_DIRS ${MSF_LOCALIZATION_CORE_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR}
+        LIBRARIES ${PROJECT_NAME} ${Boost_LIBRARIES} ${EIGEN3_LIBRARIES}
         DEPENDS Boost EIGEN3 Threads
         CATKIN_DEPENDS pugixml quaternion_algebra time_stamp buffer
   )

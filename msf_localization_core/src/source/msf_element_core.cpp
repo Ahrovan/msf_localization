@@ -56,7 +56,34 @@ int MsfElementCore::init()
 
     /// LOG
     const char* env_p = std::getenv("FUSEON_STACK");
-    log_path_=std::string(env_p)+"/logs/"+"logMsfElementCoreFile.txt";
+    if(!env_p)
+    {
+        std::cout<<"[ERROR MsfElementCore] unable to find environment variable 'FUSEON_STACK'"<<std::endl;
+//        throw;
+    }
+    std::string log_dir="";
+    if(env_p)
+    {
+        log_dir=std::string(env_p);
+    }
+    else
+    {
+        boost::filesystem::path full_path( boost::filesystem::current_path() );
+        log_dir=full_path.string();
+    }
+    log_dir=log_dir+"/logs/";
+    std::cout<<"Log of MsfElementCore in path: "<<log_dir<<std::endl;
+
+    boost::filesystem::path dir(log_dir);
+
+    if(!(boost::filesystem::exists(dir))){
+        std::cout<<"..Doesn't Exists"<<std::endl;
+
+        if (boost::filesystem::create_directory(dir))
+            std::cout << "....Successfully Created !" << std::endl;
+    }
+    log_path_=log_dir+"logMsfElementCoreFile.txt";
+
     log_file_.open(log_path_);
     if(!log_file_.is_open())
     {

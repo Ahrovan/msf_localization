@@ -43,22 +43,48 @@ MsfLocalizationCore::MsfLocalizationCore()
     // LOG
     const char* env_p = std::getenv("FUSEON_STACK");
 
+    if(!env_p)
+    {
+        std::cout<<"[ERROR MsfLocalizationCore] unable to find environment variable 'FUSEON_STACK'"<<std::endl;
+//        throw;
+    }
+
 
     time_t rawtime;
-      struct tm * timeinfo;
-      char buffer[80];
+    struct tm * timeinfo;
+    char buffer[80];
 
-      time (&rawtime);
-      timeinfo = localtime(&rawtime);
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
 
-      strftime(buffer,80,"%d-%m-%Y_%I:%M:%S",timeinfo);
-      std::string str(buffer);
+    strftime(buffer,80,"%d-%m-%Y_%I:%M:%S",timeinfo);
+    std::string str(buffer);
 
+    std::string log_dir="";
+    if(env_p)
+    {
+        log_dir=std::string(env_p);
+    }
+    else
+    {
+        boost::filesystem::path full_path( boost::filesystem::current_path() );
+        log_dir=full_path.string();
+    }
 
+    log_dir=log_dir+"/logs/";
 
-    logPath=std::string(env_p)+"/logs/"+"logMsfLocalizationCoreFile"+str+".txt";
+    std::cout<<"Log of MsfLocalizationCore in path: "<<log_dir<<std::endl;
 
-    //std::cout<<"logPath: "<<logPath<<std::endl;
+    boost::filesystem::path dir(log_dir);
+
+    if(!(boost::filesystem::exists(dir))){
+        std::cout<<"..Doesn't Exists"<<std::endl;
+
+        if (boost::filesystem::create_directory(dir))
+            std::cout << "....Successfully Created !" << std::endl;
+    }
+
+    logPath=log_dir+"logMsfLocalizationCoreFile"+str+".txt";
 
     logFile.open(logPath);
 
