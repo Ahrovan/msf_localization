@@ -21,6 +21,8 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/Vector3.h>
 
+// Odometry
+#include <nav_msgs/Odometry.h>
 
 
 // Time Stamp
@@ -119,6 +121,10 @@ protected:
     geometry_msgs::Vector3Stamped robotAngularAccelerationStampedMsg;
 
 
+    // Odometry out
+    ros::Publisher robot_odometry_out_pub_;
+    std::string robot_odometry_out_topic_name_;
+    nav_msgs::Odometry robot_odometry_out_msg_;
 
 
 protected:

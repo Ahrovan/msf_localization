@@ -88,7 +88,7 @@ set(MSF_LOCALIZATION_ROS_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS cmake_modules roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs px_comm)
+                COMPONENTS cmake_modules roscpp std_srvs std_msgs sensor_msgs geometry_msgs nav_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs px_comm)
 
 find_package(Boost REQUIRED
                 COMPONENTS filesystem)
@@ -113,7 +113,7 @@ catkin_package(
     INCLUDE_DIRS ${MSF_LOCALIZATION_ROS_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}_lib
     DEPENDS Boost EIGEN3 Threads
-    CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs px_comm
+    CATKIN_DEPENDS roscpp std_srvs std_msgs sensor_msgs geometry_msgs nav_msgs tf pugixml msf_localization_core msf_localization_ros_srvs aruco_eye_msgs px_comm
   )
 
 

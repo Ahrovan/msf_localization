@@ -110,6 +110,11 @@ int RosFreeModelRobotInterface::readParameters()
     ros::param::param<std::string>("~robot_angular_acceleration_topic_name", robotAngularAccelerationStampedTopicName, "msf_localization/robot_angular_acceleration");
     std::cout<<"\t robot_angular_acceleration_topic_name="<<robotAngularAccelerationStampedTopicName<<std::endl;
 
+    // Odometry
+    //
+    ros::param::param<std::string>("~robot_odometry_out_topic_name", robot_odometry_out_topic_name_, "msf_localization/robot_odometry");
+    std::cout<<"\t robot_odometry_out_topic_name="<<robot_odometry_out_topic_name_<<std::endl;
+
 
     return 0;
 }
@@ -154,6 +159,10 @@ int RosFreeModelRobotInterface::open()
     robotLinearAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotLinearAccelerationStampedTopicName, 1, true);
     //
     robotAngularAccelerationStampedPub = nh->advertise<geometry_msgs::Vector3Stamped>(robotAngularAccelerationStampedTopicName, 1, true);
+
+    // Odometry
+    //
+    robot_odometry_out_pub_=nh->advertise<nav_msgs::Odometry>(robot_odometry_out_topic_name_, 1, true);
 
 
 
@@ -332,20 +341,20 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
     //
     robot_velocities_with_covariance_stamped_msg_.twist.twist=velocity;
 
-    {
-        Eigen::Matrix<double, 6, 6> covariance;//(6,6);
-        covariance.setZero();
-        covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(3,3);
-        covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(12,12);
-        covariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(12,3);
-        covariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(3,12);
-        double covarianceArray[36];
-        Eigen::Map< Eigen::Matrix<double, 6, 6> >(covarianceArray, 6, 6) = covariance;
+    //{
+        Eigen::Matrix<double, 6, 6> covariance_velocity;//(6,6);
+        covariance_velocity.setZero();
+        covariance_velocity.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(3,3);
+        covariance_velocity.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(12,12);
+        covariance_velocity.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(12,3);
+        covariance_velocity.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(3,12);
+        double covariance_velocity_array[36];
+        Eigen::Map< Eigen::Matrix<double, 6, 6> >(covariance_velocity_array, 6, 6) = covariance_velocity;
         for(unsigned int i=0; i<36; i++)
         {
-            robot_velocities_with_covariance_stamped_msg_.twist.covariance[i]=covarianceArray[i];
+            robot_velocities_with_covariance_stamped_msg_.twist.covariance[i]=covariance_velocity_array[i];
         }
-    }
+    //}
 
 
    //
@@ -383,20 +392,20 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
     //
     robot_accelerations_with_covariance_stamped_msg_.accel.accel=acceleration;
 
-    {
-        Eigen::Matrix<double, 6, 6> covariance;//(6,6);
-        covariance.setZero();
-        covariance.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(6,6);
-        covariance.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(15,15);
-        covariance.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(15,6);
-        covariance.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(6,15);
-        double covarianceArray[36];
-        Eigen::Map< Eigen::Matrix<double, 6, 6> >(covarianceArray, 6, 6) = covariance;
+    //{
+        Eigen::Matrix<double, 6, 6> covariance_acceleration;//(6,6);
+        covariance_acceleration.setZero();
+        covariance_acceleration.block<3,3>(0,0)=covariance_robot_matrix.block<3,3>(6,6);
+        covariance_acceleration.block<3,3>(3,3)=covariance_robot_matrix.block<3,3>(15,15);
+        covariance_acceleration.block<3,3>(3,0)=covariance_robot_matrix.block<3,3>(15,6);
+        covariance_acceleration.block<3,3>(0,3)=covariance_robot_matrix.block<3,3>(6,15);
+        double covariance_acceleration_array[36];
+        Eigen::Map< Eigen::Matrix<double, 6, 6> >(covariance_acceleration_array, 6, 6) = covariance_acceleration;
         for(unsigned int i=0; i<36; i++)
         {
-            robot_accelerations_with_covariance_stamped_msg_.accel.covariance[i]=covarianceArray[i];
+            robot_accelerations_with_covariance_stamped_msg_.accel.covariance[i]=covariance_acceleration_array[i];
         }
-    }
+    //}
 
 
 
@@ -405,6 +414,27 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
    //
    robotAngularAccelerationStampedMsg.vector=ang_acc;
+
+
+
+   // Odometry
+
+   robot_odometry_out_msg_.header.stamp=ros::Time(time_stamp.getSec(), time_stamp.getNSec());
+   robot_odometry_out_msg_.header.frame_id=world_core->getWorldName();
+
+   robot_odometry_out_msg_.child_frame_id=getRobotName();
+
+   robot_odometry_out_msg_.pose.pose=robotPoseWithCovarianceStampedMsg.pose.pose;
+   robot_odometry_out_msg_.pose.covariance=robotPoseWithCovarianceStampedMsg.pose.covariance;
+
+   robot_odometry_out_msg_.twist.twist=velocity;
+   //robot_odometry_out_msg_.twist.covariance;
+   //{
+        for(unsigned int i=0; i<36; i++)
+        {
+            robot_odometry_out_msg_.twist.covariance[i]=covariance_velocity_array[i];
+        }
+    //}
 
 
 
@@ -447,6 +477,12 @@ int RosFreeModelRobotInterface::publish(const TimeStamp& time_stamp, const std::
 
    if(robotAngularAccelerationStampedPub.getNumSubscribers()>0)
        robotAngularAccelerationStampedPub.publish(robotAngularAccelerationStampedMsg);
+
+
+   // Odometry
+
+   if(robot_odometry_out_pub_.getNumSubscribers()>0)
+       robot_odometry_out_pub_.publish(robot_odometry_out_msg_);
 
 
     // end
